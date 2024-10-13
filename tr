@@ -1,0 +1,20 @@
+【python print中文不对齐问题（特殊字符、混合字符不对齐问题）的解决 - CSDN App】https://blog.csdn.net/m0_73666951/article/details/135779470?sharetype=blog&shareId=135779470&sharerefer=APP&sharesource=kge111&sharefrom=link
+https://github.com/ddkwork/ux/blob/master/gif.go
+https://gitee.com/singba/ai-steps/tree/master/src/TreeDemo/TreeDemo
+treegrid excel 实现这个功能，并测试全部xls
+tdf和pb编解码
+改变行渲染代码，后期加入拖放布局包裹
+https://github.com/Aim4kill/BlazeSDK/tree/master/Tdf
+https://github.com/ploxxxy/tdf.js/blob/refs%2Fheads%2Fmain/README.md
+https://github.com/ploxxxy/tdf.js
+https://gitee.com/mo2/linux/tree/master
+https://snapcraft.io/install/goland/arch
+curl -LO https://gitee.com/mo2/linux/raw/2/2.awk
+awk -f 2.awk
+sudo pacman -S vulkan-headers
+go env -w GOPROXY=https://goproxy.cn,direct
+git clone https://git.homegu.com/ddkwork/ux
+go run 需要sudo
+ddk ALL=(root) NOPASSWD: ALL
+/etc/sudoers
+git config --global safe.directory "$(pwd)"
