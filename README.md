@@ -1,4 +1,5 @@
-gio ux widgets is a go language gui framework based on https://github.com/gioui/gio, with added features such as tree view, grid view, and mobile support.
+gio ux widgets is a go language gui framework based on https://github.com/gioui/gio, 
+with added features such as treeGrid widget etc.
 
 thanks
 https://github.com/oligo/gioview
