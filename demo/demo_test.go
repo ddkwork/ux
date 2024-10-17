@@ -6,7 +6,7 @@ import (
 )
 
 func TestName(t *testing.T) {
-	stream.NewGeneratedFile().SetPackageName("main").Enum("demo",
+	stream.NewGeneratedFile().SetPackageName("main").Types("demo",
 		[]string{
 			"treeTable",
 			"tree",

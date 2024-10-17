@@ -17,7 +17,7 @@ type RadioButton struct {
 }
 
 // NewRadioButton returns a RadioButton with a label. The key specifies
-// the value for the Enum.
+// the value for the Types.
 func NewRadioButton(group *widget.Enum, key, label string) *RadioButton {
 	r := &RadioButton{
 		radioButton: &widget.Bool{Value: true},

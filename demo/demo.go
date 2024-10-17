@@ -8,7 +8,7 @@ import (
 	"gioui.org/widget"
 	"gioui.org/x/outlay"
 	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/golibrary/stream/orderedmap"
+	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/keygen"
 	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/terminal"
@@ -50,7 +50,7 @@ func main() {
 	})
 
 	var zero ux.Widget
-	m := orderedmap.New(InvalidDemoKind, zero)
+	m := stream.NewOrderedMap(InvalidDemoKind, zero)
 	for _, kind := range InvalidDemoKind.Kinds() {
 		switch kind {
 		case TreeTableKind:

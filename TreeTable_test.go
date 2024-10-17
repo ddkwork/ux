@@ -6,12 +6,12 @@ import (
 )
 
 func TestTreeTable_ContextMenuItem(t1 *testing.T) {
-	stream.NewGeneratedFile().Enum("ContextMenuItem",
+	stream.NewGeneratedFile().Types("ContextMenuItem",
 		[]string{
 			"CopyRow",
 			"ConvertToContainer",
 			"ConvertToNonContainer",
-			"New",
+			"NewOrderedMap",
 			"NewContainer",
 			"Delete",
 			"Duplicate",
