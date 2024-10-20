@@ -3,14 +3,16 @@ package ux
 import (
 	"bytes"
 	"fmt"
-	"gioui.org/layout"
-	"gioui.org/op/paint"
-	"gioui.org/widget"
 	"image"
 	"image/jpeg"
 	"image/png"
 	"os"
 	"strings"
+
+	"gioui.org/layout"
+	"gioui.org/op/paint"
+	"gioui.org/widget"
+	"github.com/ddkwork/golibrary/mylog"
 )
 
 type Image struct {
@@ -22,13 +24,12 @@ func NewImage(src string) *Image {
 	image := &Image{
 		src: src,
 	}
-	data, err := image.LoadImage(src)
-	if err != nil {
-		panic(err)
-	}
+	data := mylog.Check2(image.LoadImage(src))
+
 	image.imageOp = paint.NewImageOp(data)
 	return image
 }
+
 func (i *Image) Layout(gtx layout.Context) layout.Dimensions {
 	return widget.Image{
 		Src:      i.imageOp,
@@ -37,11 +38,9 @@ func (i *Image) Layout(gtx layout.Context) layout.Dimensions {
 		Scale:    1.0,
 	}.Layout(gtx)
 }
+
 func (i *Image) LoadImage(fileName string) (image.Image, error) {
-	file, err := os.ReadFile(fmt.Sprintf("%s", fileName))
-	if err != nil {
-		return nil, err
-	}
+	file := mylog.Check2(os.ReadFile(fmt.Sprintf("%s", fileName)))
 
 	// 获取fileName后缀
 	temp := strings.Split(fileName, ".")
@@ -49,12 +48,10 @@ func (i *Image) LoadImage(fileName string) (image.Image, error) {
 
 	var img image.Image
 	if suffix == "png" {
-		img, err = png.Decode(bytes.NewReader(file))
+		img = mylog.Check2(png.Decode(bytes.NewReader(file)))
 	} else if suffix == "jpg" {
-		img, err = jpeg.Decode(bytes.NewReader(file))
+		img = mylog.Check2(jpeg.Decode(bytes.NewReader(file)))
 	}
-	if err != nil {
-		return nil, err
-	}
+
 	return img, nil
 }

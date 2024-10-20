@@ -2,6 +2,11 @@ package ux
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+	"strings"
+	"time"
+
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
@@ -12,10 +17,6 @@ import (
 	"gioui.org/widget/material"
 	"golang.org/x/exp/shiny/materialdesign/colornames"
 	"golang.org/x/exp/shiny/materialdesign/icons"
-	"image"
-	"image/color"
-	"strings"
-	"time"
 )
 
 type OnCalendarDateClick func(t time.Time)
@@ -41,13 +42,25 @@ var spaceBetweenHeaderDropdowns = unit.Dp(32)
 const dropdownWidth = unit.Dp(120)
 
 var allMonthsButtonsArr = [12]monthButton{
-	{Month: 1}, {Month: 2}, {Month: 3}, {Month: 4},
-	{Month: 5}, {Month: 6}, {Month: 7}, {Month: 8},
-	{Month: 9}, {Month: 10}, {Month: 11}, {Month: 12},
+	{Month: 1},
+	{Month: 2},
+	{Month: 3},
+	{Month: 4},
+	{Month: 5},
+	{Month: 6},
+	{Month: 7},
+	{Month: 8},
+	{Month: 9},
+	{Month: 10},
+	{Month: 11},
+	{Month: 12},
 }
-var allYearsButtonsSlice []yearButton
-var monthsHeaderRowHeight = unit.Dp(64)
-var viewHeaderHeight = unit.Dp(32)
+
+var (
+	allYearsButtonsSlice  []yearButton
+	monthsHeaderRowHeight = unit.Dp(64)
+	viewHeaderHeight      = unit.Dp(32)
+)
 
 func SetAllYearsButtonsSlice(startTime, endTime time.Time) {
 	allYearsButtonsSlice = GetYearsRangeButtons(startTime.Year(), endTime.Year())
@@ -81,6 +94,7 @@ type Calendar struct {
 func (c *Calendar) SetTime(t time.Time) {
 	c.time = t
 }
+
 func (c *Calendar) Time() time.Time {
 	return c.time
 }
@@ -141,7 +155,7 @@ func (c *Calendar) Layout(gtx Gtx) Dim {
 }
 
 func (c *Calendar) drawHeaderRow(gtx Gtx) Dim {
-	var flexChildren = make([]FlexChild, len(c.weekdays))
+	flexChildren := make([]FlexChild, len(c.weekdays))
 	columnWidth := c.maxWidth / 7
 	for i, day := range c.weekdays {
 		dayStr := strings.ToUpper(day.String()[0:3])
@@ -156,6 +170,7 @@ func (c *Calendar) drawHeaderRow(gtx Gtx) Dim {
 	call.Add(gtx.Ops)
 	return d
 }
+
 func (c *Calendar) drawHeaderColumn(gtx Gtx, day string, columnWidth int) FlexChild {
 	gtx.Constraints.Min.Y, gtx.Constraints.Max.Y = gtx.Dp(monthsHeaderRowHeight), gtx.Dp(monthsHeaderRowHeight)
 	return layout.Rigid(func(gtx Gtx) Dim {

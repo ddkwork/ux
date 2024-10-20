@@ -1,6 +1,10 @@
 package ux
 
 import (
+	"image"
+	"image/color"
+	"slices"
+
 	"gioui.org/gesture"
 	"gioui.org/io/event"
 	"gioui.org/io/input"
@@ -14,9 +18,6 @@ import (
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"golang.org/x/exp/shiny/materialdesign/icons"
-	"image"
-	"image/color"
-	"slices"
 )
 
 type state uint8
@@ -28,37 +29,40 @@ const (
 	focused
 )
 
-type ActionFun func(gtx layout.Context)
-type Input struct {
-	editor    widget.Editor
-	height    unit.Dp
-	before    layout.Widget
-	after     layout.Widget
-	icon      *widget.Icon
-	iconClick widget.Clickable
+type (
+	ActionFun func(gtx layout.Context)
+	Input     struct {
+		editor    widget.Editor
+		height    unit.Dp
+		before    layout.Widget
+		after     layout.Widget
+		icon      *widget.Icon
+		iconClick widget.Clickable
 
-	click       gesture.Click
-	state       state
-	borderColor color.NRGBA
-	bgColor     color.NRGBA
-	hint        string
-	radius      unit.Dp
-	size        ElementStyle
-	width       unit.Dp
-	hasBorder   bool
+		click       gesture.Click
+		state       state
+		borderColor color.NRGBA
+		bgColor     color.NRGBA
+		hint        string
+		radius      unit.Dp
+		size        ElementStyle
+		width       unit.Dp
+		hasBorder   bool
 
-	showPassword bool
+		showPassword bool
 
-	onIconClick ActionFun
-	onFocus     ActionFun
-	onLostFocus ActionFun
-	onChange    func(text string)
-}
+		onIconClick ActionFun
+		onFocus     ActionFun
+		onLostFocus ActionFun
+		onChange    func(text string)
+	}
+)
 
 func (i *Input) SetHasBorder(hasBorder bool) *Input {
 	i.hasBorder = hasBorder
 	return i
 }
+
 func NewInput(hint string, text ...string) *Input {
 	t := &Input{
 		editor: widget.Editor{},
@@ -73,6 +77,7 @@ func NewInput(hint string, text ...string) *Input {
 	t.editor.SingleLine = true
 	return t
 }
+
 func NewTextArea(hint string, text ...string) *Input {
 	t := NewInput(hint, text...)
 	t.height = unit.Dp(100)
@@ -84,6 +89,7 @@ func (i *Input) SetOnFocus(f ActionFun) *Input {
 	i.onFocus = f
 	return i
 }
+
 func (i *Input) SetOnLostFocus(f ActionFun) *Input {
 	i.onLostFocus = f
 	return i
@@ -103,6 +109,7 @@ func (i *Input) SetOnIconClick(f ActionFun) *Input {
 	i.onIconClick = f
 	return i
 }
+
 func (i *Input) SetonChanged(f func(text string)) *Input {
 	i.onChange = f
 	return i
@@ -115,6 +122,7 @@ func (i *Input) Password() *Input {
 	i.showPassword = false
 	return i
 }
+
 func (i *Input) SetIcon(icon *widget.Icon) *Input {
 	i.icon = icon
 	return i
@@ -125,14 +133,17 @@ func (i *Input) SetRadius(radius unit.Dp) *Input {
 	i.radius = radius
 	return i
 }
+
 func (i *Input) ReadOnly() *Input {
 	i.editor.ReadOnly = true
 	return i
 }
+
 func (i *Input) SetBefore(before layout.Widget) *Input {
 	i.before = before
 	return i
 }
+
 func (i *Input) SetAfter(after layout.Widget) *Input {
 	i.after = after
 	return i
@@ -147,9 +158,11 @@ func (i *Input) SetText(text string) *Input {
 	i.editor.SetText(text)
 	return i
 }
+
 func (i *Input) GetText() string {
 	return i.editor.Text()
 }
+
 func (i *Input) update(gtx layout.Context) {
 	if gtx.Focused(&i.editor) {
 		if i.onFocus != nil {
@@ -301,7 +314,7 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 								return i.icon.Layout(gtx, th.Color.DefaultIconColor)
 							})
 						})
-						//widgets = append(widgets, iconLayout)
+						// widgets = append(widgets, iconLayout)
 						widgets = slices.Insert(widgets, 0, iconLayout)
 					} else {
 						if i.after != nil {

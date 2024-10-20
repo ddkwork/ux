@@ -1,9 +1,10 @@
 package ux_test
 
 import (
+	"testing"
+
 	"gioui.org/layout"
 	"github.com/ddkwork/ux"
-	"testing"
 )
 
 func TestButton_Layout(t *testing.T) {

@@ -1,16 +1,17 @@
 package ux
 
 import (
-	"gioui.org/layout"
-	"gioui.org/op/clip"
-	"gioui.org/text"
-	"gioui.org/widget/material"
 	"net/http"
 	"reflect"
 	"slices"
 	"strconv"
 	"strings"
 	"time"
+
+	"gioui.org/layout"
+	"gioui.org/op/clip"
+	"gioui.org/text"
+	"gioui.org/widget/material"
 )
 
 type packet struct {
@@ -867,7 +868,7 @@ func NewGoroutineList(rows []*packet) *GoroutineList {
 
 func (g *GoroutineList) SetGoroutines(gtx layout.Context) {
 	cellData := g.GetCellData()               // 获取当前的单元格数据
-	g.table.SetColumns(gtx, g.cols, cellData) //调整列宽？没意义，需要根据单元格最大宽度调整当前列的列宽
+	g.table.SetColumns(gtx, g.cols, cellData) // 调整列宽？没意义，需要根据单元格最大宽度调整当前列的列宽
 	g.Sort(g.rows)
 }
 
@@ -907,7 +908,7 @@ func (g *GoroutineList) Sort(gs []*packet) {
 
 func (g *GoroutineList) Update(gtx layout.Context) {
 	g.SetGoroutines(gtx)
-	g.table.Update(gtx) //得到被点击的列索引
+	g.table.Update(gtx) // 得到被点击的列索引
 	if clickedColumnIndex, ok := g.table.SortByClickedColumn(); ok {
 		if clickedColumnIndex == g.sortColumn {
 			g.sortOrder = !g.sortOrder // 切换排序方向

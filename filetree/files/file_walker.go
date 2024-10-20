@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"gioui.org/widget"
+	"github.com/ddkwork/golibrary/mylog"
 )
 
 // File structure representing files and folders with their accumulated sizes
@@ -98,11 +99,8 @@ func walkSubFolderConcurrently(
 	progress chan<- int,
 ) *File {
 	result := &File{}
-	entries, err := readDir(path)
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
+	entries := mylog.Check2(readDir(path))
+
 	dirName, name := filepath.Split(path)
 	result.Files = make([]*File, 0, len(entries))
 	numSubFolders := 0

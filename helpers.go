@@ -6,18 +6,20 @@ import "time"
 func beginningOfMonth(date time.Time) time.Time {
 	return date.AddDate(0, 0, -date.Day()+1)
 }
+
 func endOfMonth(date time.Time) time.Time {
 	return date.AddDate(0, 1, -date.Day())
 }
 
 func firstDayOfWeek(tm time.Time, weekStartDay time.Weekday) time.Time {
-	//tm = time.Date(tm.Year(), tm.Month(), 1, 0, 0, 0, 0, tm.Location())
+	// tm = time.Date(tm.Year(), tm.Month(), 1, 0, 0, 0, 0, tm.Location())
 	tm = beginningOfMonth(tm)
 	for tm.Weekday() != weekStartDay {
 		tm = tm.AddDate(0, 0, -1)
 	}
 	return tm
 }
+
 func lastDayOfWeek(tm time.Time, weekStartDay time.Weekday) time.Time {
 	tm = endOfMonth(tm)
 	weekEndDay := (weekStartDay + 6) % 7

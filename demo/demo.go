@@ -3,6 +3,10 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"image/color"
+	"net/http"
+	"time"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -12,17 +16,13 @@ import (
 	"github.com/ddkwork/keygen"
 	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/terminal"
-	"image/color"
-	"net/http"
-	"time"
 )
 
 func main() {
-
-	//stream.FileServerWindowsDisk()
-	//stream.FileServer()
-	//安卓的类似功能是文件闪传，上传速度只有FileServerWindowsDisk的1%左右
-	//这种本地起文件服务的方式对方下载很快
+	// stream.FileServerWindowsDisk()
+	// stream.FileServer()
+	// 安卓的类似功能是文件闪传，上传速度只有FileServerWindowsDisk的1%左右
+	// 这种本地起文件服务的方式对方下载很快
 
 	w := ux.NewWindow("gio demo")
 	panel := ux.NewPanel(w)
@@ -104,7 +104,7 @@ func main() {
 			})
 			m.Set(TreeKind, tree.Layout)
 		case Table2Kind:
-			var t = ux.NewGoroutineList(ux.Packets)
+			t := ux.NewGoroutineList(ux.Packets)
 			m.Set(Table2Kind, t.Layout)
 		case TableKind:
 			m.Set(TableKind, table())
@@ -229,7 +229,7 @@ func main() {
 			dropDown := ux.NewDropDown(keygen.InvalidAppKind.Keys()...)
 			form.InsertAt(0, "choose a app", dropDown.Layout)
 
-			//form.Add("", ux.BlueButton(&clickable, "submit", unit.Dp(100)).Layout)
+			// form.Add("", ux.BlueButton(&clickable, "submit", unit.Dp(100)).Layout)
 
 			m.Set(StructViewKind, form.Layout)
 		case ColorPickerKind:
@@ -240,7 +240,7 @@ func main() {
 				List: widget.List{
 					Scrollbar: widget.Scrollbar{},
 					List: layout.List{
-						//Axis:        layout.Vertical,
+						// Axis:        layout.Vertical,
 						ScrollToEnd: false,
 						Alignment:   0,
 						Position:    layout.Position{},
@@ -256,7 +256,7 @@ func main() {
 			//	mylog.Info("svg button clicked")
 			//})
 
-			//todo download svg icon has bug with Rotate 90°,we should use  f32.Affine2D{}
+			// todo download svg icon has bug with Rotate 90°,we should use  f32.Affine2D{}
 			m.Set(MobileKind, ux.NewButton("Hex Editor", nil).SetRectIcon(true).SetSVGIcon(ux.CircledChevronRight).Layout)
 
 		//case SvgButtonKind:
@@ -279,10 +279,10 @@ func main() {
 		//		})
 		//	})
 
-		//continue
-		//icon := mylog.Check2(widget.NewIcon(mylog.Check2(ivgconv.FromContent(data))))
-		//tooltip := ux.NewTooltipButton(icon, "Load preset xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", nil)
-		//m.Set(TooltipKind, tooltip.Layout)
+		// continue
+		// icon := mylog.Check2(widget.NewIcon(mylog.Check2(ivgconv.FromContent(data))))
+		// tooltip := ux.NewTooltipButton(icon, "Load preset xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", nil)
+		// m.Set(TooltipKind, tooltip.Layout)
 
 		//svgButton := ux.NewSVGButton("", ux.Svg2Icon(CircledChevronRight), func() {
 		//	mylog.Info("svg button clicked")
@@ -299,8 +299,8 @@ func main() {
 			newButtonAnimation := ux.NewButtonAnimation("animation button", ux.IconBack, func() {
 				mylog.Info("animation button clicked")
 			})
-			m.Set(JsonTreeKind, newButtonAnimation.Layout) //todo bug
-		case TerminalKind: //todo 控制台被接管了
+			m.Set(JsonTreeKind, newButtonAnimation.Layout) // todo bug
+		case TerminalKind: // todo 控制台被接管了
 			if mylog.IsWindows() {
 				continue
 			}
@@ -371,12 +371,12 @@ func main() {
 		}
 	}
 
-	m.Set(CodeEditorKind, ux.NewCodeEditor(tabGo, ux.CodeLanguageGO).Layout) //todo 增加滚动条
-	m.Set(LogViewKind, ux.LogView())                                         //todo 日志没有对齐，控制台是对齐的，增加滚动条
-	//m.Set(ComBoxKind, combox(w))//newselect
+	m.Set(CodeEditorKind, ux.NewCodeEditor(tabGo, ux.CodeLanguageGO).Layout) // todo 增加滚动条
+	m.Set(LogViewKind, ux.LogView())                                         // todo 日志没有对齐，控制台是对齐的，增加滚动条
+	// m.Set(ComBoxKind, combox(w))//newselect
 
 	sp := ux.NewSplit(ux.Split{
-		Ratio:  0, //布局比例，0 表示居中，-1 表示完全靠左，1 表示完全靠右
+		Ratio:  0, // 布局比例，0 表示居中，-1 表示完全靠左，1 表示完全靠右
 		Bar:    10,
 		Axis:   layout.Horizontal,
 		First:  ux.NewCodeEditor(tabGo, ux.CodeLanguageGO).Layout,
@@ -389,16 +389,16 @@ func main() {
 		tab := ux.NewTabItem(p.Key.String(), p.Value)
 		vtab.AddTab(tab)
 	}
-	//mylog.Success("test append log")
-	//mylog.Warning("test append log")
-	//mylog.Trace("test append log")
+	// mylog.Success("test append log")
+	// mylog.Warning("test append log")
+	// mylog.Trace("test append log")
 
-	//htab := ux.NewTabView(layout.Horizontal)
+	// htab := ux.NewTabView(layout.Horizontal)
 
-	//buildTabItems(htab)
-	//buildTabItems(vtab)
+	// buildTabItems(htab)
+	// buildTabItems(vtab)
 
-	//panel.AddChild(htab.Layout)
+	// panel.AddChild(htab.Layout)
 	panel.AddChild(vtab.Layout)
 
 	//app.FileDropCallback(func(files []string) {
@@ -410,7 +410,7 @@ func main() {
 	ux.Run(panel)
 }
 
-func treeTable() ux.Widget { //todo 调用抓包模块处理超长url
+func treeTable() ux.Widget { // todo 调用抓包模块处理超长url
 	type packet struct {
 		Scheme        string        // 请求协议
 		Method        string        // 请求方式
@@ -425,7 +425,7 @@ func treeTable() ux.Widget { //todo 调用抓包模块处理超长url
 	}
 	t := ux.NewTreeTable(packet{}, ux.TableContext[packet]{
 		ContextMenuItems: func(node *ux.Node[packet], gtx layout.Context) (items []ux.ContextMenuItem) {
-			//item := ux.ContextMenuItem{}
+			// item := ux.ContextMenuItem{}
 			return
 		},
 		MarshalRow: func(node *ux.Node[packet]) (cells []ux.CellData) {
@@ -436,7 +436,7 @@ func treeTable() ux.Widget { //todo 调用抓包模块处理超长url
 				node.Data.ContentLength = sumBytes
 				node.Data.PadTime = sumTime
 				node.Walk(func(node *ux.Node[packet]) {
-					sumBytes += node.Data.ContentLength //todo bug 排序图标也是，tree和node结构体合并不知道怎么样，root节点排除？：
+					sumBytes += node.Data.ContentLength // todo bug 排序图标也是，tree和node结构体合并不知道怎么样，root节点排除？：
 					sumTime += node.Data.PadTime
 				})
 				node.Data.ContentLength = sumBytes
@@ -713,12 +713,12 @@ func table() ux.Widget {
 	table := ux.NewTable(datatable)
 	table.SelectionChangedCallback = func(gtx layout.Context, row, col int) {
 		data := table.GetRow(row)
-		mylog.Struct(data) //todo check data
+		mylog.Struct(data) // todo check data
 	}
 
 	table.DoubleClickCallback = func(gtx layout.Context, row, col int) {
-		//data := table.GetRow(row)
-		//mylog.Struct(data)
+		// data := table.GetRow(row)
+		// mylog.Struct(data)
 		mylog.Info("double click for edit row data")
 	}
 
@@ -775,7 +775,7 @@ type BasicFan struct {
 	CircuitID   int     `json:"circuitId"`   // 集电线id
 	CircuitName string  `json:"circuitName"` // 集电线名称
 	FanName     string  `json:"fanName"`     // 风机名称
-	PowerField  string  `json:"powerField"`  //电量计算的原始点
+	PowerField  string  `json:"powerField"`  // 电量计算的原始点
 	FanCode     string  `json:"fanCode"`     // 风机编码
 	InnerCode   string  `json:"innerCode"`   // 内部编码
 	ModelID     int     `json:"modelId"`     // 型号id
@@ -784,10 +784,10 @@ type BasicFan struct {
 	StartSpeed  float64 `json:"startSpeed"`  // 切入风速(m/s)
 	StopSpeed   float64 `json:"stopSpeed"`   // 切出风速(m/s)
 	FanCap      float64 `json:"fanCap"`      // 装机容量
-	//Host        string  `json:"host"`
+	// Host        string  `json:"host"`
 
-	IsParadigm   int    `json:"isParadigm"`   //是否是标杆
-	FanLocalType string `json:"fanLocalType"` //fan_local_type 海风陆风
+	IsParadigm   int    `json:"isParadigm"`   // 是否是标杆
+	FanLocalType string `json:"fanLocalType"` // fan_local_type 海风陆风
 }
 
 //go:embed demo.go

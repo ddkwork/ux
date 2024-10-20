@@ -1,12 +1,13 @@
 package terminal
 
 import (
-	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/ux"
 	"image"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/ux"
 
 	"gioui.org/font"
 	"gioui.org/io/event"

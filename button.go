@@ -1,6 +1,9 @@
 package ux
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/io/input"
 	"gioui.org/io/semantic"
 	"gioui.org/layout"
@@ -13,8 +16,6 @@ import (
 	"github.com/ddkwork/ux/animationButton"
 	"github.com/ddkwork/ux/f32color"
 	"github.com/inkeliz/giosvg"
-	"image"
-	"image/color"
 )
 
 func NewButtonAnimation(text string, icon *widget.Icon, callBack func()) *animationButton.Button {
@@ -22,7 +23,7 @@ func NewButtonAnimation(text string, icon *widget.Icon, callBack func()) *animat
 		Rounded:  animationButton.UniformRounded(unit.Dp(12)),
 		TextSize: unit.Sp(12),
 		Inset:    layout.UniformInset(unit.Dp(4)),
-		//Font:        font.Font{},
+		// Font:        font.Font{},
 		Icon:      icon,
 		IconGap:   unit.Dp(1),
 		Animation: animationButton.NewButtonAnimationDefault(),
@@ -42,6 +43,7 @@ func NewButtonAnimation(text string, icon *widget.Icon, callBack func()) *animat
 	}
 	return animationButton.NewButton(style, th.Theme, text, callBack)
 }
+
 func NewButtonAnimationDefault() animationButton.ButtonAnimation {
 	return NewButtonAnimationScale(.98)
 }
@@ -60,10 +62,10 @@ type Button struct {
 	callBack func()
 	text     string
 	Inset    layout.Inset
-	spacer   unit.Dp //icon insets
+	spacer   unit.Dp // icon insets
 
-	radius unit.Dp //border radius
-	width  unit.Dp //border width
+	radius unit.Dp // border radius
+	width  unit.Dp // border width
 }
 
 func NewButton(text string, callBack func()) *Button {
@@ -106,6 +108,7 @@ func (m *Button) SetIcon(icon *widget.Icon) *Button {
 	m.icon = icon
 	return m
 }
+
 func (m *Button) SetSVGIcon(content string) *Button {
 	m.svgIcon = Svg2Icon([]byte(content))
 	return m
@@ -118,15 +121,15 @@ func (m *Button) Layout(gtx layout.Context) layout.Dimensions {
 		}
 	}
 
-	//textOnly := m.icon == nil && m.svgIcon == nil && m.text != ""
-	//iconOnly := m.icon != nil || m.svgIcon != nil && m.text == ""
-	//svgOnly := m.svgIcon != nil && m.text == ""
-	//iconAndText := m.icon != nil || m.svgIcon != nil && m.text != ""
-	//svgAndText := m.svgIcon != nil && m.text != ""
+	// textOnly := m.icon == nil && m.svgIcon == nil && m.text != ""
+	// iconOnly := m.icon != nil || m.svgIcon != nil && m.text == ""
+	// svgOnly := m.svgIcon != nil && m.text == ""
+	// iconAndText := m.icon != nil || m.svgIcon != nil && m.text != ""
+	// svgAndText := m.svgIcon != nil && m.text != ""
 
-	if m.icon == nil && m.svgIcon == nil && m.text != "" { //只有文字
+	if m.icon == nil && m.svgIcon == nil && m.text != "" { // 只有文字
 		btn := material.Button(th.Theme, m.Clickable, m.text)
-		btn.Inset = layout.UniformInset(2) //todo test
+		btn.Inset = layout.UniformInset(2) // todo test
 
 		return material.ButtonLayoutStyle{
 			Background:   th.Color.InputFocusedBgColor,
@@ -150,8 +153,8 @@ func (m *Button) Layout(gtx layout.Context) layout.Dimensions {
 		})
 	}
 
-	if m.text == "" && m.icon != nil || m.svgIcon != nil { //树形层级图标，没有文字
-		if m.iconRect { //带图标的编辑框，图标背景色和按钮背景色一致
+	if m.text == "" && m.icon != nil || m.svgIcon != nil { // 树形层级图标，没有文字
+		if m.iconRect { // 带图标的编辑框，图标背景色和按钮背景色一致
 			return material.Clickable(gtx, m.Clickable, func(gtx C) D {
 				const defaultIconSize = unit.Dp(24)
 				sz := gtx.Dp(defaultIconSize)
@@ -160,10 +163,10 @@ func (m *Button) Layout(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Max = size
 
 				background := func(gtx C) D {
-					//th.Color.InputFocusedBgColor
+					// th.Color.InputFocusedBgColor
 					defer clip.Rect{Max: gtx.Constraints.Max}.Push(gtx.Ops).Pop()
 					if m.Hovered() || gtx.Focused(m) {
-						//paint.Fill(gtx.Ops, (th.Color.InputFocusedBgColor))
+						// paint.Fill(gtx.Ops, (th.Color.InputFocusedBgColor))
 						paint.Fill(gtx.Ops, f32color.Hovered(color.NRGBA{}))
 					}
 					//for _, c := range m.History() {
@@ -197,7 +200,7 @@ func (m *Button) Layout(gtx layout.Context) layout.Dimensions {
 		return btn.Layout(gtx)
 	}
 
-	//图标和文字都有,两个都画
+	// 图标和文字都有,两个都画
 	return material.ButtonLayout(th.Theme, m.Clickable).Layout(gtx, func(gtx C) D {
 		top := m.Inset.Top - 2
 		bottom := m.Inset.Bottom - 2
@@ -210,12 +213,11 @@ func (m *Button) Layout(gtx layout.Context) layout.Dimensions {
 		return layout.Inset{Top: top, Bottom: bottom, Left: m.Inset.Left, Right: m.Inset.Right}.Layout(gtx, func(gtx C) D {
 			iconAndLabel := layout.Flex{Axis: m.Axis, Alignment: layout.Middle}
 			layIcon := layout.Rigid(func(gtx C) D {
-
 				var d layout.Dimensions
 				if m.icon != nil {
 					d = m.icon.Layout(gtx, th.Theme.Fg)
 				} else {
-					d = m.svgIcon.Layout(gtx) //todo theme check
+					d = m.svgIcon.Layout(gtx) // todo theme check
 				}
 
 				if m.Axis == layout.Horizontal {

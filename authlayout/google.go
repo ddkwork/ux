@@ -1,12 +1,13 @@
 package authlayout
 
 import (
+	"image/color"
+
 	"gioui.org/font"
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/ddkwork/ux/authlayout/internal"
 	"github.com/inkeliz/giosvg"
-	"image/color"
 )
 
 // DefaultLightGoogleButtonStyle is the default style for Google buttons.

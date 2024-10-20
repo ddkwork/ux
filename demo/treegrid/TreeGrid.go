@@ -2,6 +2,12 @@ package main
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+	"slices"
+	"sort"
+	"strings"
+
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -13,12 +19,6 @@ import (
 	"gioui.org/x/component"
 	"gioui.org/x/richtext"
 	"github.com/ddkwork/ux"
-	"slices"
-	"strings"
-
-	"image"
-	"image/color"
-	"sort"
 )
 
 // 3. 表头排序
@@ -30,26 +30,28 @@ import (
 // 9. 可拖动列宽
 // 10. 奇偶行斑马线背景色
 
-type ClickAction func(node *Node)
-type TreeTable struct {
-	Children     []*Node
-	root         *Node //？ how to use it?
-	selectedNode *Node
+type (
+	ClickAction func(node *Node)
+	TreeTable   struct {
+		Children     []*Node
+		root         *Node //？ how to use it?
+		selectedNode *Node
 
-	maxIndentWidth           int         //层级列单元格最小宽度
-	SelectionChangedCallback ClickAction //行选中回调
-	DoubleClickCallback      ClickAction //double click callback
-	LongPressCallback        ClickAction //mobile long press callback
+		maxIndentWidth           int         // 层级列单元格最小宽度
+		SelectionChangedCallback ClickAction // 行选中回调
+		DoubleClickCallback      ClickAction // double click callback
+		LongPressCallback        ClickAction // mobile long press callback
 
-	widget.List
+		widget.List
 
-	headerButtons   []*widget.Clickable // 存储每列的 clickable 状态
-	sortColumn      int                 // 当前排序的列索引
-	sortAscending   bool                // 是否升序排序
-	filterText      string
-	filteredRows    []*Node
-	onMenuItemClick func(tr *Node, item string)
-}
+		headerButtons   []*widget.Clickable // 存储每列的 clickable 状态
+		sortColumn      int                 // 当前排序的列索引
+		sortAscending   bool                // 是否升序排序
+		filterText      string
+		filteredRows    []*Node
+		onMenuItemClick func(tr *Node, item string)
+	}
+)
 
 func NewTreeTable() *TreeTable {
 	return &TreeTable{
@@ -73,6 +75,7 @@ func (t *TreeTable) OnClick(fun ClickAction) *TreeTable {
 	t.SelectionChangedCallback = fun
 	return t
 }
+
 func (t *TreeTable) OnNodeDoubleClick(fun ClickAction) *TreeTable {
 	t.DoubleClickCallback = fun
 	return t
@@ -142,7 +145,7 @@ type ColumnInfo struct {
 
 type Node struct {
 	RowCells          []ColumnInfo
-	cells             []*widget.Clickable //单元格单击事件
+	cells             []*widget.Clickable // 单元格单击事件
 	Icon              *widget.Icon
 	Children          []*Node
 	expanded          bool
@@ -249,7 +252,7 @@ func (t *TreeTable) Filter(text string) {
 		return
 	}
 
-	var items = make([]*Node, 0)
+	items := make([]*Node, 0)
 	for i, item := range t.Children {
 		if strings.Contains(item.RowCells[i].Cell, text) {
 			items = append(items, item)
@@ -273,11 +276,11 @@ func (t *TreeTable) renderHeader(gtx layout.Context) layout.Dimensions { // 渲�
 		return layout.Flex{
 			Axis:    layout.Horizontal,
 			Spacing: 0,
-			//Alignment: layout.Middle,
+			// Alignment: layout.Middle,
 			WeightSum: 0,
 		}.Layout(gtx,
 			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-				//gtx.Constraints.Min.X = gtx.Dp(t.maxIndentWidth) //todo not work
+				// gtx.Constraints.Min.X = gtx.Dp(t.maxIndentWidth) //todo not work
 				return t.headerCell(gtx, "列 1", 1)
 			}),
 			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
@@ -338,7 +341,6 @@ func (t *TreeTable) headerCell(gtx layout.Context, title string, colIndex int) l
 }
 
 func (t *TreeTable) renderNode(gtx layout.Context, node *Node, rowIndex int) layout.Dimensions {
-
 	if !node.menuInit {
 		node.menuInit = true
 		node.contextMenu = component.MenuState{
@@ -374,7 +376,7 @@ func (t *TreeTable) renderNode(gtx layout.Context, node *Node, rowIndex int) lay
 		node.clickable = &widget.Clickable{}
 	}
 
-	for { //todo bug
+	for { // todo bug
 		break
 		click, ok := node.clickable.Update(gtx)
 		if !ok {
@@ -399,7 +401,7 @@ func (t *TreeTable) renderNode(gtx layout.Context, node *Node, rowIndex int) lay
 			}
 
 		case 2:
-			if t.DoubleClickCallback != nil { //todo rename
+			if t.DoubleClickCallback != nil { // todo rename
 				go t.DoubleClickCallback(node)
 				gtx.Execute(op.InvalidateCmd{})
 			}
@@ -427,11 +429,11 @@ func (t *TreeTable) renderNode(gtx layout.Context, node *Node, rowIndex int) lay
 	}
 
 	if node.clickable.Hovered() {
-		bgColor = th.Color.InputFocusedBgColor //TreeHoveredBgColor
+		bgColor = th.Color.InputFocusedBgColor // TreeHoveredBgColor
 	}
 
 	const baseIndent = 8
-	var HierarchyInsert = layout.Inset{Left: unit.Dp((node.Depth() + 1) * baseIndent), Top: 1}
+	HierarchyInsert := layout.Inset{Left: unit.Dp((node.Depth() + 1) * baseIndent), Top: 1}
 
 	var rowCells []layout.FlexChild
 	// 绘制层级图标，虽然非容器节点没有图标，但是需要绘制深度+1的空白图标占位来缩进层级
@@ -453,18 +455,18 @@ func (t *TreeTable) renderNode(gtx layout.Context, node *Node, rowIndex int) lay
 	}))
 
 	// 绘制层级列文本
-	HierarchyIndent := 0 //层级图标和层级文本聚拢,视觉这样才是ok的
+	HierarchyIndent := 0 // 层级图标和层级文本聚拢,视觉这样才是ok的
 	if !isContainer {
-		HierarchyIndent = (node.parent.Depth())*baseIndent - iconSize //层级列非容器节点的文本和父节点文本对齐算法,即图标左侧的占用宽度
+		HierarchyIndent = (node.parent.Depth())*baseIndent - iconSize // 层级列非容器节点的文本和父节点文本对齐算法,即图标左侧的占用宽度
 	}
 	// 绘制层级列（固定宽度）
 	rowCells = append(rowCells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 		return layout.Inset{Left: unit.Dp(HierarchyIndent)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			gtx.Constraints.Min.X = gtx.Dp(unit.Dp(t.maxIndentWidth)) //限制层级列最小宽度
+			gtx.Constraints.Min.X = gtx.Dp(unit.Dp(t.maxIndentWidth)) // 限制层级列最小宽度
 			return node.clickable.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				richText := ux.NewRichText()
 				richText.AddSpan(richtext.SpanStyle{
-					//Font:        font.Font{},
+					// Font:        font.Font{},
 					Size:        unit.Sp(12),
 					Color:       Orange100,
 					Content:     node.RowCells[0].Cell,
@@ -477,9 +479,9 @@ func (t *TreeTable) renderNode(gtx layout.Context, node *Node, rowIndex int) lay
 
 	// 绘制其他列
 	for i, cell := range node.RowCells[1:] {
-		noHierarchyColumIndent := -((node.Depth()) * baseIndent) + iconSize //非层级列容器节点单元格负缩进,todo handle DividerWidth?
+		noHierarchyColumIndent := -((node.Depth()) * baseIndent) + iconSize // 非层级列容器节点单元格负缩进,todo handle DividerWidth?
 		if i > 0 && node.Depth() < t.calculateMaxDepth(node) {
-			//todo remove this condition?
+			// todo remove this condition?
 			// 另一种方案是copy grid的取单元格平均坐标宽度的代码,然后强制宽度为平均宽度,这样就能保证单元格对齐。不过这似乎有点复杂，需要加入几个update函数
 			// 此外，要对齐表头也只能移动坐标偏移这个办法了，所以先搞右键菜单和排序bug修复，以及unison的n叉树的增删改查功能，然后再考虑表头对齐的问题
 			noHierarchyColumIndent -= i + 1
@@ -490,8 +492,8 @@ func (t *TreeTable) renderNode(gtx layout.Context, node *Node, rowIndex int) lay
 				noHierarchyColumIndent = -t.maxIndentWidth // 确保不会过度缩进
 			}
 		}
-		if !isContainer { //非层级列是正常的对齐算法
-			noHierarchyColumIndent = -(node.parent.Depth())*baseIndent + iconSize //非层级列非容器节点单元格负缩进算法，和层级列非容器节点是对称的
+		if !isContainer { // 非层级列是正常的对齐算法
+			noHierarchyColumIndent = -(node.parent.Depth())*baseIndent + iconSize // 非层级列非容器节点单元格负缩进算法，和层级列非容器节点是对称的
 		}
 		rowCells = append(rowCells, layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 			return layout.Inset{Left: unit.Dp(noHierarchyColumIndent)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { // 添加缩进
@@ -508,7 +510,7 @@ func (t *TreeTable) renderNode(gtx layout.Context, node *Node, rowIndex int) lay
 						drawColumnDivider(gtx, i+1, DividerFg) // 为每列绘制列分隔条
 						richText := ux.NewRichText()
 						richText.AddSpan(richtext.SpanStyle{
-							//Font:        font.Font{},
+							// Font:        font.Font{},
 							Size:        unit.Sp(12),
 							Color:       Yellow200,
 							Content:     cell.Cell,
@@ -516,7 +518,7 @@ func (t *TreeTable) renderNode(gtx layout.Context, node *Node, rowIndex int) lay
 						})
 						insetCell := layoutInsetCell(gtx, richText.Layout)
 
-						//contextMenu todo
+						// contextMenu todo
 						if node.MenuOptions == nil {
 							node.MenuOptions = []string{
 								"add",
@@ -548,7 +550,7 @@ func (t *TreeTable) renderNode(gtx layout.Context, node *Node, rowIndex int) lay
 											if len(node.contextAreas) < index+1 {
 												node.contextAreas = append(node.contextAreas, component.ContextArea{})
 											}
-											//state := &node.contextAreas[index]
+											// state := &node.contextAreas[index]
 											return layout.Stack{}.Layout(gtx,
 												layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 													gtx.Constraints.Min.X = gtx.Constraints.Max.X
@@ -573,14 +575,14 @@ func (t *TreeTable) renderNode(gtx layout.Context, node *Node, rowIndex int) lay
 													}
 													if e.Buttons == pointer.ButtonSecondary {
 														if e.Kind == pointer.Press {
-															//cellMenu.active = true
+															// cellMenu.active = true
 														} else if e.Kind == pointer.Release {
-															//cellMenu.active = false
+															// cellMenu.active = false
 														}
-														//if cellMenu.active {
+														// if cellMenu.active {
 														return node.contextAreas[index].Layout(gtx, func(gtx C) D {
-															//m.rowIdx = row
-															//m.colIdx = col
+															// m.rowIdx = row
+															// m.colIdx = col
 															gtx.Constraints.Max.X = 500
 															gtx.Constraints.Max.Y = 1400
 															return t.drawContextArea(gtx, node)
@@ -588,7 +590,6 @@ func (t *TreeTable) renderNode(gtx layout.Context, node *Node, rowIndex int) lay
 														//}
 													}
 													return D{}
-
 												}),
 											)
 										})
@@ -596,10 +597,8 @@ func (t *TreeTable) renderNode(gtx layout.Context, node *Node, rowIndex int) lay
 								)
 							}),
 						)
-
 					})
 				})
-
 			})
 		}))
 	}
@@ -635,7 +634,6 @@ func (t *TreeTable) renderNode(gtx layout.Context, node *Node, rowIndex int) lay
 				}
 				paint.FillShape(gtx.Ops, bgColor, clip.Rect{Max: image.Pt(gtx.Constraints.Max.X, gtx.Constraints.Min.Y)}.Op())
 				return layout.Dimensions{Size: gtx.Constraints.Min}
-
 			}, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(22)) // 行高
 				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, rowCells...)
@@ -673,19 +671,19 @@ func init() {
 }
 
 func (t *TreeTable) drawContextArea(gtx C, node *Node) D {
-	return layout.Center.Layout(gtx, func(gtx C) D { //重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
-		//mylog.Struct(gtx.Constraints)
+	return layout.Center.Layout(gtx, func(gtx C) D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
+		// mylog.Struct(gtx.Constraints)
 		menuStyle := component.Menu(th.Theme, &node.contextMenu)
 		menuStyle.SurfaceStyle = component.SurfaceStyle{
 			Theme: th.Theme,
 			ShadowStyle: component.ShadowStyle{
-				CornerRadius: 18, //弹出菜单的椭圆角度
+				CornerRadius: 18, // 弹出菜单的椭圆角度
 				Elevation:    0,
-				//AmbientColor:  color.NRGBA(colornames.Blue400),
-				//PenumbraColor: color.NRGBA(colornames.Blue400),
-				//UmbraColor:    color.NRGBA(colornames.Blue400),
+				// AmbientColor:  color.NRGBA(colornames.Blue400),
+				// PenumbraColor: color.NRGBA(colornames.Blue400),
+				// UmbraColor:    color.NRGBA(colornames.Blue400),
 			},
-			Fill: color.NRGBA{R: 50, G: 50, B: 50, A: 255}, //弹出菜单的背景色
+			Fill: color.NRGBA{R: 50, G: 50, B: 50, A: 255}, // 弹出菜单的背景色
 		}
 		return menuStyle.Layout(gtx)
 	})
@@ -693,7 +691,7 @@ func (t *TreeTable) drawContextArea(gtx C, node *Node) D {
 
 func layoutInsetCell(gtx layout.Context, cell layout.Widget) layout.Dimensions {
 	return layout.Inset{
-		Top:    4, //文本居中，drawColumnDivider需要设置tallestHeight := gtx.Dp(unit.Dp(32))增加高度避免虚线
+		Top:    4, // 文本居中，drawColumnDivider需要设置tallestHeight := gtx.Dp(unit.Dp(32))增加高度避免虚线
 		Bottom: 0,
 		Left:   8,
 		Right:  8,

@@ -2,6 +2,8 @@ package ux
 
 import (
 	"fmt"
+	"image"
+
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
@@ -9,16 +11,18 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
-	"image"
+	"github.com/ddkwork/golibrary/mylog"
 )
 
-type ClickAction1 func(gtx layout.Context, node *TreeNode)
-type Tree struct {
-	nodes       []*TreeNode
-	width       unit.Dp
-	clickedNode *TreeNode
-	click       ClickAction1
-}
+type (
+	ClickAction1 func(gtx layout.Context, node *TreeNode)
+	Tree         struct {
+		nodes       []*TreeNode
+		width       unit.Dp
+		clickedNode *TreeNode
+		click       ClickAction1
+	}
+)
 
 func NewTree() *Tree {
 	return &Tree{
@@ -30,6 +34,7 @@ func (t *Tree) OnClick(fun ClickAction1) *Tree {
 	t.click = fun
 	return t
 }
+
 func (t *Tree) SetWidth(width unit.Dp) *Tree {
 	t.width = width
 	return t
@@ -57,10 +62,8 @@ func (t *Tree) AddSonNode(newNode *TreeNode) error {
 	}
 	t.setClick(newNode)
 	path := t.clickedNode.Path
-	parentNode, err := t.getNode(t.nodes, path)
-	if err != nil {
-		return err
-	}
+	parentNode := mylog.Check2(t.getNode(t.nodes, path))
+
 	parentNode.Children = append(parentNode.Children, newNode)
 	t.setPath(t.nodes, []int{})
 	return nil
@@ -72,10 +75,8 @@ func (t *Tree) DeleteNode(newNode *TreeNode) error {
 	}
 	t.setClick(newNode)
 	path := t.clickedNode.Path
-	parentNode, err := t.getNode(t.nodes, path)
-	if err != nil {
-		return err
-	}
+	parentNode := mylog.Check2(t.getNode(t.nodes, path))
+
 	parentNode.IsDeleted = true
 	return nil
 }
@@ -268,9 +269,11 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, loop int, isParent
 func (t *Tree) SetCurrentNode(node *TreeNode) {
 	t.clickedNode = node
 }
+
 func (t *Tree) GetCurrentNode() *TreeNode {
 	return t.clickedNode
 }
+
 func (t *Tree) MinTree(gtx layout.Context, nodes []*TreeNode) {
 	if nodes == nil {
 		nodes = t.nodes

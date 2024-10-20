@@ -1,12 +1,13 @@
 package ux
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/x/colorpicker"
-	"image"
-	"image/color"
 )
 
 type ColorPicker struct {

@@ -1,12 +1,13 @@
 package ux
 
 import (
+	"slices"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/ddkwork/golibrary/stream"
-	"slices"
 )
 
 type StructView struct {
@@ -70,7 +71,7 @@ func (s *StructView) Layout(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Max.X = gtx.Dp(maxLabelWidth)
 					return layout.Inset{Top: rowHeight}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-							layout.Flexed(1, func(gtx layout.Context) layout.Dimensions { //占据label宽度右对齐
+							layout.Flexed(1, func(gtx layout.Context) layout.Dimensions { // 占据label宽度右对齐
 								return layout.Spacer{}.Layout(gtx)
 							}),
 							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -84,7 +85,6 @@ func (s *StructView) Layout(gtx layout.Context) layout.Dimensions {
 							}),
 						)
 					})
-
 				}),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					return layout.Inset{Top: rowHeight}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {

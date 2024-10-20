@@ -2,6 +2,9 @@ package ux
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+
 	"gioui.org/gesture"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -9,8 +12,6 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"image"
-	"image/color"
 )
 
 // Resize provides a draggable handle in between two widgets for resizing their area.

@@ -1,22 +1,25 @@
 package ux
 
 import (
+	"log"
+
 	"gioui.org/gesture"
 	"gioui.org/layout"
 	"gioui.org/x/richtext"
-	"log"
 )
 
-type actionFun func(gtx layout.Context, content string)
-type RichText struct {
-	state richtext.InteractiveText
-	spans []richtext.SpanStyle
+type (
+	actionFun func(gtx layout.Context, content string)
+	RichText  struct {
+		state richtext.InteractiveText
+		spans []richtext.SpanStyle
 
-	click     actionFun
-	hover     actionFun
-	unHover   actionFun
-	longPress actionFun
-}
+		click     actionFun
+		hover     actionFun
+		unHover   actionFun
+		longPress actionFun
+	}
+)
 
 func (r *RichText) Reset() {
 	r.spans = nil
@@ -27,6 +30,7 @@ func (r *RichText) AddSpan(span richtext.SpanStyle) *RichText {
 	r.spans = append(r.spans, span)
 	return r
 }
+
 func (r *RichText) UpdateSpan(spans []richtext.SpanStyle) *RichText {
 	for key := range spans {
 		spans[key].Interactive = true
@@ -48,10 +52,12 @@ func (r *RichText) OnHover(f actionFun) *RichText {
 	r.hover = f
 	return r
 }
+
 func (r *RichText) OnUnHover(f actionFun) *RichText {
 	r.unHover = f
 	return r
 }
+
 func (r *RichText) OnLongPress(f actionFun) *RichText {
 	r.longPress = f
 	return r
@@ -88,7 +94,7 @@ func (r *RichText) Layout(gtx layout.Context) layout.Dimensions {
 	}
 	// render the rich text into the operation list
 	textStyle := richtext.Text(&r.state, th.Shaper, r.spans...)
-	//textStyle.WrapPolicy =  styledtext.WrapGraphemes
-	//textStyle.SingleLine = r.SingleLine
+	// textStyle.WrapPolicy =  styledtext.WrapGraphemes
+	// textStyle.SingleLine = r.SingleLine
 	return textStyle.Layout(gtx)
 }

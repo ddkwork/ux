@@ -1,13 +1,14 @@
 package ux
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget/material"
-	"image"
-	"image/color"
 )
 
 type Modal struct {
@@ -32,10 +33,12 @@ func NewModal() *Modal {
 	}).SetIcon(IconClose)
 	return m
 }
+
 func (m *Modal) SetWidth(width int) *Modal {
 	m.width = width
 	return m
 }
+
 func (m *Modal) SetHeight(height int) *Modal {
 	m.height = height
 	return m
@@ -44,6 +47,7 @@ func (m *Modal) SetHeight(height int) *Modal {
 func (m *Modal) Visible() bool {
 	return m.visible
 }
+
 func (m *Modal) SetTitle(title string) *Modal {
 	m.title = title
 	return m
@@ -53,6 +57,7 @@ func (m *Modal) SetContent(content layout.Widget) {
 	m.content = content
 	m.visible = true
 }
+
 func (m *Modal) Close() {
 	m.visible = false
 }

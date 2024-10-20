@@ -1,10 +1,11 @@
 package ux_test
 
 import (
+	"testing"
+
 	"gioui.org/layout"
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/ux"
-	"testing"
 )
 
 func TestGoogleDummyButton_Layout(t *testing.T) {
@@ -15,7 +16,7 @@ func TestGoogleDummyButton_Layout(t *testing.T) {
 		mylog.Info("svg button clicked")
 	})
 
-	//SaveScreenshot(CircledChevronDownButton.Layout)
+	// SaveScreenshot(CircledChevronDownButton.Layout)
 	ux.SaveScreenshot(func(gtx layout.Context) layout.Dimensions {
 		list := layout.List{
 			Axis:        layout.Vertical,

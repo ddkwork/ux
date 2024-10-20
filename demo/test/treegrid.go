@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+	"strings"
+
 	"gioui.org/unit"
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/golibrary/stream/align"
 	"github.com/ddkwork/ux"
-	"strings"
 )
 
 // CellData 表示单元格的数据结构
@@ -31,7 +32,7 @@ type Node struct {
 
 // Global constants
 const (
-	indentBase        = unit.Dp(1) //todo test
+	indentBase        = unit.Dp(1) // todo test
 	columnHeaderCount = 3
 )
 
@@ -54,8 +55,8 @@ func collectRows(node *Node) [][]CellData {
 			Text:        cell.Text,
 			Depth:       node.Depth(),
 			IsLastChild: false,
-			//maxColumnCellTextWidth: 0,
-			//maxColumnCellText:      "",
+			// maxColumnCellTextWidth: 0,
+			// maxColumnCellText:      "",
 		}
 		if i == len(node.RowCells)-1 {
 			cellData.IsLastChild = true
@@ -95,21 +96,21 @@ func (n *Node) MaxColumnCellTextWidths(columns [][]CellData) []unit.Dp {
 	columnWidths := make([]unit.Dp, columnHeaderCount)
 	for rowIndex, column := range columns {
 		for columnIndex, cell := range column {
-			if columnIndex == columnHeaderCount { //todo bug  0- (columnHeaderCount-1) == columnIndex
+			if columnIndex == columnHeaderCount { // todo bug  0- (columnHeaderCount-1) == columnIndex
 				break
 			}
-			width := align.StringWidth(cell.Text) //这里应该是导致非层级右边距太大的原因
+			width := align.StringWidth(cell.Text) // 这里应该是导致非层级右边距太大的原因
 			if width > columnWidths[columnIndex] {
 				columnWidths[columnIndex] = width
 
-				//这个很重要，用于精确计算最大列单元格宽度
+				// 这个很重要，用于精确计算最大列单元格宽度
 				columns[rowIndex][columnIndex].maxColumnCellTextWidth = width
 				columns[rowIndex][columnIndex].maxColumnCellText = cell.Text
 			}
 		}
 	}
-	n.maxLevelColumnCellTextWidth = columns[0][0].maxColumnCellTextWidth //层级列最大单元格文本宽度
-	n.maxColumnCellWidth = n.MaxColumnCellWidth()                        //层级列最大单元格宽度,限制宽度对齐
+	n.maxLevelColumnCellTextWidth = columns[0][0].maxColumnCellTextWidth // 层级列最大单元格文本宽度
+	n.maxColumnCellWidth = n.MaxColumnCellWidth()                        // 层级列最大单元格宽度,限制宽度对齐
 	return columnWidths
 }
 
@@ -179,15 +180,15 @@ func (n *Node) AddChild(child *Node) {
 func (n *Node) drawRows1(rows [][]CellData, maxColumnCellTextWidths []int) {
 	buf := stream.NewBuffer("")
 
-	//绘制表头
+	// 绘制表头
 	buf.WriteStringLn("─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
 	buf.WriteString("│")
 	buf.WriteString("       ")
-	//writeRow(buf, n.Header.RowCells, maxColumnCellTextWidths) // 传入 maxColumnCellTextWidths
+	// writeRow(buf, n.Header.RowCells, maxColumnCellTextWidths) // 传入 maxColumnCellTextWidths
 	buf.NewLine()
 	buf.WriteStringLn("─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
 
-	//绘制行数据
+	// 绘制行数据
 	const (
 		indent          = "│   "
 		childPrefix     = "├───"
@@ -197,9 +198,9 @@ func (n *Node) drawRows1(rows [][]CellData, maxColumnCellTextWidths []int) {
 		// 只处理第一列作为层级列
 		b := stream.NewBuffer("")
 		levelIndent := strings.Repeat(" ", int(row[0].Depth))
-		//b.WriteString("│")         // 往缓冲区添加一条分隔线
+		// b.WriteString("│")         // 往缓冲区添加一条分隔线
 		b.WriteString(levelIndent) // 增加层级缩进
-		//if row[0].Depth > 0 {
+		// if row[0].Depth > 0 {
 		b.WriteString("├───")
 		//} else {
 		indent := maxColumnCellTextWidths[0] - b.Len()
@@ -208,13 +209,13 @@ func (n *Node) drawRows1(rows [][]CellData, maxColumnCellTextWidths []int) {
 		//mylog.Trace("层级列实际宽度", b.Len())
 		//mylog.Trace("预期层级列宽度", maxColumnCellTextWidths[0])
 		if b.Len() != maxColumnCellTextWidths[0] {
-			//panic("层级列宽度校验失败b.Len() != maxColumnCellTextWidths[0]")
+			// panic("层级列宽度校验失败b.Len() != maxColumnCellTextWidths[0]")
 		}
 		buf.WriteString(b.String())
 		buf.Indent(1)
 
-		//绘制非层级列
-		//writeRow(buf, row[1:], maxColumnCellTextWidths[1:]) //绘制非层级列
+		// 绘制非层级列
+		// writeRow(buf, row[1:], maxColumnCellTextWidths[1:]) //绘制非层级列
 		buf.NewLine()
 	}
 
@@ -230,8 +231,8 @@ const (
 
 func (n *Node) MaxColumnCellWidth() unit.Dp {
 	HierarchyIndent := unit.Dp(1)
-	DividerWidth := align.StringWidth(" │ ")    //todo test
-	iconWidth := align.StringWidth(childPrefix) //todo test
+	DividerWidth := align.StringWidth(" │ ")    // todo test
+	iconWidth := align.StringWidth(childPrefix) // todo test
 	return n.MaxDepth()*HierarchyIndent +       // 最大深度的左缩进
 		iconWidth + // 图标宽度,不管深度是多少，每一行都只会有一个层级图标
 		n.maxLevelColumnCellTextWidth + 5 + //(8 * 2) + 20 + // 左右padding,20是sort图标的宽度或者容器节点求和的文本宽度

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ddkwork/golibrary/mylog"
 	gitignore "github.com/sabhiram/go-gitignore"
 )
 
@@ -18,15 +19,8 @@ func main() {
 		fmt.Println(".")
 	case 2:
 		rootDir = os.Args[1]
-		_, err := os.Stat(rootDir)
-		if os.IsNotExist(err) {
-			fmt.Println("directory does not exist")
-			os.Exit(1)
-		}
-		if err != nil {
-			fmt.Println(fmt.Errorf("error: %v", err))
-			os.Exit(1)
-		}
+		mylog.Check2(os.Stat(rootDir))
+
 	default:
 		fmt.Println("Usage: dirtree [directory]")
 		os.Exit(1)
@@ -46,15 +40,11 @@ func shouldIgnore(path string, ignoreMatchers []*gitignore.GitIgnore) bool {
 
 func loadIgnoreMatchers(path string, parentMatchers []*gitignore.GitIgnore) []*gitignore.GitIgnore {
 	ignoreFile := filepath.Join(path, ".gitignore")
-	if _, err := os.Stat(ignoreFile); os.IsNotExist(err) {
+	if _ := mylog.Check2(os.Stat(ignoreFile)); os.IsNotExist(err) {
 		return parentMatchers
 	}
 
-	ignoreMatcher, err := gitignore.CompileIgnoreFile(ignoreFile)
-	if err != nil {
-		fmt.Printf("Error reading .gitignore in %s: %v\n", path, err)
-		return parentMatchers
-	}
+	ignoreMatcher := mylog.Check2(gitignore.CompileIgnoreFile(ignoreFile))
 
 	return append(parentMatchers, ignoreMatcher)
 }
@@ -62,11 +52,7 @@ func loadIgnoreMatchers(path string, parentMatchers []*gitignore.GitIgnore) []*g
 func printTree(root string, prefix string, parentMatchers []*gitignore.GitIgnore) {
 	ignoreMatchers := loadIgnoreMatchers(root, parentMatchers)
 
-	files, err := os.ReadDir(root)
-	if err != nil {
-		fmt.Printf("Error reading directory %s: %v\n", root, err)
-		return
-	}
+	files := mylog.Check2(os.ReadDir(root))
 
 	for i, file := range files {
 		if file.Name() == ".git" {

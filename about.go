@@ -2,6 +2,11 @@ package ux
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+	"strings"
+	"time"
+
 	"gioui.org/app"
 	"gioui.org/io/event"
 	"gioui.org/io/key"
@@ -13,10 +18,6 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget/material"
-	"image"
-	"image/color"
-	"strings"
-	"time"
 )
 
 // A []string to hold the speech as a list of paragraphs
@@ -63,7 +64,7 @@ func About[T Widget](w *app.Window, data string) error {
 	var ops op.Ops
 
 	// Define a tag for input routing
-	var tag = "My Input Routing Tag - which could be this silly string, or an int/float/address, or anything else"
+	tag := "My Input Routing Tag - which could be this silly string, or an int/float/address, or anything else"
 
 	// Colors
 	colorDark := colorMode{
@@ -82,7 +83,6 @@ func About[T Widget](w *app.Window, data string) error {
 	myColor := colorDark
 
 	for {
-
 		// listen for events in the window
 		switch winE := w.Event().(type) {
 
@@ -265,7 +265,7 @@ func About[T Widget](w *app.Window, data string) error {
 			}
 			// Then we use scrollY to control the distance from the top of the screen to the first element.
 			// We visualize the text using a list where each paragraph is a separate item.
-			var vizList = layout.List{
+			vizList := layout.List{
 				Axis: layout.Vertical,
 				Position: layout.Position{
 					Offset: int(scrollY),

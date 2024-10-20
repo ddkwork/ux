@@ -1,10 +1,11 @@
 package ux
 
 import (
+	"image/color"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget/material"
-	"image/color"
 )
 
 var th = NewTheme()

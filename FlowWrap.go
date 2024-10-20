@@ -64,19 +64,19 @@ func (gr *FlowWrap) Layout(gtx C) D {
 
 					if gr.Cards[i].btn.Clicked(gtx) {
 						gr.Contextual = gr.Cards[i] // interface to assert type when enabling ContextualAppBar
-						//gr.cards[i].IsCtxtActive = true
-						//op.InvalidateOp{}.Add(gtx.Ops)
+						// gr.cards[i].IsCtxtActive = true
+						// op.InvalidateOp{}.Add(gtx.Ops)
 					}
 
 					if gr.Cards[i].selectBtn.Clicked(gtx) {
-						//data.Cached[i].Selected = true
-						//op.InvalidateOp{}.Add(gtx.Ops)
+						// data.Cached[i].Selected = true
+						// op.InvalidateOp{}.Add(gtx.Ops)
 					} else if gr.Cards[i].deselectBtn.Clicked(gtx) {
-						//data.Cached[i].Selected = false
-						//op.InvalidateOp{}.Add(gtx.Ops)
+						// data.Cached[i].Selected = false
+						// op.InvalidateOp{}.Add(gtx.Ops)
 					}
 
-					//if gr.cards[i].IsSearchedFor && gr.cards[i].IsActiveContinent {
+					// if gr.cards[i].IsSearchedFor && gr.cards[i].IsActiveContinent {
 					content = layout.Inset{
 						Top:    unit.Dp(15),
 						Bottom: unit.Dp(15),

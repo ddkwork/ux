@@ -2,11 +2,12 @@ package main
 
 import (
 	_ "embed"
-	"gioui.org/unit"
 	"image/color"
 	_ "image/jpeg"
 	_ "image/png"
 	"sync"
+
+	"gioui.org/unit"
 
 	"gioui.org/widget"
 	"github.com/ddkwork/golibrary/mylog"
@@ -264,38 +265,47 @@ var ActionVisibilityIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.ActionVisibility)
 	return icon
 }()
+
 var ActionVisibilityOffIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.ActionVisibilityOff)
 	return icon
 }()
+
 var ActionPermIdentityIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.ActionPermIdentity)
 	return icon
 }()
+
 var EditorFunctionsIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.EditorFunctions)
 	return icon
 }()
+
 var EditorBorderAllIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.EditorBorderAll)
 	return icon
 }()
+
 var MapsDirectionsRunIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.MapsDirectionsRun)
 	return icon
 }()
+
 var ActionZoomInIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.ActionZoomIn)
 	return icon
 }()
+
 var NavigationSubdirectoryArrowRightIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.NavigationSubdirectoryArrowRight)
 	return icon
 }()
+
 var ActionInfoOutlineIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.ActionInfoOutline)
 	return icon
 }()
+
 var ActionStarRateIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.ActionStarRate)
 	return icon
@@ -315,14 +325,17 @@ var AlertErrorIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.AlertError)
 	return icon
 }()
+
 var ActionCheckCircleIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.ActionCheckCircle)
 	return icon
 }()
+
 var ActionHighlightOffIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.ActionHighlightOff)
 	return icon
 }()
+
 var NavigationCancelIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.NavigationCancel)
 	return icon
@@ -343,14 +356,17 @@ var ActionMinIcon *widget.Icon = func() *widget.Icon {
 	// icon, _ := widget.NewIcon(icons.NotificationDoNotDisturbOn)
 	return icon
 }()
+
 var ActionFullIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.ActionOpenWith)
 	return icon
 }()
+
 var ArrowRightIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.HardwareKeyboardArrowRight)
 	return icon
 }()
+
 var ArrowDownIcon *widget.Icon = func() *widget.Icon {
 	icon, _ := widget.NewIcon(icons.HardwareKeyboardArrowDown)
 	return icon

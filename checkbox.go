@@ -1,6 +1,9 @@
 package ux
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/font"
 	"gioui.org/io/semantic"
 	"gioui.org/layout"
@@ -10,8 +13,6 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"github.com/x-module/gioui-plugins/theme"
-	"image"
-	"image/color"
 )
 
 type Checkbox struct {

@@ -3,6 +3,14 @@ package ux
 import (
 	_ "embed"
 	"fmt"
+	"image"
+	"image/color"
+	"io"
+	"slices"
+	"sort"
+	"strconv"
+	"strings"
+
 	"gioui.org/gesture"
 	"gioui.org/io/clipboard"
 	"gioui.org/io/key"
@@ -20,13 +28,6 @@ import (
 	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/golibrary/stream/align"
 	"github.com/google/uuid"
-	"image"
-	"image/color"
-	"io"
-	"slices"
-	"sort"
-	"strconv"
-	"strings"
 )
 
 type (
@@ -39,7 +40,7 @@ type (
 
 		header            TableHeader[T]
 		columnHeaderCount int
-		inLayoutHeader    bool //for drag
+		inLayoutHeader    bool // for drag
 		TableContext[T]
 		widget.List
 
@@ -54,9 +55,9 @@ type (
 		ContextMenuItems       func(node *Node[T], gtx layout.Context) (items []ContextMenuItem)
 		MarshalRow             func(node *Node[T]) (cells []CellData)
 		UnmarshalRow           func(node *Node[T], values []string)
-		RowSelectedCallback    func(node *Node[T]) //行选中回调
-		RowDoubleClickCallback func(node *Node[T]) //double click callback
-		LongPressCallback      func(node *Node[T]) //mobile long press callback
+		RowSelectedCallback    func(node *Node[T]) // 行选中回调
+		RowDoubleClickCallback func(node *Node[T]) // double click callback
+		LongPressCallback      func(node *Node[T]) // mobile long press callback
 		SetRootRowsCallBack    func(node *Node[T])
 		JsonName               string
 		IsDocument             bool
@@ -73,21 +74,21 @@ type (
 		contextMenu        *ContextMenu
 	}
 	CellData struct {
-		ColumID int //列id
-		RowID   int //行id
+		ColumID int // 列id
+		RowID   int // 行id
 
-		Text     string  //单元格文本
-		maxDepth unit.Dp //层级
+		Text     string  // 单元格文本
+		maxDepth unit.Dp // 层级
 
 		maxColumnTextWidth unit.Dp
 		maxColumnText      string
 
-		Current     unit.Dp //正在使用的宽度
-		Minimum     unit.Dp //拖放表头列分隔条得到的最小宽度
-		Maximum     unit.Dp //拖放表头列分隔条得到的最大宽度
-		AutoMinimum unit.Dp //根据单元格内容预渲染自动计算最小宽度
-		AutoMaximum unit.Dp //根据单元格内容预渲染自动计算最大宽度
-		Disabled    bool    //是否显示表头或者body单元格
+		Current     unit.Dp // 正在使用的宽度
+		Minimum     unit.Dp // 拖放表头列分隔条得到的最小宽度
+		Maximum     unit.Dp // 拖放表头列分隔条得到的最大宽度
+		AutoMinimum unit.Dp // 根据单元格内容预渲染自动计算最小宽度
+		AutoMaximum unit.Dp // 根据单元格内容预渲染自动计算最大宽度
+		Disabled    bool    // 是否显示表头或者body单元格
 		Tooltip     string
 		SvgBuffer   string
 		ImageBuffer []byte
@@ -310,11 +311,11 @@ func newNode[T any](typeKey string, isContainer bool, data T) *Node[T] {
 }
 
 type Node[T any] struct {
-	//TableContext[T]
+	// TableContext[T]
 	MarshalRow   func(node *Node[T]) (cells []CellData) `json:"-"`
 	MarshalColum func(node *Node[T]) (cells []CellData) `json:"-"`
 
-	Icon                widget.Icon //层级列图标，不是其他列的图标，其他列要看富文本是否支持渲染图标或者封装单元格渲染函数
+	Icon                widget.Icon // 层级列图标，不是其他列的图标，其他列要看富文本是否支持渲染图标或者封装单元格渲染函数
 	rowSelected         bool
 	rowClick            widget.Clickable
 	CellClickedCallback func(root *Node[T])
@@ -335,7 +336,7 @@ type Node[T any] struct {
 	DoubleClickCallback      func()     `json:"-"`
 	DragRemovedRowsCallback  func()     `json:"-"` // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
 	DropOccurredCallback     func()     `json:"-"` // Called whenever a drop occurs that modifies the model.
-	filteredRows             []*Node[T] //todo move into treeTable
+	filteredRows             []*Node[T] // todo move into treeTable
 
 	columnResizeStart        unit.Dp
 	columnResizeBase         unit.Dp
@@ -409,14 +410,14 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 		for _, data := range row {
 			b.WriteString(fmt.Sprintf("%-20s", data.Text))
 		}
-		//mylog.Warning("rowCells "+fmt.Sprint(id), b.String())
+		// mylog.Warning("rowCells "+fmt.Sprint(id), b.String())
 	}
 	fmtColumn := func(column []CellData) {
 		b := stream.NewBuffer("")
 		for _, data := range column {
 			b.WriteStringLn(data.Text)
 		}
-		//mylog.Json("-------> col: "+fmt.Sprint(column[0].ColumID), b.String())
+		// mylog.Json("-------> col: "+fmt.Sprint(column[0].ColumID), b.String())
 	}
 
 	t.Rows = make([][]CellData, 0, len(t.Children)) // 用于存储所有行
@@ -462,7 +463,8 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 
 	t.Children = t.Root.Children
 }
-func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions { //相当于syncModel,内部也是渲染之前调用 heightForColumns 调整列宽的
+
+func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions { // 相当于syncModel,内部也是渲染之前调用 heightForColumns 调整列宽的
 	t.SizeColumnsToFit(gtx, false)
 	list := material.List(th.Theme, &t.List)
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
@@ -506,7 +508,7 @@ func initHeader(data any) (Columns []CellData) {
 	fields := stream.ReflectVisibleFields(data)
 	Columns = make([]CellData, 0)
 	for i, field := range fields {
-		if field.Tag.Get("table") != "" { //中文列表头简短
+		if field.Tag.Get("table") != "" { // 中文列表头简短
 			field.Name = field.Tag.Get("table")
 		}
 		Columns = append(Columns, CellData{
@@ -572,10 +574,10 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 					t.header.ColumnCells[i].Text += " ⇩"
 				}
 				t.SortNodes()
-				//t.header.clickedColumnIndex = -1 //重置点击列索引
+				// t.header.clickedColumnIndex = -1 //重置点击列索引
 			}
 		}
-		//拦截右击事件并在事件中赋值命中的列id
+		// 拦截右击事件并在事件中赋值命中的列id
 		evt, ok := gtx.Source.Event(pointer.Filter{
 			Target: clickable,
 			Kinds:  pointer.Press | pointer.Release,
@@ -609,7 +611,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 
 		cols = append(cols, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return Background{Color: ColorHeaderFg}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				//实现右键复制列到剪切板功能
+				// 实现右键复制列到剪切板功能
 				return layout.Stack{}.Layout(gtx,
 					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 						return material.Clickable(gtx, clickable, func(gtx layout.Context) layout.Dimensions {
@@ -867,11 +869,11 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions
 				}
 
 				// Draw the vertical bar
-				//stack3 := clip.Rect{Max: image.Pt(dividerWidth, tallestHeight)}.Push(gtx.Ops)
-				//Fill( gtx.Ops, win.Theme.Palette.Table2.Divider) // 如果有需要，在此处可绘制分割线
-				//stack3.Pop()
+				// stack3 := clip.Rect{Max: image.Pt(dividerWidth, tallestHeight)}.Push(gtx.Ops)
+				// Fill( gtx.Ops, win.Theme.Palette.Table2.Divider) // 如果有需要，在此处可绘制分割线
+				// stack3.Pop()
 			}
-			//为表头和每列绘制列分隔条
+			// 为表头和每列绘制列分隔条
 			stack3 := clip.Rect{Max: image.Pt(dividerWidth, tallestHeight)}.Push(gtx.Ops) // 绘制分隔条的矩形区域
 			paint.Fill(gtx.Ops, DividerFg)                                                // 填充分隔条的颜色
 			stack3.Pop()                                                                  // 弹出分隔条的绘制堆栈
@@ -890,11 +892,13 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions
 func NewNode[T any](data T) (child *Node[T]) {
 	return newNode("", false, data)
 }
+
 func NewContainerNode[T any](typeKey string, data T) (container *Node[T]) {
 	n := newNode(typeKey, true, data)
 	n.Children = make([]*Node[T], 0)
 	return n
 }
+
 func NewContainerNodes[T any](typeKeys []string, objects ...T) (containerNodes []*Node[T]) {
 	containerNodes = make([]*Node[T], 0)
 	var data T // it is zero value
@@ -912,7 +916,7 @@ func (t *TreeTable[T]) SortNodes() {
 		return // 如果没有子节点或者列索引无效，直接返回
 	}
 	sort.Slice(t.Children, func(i, j int) bool {
-		if t.Children[i].RowCells == nil { //why? module do not need this
+		if t.Children[i].RowCells == nil { // why? module do not need this
 			t.Children[i].RowCells = t.MarshalRow(t.Children[i])
 		}
 		if t.Children[j].RowCells == nil {
@@ -949,8 +953,7 @@ func RowColor(rowIndex int) color.NRGBA {
 
 var modal = NewModal()
 
-//var editNode *StructView
-
+// var editNode *StructView
 func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int) layout.Dimensions {
 	node.RowCells = t.MarshalRow(node)
 	for i := range node.RowCells {
@@ -1018,7 +1021,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 		return layout.Flex{Axis: layout.Horizontal, Spacing: layout.SpaceBetween}.Layout(gtx,
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					//制层级图绘标-----------------------------------------------------------------------------------------------------------------
+					// 制层级图绘标-----------------------------------------------------------------------------------------------------------------
 					HierarchyInsert := layout.Inset{Left: c.leftIndent, Top: 2}
 					icon := ArrowRightIcon
 					if node.isOpen {
@@ -1047,21 +1050,21 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 		return layoutHierarchyColumn(gtx, node.RowCells[0])
 	}))
 
-	//绘制非层级列-----------------------------------------------------------------------------------------------------------------
+	// 绘制非层级列-----------------------------------------------------------------------------------------------------------------
 	for i, cell := range node.RowCells[1:] {
 		rowCells = append(rowCells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return material.Clickable(gtx, &node.RowCells[i].Clickable, func(gtx layout.Context) layout.Dimensions {
-					return layout.Stack{Alignment: layout.Center}.Layout(gtx, //层级列就懒得弹了，copy这个逻辑就行了，要弹的话，长按不支持有点纠结移动平台
+					return layout.Stack{Alignment: layout.Center}.Layout(gtx, // 层级列就懒得弹了，copy这个逻辑就行了，要弹的话，长按不支持有点纠结移动平台
 						layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 							if len(cell.Text) > 80 {
 								cell.Text = cell.Text[:len(cell.Text)/2] + "..."
-								//todo 这里更新前面已经渲染过的行不方便，所以要在layout或者实例化的时候提前处理
+								// todo 这里更新前面已经渲染过的行不方便，所以要在layout或者实例化的时候提前处理
 								// 更好的办法是让富文本编辑器做这个事情，对 maxline 。。。 看看代码编辑器扩建是如何实现这个的
 								// 然后双击编辑行的时候从富文本取出完整行并换行显示，structView需要好好设计一下这个
 								// 这个在抓包场景很那个，url列一般都长
 							}
-							//cell.Minimum = CalculateTextWidth(gtx, cell.Text)
+							// cell.Minimum = CalculateTextWidth(gtx, cell.Text)
 							return node.CellFrame(gtx, cell)
 						}),
 						layout.Expanded(func(gtx layout.Context) layout.Dimensions {
@@ -1144,7 +1147,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											},
 											Do: func() {
 												evt, ok := gtx.Source.Event(pointer.Filter{
-													Target: &node.RowCells[i].Clickable, //todo 检查这个的正确性
+													Target: &node.RowCells[i].Clickable, // todo 检查这个的正确性
 													Kinds:  pointer.Press | pointer.Release,
 												})
 												if ok {
@@ -1168,11 +1171,11 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 												} else {
 													t.selectedNode.parent.AddChild(clone)
 												}
-												//这里应该取已选中的节点，但是这里取右键按下事件并给选中节点赋值，然而右键菜单会因事件执激活菜单失败，弹不出菜单。
-												t.SizeColumnsToFit(gtx, false) //非得排序才能刷新成功
+												// 这里应该取已选中的节点，但是这里取右键按下事件并给选中节点赋值，然而右键菜单会因事件执激活菜单失败，弹不出菜单。
+												t.SizeColumnsToFit(gtx, false) // 非得排序才能刷新成功
 												t.List.Update(gtx, layout.Vertical, 0, 0)
 
-												//todo open editor window,把双击编辑节点的代码提到单独的函数，然后调用它
+												// todo open editor window,把双击编辑节点的代码提到单独的函数，然后调用它
 											},
 											Clickable: widget.Clickable{},
 										}
@@ -1275,7 +1278,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 		}))
 	}
 
-	rows := []layout.FlexChild{ //合成层级列和其他列的单元格为一行,并设置该行的背景和行高
+	rows := []layout.FlexChild{ // 合成层级列和其他列的单元格为一行,并设置该行的背景和行高
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return Background{bgColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(22)) // 行高,todo bug 增加了上下文菜单后设置更改的分割线高度不生效,除非删除这一行，但是这样高度太低了
@@ -1283,7 +1286,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 			})
 		}),
 	}
-	if node.CanHaveChildren() && node.isOpen { //如果是容器节点则递归填充孩子节点形成多行
+	if node.CanHaveChildren() && node.isOpen { // 如果是容器节点则递归填充孩子节点形成多行
 		for _, child := range node.Children {
 			rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				rowIndex++
@@ -1291,7 +1294,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 			}))
 		}
 	}
-	//把全部行垂直居中排列，rowClick点击后根据点击状态显示了这里填充了多少行，展开节点后看到的行就是这里来的
+	// 把全部行垂直居中排列，rowClick点击后根据点击状态显示了这里填充了多少行，展开节点后看到的行就是这里来的
 	return layout.Flex{Axis: layout.Vertical, Spacing: 0, Alignment: layout.Middle, WeightSum: 0}.Layout(gtx, rows...)
 }
 
@@ -1302,19 +1305,19 @@ func (t *TreeTable[T]) ColumnCell(row, col int, foreground, background color.NRG
 // -----------------------------------------------------------------------------------------------------------------
 
 func (t *TreeTable[T]) drawContextArea(gtx C, menuState *component.MenuState) D {
-	return layout.Center.Layout(gtx, func(gtx C) D { //重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
-		//mylog.Struct(gtx.Constraints)
+	return layout.Center.Layout(gtx, func(gtx C) D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
+		// mylog.Struct(gtx.Constraints)
 		menuStyle := component.Menu(th.Theme, menuState)
 		menuStyle.SurfaceStyle = component.SurfaceStyle{
 			Theme: th.Theme,
 			ShadowStyle: component.ShadowStyle{
-				CornerRadius: 18, //弹出菜单的椭圆角度
+				CornerRadius: 18, // 弹出菜单的椭圆角度
 				Elevation:    0,
-				//AmbientColor:  color.NRGBA(colornames.Blue400),
-				//PenumbraColor: color.NRGBA(colornames.Blue400),
-				//UmbraColor:    color.NRGBA(colornames.Blue400),
+				// AmbientColor:  color.NRGBA(colornames.Blue400),
+				// PenumbraColor: color.NRGBA(colornames.Blue400),
+				// UmbraColor:    color.NRGBA(colornames.Blue400),
 			},
-			Fill: color.NRGBA{R: 50, G: 50, B: 50, A: 255}, //弹出菜单的背景色
+			Fill: color.NRGBA{R: 50, G: 50, B: 50, A: 255}, // 弹出菜单的背景色
 		}
 		return menuStyle.Layout(gtx)
 	})
@@ -1337,7 +1340,7 @@ func reDrawIcon(gtx layout.Context, icon *widget.Icon) layout.Dimensions {
 		}),
 		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 			gtx.Constraints.Min = image.Point{X: size}
-			//icon.Layout(gtx, Black)
+			// icon.Layout(gtx, Black)
 
 			svgButtonTest = NewSVGButton("", Svg2Icon([]byte(CircledChevronRight)), func() {
 				mylog.Info("svg button clicked")
@@ -1351,6 +1354,7 @@ func reDrawIcon(gtx layout.Context, icon *widget.Icon) layout.Dimensions {
 		}),
 	)
 }
+
 func reDrawIcon2(gtx layout.Context, icon *widget.Icon) layout.Dimensions {
 	size := gtx.Dp(iconSize)
 	point := image.Pt(size, size)
@@ -1390,16 +1394,19 @@ func DrawColumnDivider(gtx layout.Context, col int) {
 //---------------------------------------泛型n叉树实现------------------------------------------
 
 func (n *Node[T]) AddChildByData(data T) { n.AddChild(NewNode(data)) }
+
 func (n *Node[T]) AddChildrenByDatas(datas ...T) {
 	for _, data := range datas {
 		n.AddChild(NewNode(data))
 	}
 }
+
 func (n *Node[T]) AddContainerByData(typeKey string, data T) (newContainer *Node[T]) { // 我们需要返回新的容器节点用于递归填充它的孩子节点，用例是explorer文件资源管理器
 	newContainer = NewContainerNode(typeKey, data)
 	n.AddChild(newContainer)
 	return newContainer
 }
+
 func (n *Node[T]) Sum() string {
 	// container column 0 key is empty string
 	key := n.Type
@@ -1414,51 +1421,65 @@ func (n *Node[T]) Sum() string {
 func NewUUID() uuid.UUID {
 	return mylog.Check2(uuid.NewRandom())
 }
+
 func (n *Node[T]) UUID() uuid.UUID {
 	return n.ID
 }
+
 func (n *Node[T]) Container() bool {
 	return strings.HasSuffix(n.Type, ContainerKeyPostfix)
 }
+
 func (n *Node[T]) kind(base string) string {
 	if n.Container() {
 		return fmt.Sprintf(("%s Container"), base)
 	}
 	return base
 }
+
 func (n *Node[T]) GetType() string {
 	return n.Type
 }
+
 func (n *Node[T]) SetType(typeKey string) {
 	n.Type = typeKey
 }
+
 func (n *Node[T]) IsOpen() bool {
 	return n.isOpen && n.Container()
 }
+
 func (n *Node[T]) SetOpen(open bool) {
 	n.isOpen = open && n.Container()
 }
+
 func (n *Node[T]) Parent() *Node[T] {
 	return n.parent
 }
+
 func (n *Node[T]) SetParent(parent *Node[T]) {
 	n.parent = parent
 }
+
 func (n *Node[T]) clearUnusedFields() {
 	if !n.Container() {
 		n.Children = nil
 		n.isOpen = false
 	}
 }
+
 func (n *Node[T]) CanHaveChildren() bool {
 	return n.HasChildren()
 }
+
 func (n *Node[T]) HasChildren() bool {
 	return n.Container() && len(n.Children) > 0
 }
+
 func (n *Node[T]) SetChildren(children []*Node[T]) {
 	n.Children = children
 }
+
 func (n *Node[T]) CellDataForSort(col int) string {
 	return n.MarshalRow(n)[col].Text
 }
@@ -1546,14 +1567,14 @@ func (n *Node[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions
 	}
 	richText := NewRichText()
 	richText.AddSpan(richtext.SpanStyle{
-		//Font:        font.Font{},
+		// Font:        font.Font{},
 		Size:        unit.Sp(12),
 		Color:       data.FgColor,
 		Content:     data.Text,
 		Interactive: false,
 	})
 	inset := layout.Inset{
-		Top:    4, //文本居中，drawColumnDivider需要设置tallestHeight := gtx.Dp(unit.Dp(32))增加高度避免虚线
+		Top:    4, // 文本居中，drawColumnDivider需要设置tallestHeight := gtx.Dp(unit.Dp(32))增加高度避免虚线
 		Bottom: 0,
 		Left:   8,
 		Right:  8,
@@ -1571,11 +1592,13 @@ func (n *Node[T]) RootRows() []*Node[T] {
 	}
 	return n.Children
 }
+
 func (n *Node[T]) SetRootRows(rows []*Node[T]) {
 	n.filteredRows = nil
 	n.Children = rows
 	n.SyncToModel()
 }
+
 func (n *Node[T]) SyncToModel() {
 	//rowCount := 0
 	//roots := n.RootRows()
@@ -1615,6 +1638,7 @@ func (t *TreeTable[T]) CopyColumn(gtx layout.Context) string {
 	gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(b.String()))})
 	return b.String()
 }
+
 func (n *Node[T]) CopyRow(gtx layout.Context) string {
 	b := stream.NewBuffer("var rowData = []string{")
 	cells := n.RowCells
@@ -1632,6 +1656,7 @@ func (n *Node[T]) CopyRow(gtx layout.Context) string {
 func (n *Node[T]) IsFiltered() bool {
 	return n.filteredRows != nil
 }
+
 func (n *Node[T]) ApplyFilter(filter func(row *Node[T]) bool) {
 	if filter == nil {
 		if n.filteredRows == nil {
@@ -1649,6 +1674,7 @@ func (n *Node[T]) ApplyFilter(filter func(row *Node[T]) bool) {
 	//	n.header.ApplySort()
 	//}
 }
+
 func (n *Node[T]) applyFilter(row *Node[T], filter func(row *Node[T]) bool) {
 	if !filter(row) {
 		n.filteredRows = append(n.filteredRows, row)
@@ -1659,6 +1685,7 @@ func (n *Node[T]) applyFilter(row *Node[T], filter func(row *Node[T]) bool) {
 		}
 	}
 }
+
 func (t *TreeTable[T]) Filter(text string) {
 	t.filterText = text
 
@@ -1667,7 +1694,7 @@ func (t *TreeTable[T]) Filter(text string) {
 		return
 	}
 
-	var items = make([]*Node[T], 0)
+	items := make([]*Node[T], 0)
 	//for i, item := range t.Children {
 	//	if strings.Contains(item.RowCells[i].Cell, text) {
 	//		items = append(items, item)
@@ -1682,6 +1709,7 @@ func (t *TreeTable[T]) Filter(text string) {
 
 	t.filteredRows = items
 }
+
 func (n *Node[T]) ApplyFilter_(tag string) {
 	n.filteredRows = make([]*Node[T], 0)
 	// var node *Node[T]
@@ -1713,6 +1741,7 @@ func (n *Node[T]) ApplyFilter_(tag string) {
 
 	n.SetChildren(n.filteredRows)
 }
+
 func (n *Node[T]) OpenAll() {
 	n.WalkContainer(func(node *Node[T]) {
 		if node.Container() {
@@ -1720,6 +1749,7 @@ func (n *Node[T]) OpenAll() {
 		}
 	})
 }
+
 func (t *TreeTable[T]) expandNode(node *Node[T]) {
 	node.isOpen = true // 设置节点为展开状态
 	for _, child := range node.Children {
@@ -1734,7 +1764,8 @@ func (n *Node[T]) CloseAll() {
 		}
 	})
 }
-func (n *Node[T]) DiscloseRow(row *Node[T], delaySync bool) bool { //todo merge CloseAll and DiscloseRow
+
+func (n *Node[T]) DiscloseRow(row *Node[T], delaySync bool) bool { // todo merge CloseAll and DiscloseRow
 	modified := false
 	p := row.Parent()
 	var zero *Node[T]
@@ -1746,14 +1777,14 @@ func (n *Node[T]) DiscloseRow(row *Node[T], delaySync bool) bool { //todo merge 
 		p = p.Parent()
 	}
 	if modified {
-		n.SyncToModel() //todo 加入是否处于过滤状态的字段，以及重设rootRows后重新layout刷新
+		n.SyncToModel() // todo 加入是否处于过滤状态的字段，以及重设rootRows后重新layout刷新
 	}
 	return modified
 }
 
 //-----------------------------------------------------------------------------
 
-func CountTableRows[T any](rows []*Node[T]) int { //正个表的总行数
+func CountTableRows[T any](rows []*Node[T]) int { // 正个表的总行数
 	count := len(rows)
 	for _, row := range rows {
 		if row.CanHaveChildren() {
@@ -1762,18 +1793,21 @@ func CountTableRows[T any](rows []*Node[T]) int { //正个表的总行数
 	}
 	return count
 }
-func RowContainsRow[T any](ancestor, descendant *Node[T]) bool { //todo use walk and  rename to Contains
+
+func RowContainsRow[T any](ancestor, descendant *Node[T]) bool { // todo use walk and  rename to Contains
 	var zero *Node[T]
 	for descendant != zero && descendant != ancestor {
 		descendant = descendant.Parent()
 	}
 	return descendant == ancestor
 }
+
 func (n *Node[T]) RemoveFromParent() {
 	mylog.CheckNil(n.parent)
 	n.parent.Remove(n.ID)
 }
-func (n *Node[T]) Remove(id uuid.UUID) { //todo add remove callback
+
+func (n *Node[T]) Remove(id uuid.UUID) { // todo add remove callback
 	if n.ID == id {
 		n.parent.Remove(id)
 		return
@@ -1786,6 +1820,7 @@ func (n *Node[T]) Remove(id uuid.UUID) { //todo add remove callback
 	}
 	mylog.Check("Node not found in parent")
 }
+
 func (n *Node[T]) Find(id uuid.UUID) *Node[T] {
 	if n.ID == id {
 		return n
@@ -1798,7 +1833,8 @@ func (n *Node[T]) Find(id uuid.UUID) *Node[T] {
 	}
 	return nil
 }
-func (n *Node[T]) Sort(cmp func(a T, b T) bool) { //todo merge
+
+func (n *Node[T]) Sort(cmp func(a T, b T) bool) { // todo merge
 	sort.SliceStable(n.Children, func(i, j int) bool {
 		return cmp(n.Children[i].Data, n.Children[j].Data)
 	})
@@ -1806,12 +1842,14 @@ func (n *Node[T]) Sort(cmp func(a T, b T) bool) { //todo merge
 		child.Sort(cmp)
 	}
 }
+
 func (n *Node[T]) Walk(callback func(node *Node[T])) {
 	callback(n)
 	for _, child := range n.Children {
 		child.Walk(callback)
 	}
 }
+
 func (n *Node[T]) WalkQueue(callback func(node *Node[T])) {
 	queue := []*Node[T]{n}
 	for len(queue) > 0 {
@@ -1823,6 +1861,7 @@ func (n *Node[T]) WalkQueue(callback func(node *Node[T])) {
 		}
 	}
 }
+
 func (n *Node[T]) Containers() []*Node[T] {
 	containers := make([]*Node[T], 0)
 	for _, child := range n.Children {
@@ -1832,6 +1871,7 @@ func (n *Node[T]) Containers() []*Node[T] {
 	}
 	return containers
 }
+
 func (n *Node[T]) WalkContainer(callback func(node *Node[T])) {
 	callback(n) // always walk root here
 	containers := make([]*Node[T], 0)
@@ -1937,9 +1977,11 @@ func (t *TreeTable[T]) Format() *stream.Buffer {
 	mylog.Json("RootRows", buf.String())
 	return buf
 }
+
 func (t *TreeTable[T]) String() string {
 	return t.Format().String()
 }
+
 func (t *TreeTable[T]) Document() string {
 	s := stream.NewBuffer("")
 	// s.WriteStringLn("// interface or method name here")
@@ -1951,24 +1993,29 @@ func (t *TreeTable[T]) Document() string {
 	// s.WriteStringLn("*/")
 	return s.String()
 }
+
 func (n *Node[T]) Depth() unit.Dp {
 	if n.parent != nil {
 		return n.parent.Depth() + 1
 	}
 	return 1
 }
+
 func (n *Node[T]) LenChildren() int {
 	return len(n.Children)
 }
+
 func (n *Node[T]) LastChild() (lastChild *Node[T]) {
 	if n.IsRoot() {
 		return n.Children[len(n.Children)-1]
 	}
 	return n.parent.Children[len(n.parent.Children)-1]
 }
+
 func (n *Node[T]) IsLastChild() bool {
 	return n.LastChild() == n
 }
+
 func (n *Node[T]) ResetChildren() {
 	n.Children = nil
 	n.filteredRows = nil
@@ -1978,10 +2025,12 @@ func (n *Node[T]) CopyFrom(from *Node[T]) *Node[T] {
 	*n = *from
 	return n
 }
+
 func (n *Node[T]) ApplyTo(to *Node[T]) *Node[T] {
 	*to = *n
 	return n
 }
+
 func (n *Node[T]) Clone() (newNode *Node[T]) {
 	defer n.SyncToModel()
 	if n.Container() {

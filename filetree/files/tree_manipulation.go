@@ -24,5 +24,4 @@ func PruneSmallFiles(folder *File, limit int64) {
 		}
 	}
 	folder.Files = prunedFiles
-
 }

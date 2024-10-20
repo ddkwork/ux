@@ -20,6 +20,7 @@ func NewProgressBar(initProgress float32) *ProgressBar {
 	progressBar.progressBar.Color = th.Color.ProgressBarColor
 	return progressBar
 }
+
 func (p *ProgressBar) SetProgress(progress float32) {
 	p.currentProgress = progress
 	p.progressBar.Progress = p.currentProgress

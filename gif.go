@@ -2,11 +2,12 @@ package ux
 
 import (
 	"fmt"
-	"gioui.org/layout"
 	"image"
 	"image/draw"
 	"image/gif"
 	"time"
+
+	"gioui.org/layout"
 
 	"gioui.org/op"
 	"gioui.org/op/paint"

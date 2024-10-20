@@ -1,6 +1,9 @@
 package ux
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/font"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -11,8 +14,6 @@ import (
 	"gioui.org/widget/material"
 	"gioui.org/x/component"
 	"github.com/x-module/gioui-plugins/resource"
-	"image"
-	"image/color"
 )
 
 type DropDown struct {

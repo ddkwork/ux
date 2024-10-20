@@ -1,13 +1,14 @@
 package ux
 
 import (
+	"image/color"
+	"math"
+
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"github.com/x-module/gioui-plugins/theme"
-	"image/color"
-	"math"
 )
 
 type Line struct {
@@ -32,14 +33,17 @@ func (l *Line) Color(color color.NRGBA) *Line {
 	l.color = color
 	return l
 }
+
 func (l *Line) Width(width float32) *Line {
 	l.width = width
 	return l
 }
+
 func (l *Line) Sap(sap float32) *Line {
 	l.sap = sap
 	return l
 }
+
 func (l *Line) DashLength(dashLength float32) *Line {
 	l.dashLength = dashLength
 	return l
@@ -92,6 +96,7 @@ func (l *Line) Line(gtx layout.Context, start f32.Point, end f32.Point) *Line {
 	paint.FillShape(gtx.Ops, l.color, clip.Stroke{Path: path.End(), Width: l.width}.Op())
 	return l
 }
+
 func (l *Line) Layout(gtx layout.Context) layout.Dimensions {
 	return layout.Dimensions{}
 }

@@ -23,7 +23,7 @@ func NewTooltipButton(icon *widget.Icon, tip string, callback func()) *TipIconBu
 	t.Bg = Yellow100
 	t.Text.Color = th.Color.ButtonTextBlackColor
 	t.CornerRadius = 14
-	t.Text.MaxLines = 3 //todo newlines
+	t.Text.MaxLines = 3 // todo newlines
 	clickable := &widget.Clickable{}
 	iconButtonStyle := material.IconButton(th.Theme, clickable, icon, "")
 	iconButtonStyle.Color = th.Fg
@@ -45,7 +45,7 @@ func (t *TipIconButton) Layout(gtx C) D {
 			t.callback()
 		}
 	}
-	//return t.TipArea.Layout(gtx, t.Tooltip, t.IconButtonStyle.Layout)
+	// return t.TipArea.Layout(gtx, t.Tooltip, t.IconButtonStyle.Layout)
 	return layout.Inset{Top: 4}.Layout(gtx, func(gtx C) D {
 		return t.TipArea.Layout(gtx, t.Tooltip, t.IconButtonStyle.Layout)
 	})

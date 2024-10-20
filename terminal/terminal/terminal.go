@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/ddkwork/ux/terminal"
 	"io"
 	"log/slog"
 	"math/rand"
 	"os"
+
+	"github.com/ddkwork/ux/terminal"
 
 	"gioui.org/app"
 	"gioui.org/io/system"
@@ -29,7 +30,6 @@ func (l TerminalWindow) Close() {
 }
 
 func (l TerminalWindow) Open() error {
-
 	w := &app.Window{}
 
 	guiReady := make(chan any)

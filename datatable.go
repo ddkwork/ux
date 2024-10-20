@@ -3,13 +3,14 @@ package ux
 import (
 	"errors"
 	"fmt"
-	"github.com/ddkwork/golibrary/mylog"
 	"io"
 	"log"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/ddkwork/golibrary/mylog"
 
 	"gioui.org/text"
 )
@@ -22,12 +23,12 @@ type Finder interface {
 }
 
 type Column struct {
-	Width     int    //宽度
+	Width     int    // 宽度
 	Title     string // 列名
-	Key       string //源列名
+	Key       string // 源列名
 	Alignment text.Alignment
 	Ids       []int
-	cb        func(colIdx int) //单击标题时回调函数
+	cb        func(colIdx int) // 单击标题时回调函数
 }
 
 func NewColumn(title string, width int, alig ...text.Alignment) *Column {
@@ -46,7 +47,7 @@ type ItemText func(record any, row, col int) string
 
 type DataTable[G any] struct {
 	list     []*G
-	root     []*G //原始数据不会变化
+	root     []*G // 原始数据不会变化
 	cols     []*Column
 	textFunc ItemText
 }
@@ -135,14 +136,14 @@ func (m *DataTable[G]) ResetFind() {
 func (m *DataTable[G]) Find(text string, colIdx int) (err error) {
 	text = strings.TrimSpace(text)
 	if text == "" {
-		err = errors.New("查找的字符串不能是空")
+		mylog.Check(errors.New("查找的字符串不能是空"))
 		return
 	}
 
 	list := reflect.ValueOf(m.root)
 	list = reflect.Indirect(list)
 	if !(list.Kind() == reflect.Slice || list.Kind() == reflect.Array) {
-		err = errors.New("内部错误, 关联数组错误")
+		mylog.Check(errors.New("内部错误, 关联数组错误"))
 		return
 	}
 
@@ -161,7 +162,7 @@ func (m *DataTable[G]) Find(text string, colIdx int) (err error) {
 			newList.SetLen(idx)
 			m.list = newList.Interface().([]*G)
 		} else {
-			err = errors.New("not found")
+			mylog.Check(errors.New("not found"))
 		}
 	}()
 
@@ -176,7 +177,7 @@ func (m *DataTable[G]) Find(text string, colIdx int) (err error) {
 	return
 }
 
-func (m *DataTable[G]) CopyRow(record any, row int, buf io.Writer) { //todo 写入剪切板
+func (m *DataTable[G]) CopyRow(record any, row int, buf io.Writer) { // todo 写入剪切板
 	n := m.GetColumnCount()
 	for i := 0; i < n; i++ {
 		if i != 0 {
@@ -197,7 +198,7 @@ func MakeColumns(list any, mapColumn map[string]*Column) (cols []*Column, f Item
 	cols = make([]*Column, len(key)+1)
 	c := &Column{
 		Title: "序号",
-		//Width: 75,
+		// Width: 75,
 	}
 
 	cols[0] = c
@@ -248,16 +249,16 @@ func FormatTime(t int64, fmt ...string) string {
 }
 
 const (
-	YYYYMMDDHHMMSSMill = "2006-01-02 15:04:05.000" //年月日 时分秒,毫秒
+	YYYYMMDDHHMMSSMill = "2006-01-02 15:04:05.000" // 年月日 时分秒,毫秒
 	YMDHMSMill         = "20060102150405000"
-	YYYYMMDDHHMMSS     = "2006-01-02 15:04:05" //年月日 时分秒
-	YYYYMMDDHHMM       = "2006-01-02 15:04"    //年月日 时分
-	YYYYMMDD           = "2006-01-02"          //年月日
-	YMDHMS             = "20060102150405"      //精简版 年月日时分秒
-	YMDHM              = "200601021504"        //精简版 年月日时分
-	YMD                = "20060102"            //精简版 年月日
-	HHMMSS             = "15:04:05"            //时分秒
-	HMS                = "150405"              //时分秒
+	YYYYMMDDHHMMSS     = "2006-01-02 15:04:05" // 年月日 时分秒
+	YYYYMMDDHHMM       = "2006-01-02 15:04"    // 年月日 时分
+	YYYYMMDD           = "2006-01-02"          // 年月日
+	YMDHMS             = "20060102150405"      // 精简版 年月日时分秒
+	YMDHM              = "200601021504"        // 精简版 年月日时分
+	YMD                = "20060102"            // 精简版 年月日
+	HHMMSS             = "15:04:05"            // 时分秒
+	HMS                = "150405"              // 时分秒
 )
 
 /**
@@ -286,7 +287,7 @@ func MapNameID(prefix string, mapKeyId map[string][]int, paths []int, t reflect.
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
-	//log.Println(prefix + meta.String())
+	// log.Println(prefix + meta.String())
 	for i := 0; i < t.NumField(); i++ {
 		newPaths := make([]int, len(paths))
 		copy(newPaths, paths)
@@ -299,7 +300,7 @@ func MapNameID(prefix string, mapKeyId map[string][]int, paths []int, t reflect.
 			typ = typ.Elem()
 		}
 
-		//log.Println(prefix+fieldType.Name, typ.Kind())
+		// log.Println(prefix+fieldType.Name, typ.Kind())
 
 		if fieldType.Anonymous {
 			if typ.Kind() == reflect.Struct {

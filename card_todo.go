@@ -1,12 +1,13 @@
 package ux
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"image"
-	"image/color"
 )
 
 type Card_ struct {
@@ -34,6 +35,7 @@ func (c *Card_) SetBgColor(bgColor color.NRGBA) *Card_ {
 	c.bgColor = bgColor
 	return c
 }
+
 func (c *Card_) SetPadding(padding unit.Dp) *Card_ {
 	c.padding = padding
 	return c

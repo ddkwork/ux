@@ -2,9 +2,11 @@ package ux
 
 import (
 	"fmt"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
+	"github.com/ddkwork/golibrary/mylog"
 	"github.com/gen2brain/dlgs"
 	"github.com/x-module/gioui-plugins/resource"
 )
@@ -52,11 +54,8 @@ func (b *DirSelector) action(gtx layout.Context) {
 			b.changed = true
 			return
 		} else {
-			dir, _, err := dlgs.File(b.windowTitle, "", true)
-			if err != nil {
-				fmt.Println("Error:", err)
-				return
-			}
+			dir, _ := mylog.Check3(dlgs.File(b.windowTitle, "", true))
+
 			fmt.Println("Selected Directory:", dir)
 			if dir == "" {
 				return
@@ -69,6 +68,7 @@ func (b *DirSelector) action(gtx layout.Context) {
 		}
 	}
 }
+
 func (b *DirSelector) SetOnSelectDir(f func(dir string)) *DirSelector {
 	b.onSelectDir = f
 	return b

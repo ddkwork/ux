@@ -1,23 +1,12 @@
 package ux
 
 import (
-	"github.com/ddkwork/golibrary/stream"
 	"testing"
+
+	"github.com/ddkwork/golibrary/mylog"
 )
 
 func TestTreeTable_ContextMenuItem(t1 *testing.T) {
-	stream.NewGeneratedFile().Types("ContextMenuItem",
-		[]string{
-			"CopyRow",
-			"ConvertToContainer",
-			"ConvertToNonContainer",
-			"NewOrderedMap",
-			"NewContainer",
-			"Delete",
-			"Duplicate",
-			"Edit",
-			"OpenAll",
-			"CloseAll",
-		},
-		nil)
+	mylog.Skips = append(mylog.Skips, "patch")
+	mylog.FormatAllFiles()
 }

@@ -100,14 +100,14 @@ func (e *EditableLabel) Layout(gtx layout.Context) layout.Dimensions {
 			}
 
 			border := widget.Border{
-				//Color:        theme.BorderColorFocused,
+				// Color:        theme.BorderColorFocused,
 				Width:        1,
 				CornerRadius: unit.Dp(4),
 			}
 			return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return layout.UniformInset(unit.Dp(5)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					editor := material.Editor(th.Theme, e.editor, "")
-					//editor.SelectionColor = theme.TextSelectionColor
+					// editor.SelectionColor = theme.TextSelectionColor
 					return editor.Layout(gtx)
 				})
 			})

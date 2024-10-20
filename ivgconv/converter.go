@@ -3,6 +3,8 @@ package ivgconv
 import (
 	"encoding/xml"
 	"os"
+
+	"github.com/ddkwork/golibrary/mylog"
 )
 
 // ConverterOptions contains options for the SVG to IconVG converter.
@@ -19,10 +21,8 @@ type Option func(*ConverterOptions)
 // FromFile encodes the SVG file as IconVG.
 func FromFile(filepath string, options ...Option) ([]byte, error) {
 	// Read the SVG file.
-	svgData, err := os.ReadFile(filepath)
-	if err != nil {
-		return nil, err
-	}
+	svgData := mylog.Check2(os.ReadFile(filepath))
+
 	// Encode the SVG file content as IconVG.
 	return FromContent(svgData, options...)
 }
@@ -45,11 +45,11 @@ func FromContent(content []byte, options ...Option) ([]byte, error) {
 	}
 	// Parse the SVG file.
 	var svg SVG
-	if err := xml.Unmarshal(content, &svg); err != nil {
+	if mylog.Check(xml.Unmarshal(content, &svg)); err != nil {
 		return nil, err
 	}
 	// Check if the SVG file is valid.
-	if err := svg.Validate(); err != nil {
+	if mylog.Check(svg.Validate()); err != nil {
 		return nil, err
 	}
 	// Encode the SVG file as IconVG.

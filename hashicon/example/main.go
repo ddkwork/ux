@@ -1,14 +1,16 @@
 package main
 
 import (
+	"log"
+	"os"
+	"strconv"
+
 	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/unit"
+	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/ux/hashicon"
-	"log"
-	"os"
-	"strconv"
 )
 
 func main() {
@@ -16,10 +18,8 @@ func main() {
 		w := new(app.Window)
 		w.Option(
 			app.Size(740, 500))
-		err := run(w)
-		if err != nil {
-			log.Fatal(err)
-		}
+		mylog.Check(run(w))
+
 		os.Exit(0)
 	}()
 	app.Main()
@@ -43,7 +43,6 @@ func run(w *app.Window) error {
 }
 
 func grid(gtx layout.Context, rowCount int, columnCount int) layout.Dimensions {
-
 	var rows []layout.FlexChild
 	var i int
 

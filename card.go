@@ -1,6 +1,9 @@
 package ux
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
@@ -8,8 +11,6 @@ import (
 	"gioui.org/widget/material"
 	"gioui.org/x/component"
 	"gioui.org/x/outlay"
-	"image"
-	"image/color"
 )
 
 type (
@@ -43,7 +44,7 @@ func (c *Card) LayCard(gtx C) D {
 	c.container.Elevation = unit.Dp(5)
 	c.shadow.CornerRadius = unit.Dp(18)
 	c.shadow.Elevation = unit.Dp(8)
-	c.shadow.AmbientColor = ColorPink //color.NRGBA{A: 0x10}
+	c.shadow.AmbientColor = ColorPink // color.NRGBA{A: 0x10}
 	c.shadow.PenumbraColor = color.NRGBA{A: 0x20}
 	c.shadow.UmbraColor = color.NRGBA{A: 0x30}
 
@@ -57,9 +58,9 @@ func (c *Card) LayCard(gtx C) D {
 		var item component.MenuItemStyle
 		item.LabelInset = outlay.Inset{
 			Top: unit.Dp(5),
-			//Right:  unit.Dp(5),
+			// Right:  unit.Dp(5),
 			Bottom: unit.Dp(5),
-			//Left:   unit.Dp(5),
+			// Left:   unit.Dp(5),
 		}
 		item = component.MenuItem(th.Theme, btn, lbl)
 

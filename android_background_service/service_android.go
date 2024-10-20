@@ -21,57 +21,41 @@ package android_background_service
 */
 
 import "C"
+
 import (
 	"time"
 
 	"gioui.org/app"
 	"git.wow.st/gmp/jni"
+	"github.com/ddkwork/golibrary/mylog"
 )
 
 //go:generate javac -source 8 -target 8  -bootclasspath $ANDROID_HOME/platforms/android-33/android.jar -d $TEMP/worker_android/classes *.java
 //go:generate jar cf worker_android.jar -C $TEMP/worker_android/classes .
 
 func Start() (err error) {
-	serviceRunning, err := isServiceRunning()
-	if err != nil {
-		return err
-	}
+	serviceRunning := mylog.Check2(isServiceRunning())
 
 	if serviceRunning {
-		foregroundRunning, err := isForegroundRunning()
-		if err != nil {
-			return err
-		}
+		foregroundRunning := mylog.Check2(isForegroundRunning())
 
 		if !foregroundRunning {
-			err = startForeground()
-			if err != nil {
-				return err
-			}
+			mylog.Check(startForeground())
 		}
 	} else {
-		err = startService()
-		if err != nil {
-			return
-		}
+		mylog.Check(startService())
 
 		// Wait for service to initialized before setting foreground
 		time.Sleep(1 * time.Second)
+		mylog.Check(startForeground())
 
-		err = startForeground()
-		if err != nil {
-			return
-		}
 	}
 
 	return
 }
 
 func Stop() (err error) {
-	err = stopForeground()
-	if err != nil {
-		return
-	}
+	mylog.Check(stopForeground())
 
 	/*
 		Don't stop entire service. It's faster to remove from foreground.
@@ -85,15 +69,9 @@ func Stop() (err error) {
 }
 
 func IsRunning() (bool, error) {
-	serviceRunning, err := isServiceRunning()
-	if err != nil {
-		return false, err
-	}
+	serviceRunning := mylog.Check2(isServiceRunning())
 
-	foregroundRunning, err := isForegroundRunning()
-	if err != nil {
-		return false, err
-	}
+	foregroundRunning := mylog.Check2(isForegroundRunning())
 
 	return serviceRunning && foregroundRunning, nil
 }
@@ -107,109 +85,79 @@ func loadWorkerClass(env jni.Env) (jni.Class, error) {
 }
 
 func startService() error {
-	err := jni.Do(jni.JVMFor(app.JavaVM()), func(env jni.Env) error {
-		class, err := loadWorkerClass(env)
-		if err != nil {
-			return err
-		}
+	mylog.Check(jni.Do(jni.JVMFor(app.JavaVM()), func(env jni.Env) error {
+		class := mylog.Check2(loadWorkerClass(env))
 
 		methodId := jni.GetStaticMethodID(env, class, "startService", "(Landroid/content/Context;)V")
-		err = jni.CallStaticVoidMethod(env, class, methodId, jni.Value(app.AppContext()))
-		if err != nil {
-			return err
-		}
+		mylog.Check(jni.CallStaticVoidMethod(env, class, methodId, jni.Value(app.AppContext())))
 
 		return nil
-	})
+	}))
 
 	return err
 }
 
 func stopService() error {
-	err := jni.Do(jni.JVMFor(app.JavaVM()), func(env jni.Env) error {
-		class, err := loadWorkerClass(env)
-		if err != nil {
-			return err
-		}
+	mylog.Check(jni.Do(jni.JVMFor(app.JavaVM()), func(env jni.Env) error {
+		class := mylog.Check2(loadWorkerClass(env))
 
 		methodId := jni.GetStaticMethodID(env, class, "stopService", "(Landroid/content/Context;)V")
-		err = jni.CallStaticVoidMethod(env, class, methodId, jni.Value(app.AppContext()))
-		if err != nil {
-			return err
-		}
+		mylog.Check(jni.CallStaticVoidMethod(env, class, methodId, jni.Value(app.AppContext())))
 
 		return nil
-	})
+	}))
 
 	return err
 }
 
 func isForegroundRunning() (bool, error) {
 	running := false
-	err := jni.Do(jni.JVMFor(app.JavaVM()), func(env jni.Env) error {
-		class, err := loadWorkerClass(env)
-		if err != nil {
-			return err
-		}
+	mylog.Check(jni.Do(jni.JVMFor(app.JavaVM()), func(env jni.Env) error {
+		class := mylog.Check2(loadWorkerClass(env))
 
 		fieldId := jni.GetStaticFieldID(env, class, "foregroundRunning", "Z")
 		running = jni.GetStaticBooleanField(env, class, fieldId)
 		return err
-	})
+	}))
 
 	return running, err
 }
 
 func startForeground() error {
-	err := jni.Do(jni.JVMFor(app.JavaVM()), func(env jni.Env) error {
-		class, err := loadWorkerClass(env)
-		if err != nil {
-			return err
-		}
+	mylog.Check(jni.Do(jni.JVMFor(app.JavaVM()), func(env jni.Env) error {
+		class := mylog.Check2(loadWorkerClass(env))
 
 		methodId := jni.GetStaticMethodID(env, class, "startForeground", "()V")
-		err = jni.CallStaticVoidMethod(env, class, methodId, jni.Value(app.AppContext()))
-		if err != nil {
-			return err
-		}
+		mylog.Check(jni.CallStaticVoidMethod(env, class, methodId, jni.Value(app.AppContext())))
 
 		return nil
-	})
+	}))
 
 	return err
 }
 
 func stopForeground() error {
-	err := jni.Do(jni.JVMFor(app.JavaVM()), func(env jni.Env) error {
-		class, err := loadWorkerClass(env)
-		if err != nil {
-			return err
-		}
+	mylog.Check(jni.Do(jni.JVMFor(app.JavaVM()), func(env jni.Env) error {
+		class := mylog.Check2(loadWorkerClass(env))
 
 		methodId := jni.GetStaticMethodID(env, class, "stopForeground", "()V")
-		err = jni.CallStaticVoidMethod(env, class, methodId, jni.Value(app.AppContext()))
-		if err != nil {
-			return err
-		}
+		mylog.Check(jni.CallStaticVoidMethod(env, class, methodId, jni.Value(app.AppContext())))
 
 		return nil
-	})
+	}))
 
 	return err
 }
 
 func isServiceRunning() (bool, error) {
 	running := false
-	err := jni.Do(jni.JVMFor(app.JavaVM()), func(env jni.Env) error {
-		class, err := loadWorkerClass(env)
-		if err != nil {
-			return err
-		}
+	mylog.Check(jni.Do(jni.JVMFor(app.JavaVM()), func(env jni.Env) error {
+		class := mylog.Check2(loadWorkerClass(env))
 
 		fieldId := jni.GetStaticFieldID(env, class, "serviceRunning", "Z")
 		running = jni.GetStaticBooleanField(env, class, fieldId)
 		return nil
-	})
+	}))
 
 	return running, err
 }

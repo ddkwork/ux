@@ -1,10 +1,11 @@
 package main
 
 import (
-	"gioui.org/layout"
-	"github.com/ddkwork/ux"
-	"log"
 	"os"
+
+	"gioui.org/layout"
+	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/ux"
 
 	"gioui.org/app"
 	"gioui.org/op"
@@ -13,9 +14,7 @@ import (
 func main() {
 	go func() {
 		w := new(app.Window)
-		if err := loop(w); err != nil {
-			log.Fatal(err)
-		}
+		mylog.Check(loop(w))
 		os.Exit(0)
 	}()
 	app.Main()
@@ -27,8 +26,8 @@ type (
 )
 
 func loop(w *app.Window) error {
-	//th := material.NewTheme()
-	//th.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
+	// th := material.NewTheme()
+	// th.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
 	t := NewTreeTable()
 	t.SetRootRows(TestRootRows)
 	SetParents(TestRootRows, nil)

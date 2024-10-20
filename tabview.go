@@ -1,12 +1,13 @@
 package ux
 
 import (
-	"gioui.org/font"
-	"gioui.org/widget"
-	"github.com/ddkwork/ux/safemap"
 	"image"
 	"image/color"
 	"unicode"
+
+	"gioui.org/font"
+	"gioui.org/widget"
+	"github.com/ddkwork/ux/safemap"
 
 	"gioui.org/gesture"
 	"gioui.org/io/event"
@@ -159,7 +160,7 @@ func (t *TabItem) layoutTitle(gtx C) D {
 									label := material.Label(th.Theme, unit.Sp(13), ellipticalTruncate(t.title, maxTitleWidth))
 									label.Color = th.Color.DefaultTextWhiteColor
 									if t.btn.Hovered() {
-										//label.Font.Weight = font.Bold
+										// label.Font.Weight = font.Bold
 										label.TextSize++
 										label.Color = Red100
 									}
@@ -283,7 +284,6 @@ func (v *TabView) Layout(gtx C) D {
 							return item.LayoutTitle(gtx)
 						})
 					}
-
 				})
 
 				if v.Axis == layout.Horizontal {
@@ -309,6 +309,7 @@ func (v *TabView) Layout(gtx C) D {
 		}),
 	)
 }
+
 func (v *TabView) Update(gtx C) {
 	for idx, item := range v.tabItems {
 		if item.Update(gtx) {
@@ -369,10 +370,12 @@ func (v *TabView) SelectedTab() *TabItem {
 	}
 	return v.tabItems[v.index]
 }
+
 func (v *TabView) AddTab(tab *TabItem) int {
 	v.tabItems = append(v.tabItems, tab)
 	return len(v.tabItems) - 1
 }
+
 func (v *TabView) RemoveTabByID(id string) {
 	tab := v.findTabByID(id)
 	if tab == nil {
@@ -381,6 +384,7 @@ func (v *TabView) RemoveTabByID(id string) {
 
 	tab.isClosed = true
 }
+
 func (v *TabView) findTabByID(id string) *TabItem {
 	for _, t := range v.tabItems {
 		if t.Identifier == id {
@@ -389,6 +393,7 @@ func (v *TabView) findTabByID(id string) *TabItem {
 	}
 	return nil
 }
+
 func (v *TabView) SetSelectedByID(id string) {
 	for i, t := range v.tabItems {
 		if t.Identifier == id {
@@ -397,6 +402,7 @@ func (v *TabView) SetSelectedByID(id string) {
 		}
 	}
 }
+
 func (v *TabView) SetTabs(items []*TabItem) {
 	v.tabItems = items
 }
@@ -404,22 +410,28 @@ func (v *TabView) SetTabs(items []*TabItem) {
 func (t *TabItem) SetMaxTitleWidth(maxWidth int) {
 	t.maxTitleWidth = maxWidth
 }
+
 func (t *TabItem) Selected() bool {
 	return t.selected
 }
+
 func (t *TabItem) SetDataChanged(changed bool) *TabItem {
 	t.isDataChanged = changed
 	return t
 }
+
 func (t *TabItem) IsDataChanged() bool {
 	return t.isDataChanged
 }
+
 func (t *TabItem) SetIdentifier(id string) {
 	t.Identifier = id
 }
+
 func (t *TabItem) SetSelected(index int) {
 	t.index = index
 }
+
 func (t *TabItem) SetOnClose(f func(t *TabItem)) {
 	t.onClose = f
 }

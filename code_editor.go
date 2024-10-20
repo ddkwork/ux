@@ -3,6 +3,9 @@ package ux
 import (
 	"bytes"
 	_ "embed"
+	"image/color"
+	"strings"
+
 	"gioui.org/font"
 	"gioui.org/font/opentype"
 	"gioui.org/layout"
@@ -13,8 +16,6 @@ import (
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/ddkwork/golibrary/mylog"
-	"image/color"
-	"strings"
 
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
@@ -126,6 +127,7 @@ func (c *CodeEditor) SetOnLoadExample(f func()) {
 func (c *CodeEditor) AppendText(text string) {
 	c.editor.Insert(text)
 }
+
 func (c *CodeEditor) SetCode(code string) {
 	code = strings.ReplaceAll(code, "\t", "    ")
 	c.editor.SetText(code, false)
@@ -157,7 +159,7 @@ func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 				c.onChange(c.editor.Text())
 				c.code = c.editor.Text()
 			}
-			//case key.Event://todo ctrl+x +d use insert method
+			// case key.Event://todo ctrl+x +d use insert method
 		}
 	}
 
@@ -174,8 +176,8 @@ func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 						return layout.Dimensions{}
 					}
 
-					//btn := Button(theme.Theme(), &c.loadExample, RefreshIcon, IconPositionStart, "Load Example")
-					//btn.Color = theme.ButtonTextColor
+					// btn := Button(theme.Theme(), &c.loadExample, RefreshIcon, IconPositionStart, "Load Example")
+					// btn.Color = theme.ButtonTextColor
 					btn := NewNavButton("Load Example")
 					//btn.Inset = DefaultDraw.Inset{
 					//	Top: unit.Dp(4), Bottom: unit.Dp(4),
@@ -193,8 +195,8 @@ func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 						return layout.Dimensions{}
 					}
 
-					//btn := Button(theme.Theme(), &c.beatufier, CleanIcon, IconPositionStart, "Beautify")
-					//btn.Color = theme.ButtonTextColor
+					// btn := Button(theme.Theme(), &c.beatufier, CleanIcon, IconPositionStart, "Beautify")
+					// btn.Color = theme.ButtonTextColor
 					btn := NewNavButton("Beautify")
 					//btn.Inset = DefaultDraw.Inset{
 					//	Top: 4, Bottom: 4,
@@ -223,7 +225,7 @@ func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 								Shaper:         th.Theme.Shaper,
 								TextColor:      th.Theme.Fg,
 								Bg:             BackgroundColor,
-								SelectionColor: Blue500, //todo
+								SelectionColor: Blue500, // todo
 								LineHighlightColor: color.NRGBA{
 									R: 0xbb,
 									G: 0xbb,
@@ -252,7 +254,7 @@ func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 							hint := "No example available"
 							return giovieweditor.NewEditor(c.editor, editorConf, hint).Layout(gtx)
 
-							var list = widget.List{
+							list := widget.List{
 								Scrollbar: widget.Scrollbar{},
 								List:      layout.List{},
 							}
@@ -281,10 +283,7 @@ func (c *CodeEditor) stylingText(text string) []*giovieweditor.TextStyle {
 
 	offset := 0
 
-	iterator, err := c.lexer.Tokenise(nil, text)
-	if err != nil {
-		return textStyles
-	}
+	iterator := mylog.Check2(c.lexer.Tokenise(nil, text))
 
 	for _, token := range iterator.Tokens() {
 		entry := c.codeStyle.Get(token.Type)

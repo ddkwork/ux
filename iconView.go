@@ -2,6 +2,9 @@ package ux
 
 import (
 	"fmt"
+	"io"
+	"strings"
+
 	"gioui.org/io/clipboard"
 	"gioui.org/layout"
 	"gioui.org/unit"
@@ -9,8 +12,6 @@ import (
 	"gioui.org/widget/material"
 	"github.com/ddkwork/ux/animationButton"
 	"golang.org/x/exp/shiny/materialdesign/icons"
-	"io"
-	"strings"
 )
 
 type IconView struct {
@@ -43,7 +44,7 @@ func NewIconView() *IconView {
 	})
 	for _, name := range iconList {
 		i.clickMap[name] = NewButtonAnimation(name, IconCopy, func() {
-			//copyResponse(gtx, name)
+			// copyResponse(gtx, name)
 		})
 	}
 	return i
@@ -57,7 +58,7 @@ func copyResponse(gtx layout.Context, name string) {
 }
 
 func (i *IconView) Layout(gtx layout.Context) layout.Dimensions {
-	i.getElements() //todo not work
+	i.getElements() // todo not work
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return i.filter.Layout(gtx)
@@ -1062,6 +1063,7 @@ var iconList = []string{
 	"icons.ToggleStarBorder",
 	"icons.ToggleStarHalf",
 }
+
 var iconMap = map[string][]byte{
 	"icons.Action3DRotation":                            icons.Action3DRotation,
 	"icons.ActionAccessibility":                         icons.ActionAccessibility,

@@ -14,12 +14,13 @@ import (
 	"gioui.org/op"
 	"gioui.org/text"
 	"gioui.org/widget/material"
+	"github.com/ddkwork/golibrary/mylog"
 )
 
 func main() {
 	go func() {
 		w := new(app.Window)
-		if err := loop(w); err != nil {
+		if mylog.Check(loop(w)); err != nil {
 			log.Fatal(err)
 		}
 		os.Exit(0)

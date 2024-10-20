@@ -1,13 +1,14 @@
 package ux
 
 import (
+	"image/color"
+
 	"gioui.org/font"
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/ux/authlayout"
 	"github.com/inkeliz/giosvg"
-	"image/color"
 )
 
 func NewSVGButton(title string, icon *giosvg.Icon, callback func()) *GoogleDummyButton {
@@ -37,7 +38,7 @@ func (g *GoogleDummyButton) Layout(gtx layout.Context) layout.Dimensions {
 
 func (g *GoogleDummyButton) LayoutText(gtx layout.Context, text string) layout.Dimensions {
 	if g.icon == nil {
-		//g.icon = giosvg.NewIcon(internal.VectorGoogleLogo)//todo
+		// g.icon = giosvg.NewIcon(internal.VectorGoogleLogo)//todo
 	}
 	if g.Clicked(gtx) {
 		if g.callback != nil {

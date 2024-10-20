@@ -1,6 +1,8 @@
 package ux
 
 import (
+	"image/color"
+
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -12,22 +14,21 @@ import (
 	"gioui.org/x/component"
 	"github.com/ddkwork/golibrary/mylog"
 	"golang.org/x/exp/shiny/materialdesign/colornames"
-	"image/color"
 )
 
 type Tabler interface {
-	//获取标题
+	// 获取标题
 	GetTitle(i int) (title string)
-	//获取单元格数据
+	// 获取单元格数据
 	GetItemText(record any, row, col int) (text string)
-	//获取列宽度
+	// 获取列宽度
 	GetColumnWitdh(i int) (width float32)
-	//获取列属性
+	// 获取列属性
 	GetColumn(i int) *Column
 	GetRow(row int) any
-	//获取列个数
+	// 获取列个数
 	GetColumnCount() (count int)
-	//获取行数
+	// 获取行数
 	Size() (size int)
 }
 
@@ -85,33 +86,32 @@ func (t *Table) LayoutHoverTable(gtx layout.Context) layout.Dimensions {
 */
 
 type Table struct {
-
-	//todo use this object to draw table
-	//height      unit.Dp
-	//grid        component.GridState
-	//headerFun   layout.ListElement
-	//dataFun     outlay.Cell
-	//headers     []string
-	//data        [][]any
-	//dataContent []widget.Bool
-	//table       component.TableStyle
+	// todo use this object to draw table
+	// height      unit.Dp
+	// grid        component.GridState
+	// headerFun   layout.ListElement
+	// dataFun     outlay.Cell
+	// headers     []string
+	// data        [][]any
+	// dataContent []widget.Bool
+	// table       component.TableStyle
 
 	component.GridState
 
 	headerBorder             *widget.Border
 	cellBorder               *widget.Border
 	headers                  []*widget.Clickable
-	cells                    []*widget.Clickable                    //单元格单击事件
-	SelectionChangedCallback func(gtx layout.Context, row, col int) //num 单击了几次
-	DoubleClickCallback      func(gtx layout.Context, row, col int) `json:"-"` //双击编辑节点或行结构体数据
-	rowChan                  chan int                               //存放需要刷新的行
+	cells                    []*widget.Clickable                    // 单元格单击事件
+	SelectionChangedCallback func(gtx layout.Context, row, col int) // num 单击了几次
+	DoubleClickCallback      func(gtx layout.Context, row, col int) `json:"-"` // 双击编辑节点或行结构体数据
+	rowChan                  chan int                               // 存放需要刷新的行
 	rowChanSize              int
-	lastRowIdx               int //用于去重
-	HeaderCellIndex          int //哪列被点击了
+	lastRowIdx               int // 用于去重
+	HeaderCellIndex          int // 哪列被点击了
 
 	creatCellCallback func(gtx layout.Context, row, col int) layout.Dimensions
 
-	rowIdx int //左键的索引
+	rowIdx int // 左键的索引
 	colIdx int
 
 	Tabler
@@ -123,7 +123,8 @@ type Table struct {
 func NewTable(table Tabler) *Table {
 	return &Table{
 		GridState: component.GridState{},
-		headerBorder: &widget.Border{Color: color.NRGBA{R: 76, G: 76, B: 76, A: 255},
+		headerBorder: &widget.Border{
+			Color: color.NRGBA{R: 76, G: 76, B: 76, A: 255},
 			//Color: color.NRGBA{
 			//	R: 32,
 			//	G: 32,
@@ -186,7 +187,7 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 	if len(m.cells) != m.Size()*m.GetColumnCount() {
 		m.cells = make([]*widget.Clickable, m.Size()*m.GetColumnCount())
 	}
-	mylog.CheckNil(m.menu) //todo，把增删改查，节点转换，复制行列设置为默认菜单，并添加每个菜单子项目的回调字段
+	mylog.CheckNil(m.menu) // todo，把增删改查，节点转换，复制行列设置为默认菜单，并添加每个菜单子项目的回调字段
 	if len(m.cellsAreas) != m.Size()*m.GetColumnCount() {
 		m.cellsAreas = make([]*component.ContextArea, m.Size()*m.GetColumnCount())
 	}
@@ -218,12 +219,12 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 				}
 				return gtx.Dp(unit.Dp(width))
 			default:
-				return gtx.Dp(unit.Dp(27)) //行高
+				return gtx.Dp(unit.Dp(27)) // 行高
 			}
 		},
 		/*表头绘制 headingFunc DefaultDraw.ListElement*/ func(gtx C, col int) D {
-			DrawColumnDivider(gtx, col)                                                       //为表头绘制列分隔条
-			paint.FillShape(gtx.Ops, ColorHeaderFg, clip.Rect{Max: gtx.Constraints.Max}.Op()) //表头背景色
+			DrawColumnDivider(gtx, col)                                                       // 为表头绘制列分隔条
+			paint.FillShape(gtx.Ops, ColorHeaderFg, clip.Rect{Max: gtx.Constraints.Max}.Op()) // 表头背景色
 
 			//return component.Resize{}.Layout(gtx, func(gtx DefaultDraw.Context) DefaultDraw.Dimensions {
 			//
@@ -236,35 +237,33 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 					click = new(widget.Clickable)
 					m.headers[col] = click
 				}
-				//component.Rect{}.Layout(gtx)
+				// component.Rect{}.Layout(gtx)
 				if click.Clicked(gtx) {
 					m.HeaderCellIndex = col
 					if column.cb != nil {
-						column.cb(col) //todo 表头每列双击弹出对应每列位置的搜索框，单机排序，右击复制列到剪切板
+						column.cb(col) // todo 表头每列双击弹出对应每列位置的搜索框，单机排序，右击复制列到剪切板
 					}
 				}
 
-				//button := material.Button(th.Theme, RowSelectedCallback, m.GetTitle(col))
-				//button.Background = color.NRGBA(colornames.Grey500)
-				//return DefaultDraw.Center.Layout(gtx, button.Layout)
+				// button := material.Button(th.Theme, RowSelectedCallback, m.GetTitle(col))
+				// button.Background = color.NRGBA(colornames.Grey500)
+				// return DefaultDraw.Center.Layout(gtx, button.Layout)
 				return material.Clickable(gtx, click, func(gtx C) D {
 					return layout.UniformInset(0).Layout(gtx, func(gtx C) D {
-						DrawColumnDivider(gtx, col) //为每列绘制列分隔条
+						DrawColumnDivider(gtx, col) // 为每列绘制列分隔条
 						body1 := material.Body1(th.Theme, m.GetTitle(col))
 						body1.MaxLines = 1
 						body1.Truncator = "..."
 						body1.Color = th.Color.DefaultTextWhiteColor
 						return layout.Center.Layout(gtx, body1.Layout)
-
 					})
 				})
-
 			})
 		},
 		/*渲染body单元格 cellFunc outlay.Cell*/ func(gtx C, row, col int) D {
-			DrawCrosswalk(gtx, row)         //绘制斑马线
-			DrawColumnDivider(gtx, col)     //为每列绘制列分隔条
-			if m.creatCellCallback != nil { //todo remove ? 看看是的呀着色会不会用到
+			DrawCrosswalk(gtx, row)         // 绘制斑马线
+			DrawColumnDivider(gtx, col)     // 为每列绘制列分隔条
+			if m.creatCellCallback != nil { // todo remove ? 看看是的呀着色会不会用到
 				return m.creatCellCallback(gtx, row, col)
 			}
 			if m.lastRowIdx != row {
@@ -296,7 +295,7 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 						m.SelectionChangedCallback(gtx, m.rowIdx, m.colIdx)
 						gtx.Execute(op.InvalidateCmd{})
 					}
-				case 2: //todo https://github.com/chapar-rest/chapar/issues/17
+				case 2: // todo https://github.com/chapar-rest/chapar/issues/17
 					if m.DoubleClickCallback != nil {
 						m.DoubleClickCallback(gtx, m.rowIdx, m.colIdx)
 						gtx.Execute(op.InvalidateCmd{})
@@ -313,7 +312,7 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 					}
 					m.cellsAreas[idx] = cellMenu
 				}
-				m.menu.Clicked(gtx) //callback
+				m.menu.Clicked(gtx) // callback
 
 				return layout.Stack{}.Layout(gtx,
 					layout.Stacked(func(gtx C) D {
@@ -325,7 +324,7 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 									cellText.Color = color.NRGBA{R: 0, G: 0, B: 255, A: 255}
 								} else {
 									cellText.Color = color.NRGBA{R: 0, G: 0, B: 180, A: 255}
-									HighlightRow(gtx) //IsRowSelected
+									HighlightRow(gtx) // IsRowSelected
 								}
 							}
 							cellText.MaxLines = 1
@@ -349,19 +348,19 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 }
 
 func (m *Table) drawContextArea(gtx C) D {
-	return layout.Center.Layout(gtx, func(gtx C) D { //重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
-		//mylog.Struct(gtx.Constraints)
+	return layout.Center.Layout(gtx, func(gtx C) D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
+		// mylog.Struct(gtx.Constraints)
 		menuStyle := component.Menu(th.Theme, &m.menu.MenuState)
 		menuStyle.SurfaceStyle = component.SurfaceStyle{
 			Theme: th.Theme,
 			ShadowStyle: component.ShadowStyle{
-				CornerRadius: 18, //弹出菜单的椭圆角度
+				CornerRadius: 18, // 弹出菜单的椭圆角度
 				Elevation:    0,
-				//AmbientColor:  color.NRGBA(colornames.Blue400),
-				//PenumbraColor: color.NRGBA(colornames.Blue400),
-				//UmbraColor:    color.NRGBA(colornames.Blue400),
+				// AmbientColor:  color.NRGBA(colornames.Blue400),
+				// PenumbraColor: color.NRGBA(colornames.Blue400),
+				// UmbraColor:    color.NRGBA(colornames.Blue400),
 			},
-			Fill: color.NRGBA{R: 50, G: 50, B: 50, A: 255}, //弹出菜单的背景色
+			Fill: color.NRGBA{R: 50, G: 50, B: 50, A: 255}, // 弹出菜单的背景色
 		}
 		return menuStyle.Layout(gtx)
 	})
@@ -377,11 +376,11 @@ func (m *Table) drawContextArea(gtx C) D {
 //	}
 //}
 
-func HighlightRow(gtx C) { //高亮选中行为蓝色
+func HighlightRow(gtx C) { // 高亮选中行为蓝色
 	paint.FillShape(gtx.Ops, color.NRGBA(colornames.Blue400), clip.Rect{Max: gtx.Constraints.Max}.Op())
 }
 
-func DrawCrosswalk(gtx C, row int) { //绘制斑马线
+func DrawCrosswalk(gtx C, row int) { // 绘制斑马线
 	if row%2 == 0 {
 		paint.FillShape(gtx.Ops, color.NRGBA{
 			R: 42,

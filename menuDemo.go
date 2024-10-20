@@ -2,20 +2,21 @@ package ux
 
 import (
 	"fmt"
+	"image/color"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"gioui.org/x/component"
-	"image/color"
 )
 
 type MenuObj struct {
 	balanceButton, accountButton, cartButton widget.Clickable
 	menuState                                component.MenuState
 	menuInit                                 bool
-	menuDemoList widget.List
-	contextAreas []component.ContextArea
+	menuDemoList                             widget.List
+	contextAreas                             []component.ContextArea
 	widget.List
 }
 
@@ -25,7 +26,7 @@ func NewMenuObj() *MenuObj {
 }
 
 func (p *MenuObj) Layout(gtx layout.Context) layout.Dimensions {
-	//paint.Fill(gtx.Ops, color.NRGBA(Grey800))
+	// paint.Fill(gtx.Ops, color.NRGBA(Grey800))
 	if !p.menuInit {
 		p.menuState = component.MenuState{
 			Options: []func(gtx C) D{
@@ -86,19 +87,19 @@ func (p *MenuObj) Layout(gtx layout.Context) layout.Dimensions {
 }
 
 func (p *MenuObj) drawContextArea(gtx C, th *material.Theme) D {
-	return layout.Center.Layout(gtx, func(gtx C) D { //重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
-		//mylog.Struct(gtx.Constraints)
+	return layout.Center.Layout(gtx, func(gtx C) D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
+		// mylog.Struct(gtx.Constraints)
 		menuStyle := component.Menu(th, &p.menuState)
 		menuStyle.SurfaceStyle = component.SurfaceStyle{
 			Theme: th,
 			ShadowStyle: component.ShadowStyle{
-				CornerRadius: 18, //弹出菜单的椭圆角度
+				CornerRadius: 18, // 弹出菜单的椭圆角度
 				Elevation:    0,
-				//AmbientColor:  color.NRGBA(Blue400),
-				//PenumbraColor: color.NRGBA(Blue400),
-				//UmbraColor:    color.NRGBA(Blue400),
+				// AmbientColor:  color.NRGBA(Blue400),
+				// PenumbraColor: color.NRGBA(Blue400),
+				// UmbraColor:    color.NRGBA(Blue400),
 			},
-			Fill: color.NRGBA{R: 50, G: 50, B: 50, A: 255}, //弹出菜单的背景色
+			Fill: color.NRGBA{R: 50, G: 50, B: 50, A: 255}, // 弹出菜单的背景色
 		}
 		return menuStyle.Layout(gtx)
 	})

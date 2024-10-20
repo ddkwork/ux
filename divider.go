@@ -30,7 +30,7 @@ func (d *DividerStyle) Layout(gtx layout.Context) layout.Dimensions {
 	return d.Inset.Layout(gtx, func(gtx C) D {
 		weight := gtx.Dp(d.Thickness)
 
-		var maxDim = image.Point{}
+		maxDim := image.Point{}
 		if d.Axis == layout.Horizontal {
 			maxDim = image.Pt(gtx.Constraints.Min.X, weight)
 		} else {

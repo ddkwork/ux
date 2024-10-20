@@ -1,6 +1,10 @@
 package authlayout
 
 import (
+	"image"
+	"image/color"
+	"time"
+
 	"gioui.org/font"
 	"gioui.org/io/event"
 	"gioui.org/io/pointer"
@@ -12,9 +16,6 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"github.com/inkeliz/giosvg"
-	"image"
-	"image/color"
-	"time"
 )
 
 type Format int
@@ -59,6 +60,7 @@ func toLabelColor(gtx layout.Context, c color.NRGBA) op.CallOp {
 	paint.ColorOp{Color: c}.Add(gtx.Ops)
 	return r.Stop()
 }
+
 func (b ButtonStyle) LayoutText_(gtx layout.Context, icon *giosvg.Icon, pointer *Pointer, text string, logoSize int, logoPadding int) layout.Dimensions {
 	if pointer.entered {
 		b.TextSize += 0.5
@@ -72,8 +74,8 @@ func (b ButtonStyle) LayoutText_(gtx layout.Context, icon *giosvg.Icon, pointer 
 	gtx.Constraints.Min.X = fixedSize
 	gtx.Constraints.Max.Y = fixedSize
 	gtx.Constraints.Min.Y = fixedSize
-	//mylog.Struct(gtx.Constraints.Min)
-	//mylog.Struct(gtx.Constraints.Max)
+	// mylog.Struct(gtx.Constraints.Min)
+	// mylog.Struct(gtx.Constraints.Max)
 
 	// 使用统一的内边距
 	inset := layout.UniformInset(1)
@@ -164,9 +166,9 @@ func (b ButtonStyle) LayoutText_(gtx layout.Context, icon *giosvg.Icon, pointer 
 }
 
 func (b ButtonStyle) LayoutText_bak(gtx layout.Context, icon *giosvg.Icon, pointer *Pointer, text string, logoSize int, logoPadding int) layout.Dimensions {
-	//svg  ---> resize to logoSize
-	//text ---> layout with inset
-	//svg and text ---> layout with inset
+	// svg  ---> resize to logoSize
+	// text ---> layout with inset
+	// svg and text ---> layout with inset
 
 	if pointer.entered {
 		b.TextSize++

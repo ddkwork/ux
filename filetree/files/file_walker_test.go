@@ -59,7 +59,7 @@ func TestWalkFolderOnSimpleDir(t *testing.T) {
 			{"d", 0, []fakeFile{
 				{"e", 50, []fakeFile{}},
 				{"f", 30, []fakeFile{}},
-				{"g", 70, []fakeFile{ //thisfolder should get ignored
+				{"g", 70, []fakeFile{ // thisfolder should get ignored
 					{"h", 10, []fakeFile{}},
 					{"i", 20, []fakeFile{}},
 				}},

@@ -4,6 +4,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
+	"github.com/ddkwork/golibrary/mylog"
 	"github.com/gen2brain/dlgs"
 	"github.com/x-module/gioui-plugins/resource"
 )
@@ -64,11 +65,8 @@ func (b *FileSelector) action(gtx layout.Context) {
 			b.changed = true
 			return
 		} else {
-			file, _, err := dlgs.File(b.windowTitle, b.filter, false)
-			if err != nil {
-				b.errLog(err)
-				return
-			}
+			file, _ := mylog.Check3(dlgs.File(b.windowTitle, b.filter, false))
+
 			if file == "" {
 				return
 			}

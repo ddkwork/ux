@@ -68,7 +68,7 @@ func (p *PatternEditor) Layout(gtx layout.Context) layout.Dimensions {
 		Shaper:    th.Theme.Shaper,
 		TextColor: th.Theme.Fg,
 		Bg:        th.Theme.Bg,
-		//SelectionColor:  th.Theme.TextSelectionColor,
+		// SelectionColor:  th.Theme.TextSelectionColor,
 		TextSize:        unit.Sp(14),
 		LineHeightScale: 1,
 	}

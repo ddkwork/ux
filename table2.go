@@ -2,6 +2,9 @@ package ux
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+
 	"gioui.org/gesture"
 	"gioui.org/io/key"
 	"gioui.org/io/pointer"
@@ -14,8 +17,6 @@ import (
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/ddkwork/golibrary/mylog"
-	"image"
-	"image/color"
 )
 
 type (
@@ -28,7 +29,7 @@ type (
 		SortedBy           int
 		drags              []tableDrag
 		headers            []*widget.Clickable
-		cells              []*widget.Clickable //单元格单击事件
+		cells              []*widget.Clickable // 单元格单击事件
 		clickedColumnIndex int
 		manualWidthSet     []bool // 新增状态标志数组，记录列是否被手动调整
 
@@ -76,9 +77,11 @@ func NewTable2(columns []Column2) *Table2 {
 	}
 }
 
-type SortOrder uint8
-type CellFn func(gtx layout.Context, row, col int) layout.Dimensions
-type RowFn func(gtx layout.Context, row int) layout.Dimensions
+type (
+	SortOrder uint8
+	CellFn    func(gtx layout.Context, row, col int) layout.Dimensions
+	RowFn     func(gtx layout.Context, row int) layout.Dimensions
+)
 
 const (
 	SortNone SortOrder = iota
@@ -108,9 +111,9 @@ func (t *Table2) SetColumns(gtx layout.Context, cols []Column2, cellData [][]str
 		for _, data := range cellData {
 			if i < len(data) {
 				currentWidth := CalculateTextWidth(gtx, data[i])
-				//currentWidth += float32(gtx.Dp(material.Scrollbar(th, nil).Width())) + float32(len(cols)*gtx.Dp(DefaultDividerWidth))
+				// currentWidth += float32(gtx.Dp(material.Scrollbar(th, nil).Width())) + float32(len(cols)*gtx.Dp(DefaultDividerWidth))
 				if currentWidth > maxWidth {
-					maxWidth = currentWidth //更新最大宽度
+					maxWidth = currentWidth // 更新最大宽度
 				}
 			}
 		}
@@ -137,7 +140,6 @@ func (t *Table2) Update(gtx layout.Context) {
 			switch e.Buttons {
 			case pointer.ButtonPrimary:
 				if e.Kind == pointer.Press {
-
 				}
 			case pointer.ButtonSecondary:
 
@@ -429,11 +431,11 @@ func (row *TableRowStyle) Layout(gtx layout.Context, w RowFn) layout.Dimensions 
 				}
 
 				// Draw the vertical bar
-				//stack3 := clip.Rect{Max: image.Pt(dividerWidth, tallestHeight)}.Push(gtx.Ops)
-				//Fill( gtx.Ops, win.Theme.Palette.Table2.Divider) // 如果有需要，在此处可绘制分割线
-				//stack3.Pop()
+				// stack3 := clip.Rect{Max: image.Pt(dividerWidth, tallestHeight)}.Push(gtx.Ops)
+				// Fill( gtx.Ops, win.Theme.Palette.Table2.Divider) // 如果有需要，在此处可绘制分割线
+				// stack3.Pop()
 			}
-			//为表头和每列绘制列分隔条
+			// 为表头和每列绘制列分隔条
 			stack3 := clip.Rect{Max: image.Pt(dividerWidth, tallestHeight)}.Push(gtx.Ops) // 绘制分隔条的矩形区域
 			paint.Fill(gtx.Ops, DividerFg)                                                // 填充分隔条的颜色
 			stack3.Pop()                                                                  // 弹出分隔条的绘制堆栈
@@ -467,14 +469,14 @@ func (row *TableHeaderRowStyle) Layout(gtx layout.Context) layout.Dimensions {
 			mylog.Trace("header clicked", col)
 			row.Table.clickedColumnIndex = col
 		}
-		gtx.Constraints.Min.Y = gtx.Dp(20)                                                //限制行高
-		paint.FillShape(gtx.Ops, ColorHeaderFg, clip.Rect{Max: gtx.Constraints.Max}.Op()) //表头背景色
+		gtx.Constraints.Min.Y = gtx.Dp(20)                                                // 限制行高
+		paint.FillShape(gtx.Ops, ColorHeaderFg, clip.Rect{Max: gtx.Constraints.Max}.Op()) // 表头背景色
 		return layout.Inset{
-			//Top: DefaultHeaderPadding,
-			//Top:    5,
-			//Bottom: 5,
-			//Left:   3,
-			//Right:  0,
+			// Top: DefaultHeaderPadding,
+			// Top:    5,
+			// Bottom: 5,
+			// Left:   3,
+			// Right:  0,
 		}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			var s string
 			// OPT(dh): avoid allocations for string building by precomputing and storing the column clickables.
@@ -499,7 +501,7 @@ func (row *TableHeaderRowStyle) Layout(gtx layout.Context) layout.Dimensions {
 					Left:   0,
 					Right:  0,
 				}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					gtx.Constraints.Min.Y = gtx.Dp(20) //限制行高
+					gtx.Constraints.Min.Y = gtx.Dp(20) // 限制行高
 					body1 := material.Body1(th.Theme, s)
 					body1.MaxLines = 1
 					return body1.Layout(gtx)
@@ -518,7 +520,6 @@ func TableSimpleRow(tbl *Table2) TableSimpleRowStyle {
 }
 
 func (row TableSimpleRowStyle) Layout(gtx layout.Context, rowIdx int, cellFn CellFn) layout.Dimensions {
-
 	c := color.NRGBA{
 		R: 42,
 		G: 42,
@@ -548,16 +549,16 @@ func (row TableSimpleRowStyle) Layout(gtx layout.Context, rowIdx int, cellFn Cel
 	}
 	if row.Table.cells[rowIdx].Hovered() {
 		c = th.ContrastFg
-		//ux.HighlightRow(gtx)
+		// ux.HighlightRow(gtx)
 	}
 	hover := row.Table.cells[rowIdx]
 	update, b := hover.Update(gtx)
 	if b {
 		if update.NumClicks == 1 {
-			//c = th.ContrastBg
+			// c = th.ContrastBg
 			c = ColorPink
-			//ux.HighlightRow(gtx)
-			//paint.FillShape(gtx.Ops, ColorPink, clip.Rect{Max: gtx.Constraints.Max}.Op())
+			// ux.HighlightRow(gtx)
+			// paint.FillShape(gtx.Ops, ColorPink, clip.Rect{Max: gtx.Constraints.Max}.Op())
 		}
 	}
 	return Background{Color: c}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -572,14 +573,13 @@ func (row TableSimpleRowStyle) Layout(gtx layout.Context, rowIdx int, cellFn Cel
 						Left:   5,
 						Right:  0,
 					}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						//gtx.Constraints.Min.Y = gtx.Dp(27) //限制行高
+						// gtx.Constraints.Min.Y = gtx.Dp(27) //限制行高
 						return cellFn(gtx, rowIdx, col)
 					})
 				})
 			})
 		})
 	})
-
 }
 
 func SimpleTable(gtx layout.Context, tbl *Table2, rows int, cellFn CellFn) layout.Dimensions {

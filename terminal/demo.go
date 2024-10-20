@@ -2,12 +2,13 @@ package terminal
 
 import (
 	"fmt"
-	"github.com/ddkwork/golibrary/mylog"
-	"github.com/lmittmann/tint"
 	"io"
 	"log/slog"
 	"math/rand"
 	"os"
+
+	"github.com/ddkwork/golibrary/mylog"
+	"github.com/lmittmann/tint"
 )
 
 func Demo() (*Screen, *ConsoleSettings) {

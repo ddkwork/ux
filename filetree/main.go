@@ -2,15 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/ddkwork/ux"
-	"github.com/ddkwork/ux/filetree/files"
-	"github.com/ddkwork/ux/filetree/guiutils"
-	"github.com/ddkwork/ux/filetree/ignore"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime"
+
+	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/ux"
+	"github.com/ddkwork/ux/filetree/files"
+	"github.com/ddkwork/ux/filetree/guiutils"
+	"github.com/ddkwork/ux/filetree/ignore"
 
 	"gioui.org/app"
 	"gioui.org/layout"
@@ -23,14 +25,11 @@ import (
 var filesFromDirsBeingLoaded = make(chan string, 10) // To send files being scanned inside a directory that has been clicked to be expanded
 
 func calculateDirSize(basePath string) (int64, int64, error) {
-
 	var size int64 = 0
 	var numChildren int64 = 0
-
-	err := filepath.WalkDir(basePath, func(path string, dire os.DirEntry, err error) error {
-
+	mylog.Check(filepath.WalkDir(basePath, func(path string, dire os.DirEntry, err error) error {
 		// Get the size if not a directory
-		fileinfo, err := os.Stat(path)
+		fileinfo := mylog.Check2(os.Stat(path))
 		if err == nil {
 			size += fileinfo.Size()
 			numChildren++
@@ -38,7 +37,7 @@ func calculateDirSize(basePath string) (int64, int64, error) {
 
 		// Continue even if you cannot read one specific file
 		return nil
-	})
+	}))
 
 	numChildren--
 
@@ -46,9 +45,8 @@ func calculateDirSize(basePath string) (int64, int64, error) {
 }
 
 func DeleteFiles(selectedFiles []*files.File) (int64, int64) {
-
 	var errSlice []error
-	var err error
+
 	var numFiles, sizeLiberated int64
 
 	// Loop over selected files and delete them
@@ -60,10 +58,8 @@ func DeleteFiles(selectedFiles []*files.File) (int64, int64) {
 		}
 		sizeLiberated += file.Size
 		log.Print("WARNING: If you are testing, you may want to comment the following lines")
-		err = os.RemoveAll(file.FullPath)
-		if err != nil {
-			errSlice = append(errSlice, err)
-		}
+		mylog.Check(os.RemoveAll(file.FullPath))
+
 	}
 
 	for _, er1 := range errSlice {
@@ -102,10 +98,8 @@ func getWindowsRootPath() string {
 func getIOSRootPath() string {
 	// In iOS, the application's root path is restricted, but you can use other directories like the Documents directory.
 	// This is just an example of how you could handle it, but it's not the actual root path.
-	documentsDir, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
+	documentsDir := mylog.Check2(os.UserHomeDir())
+
 	return filepath.Join(documentsDir, "Documents")
 }
 
@@ -153,8 +147,7 @@ func printTree(file *files.File, indent string) {
 // }
 
 func copyFilesInClipboard(selfiles []*files.File) {
-
-	var result = ""
+	result := ""
 
 	for _, file := range selfiles {
 		result += "\"" + file.FullPath + "\" "
@@ -164,8 +157,7 @@ func copyFilesInClipboard(selfiles []*files.File) {
 }
 
 func Run(w *app.Window) error {
-
-	var applogic = guiutils.NewAppLogic()
+	applogic := guiutils.NewAppLogic()
 
 	// ops are the operations from the UI
 	var ops op.Ops
@@ -177,30 +169,29 @@ func Run(w *app.Window) error {
 	var copy2clipboard widget.Clickable
 	var nextButton widget.Clickable
 	var initialPathInput widget.Editor
-	var fileList = widget.List{
+	fileList := widget.List{
 		List: layout.List{
 			Axis: layout.Vertical,
 		},
 	}
-	var fileDeleteList = widget.List{
+	fileDeleteList := widget.List{
 		List: layout.List{
 			Axis: layout.Vertical,
 		},
 	}
 
-	var scanFilesLoadingChan = make(chan int) // Used to transmit how many files have been read
+	scanFilesLoadingChan := make(chan int) // Used to transmit how many files have been read
 	var numFilesDeleted int64 = 0
 	var sizeLiberated int64 = 0
 
 	var initialpath string
 
-	var totalFilesReadShow = 0 // Used to maintain a count of the files read
+	totalFilesReadShow := 0
+	mylog. // Used to maintain a count of the files read
+		Check(
 
-	// Initialize clipboard so you can set the clipboard
-	err := clipboard.Init()
-	if err != nil {
-		panic(err)
-	}
+			// Initialize clipboard so you can set the clipboard
+			clipboard.Init())
 
 	// Listen for events in the window
 	for {
@@ -230,21 +221,12 @@ func Run(w *app.Window) error {
 				}
 
 				// Test the introduced path, if not good, use the root path
-				_, err := os.ReadDir(initialpath)
-				if err != nil {
-					initialPathInput.SetText("The path: \"%s\" does not exists or cannot be read; Introduce another path or leave blank for root")
-				} else {
-					// If there is no problem, continue
-					applogic.Appstate = guiutils.LoadingFilesS
+				_ := mylog.Check2(os.ReadDir(initialpath))
 
-					go applogic.ReportProgress(w, &totalFilesReadShow, scanFilesLoadingChan)
-					go func() {
-						applogic.Files = files.WalkFolder(initialpath, ioutil.ReadDir, ignore.IgnoreBasedOnIgnoreFile(ignore.ReadIgnoreFile()), scanFilesLoadingChan)
-						// Add first level of files to be shown
-						applogic.FillFirstLayer2Show()
-					}()
-					applogic.ShowLoadingPage(gtx, totalFilesReadShow)
-				}
+				// If there is no problem, continue
+
+				// Add first level of files to be shown
+
 			}
 
 			// Go to confirm deleting the files
@@ -298,9 +280,7 @@ func Run(w *app.Window) error {
 }
 
 func main() {
-
 	go func() {
-
 		// create window
 		w := new(app.Window)
 		w.Option(
@@ -309,7 +289,7 @@ func main() {
 		)
 
 		// Run main loop
-		if err := Run(w); err != nil {
+		if mylog.Check(Run(w)); err != nil {
 			log.Fatal(err)
 		}
 		os.Exit(0)

@@ -1,9 +1,10 @@
 package animationButton
 
 import (
-	"github.com/ddkwork/ux/animation"
 	"image"
 	"image/color"
+
+	"github.com/ddkwork/ux/animation"
 
 	"gioui.org/font"
 	"gioui.org/io/pointer"
@@ -124,7 +125,6 @@ func NewButtonAnimationScale(v float32) ButtonAnimation {
 }
 
 func NewButton(style ButtonStyle, th *material.Theme, text string, callback func()) *Button {
-
 	return &Button{
 		Text:             text,
 		Style:            style,
@@ -261,7 +261,7 @@ func (btn *Button) Layout(gtx layout.Context) layout.Dimensions {
 						animationClick.Reset().Start()
 					}
 				}
-			} //else {
+			} // else {
 			//animationLeave.Reset()
 			//animationEnter.Reset()
 			//animationClick.Reset()

@@ -3,12 +3,14 @@ package guiutils
 import (
 	"embed"
 	"fmt"
-	"gioui.org/text"
-	"github.com/ddkwork/ux"
-	"github.com/ddkwork/ux/filetree/files"
 	"image"
 	"path/filepath"
 	"time"
+
+	"gioui.org/text"
+	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/ux"
+	"github.com/ddkwork/ux/filetree/files"
 
 	"gioui.org/app"
 	"gioui.org/layout"
@@ -39,12 +41,13 @@ type AppLogic struct {
 	Appstate   State
 }
 
-type C = layout.Context
-type D = layout.Dimensions
+type (
+	C = layout.Context
+	D = layout.Dimensions
+)
 
 // NewAppLogic Create an instance of AppLogic
 func NewAppLogic() *AppLogic {
-
 	return &AppLogic{
 		theme:    ux.ThemeDefault().Theme,
 		Appstate: HomeS,
@@ -55,7 +58,6 @@ func NewAppLogic() *AppLogic {
 //	th.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
 
 func (a *AppLogic) ReportProgress(win *app.Window, total *int, progress <-chan int) {
-
 	// Controls how frequently to update the application
 	const interval = 250 * time.Millisecond
 	ticker := time.NewTicker(interval)
@@ -79,21 +81,15 @@ func (a *AppLogic) ReportProgress(win *app.Window, total *int, progress <-chan i
 }
 
 func showGoCleasyLogo(gtx C, margins layout.Inset) layout.FlexChild {
-
 	// Show logo
 	return layout.Flexed(1, func(gtx C) D {
 		// Open the file using the file path
-		file, err := imageFile.Open("images/gocleasy-logo.png")
-		if err != nil {
-			fmt.Println("Error:", err)
-		}
+		file := mylog.Check2(imageFile.Open("images/gocleasy-logo.png"))
+
 		defer file.Close()
 
 		// Pass the file to the Decode function
-		img, format, err := image.Decode(file)
-		if err != nil {
-			fmt.Printf("Format: %s; Error decoding image: %s\n", format, err)
-		}
+		img, format := mylog.Check3(image.Decode(file))
 
 		return margins.Layout(gtx, func(gtx C) D {
 			return widget.Image{
@@ -105,7 +101,6 @@ func showGoCleasyLogo(gtx C, margins layout.Inset) layout.FlexChild {
 }
 
 func (a *AppLogic) HomePage(gtx C, scanbutton *widget.Clickable, initialpathinput *widget.Editor, numfilesdeleted int64, sizeliberated int64) D {
-
 	margins := layout.Inset{
 		Top:    unit.Dp(25),
 		Bottom: unit.Dp(25),
@@ -168,7 +163,6 @@ func createTextNLoading(gtx C, th *material.Theme, text string) layout.FlexChild
 }
 
 func (a *AppLogic) FillFirstLayer2Show() {
-
 	for _, file := range a.Files.Files {
 		a.Files2Show = append(a.Files2Show, &files.FileShow{
 			File:         file,
@@ -179,7 +173,6 @@ func (a *AppLogic) FillFirstLayer2Show() {
 }
 
 func (a *AppLogic) ShowLoadingPage(gtx C, actualFilesRead int) D {
-
 	margins := layout.Inset{
 		Top:    unit.Dp(25),
 		Bottom: unit.Dp(25),
@@ -224,7 +217,7 @@ func selectFilesTableRow(th *material.Theme, file *files.FileShow, numchildren s
 		}),
 
 		// Ocupy the space in between buttons and text (checkbox and filenames, size and numfiles)
-		//layout.Flexed(1, layout.Spacer{}.Layout),
+		// layout.Flexed(1, layout.Spacer{}.Layout),
 		// Num of files inside the directory (0 if it is a file)
 		layout.Rigid(func(gtx C) D {
 			ux.DrawColumnDivider(gtx, 2)
@@ -239,7 +232,7 @@ func selectFilesTableRow(th *material.Theme, file *files.FileShow, numchildren s
 				return body1.Layout(gtx)
 			})
 		}),
-		//layout.Rigid(layout.Spacer{Width: unit.Dp(25)}.Layout),
+		// layout.Rigid(layout.Spacer{Width: unit.Dp(25)}.Layout),
 		// Size of the file
 		layout.Rigid(func(gtx C) D {
 			ux.DrawColumnDivider(gtx, 3)
@@ -260,10 +253,10 @@ func selectFilesTableRow(th *material.Theme, file *files.FileShow, numchildren s
 func drawTableHeader(gtx C, th *material.Theme) D {
 	return layout.Flex{
 		Axis: layout.Horizontal,
-		//Alignment: layout.Middle,
-		//Spacing:   layout.SpaceStart,
+		// Alignment: layout.Middle,
+		// Spacing:   layout.SpaceStart,
 	}.Layout(gtx,
-		//layout.Rigid(layout.Spacer{Width: unit.Dp(75)}.Layout),
+		// layout.Rigid(layout.Spacer{Width: unit.Dp(75)}.Layout),
 		// Name of the file
 		layout.Rigid(func(gtx C) D {
 			ux.DrawColumnDivider(gtx, 0)
@@ -302,7 +295,6 @@ func drawTableHeader(gtx C, th *material.Theme) D {
 }
 
 func deleteFilesTableRow(gtx C, th *material.Theme, field1 string, field2 string, field3 string) D {
-
 	return layout.Flex{
 		Axis:      layout.Horizontal,
 		Alignment: layout.Middle,
@@ -327,7 +319,7 @@ func deleteFilesTableRow(gtx C, th *material.Theme, field1 string, field2 string
 }
 
 func (a *AppLogic) DrawTreeTable(gtx C, nextbutton *widget.Clickable, filelist *widget.List) D {
-	var widgets = []layout.FlexChild{
+	widgets := []layout.FlexChild{
 		layout.Rigid(func(gtx C) D {
 			return drawTableHeader(gtx, a.theme)
 		}),
@@ -346,7 +338,7 @@ func (a *AppLogic) DrawTreeTable(gtx C, nextbutton *widget.Clickable, filelist *
 				Left:   unit.Dp(35),
 			}
 			return margins.Layout(gtx, func(gtx C) D {
-				return material.Button(a.theme, nextbutton, "Next").Layout(gtx) //todo bug
+				return material.Button(a.theme, nextbutton, "Next").Layout(gtx) // todo bug
 			})
 		}))
 
@@ -359,7 +351,6 @@ func (a *AppLogic) DrawTreeTable(gtx C, nextbutton *widget.Clickable, filelist *
 
 // Checks if ref is inside slf
 func isFileSelected(ref *files.File, slf []*files.File) bool {
-
 	for _, file := range slf {
 		if file == ref {
 			return true
@@ -372,8 +363,7 @@ func isFileSelected(ref *files.File, slf []*files.File) bool {
 // It loops from the actual position till the end of the slice or till a file with lower
 // level than the folder being closed
 func getNumFiles2NotShow(pos int, level int, sl []*files.FileShow) int {
-
-	var res = 0
+	res := 0
 
 	for ; pos < len(sl); pos++ {
 		file := sl[pos]
@@ -389,7 +379,6 @@ func getNumFiles2NotShow(pos int, level int, sl []*files.FileShow) int {
 // It loops over Files2Show and checks if there is any checkbox has been clicked to open a folder.
 // It also checks if any folder/file has been selected and adds it to Selfiles
 func (a *AppLogic) getFiles2Show(gtx C) {
-
 	var file *files.FileShow
 
 	index := 0
@@ -405,7 +394,6 @@ func (a *AppLogic) getFiles2Show(gtx C) {
 				// Create temporal slice to add to children (Files2Show)
 				var slice2add []*files.FileShow
 				for _, file2append := range file.File.Files {
-
 					// Check if the file was selected before to add it selected
 					slice2add = append(slice2add, &files.FileShow{
 						File:         file2append,
@@ -429,7 +417,6 @@ func (a *AppLogic) getFiles2Show(gtx C) {
 			if file.IsSelected.Value {
 				// Add file to Selfiles
 				a.Selfiles = append(a.Selfiles, file.File)
-
 			} else {
 				// Delete file from Selfiles
 				for id, delfile := range a.Selfiles {
@@ -437,7 +424,6 @@ func (a *AppLogic) getFiles2Show(gtx C) {
 						a.Selfiles = append(a.Selfiles[:id], a.Selfiles[id+1:]...)
 					}
 				}
-
 			}
 		}
 
@@ -448,9 +434,8 @@ func (a *AppLogic) getFiles2Show(gtx C) {
 
 // Contains the file Tree
 func (a *AppLogic) drawTreeTableRows(gtx C, filelist *widget.List, path string) D {
-
 	// empty the files to show
-	var numfiles = 0
+	numfiles := 0
 	a.getFiles2Show(gtx)
 	numfiles = len(a.Files2Show)
 
@@ -459,7 +444,7 @@ func (a *AppLogic) drawTreeTableRows(gtx C, filelist *widget.List, path string) 
 	}
 
 	return material.List(a.theme, filelist).Layout(gtx, len(a.Files2Show), func(gtx layout.Context, index int) layout.Dimensions {
-		var file = a.Files2Show[index]
+		file := a.Files2Show[index]
 		var widgets []layout.FlexChild
 
 		if file.File.IsDir {
@@ -467,7 +452,7 @@ func (a *AppLogic) drawTreeTableRows(gtx C, filelist *widget.List, path string) 
 		} else {
 			widgets = selectFilesTableRow(a.theme, file, "-", filepath.Join(path, file.File.Name), index)
 		}
-		return layout.Flex{ //row
+		return layout.Flex{ // row
 			Axis:      layout.Horizontal,
 			Spacing:   0,
 			Alignment: 0,
@@ -477,7 +462,6 @@ func (a *AppLogic) drawTreeTableRows(gtx C, filelist *widget.List, path string) 
 }
 
 func (a *AppLogic) ShowDeletingPage(gtx C, comebackbutton *widget.Clickable, copy2clipboard *widget.Clickable, deletebutton *widget.Clickable, filedeletelist *widget.List) D {
-
 	margins := layout.Inset{
 		Top:    unit.Dp(15),
 		Bottom: unit.Dp(15),
@@ -546,7 +530,7 @@ func (a *AppLogic) ShowDeletingPage(gtx C, comebackbutton *widget.Clickable, cop
 
 func (a *AppLogic) selectedFiles(gtx C, l *widget.List) D {
 	return l.List.Layout(gtx, len(a.Selfiles), func(gtx C, index int) D {
-		var f = a.Selfiles[index]
+		f := a.Selfiles[index]
 		var numChildren, fullPath string
 		if f.IsDir {
 			fullPath = fmt.Sprintf("%s/", f.FullPath)

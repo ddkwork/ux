@@ -2,10 +2,11 @@ package terminal
 
 import (
 	_ "embed"
-	"github.com/ddkwork/ux"
 	"image"
 	"image/color"
 	"strings"
+
+	"github.com/ddkwork/ux"
 
 	"gioui.org/io/event"
 	"gioui.org/io/pointer"
@@ -30,7 +31,7 @@ func Console(screen *Screen, settings *ConsoleSettings) layout.Widget {
 			evt, got := gtx.Source.Event(pointer.Filter{
 				Target: settings.scrollTag,
 				Kinds:  pointer.Scroll,
-				ScrollX: pointer.ScrollRange{ //todo test
+				ScrollX: pointer.ScrollRange{ // todo test
 					Min: -100,
 					Max: 100,
 				},

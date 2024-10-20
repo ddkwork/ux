@@ -2,6 +2,7 @@ package internal
 
 import (
 	_ "embed"
+
 	"gioui.org/font"
 	"gioui.org/font/opentype"
 	"gioui.org/text"

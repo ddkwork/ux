@@ -1,15 +1,17 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"gioui.org/app"
 	"gioui.org/font/gofont"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/text"
 	"gioui.org/widget/material"
+	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/ux"
-	"log"
-	"os"
 )
 
 type CustomView struct {
@@ -25,7 +27,7 @@ func (c *CustomView) Layout(gtx ux.Gtx) layout.Dimensions {
 func main() {
 	go func() {
 		w := new(app.Window)
-		if err := loop(w); err != nil {
+		if mylog.Check(loop(w)); err != nil {
 			log.Fatal(err)
 		}
 		os.Exit(0)
@@ -34,7 +36,7 @@ func main() {
 }
 
 func loop(w *app.Window) error {
-	//resizer := ux.Resize{}
+	// resizer := ux.Resize{}
 	cust1 := CustomView{Title: "Widget One Widget One Widget One Widget One Widget One Widget One Widget One Widget One"}
 	cust2 := CustomView{Title: "Widget Two Widget Two Widget Two Widget Two Widget Two Widget Two Widget Two Widget Two "}
 	cust3 := CustomView{Title: "Widget Three Widget Three Widget Three Widget Three Widget Three Widget Three Widget Three"}
@@ -58,9 +60,9 @@ func loop(w *app.Window) error {
 			gtx := app.NewContext(&ops, e)
 			ux.BackgroundDark(gtx)
 			resizer.Layout(gtx)
-			//resizer.Layout(gtx, cust2.Layout, nil)
-			//resizer.Layout(gtx, cust3.Layout, nil)
-			//resizer.Layout(gtx, cust4.Layout, nil)
+			// resizer.Layout(gtx, cust2.Layout, nil)
+			// resizer.Layout(gtx, cust3.Layout, nil)
+			// resizer.Layout(gtx, cust4.Layout, nil)
 			e.Frame(gtx.Ops)
 		}
 	}

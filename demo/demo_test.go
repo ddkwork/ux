@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/ddkwork/golibrary/stream"
 	"testing"
+
+	"github.com/ddkwork/golibrary/stream"
 )
 
 func TestName(t *testing.T) {
@@ -40,8 +41,8 @@ func TestName(t *testing.T) {
 			"themeView",
 			"settingsview",
 			"sliceview",
-			"xyzView", //3d游戏编程
-			"webView", //network_security_config D:\workspace\workspace\apk\androidbuild.go
+			"xyzView", // 3d游戏编程
+			"webView", // network_security_config D:\workspace\workspace\apk\androidbuild.go
 			"iconvgView",
 			"svgView",
 			"canvasView",

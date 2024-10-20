@@ -1,6 +1,9 @@
 package ux
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/io/event"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -9,8 +12,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"image"
-	"image/color"
 )
 
 // Split thx to github.com/vsariola/sointu
@@ -18,7 +19,7 @@ import (
 type Split struct {
 	// Ratio keeps the current DefaultDraw.
 	// 0 is center, -1 completely to the left, 1 completely to the right.
-	Ratio float32 //布局比例，0 表示居中，-1 表示完全靠左，1 表示完全靠右
+	Ratio float32 // 布局比例，0 表示居中，-1 表示完全靠左，1 表示完全靠右
 	// Bar is the maxIndentWidth for resizing the DefaultDraw
 	Bar unit.Dp
 	// Axis is the split direction: DefaultDraw.Horizontal splits the view in left

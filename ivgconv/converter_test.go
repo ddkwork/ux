@@ -2,17 +2,15 @@ package ivgconv
 
 import (
 	"bytes"
-	"github.com/ddkwork/ux/ivgconv/testdata"
-
 	"testing"
+
+	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/ux/ivgconv/testdata"
 )
 
 func TestFromFile(t *testing.T) {
 	// Encode the SVG file as IconVG.
-	ivgData, err := FromFile("testdata/close.svg")
-	if err != nil {
-		t.Fatal(err)
-	}
+	ivgData := mylog.Check2(FromFile("testdata/close.svg"))
 
 	// Check that the IconVG data matches the expected output.
 	if !bytes.Equal(ivgData, testdata.Close) {
@@ -20,10 +18,7 @@ func TestFromFile(t *testing.T) {
 	}
 
 	// Encode the SVG file as IconVG.
-	ivgData, err = FromFile("testdata/StarHalf.svg")
-	if err != nil {
-		t.Fatal(err)
-	}
+	ivgData = mylog.Check2(FromFile("testdata/StarHalf.svg"))
 
 	// Check that the IconVG data matches the expected output.
 	if !bytes.Equal(ivgData, testdata.StarHalf) {

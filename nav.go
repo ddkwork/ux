@@ -1,6 +1,9 @@
 package ux
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
@@ -8,8 +11,6 @@ import (
 	"gioui.org/widget/material"
 	"gioui.org/x/component"
 	"github.com/x-module/gioui-plugins/resource"
-	"image"
-	"image/color"
 )
 
 func Nav(gtx layout.Context) layout.Dimensions {

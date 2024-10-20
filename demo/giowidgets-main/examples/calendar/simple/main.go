@@ -1,6 +1,10 @@
 package main
 
 import (
+	"log"
+	"os"
+	"time"
+
 	"gioui.org/app"
 	"gioui.org/font/gofont"
 	"gioui.org/layout"
@@ -8,16 +12,14 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget/material"
+	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/ux"
-	"log"
-	"os"
-	"time"
 )
 
 func main() {
 	go func() {
 		w := new(app.Window)
-		if err := loop(w); err != nil {
+		if mylog.Check(loop(w)); err != nil {
 			log.Fatal(err)
 		}
 		os.Exit(0)

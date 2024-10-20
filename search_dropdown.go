@@ -1,6 +1,10 @@
 package ux
 
 import (
+	"image"
+	"image/color"
+	"strings"
+
 	"gioui.org/font"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -10,9 +14,6 @@ import (
 	"gioui.org/widget"
 	"gioui.org/x/component"
 	"github.com/x-module/gioui-plugins/resource"
-	"image"
-	"image/color"
-	"strings"
 )
 
 type SearchDropDown struct {
@@ -121,7 +122,7 @@ func NewSearchDropDown() *SearchDropDown {
 				Axis: layout.Vertical,
 			},
 		},
-		//borderWidth:  unit.Dp(1),
+		// borderWidth:  unit.Dp(1),
 		cornerRadius: unit.Dp(4),
 		width:        th.Size.DefaultElementWidth,
 		SearchInput:  NewInput("Search..."),
@@ -211,6 +212,7 @@ func (c *SearchDropDown) box1(gtx layout.Context, text string, maxWidth unit.Dp)
 		})
 	})
 }
+
 func (c *SearchDropDown) box(gtx layout.Context, text string, maxWidth unit.Dp) layout.Dimensions {
 	c.SearchInput.SetWidth(c.width).SetHasBorder(false)
 	return c.SearchInput.Layout(gtx)
@@ -236,7 +238,7 @@ func (c *SearchDropDown) SetMinWidth(minWidth unit.Dp) {
 
 // Layout the SearchDropDown.
 func (c *SearchDropDown) Layout(gtx layout.Context) layout.Dimensions {
-	//c.update(gtx)
+	// c.update(gtx)
 	c.isOpen = c.menuContextArea.Active()
 
 	for i, opt := range c.options {
@@ -273,7 +275,6 @@ func (c *SearchDropDown) Layout(gtx layout.Context) layout.Dimensions {
 			return box
 		}),
 		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-
 			return c.menuContextArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				offset := layout.Inset{
 					Top:  unit.Dp(float32(box.Size.Y)/gtx.Metric.PxPerDp + 1),

@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/ddkwork/golibrary/mylog"
 	"io"
 	"io/fs"
 	"os"
+
+	"github.com/ddkwork/golibrary/mylog"
 )
 
-//https://github.com/aleksandrzaykov88/learngo/tree/refs/heads/master/Coursera/tree
+// https://github.com/aleksandrzaykov88/learngo/tree/refs/heads/master/Coursera/tree
 
 // Leaf is a dir with or without children-cats.
 type Leaf struct {
@@ -36,10 +37,8 @@ func (l Leaf) Size() string {
 
 // getLeaves gets all leaves from tree.
 func getLeaves(path string, printFiles bool) []Leaf {
-	files, err := os.ReadDir(path)
-	if err != nil {
-		return nil
-	}
+	files := mylog.Check2(os.ReadDir(path))
+
 	var leaves []Leaf
 	for _, file := range files {
 		if file.Name() == ".git" {
@@ -89,8 +88,5 @@ func main() {
 	//path := os.Args[1]
 	printFiles := len(os.Args) == 3 && os.Args[2] == "-f"
 	printFiles = true
-	err := dirTree(out, ".", printFiles)
-	if err != nil {
-		panic(err.Error())
-	}
+	mylog.Check(dirTree(out, ".", printFiles))
 }

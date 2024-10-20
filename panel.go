@@ -2,6 +2,13 @@ package ux
 
 import (
 	"bytes"
+	"image"
+	"image/color"
+	"image/draw"
+	"image/png"
+	"os"
+	"path/filepath"
+
 	"gioui.org/app"
 	_ "gioui.org/app/permission/networkstate"
 	_ "gioui.org/app/permission/storage"
@@ -16,13 +23,6 @@ import (
 	"gioui.org/x/richtext"
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/ux/android_background_service"
-	"image"
-	"image/color"
-	"image/draw"
-	"image/png"
-	"log"
-	"os"
-	"path/filepath"
 )
 
 type Widget layout.Widget
@@ -31,7 +31,7 @@ var ZeroWidget = func(gtx layout.Context) layout.Dimensions {
 	return layout.Dimensions{}
 }
 
-type Panel[T Widget] struct { //使用泛型而不是接口，这样返回的每个控件结构体字段无需断言，并且有类型约束，是安全的
+type Panel[T Widget] struct { // 使用泛型而不是接口，这样返回的每个控件结构体字段无需断言，并且有类型约束，是安全的
 	layout.Flex
 	Data              T
 	children          []layout.FlexChild
@@ -49,6 +49,7 @@ func NewHPanel[T Widget](w *app.Window) *Panel[T] {
 	panel.Axis = layout.Horizontal
 	return panel
 }
+
 func NewPanel[T Widget](w *app.Window) *Panel[T] {
 	return &Panel[T]{
 		Flex: layout.Flex{
@@ -69,12 +70,13 @@ func (p *Panel[T]) AddChildCallback(childCallback func(gtx layout.Context) layou
 
 func (p *Panel[T]) AddChild(child ...Widget) {
 	if p.Data == nil {
-		p.Data = any(child[0]).(T) //todo test if child is T
+		p.Data = any(child[0]).(T) // todo test if child is T
 	}
 	for _, c := range child {
 		p.children = append(p.children, layout.Rigid(layout.Widget(c)))
 	}
 }
+
 func (p *Panel[T]) AddChildFlexed(weight float32, child Widget) {
 	if p.Data == nil {
 		p.Data = any(child).(T)
@@ -112,7 +114,7 @@ type AppBar struct {
 
 func InitAppBar[T Widget](panel *Panel[T], toolBars []*TipIconButton, speechTxt string) *AppBar {
 	search := NewInput("请输入搜索关键字...").SetIcon(IconSearch).SetRadius(16)
-	panel.AddChildFlexed(1, search.Layout) //todo 太多之后apk需要管理溢出
+	panel.AddChildFlexed(1, search.Layout) // todo 太多之后apk需要管理溢出
 
 	if toolBars != nil {
 		for _, toolbar := range toolBars {
@@ -120,7 +122,7 @@ func InitAppBar[T Widget](panel *Panel[T], toolBars []*TipIconButton, speechTxt 
 		}
 	}
 
-	about := NewTooltipButton(IconError, "about", func() { //todo ico make
+	about := NewTooltipButton(IconError, "about", func() { // todo ico make
 		if mylog.IsAndroid() {
 			mylog.Info("android not support about window")
 			return
@@ -141,15 +143,9 @@ func BackgroundDark(gtx layout.Context) {
 }
 
 func drawImageBackground(gtx layout.Context) {
-	data, err := os.ReadFile("asset/background.png")
-	if err != nil {
-		log.Fatal(err)
-	}
+	data := mylog.Check2(os.ReadFile("asset/background.png"))
 
-	img, err := png.Decode(bytes.NewReader(data))
-	if err != nil {
-		log.Fatal(err)
-	}
+	img := mylog.Check2(png.Decode(bytes.NewReader(data)))
 
 	dst := image.NewRGBA(image.Rect(0, 0, gtx.Constraints.Max.X, gtx.Constraints.Max.Y))
 	draw.Draw(dst, dst.Bounds(), img, image.Point{}, draw.Over)
@@ -167,7 +163,7 @@ func NewWindow(title string) *app.Window {
 		app.Size(1200, 600),
 	)
 	w.Perform(system.ActionCenter)
-	mylog.Check(android_background_service.Start()) //todo fix xml
+	mylog.Check(android_background_service.Start()) // todo fix xml
 	return w
 }
 
@@ -261,11 +257,11 @@ func WithAlpha(c color.NRGBA, a uint8) color.NRGBA {
 // CalculateTextWidth originalConstraints := gtx.Constraints // 保存原始约束
 // gtx.Constraints = originalConstraints
 func CalculateTextWidth(gtx layout.Context, text string) unit.Dp {
-	//fmt.Printf("Calculating text width for: %s\n", text)
-	//fmt.Printf("Current Min.X: %v\n", gtx.Constraints.Min.X)
+	// fmt.Printf("Calculating text width for: %s\n", text)
+	// fmt.Printf("Current Min.X: %v\n", gtx.Constraints.Min.X)
 	richText := NewRichText()
 	richText.AddSpan(richtext.SpanStyle{
-		//Font:        font.Font{},
+		// Font:        font.Font{},
 		Size:        unit.Sp(12),
 		Color:       White,
 		Content:     text,
@@ -275,7 +271,7 @@ func CalculateTextWidth(gtx layout.Context, text string) unit.Dp {
 		gtx.Constraints.Min.X = 0
 		return richText.Layout(gtx)
 	})
-	//fmt.Printf("Calculated width: %v\n", unit.Dp(recording.Dimensions.Size.X))
+	// fmt.Printf("Calculated width: %v\n", unit.Dp(recording.Dimensions.Size.X))
 	return unit.Dp(recording.Dimensions.Size.X)
 
 	body := material.Body1(th.Theme, text)
@@ -298,7 +294,7 @@ func (r Recording) Layout(gtx layout.Context) layout.Dimensions {
 	return r.Dimensions
 }
 
-func Record(gtx layout.Context, w layout.Widget) Recording { //应用场景:计算单元格宽度求平均宽度
+func Record(gtx layout.Context, w layout.Widget) Recording { // 应用场景:计算单元格宽度求平均宽度
 	m := op.Record(gtx.Ops)
 	dims := w(gtx)
 	c := m.Stop()

@@ -2,28 +2,24 @@ package ignore
 
 import (
 	"bufio"
-	"github.com/ddkwork/ux/filetree/files"
 	"log"
 	"os"
 	"os/user"
 	"path/filepath"
+
+	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/ux/filetree/files"
 )
 
 func ReadIgnoreFile() []string {
-	usr, err := user.Current()
-	if err != nil {
-		log.Println("Wasn't able to retrieve current user at runtime")
-		return []string{}
-	}
+	usr := mylog.Check2(user.Current())
+
 	ignoreFileName := filepath.Join(usr.HomeDir, ".goduignore")
-	if _, err := os.Stat(ignoreFileName); os.IsNotExist(err) {
+	if _ := mylog.Check2(os.Stat(ignoreFileName)); os.IsNotExist(err) {
 		return []string{}
 	}
-	ignoreFile, err := os.Open(ignoreFileName)
-	if err != nil {
-		log.Printf("Failed to read ingorefile because %s\n", err.Error())
-		return []string{}
-	}
+	ignoreFile := mylog.Check2(os.Open(ignoreFileName))
+
 	defer ignoreFile.Close()
 	scanner := bufio.NewScanner(ignoreFile)
 	lines := []string{}

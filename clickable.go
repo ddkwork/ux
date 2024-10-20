@@ -1,6 +1,9 @@
 package ux
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/io/input"
 	"gioui.org/io/semantic"
 	"gioui.org/layout"
@@ -8,8 +11,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/widget"
 	"github.com/x-module/gioui-plugins/utils"
-	"image"
-	"image/color"
 )
 
 type Clickable struct {
@@ -27,9 +28,11 @@ func NewClickable() *Clickable {
 func (c *Clickable) SetBgColor(bgColor color.NRGBA) {
 	c.bgColor = bgColor
 }
+
 func (c *Clickable) SetBgColorHover(bgColorHover color.NRGBA) {
 	c.bgColorHover = bgColorHover
 }
+
 func (c *Clickable) SetWidget(widget layout.Widget) *Clickable {
 	c.widget = widget
 	return c

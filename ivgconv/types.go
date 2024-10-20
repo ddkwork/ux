@@ -4,6 +4,8 @@ import (
 	"encoding/xml"
 	"fmt"
 	"strings"
+
+	"github.com/ddkwork/golibrary/mylog"
 )
 
 type SVG struct {
@@ -64,7 +66,7 @@ func (vb *ViewBox) UnmarshalXMLAttr(attr xml.Attr) error {
 	if attr.Name.Local != "viewBox" {
 		return nil
 	}
-	if _, err := fmt.Sscanf(attr.Value, "%f %f %f %f", &vb.MinX, &vb.MinY, &vb.Width, &vb.Height); err != nil {
+	if _ := mylog.Check2(fmt.Sscanf(attr.Value, "%f %f %f %f", &vb.MinX, &vb.MinY, &vb.Width, &vb.Height)); err != nil {
 		return err
 	}
 	return nil

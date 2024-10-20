@@ -2,6 +2,8 @@ package ux
 
 import (
 	"fmt"
+	"image"
+
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -12,7 +14,6 @@ import (
 	"gioui.org/widget/material"
 	"gioui.org/x/component"
 	"github.com/x-module/gioui-plugins/utils"
-	"image"
 )
 
 type MenuBarAction func()

@@ -2,10 +2,12 @@ package ivgconv
 
 import (
 	"fmt"
-	"golang.org/x/exp/shiny/iconvg"
-	"golang.org/x/image/math/f32"
 	"io"
 	"strings"
+
+	"github.com/ddkwork/golibrary/mylog"
+	"golang.org/x/exp/shiny/iconvg"
+	"golang.org/x/image/math/f32"
 )
 
 func parseSVG(svg SVG, opts ConverterOptions) ([]byte, error) {
@@ -18,8 +20,8 @@ func parseSVG(svg SVG, opts ConverterOptions) ([]byte, error) {
 	var enc iconvg.Encoder
 	enc.Reset(iconvg.Metadata{
 		ViewBox: iconvg.Rectangle{
-			//Min: f32.Vec2{-24, -24},
-			//Max: f32.Vec2{+24, +24},
+			// Min: f32.Vec2{-24, -24},
+			// Max: f32.Vec2{+24, +24},
 			Min: f32.Vec2{
 				svg.ViewBox.MinX - svg.ViewBox.Width,
 				svg.ViewBox.MinY - svg.ViewBox.Height,
@@ -38,8 +40,8 @@ func parseSVG(svg SVG, opts ConverterOptions) ([]byte, error) {
 	var vbx, vby float32
 	vbx = svg.ViewBox.MinX
 	vby = svg.ViewBox.MinY
-	//vbx = 512
-	//vby = 512
+	// vbx = 512
+	// vby = 512
 	offset := f32.Vec2{
 		vbx * outSize / svgSize,
 		vby * outSize / svgSize,
@@ -62,7 +64,7 @@ func parseSVG(svg SVG, opts ConverterOptions) ([]byte, error) {
 			continue
 		}
 		// Generate the iconVG path from the SVG path.
-		if err := genPath(&enc, &p, adjs, svgSize, offset, outSize, svg.Circles); err != nil {
+		if mylog.Check(genPath(&enc, &p, adjs, svgSize, offset, outSize, svg.Circles)); err != nil {
 			return nil, err
 		}
 		svg.Circles = nil
@@ -71,7 +73,7 @@ func parseSVG(svg SVG, opts ConverterOptions) ([]byte, error) {
 	// Generate the iconVG circle.
 	if len(svg.Circles) != 0 {
 		// Generate the iconVG path from the SVG circle.
-		if err := genPath(&enc, &Path{}, adjs, svgSize, offset, outSize, svg.Circles); err != nil {
+		if mylog.Check(genPath(&enc, &Path{}, adjs, svgSize, offset, outSize, svg.Circles)); err != nil {
 			return nil, err
 		}
 		svg.Circles = nil
@@ -108,7 +110,7 @@ func genPath(enc *iconvg.Encoder, p *Path, adjs map[float32]uint8, size float32,
 	needStartPath := true
 	if p.D != "" {
 		needStartPath = false
-		if err := genPathData(enc, adj, p.D, size, offset, outSize); err != nil {
+		if mylog.Check(genPathData(enc, adj, p.D, size, offset, outSize)); err != nil {
 			return err
 		}
 	}
@@ -152,9 +154,6 @@ func genPathData(enc *iconvg.Encoder, adj uint8, pathData string, size float32, 
 		if err == io.EOF {
 			break
 		}
-		if err != nil {
-			return err
-		}
 
 		switch {
 		case b == ' ':
@@ -164,7 +163,7 @@ func genPathData(enc *iconvg.Encoder, adj uint8, pathData string, size float32, 
 		case 'a' <= b && b <= 'z':
 			op, relative = b, true
 		default:
-			if err := r.UnreadByte(); err != nil {
+			if mylog.Check(r.UnreadByte()); err != nil {
 				return err
 			}
 		}
@@ -188,7 +187,7 @@ func genPathData(enc *iconvg.Encoder, adj uint8, pathData string, size float32, 
 			return fmt.Errorf("unknown opcode %c", b)
 		}
 
-		if err := scan(&args, r, n); err != nil {
+		if mylog.Check(scan(&args, r, n)); err != nil {
 			return err
 		}
 		normalize(&args, n, op, size, offset, outSize, relative)
@@ -231,9 +230,9 @@ func genPathData(enc *iconvg.Encoder, adj uint8, pathData string, size float32, 
 			enc.AbsCubeTo(args[0], args[1], args[2], args[3], args[4], args[5])
 		case 'c':
 			enc.RelCubeTo(args[0], args[1], args[2], args[3], args[4], args[5])
-			//case 'A':
+			// case 'A':
 			//	enc.AbsArcTo(args[0], args[1], args[2], args[3] != 0, args[4] != 0, args[5], args[6])
-			//case 'a':
+			// case 'a':
 			//	enc.RelArcTo(args[0], args[1], args[2], args[3] != 0, args[4] != 0, args[5], args[6])
 		}
 	}
@@ -245,13 +244,13 @@ func scan(args *[7]float32, r *strings.Reader, n int) error {
 	for i := 0; i < n; i++ {
 		for {
 			if b, _ := r.ReadByte(); b != ' ' && b != ',' {
-				if err := r.UnreadByte(); err != nil {
+				if mylog.Check(r.UnreadByte()); err != nil {
 					return err
 				}
 				break
 			}
 		}
-		if _, err := fmt.Fscanf(r, "%f", &args[i]); err != nil {
+		if _ := mylog.Check2(fmt.Fscanf(r, "%f", &args[i])); err != nil {
 			return err
 		}
 	}
