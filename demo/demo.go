@@ -50,12 +50,12 @@ func main() {
 	})
 
 	var zero ux.Widget
-	m := stream.NewOrderedMap(InvalidDemoKind, zero)
-	for _, kind := range InvalidDemoKind.Kinds() {
-		switch kind {
-		case TreeTableKind:
-			m.Set(TreeTableKind, treeTable())
-		case TreeKind:
+	m := stream.NewOrderedMap(InvalidDemoType, zero)
+	for _, Type := range InvalidDemoType.Types() {
+		switch Type {
+		case TreeTableType:
+			m.Set(TreeTableType, treeTable())
+		case TreeType:
 			rootNodes := []*ux.TreeNode{
 				{
 					Title: "Root 0",
@@ -102,13 +102,13 @@ func main() {
 			tree.OnClick(func(gtx layout.Context, node *ux.TreeNode) {
 				fmt.Println("node:", node.Title, " clicked")
 			})
-			m.Set(TreeKind, tree.Layout)
-		case Table2Kind:
+			m.Set(TreeType, tree.Layout)
+		case Table2Type:
 			t := ux.NewGoroutineList(ux.Packets)
-			m.Set(Table2Kind, t.Layout)
-		case TableKind:
-			m.Set(TableKind, table())
-		case SearchDropDownKind:
+			m.Set(Table2Type, t.Layout)
+		case TableType:
+			m.Set(TableType, table())
+		case SearchDropDownType:
 			dropDown := ux.NewSearchDropDown()
 			dropDown.SetOnChanged(func(value string) {
 				println(dropDown.GetSelected())
@@ -138,10 +138,10 @@ func main() {
 				},
 			})
 
-			m.Set(SearchDropDownKind, dropDown.Layout)
-		case IconvgViewKind:
-			m.Set(IconvgViewKind, ux.NewIconView().Layout)
-		case StructViewKind:
+			m.Set(SearchDropDownType, dropDown.Layout)
+		case IconvgViewType:
+			m.Set(IconvgViewType, ux.NewIconView().Layout)
+		case StructViewType:
 			type Object struct {
 				MachineID string
 				RegCode   string
@@ -226,15 +226,15 @@ func main() {
 			form.Add("username", userName.Layout)
 			form.Add("password", password.Layout)
 			form.Add("email", email.Layout)
-			dropDown := ux.NewDropDown(keygen.InvalidAppKind.Keys()...)
+			dropDown := ux.NewDropDown(keygen.InvalidAppType.Names()...)
 			form.InsertAt(0, "choose a app", dropDown.Layout)
 
 			// form.Add("", ux.BlueButton(&clickable, "submit", unit.Dp(100)).Layout)
 
-			m.Set(StructViewKind, form.Layout)
-		case ColorPickerKind:
-			m.Set(ColorPickerKind, ux.NewColorPicker().Layout)
-		case CardKind:
+			m.Set(StructViewType, form.Layout)
+		case ColorPickerType:
+			m.Set(ColorPickerType, ux.NewColorPicker().Layout)
+		case CardType:
 			f := &ux.FlowWrap{
 				Cards: nil,
 				List: widget.List{
@@ -250,16 +250,16 @@ func main() {
 				Contextual: nil,
 				Loaded:     false,
 			}
-			m.Set(CardKind, f.Layout)
-		case MobileKind:
+			m.Set(CardType, f.Layout)
+		case MobileType:
 			//CircledChevronDownButton := ux.NewSVGButton("", ux.Svg2Icon([]byte(ux.CircledChevronDown)), func() {
 			//	mylog.Info("svg button clicked")
 			//})
 
 			// todo download svg icon has bug with Rotate 90°,we should use  f32.Affine2D{}
-			m.Set(MobileKind, ux.NewButton("Hex Editor", nil).SetRectIcon(true).SetSVGIcon(ux.CircledChevronRight).Layout)
+			m.Set(MobileType, ux.NewButton("Hex Editor", nil).SetRectIcon(true).SetSVGIcon(ux.CircledChevronRight).Layout)
 
-		//case SvgButtonKind:
+		//case SvgButtonType:
 		//
 		//	panel.AddChildCallback(func(gtx layout.Context) layout.Dimensions {
 		//		list := layout.List{
@@ -282,98 +282,98 @@ func main() {
 		// continue
 		// icon := mylog.Check2(widget.NewIcon(mylog.Check2(ivgconv.FromContent(data))))
 		// tooltip := ux.NewTooltipButton(icon, "Load preset xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", nil)
-		// m.Set(TooltipKind, tooltip.Layout)
+		// m.Set(TooltipType, tooltip.Layout)
 
 		//svgButton := ux.NewSVGButton("", ux.Svg2Icon(CircledChevronRight), func() {
 		//	mylog.Info("svg button clicked")
 		//})
-		//m.Set(SvgButtonKind, svgButton.Layout)
-		case CodeEditorKind:
-		case AsmViewKind:
-		case LogViewKind:
+		//m.Set(SvgButtonType, svgButton.Layout)
+		case CodeEditorType:
+		case AsmViewType:
+		case LogViewType:
 
-		case ComBoxKind:
-		case SplitViewKind:
-		case ListViewKind:
-		case JsonTreeKind:
+		case ComBoxType:
+		case SplitViewType:
+		case ListViewType:
+		case JsonTreeType:
 			newButtonAnimation := ux.NewButtonAnimation("animation button", ux.IconBack, func() {
 				mylog.Info("animation button clicked")
 			})
-			m.Set(JsonTreeKind, newButtonAnimation.Layout) // todo bug
-		case TerminalKind: // todo 控制台被接管了
+			m.Set(JsonTreeType, newButtonAnimation.Layout) // todo bug
+		case TerminalType: // todo 控制台被接管了
 			if mylog.IsWindows() {
 				continue
 			}
 			screen, settings := terminal.Demo()
-			m.Set(TerminalKind, ux.NewTabItem("Tab 5", func(gtx layout.Context) layout.Dimensions {
+			m.Set(TerminalType, ux.NewTabItem("Tab 5", func(gtx layout.Context) layout.Dimensions {
 				return terminal.Console(screen, settings)(gtx)
 			}).LayoutContent)
-		case StackViewKind:
-		case DockViewKind:
-		case Gif123Kind:
-		case HexEditorKind:
+		case StackViewType:
+		case DockViewType:
+		case Gif123Type:
+		case HexEditorType:
 			obj := ux.NewMenuObj()
-			m.Set(HexEditorKind, obj.Layout)
-		case ImageEditorKind:
-		case MediaPlayerKind:
-		case MindKind:
-		case PdfViewKind:
-		case MapViewKind:
-		case ThemeViewKind:
-		case SettingsviewKind:
-		case SliceviewKind:
-		case XyzViewKind:
-		case WebViewKind:
-		case SvgViewKind:
-		case CanvasViewKind:
-		case PopMenuKind:
-		case TooltipKind:
-		case TextfieldKind:
-		case MarkdownViewKind:
-		case GomitmproxyKind:
-		case HyperDbgKind:
-		case VstartKind:
-		case ExplorerKind:
-		case DesignerKind:
-		case AiChatKind:
-		case EncodingTestKind:
-		case GameControlFaceKind:
-		case GithubKind:
-		case GhipsKind:
-		case TaskManagerKind:
-		case GitlabKind:
-		case SteamKind:
-		case BuyTomatoesKind:
-		case CcKind:
-		case CryptKind:
-		case DatabaseKind:
-		case DatarecoveryKind:
-		case HardInfoHookKind:
-		case HardwareIndoKind:
-		case DriverToolKind:
-		case EnvironmentKind:
-		case ErpKind:
-		case FleetKind:
-		case ImageConvertKind:
-		case JetbraKind:
-		case JiakaobaodianKind:
-		case ManPieceworkKind:
-		case MypanKind:
-		case NetAdapterKind:
-		case NetScanKind:
-		case VisualStudiokitKind:
-		case C2goKind:
-		case VncKind:
-		case TodoListKind:
-		case DropFileKind:
-		case DarkThemeKind:
-		case InvalidDemoKind:
+			m.Set(HexEditorType, obj.Layout)
+		case ImageEditorType:
+		case MediaPlayerType:
+		case MindType:
+		case PdfViewType:
+		case MapViewType:
+		case ThemeViewType:
+		case SettingsviewType:
+		case SliceviewType:
+		case XyzViewType:
+		case WebViewType:
+		case SvgViewType:
+		case CanvasViewType:
+		case PopMenuType:
+		case TooltipType:
+		case TextfieldType:
+		case MarkdownViewType:
+		case GomitmproxyType:
+		case HyperDbgType:
+		case VstartType:
+		case ExplorerType:
+		case DesignerType:
+		case AiChatType:
+		case EncodingTestType:
+		case GameControlFaceType:
+		case GithubType:
+		case GhipsType:
+		case TaskManagerType:
+		case GitlabType:
+		case SteamType:
+		case BuyTomatoesType:
+		case CcType:
+		case CryptType:
+		case DatabaseType:
+		case DatarecoveryType:
+		case HardInfoHookType:
+		case HardwareIndoType:
+		case DriverToolType:
+		case EnvironmentType:
+		case ErpType:
+		case FleetType:
+		case ImageConvertType:
+		case JetbraType:
+		case JiakaobaodianType:
+		case ManPieceworkType:
+		case MypanType:
+		case NetAdapterType:
+		case NetScanType:
+		case VisualStudiokitType:
+		case C2goType:
+		case VncType:
+		case TodoListType:
+		case DropFileType:
+		case DarkThemeType:
+		case InvalidDemoType:
 		}
 	}
 
-	m.Set(CodeEditorKind, ux.NewCodeEditor(tabGo, ux.CodeLanguageGO).Layout) // todo 增加滚动条
-	m.Set(LogViewKind, ux.LogView())                                         // todo 日志没有对齐，控制台是对齐的，增加滚动条
-	// m.Set(ComBoxKind, combox(w))//newselect
+	m.Set(CodeEditorType, ux.NewCodeEditor(tabGo, ux.CodeLanguageGO).Layout) // todo 增加滚动条
+	m.Set(LogViewType, ux.LogView())                                         // todo 日志没有对齐，控制台是对齐的，增加滚动条
+	// m.Set(ComBoxType, combox(w))//newselect
 
 	sp := ux.NewSplit(ux.Split{
 		Ratio:  0, // 布局比例，0 表示居中，-1 表示完全靠左，1 表示完全靠右
@@ -382,7 +382,7 @@ func main() {
 		First:  ux.NewCodeEditor(tabGo, ux.CodeLanguageGO).Layout,
 		Second: ux.NewCodeEditor(tabGo, ux.CodeLanguageGO).Layout,
 	})
-	m.Set(SplitViewKind, sp.Layout)
+	m.Set(SplitViewType, sp.Layout)
 
 	vtab := ux.NewTabView(layout.Vertical)
 	for _, p := range m.List() {
