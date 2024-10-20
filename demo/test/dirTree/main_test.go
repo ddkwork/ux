@@ -40,7 +40,7 @@ const testFullResult = `├───project
 
 func TestTreeFull(t *testing.T) {
 	out := new(bytes.Buffer)
-	mylog.Check(dirTree(out, "./testdata/", true))
+	mylog.Check(dirTree(out, "..", true))
 
 	result := out.String()
 	if result != testFullResult {
@@ -64,7 +64,7 @@ const testDirResult = `├───project
 
 func TestTreeDir(t *testing.T) {
 	сout := new(bytes.Buffer)
-	mylog.Check(dirTree(сout, "./testdata/", false))
+	mylog.Check(dirTree(сout, "..", false))
 
 	result := сout.String()
 	if result != testDirResult {

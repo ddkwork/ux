@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"time"
 
@@ -19,9 +18,7 @@ import (
 func main() {
 	go func() {
 		w := new(app.Window)
-		if mylog.Check(loop(w)); err != nil {
-			log.Fatal(err)
-		}
+		mylog.Check(loop(w))
 		os.Exit(0)
 	}()
 	app.Main()

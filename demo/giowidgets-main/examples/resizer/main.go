@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 
 	"gioui.org/app"
@@ -27,9 +26,7 @@ func (c *CustomView) Layout(gtx ux.Gtx) layout.Dimensions {
 func main() {
 	go func() {
 		w := new(app.Window)
-		if mylog.Check(loop(w)); err != nil {
-			log.Fatal(err)
-		}
+		mylog.Check(loop(w))
 		os.Exit(0)
 	}()
 	app.Main()

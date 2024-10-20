@@ -40,7 +40,7 @@ func shouldIgnore(path string, ignoreMatchers []*gitignore.GitIgnore) bool {
 
 func loadIgnoreMatchers(path string, parentMatchers []*gitignore.GitIgnore) []*gitignore.GitIgnore {
 	ignoreFile := filepath.Join(path, ".gitignore")
-	if _ := mylog.Check2(os.Stat(ignoreFile)); os.IsNotExist(err) {
+	if _, e := os.Stat(ignoreFile); os.IsNotExist(e) {
 		return parentMatchers
 	}
 
