@@ -6,7 +6,6 @@ package main
 
 import (
 	"image/color"
-	"log"
 	"os"
 
 	"gioui.org/app"
@@ -20,9 +19,7 @@ import (
 func main() {
 	go func() {
 		w := new(app.Window)
-		if mylog.Check(loop(w)); err != nil {
-			log.Fatal(err)
-		}
+		mylog.Check(loop(w))
 		os.Exit(0)
 	}()
 	app.Main()
