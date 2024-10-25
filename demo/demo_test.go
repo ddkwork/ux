@@ -87,5 +87,5 @@ func TestName(t *testing.T) {
 	m.Set("dropFile", "dropFile")
 	m.Set("darkTheme", "darkTheme")
 
-	stream.NewGeneratedFile().SetPackageName("main").Types("demo", m)
+	stream.NewGeneratedFile().SetPackageName("main").EnumTypes("demo", m)
 }
