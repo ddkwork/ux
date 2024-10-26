@@ -8,5 +8,7 @@ import (
 
 func TestTreeTable_ContextMenuItem(t1 *testing.T) {
 	mylog.Skips = append(mylog.Skips, "patch")
+}
+func init() {
 	mylog.FormatAllFiles()
 }
