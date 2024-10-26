@@ -10,9 +10,8 @@ import (
 	"github.com/ddkwork/golibrary/stream"
 )
 
-//SetTitleBarIsDark
-//genDropFilesEventArg
-
+// SetTitleBarIsDark
+// genDropFilesEventArg
 func TestGenDropFiles(t *testing.T) {
 	stream.CopyFile("fix/os_windows.go", "../vendor/gioui.org/app/os_windows.go")
 	stream.CopyFile("fix/dropFiles_gen_windows.go", "../vendor/gioui.org/app/dropFiles_gen_windows.go")

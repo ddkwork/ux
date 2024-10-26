@@ -2,9 +2,10 @@ package app
 
 import (
 	"fmt"
-	gowindows "golang.org/x/sys/windows"
 	"syscall"
 	"unsafe"
+
+	gowindows "golang.org/x/sys/windows"
 )
 
 type DropFilesEventData struct {
