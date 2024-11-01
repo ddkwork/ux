@@ -226,7 +226,7 @@ func main() {
 			form.Add("username", userName.Layout)
 			form.Add("password", password.Layout)
 			form.Add("email", email.Layout)
-			dropDown := ux.NewDropDown(keygen.InvalidAppType.Names()...)
+			dropDown := ux.NewDropDown(keygen.SuperRecovery2Type.Names()...)
 			form.InsertAt(0, "choose a app", dropDown.Layout)
 
 			// form.Add("", ux.BlueButton(&clickable, "submit", unit.Dp(100)).Layout)
