@@ -9,7 +9,7 @@ require (
 	gioui.org/x v0.7.1
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0
 	github.com/alecthomas/chroma/v2 v2.14.0
-	github.com/ddkwork/golibrary v0.0.0-20241101105340-067eea333e30
+	github.com/ddkwork/golibrary v0.0.0-20241102061918-ccf0e4c81417
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gen2brain/dlgs v0.0.0-20220603100644-40c77870fa8d
 	github.com/google/go-github/v65 v65.0.0
