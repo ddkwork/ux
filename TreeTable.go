@@ -179,13 +179,13 @@ func NewTable3[T any](data T, ctx TableContext[T]) {
 	//		mylog.Check(json.Unmarshal(b.Bytes(), table)) // todo test need a zero table?
 	//		fnUpdate()
 	//	}
-	//	mylog.Struct(files)
+	//	mylog.Struct("todo",files)
 	//})
 	//
 	//table.RowDoubleClickCallback = func() {
 	//	rows := table.SelectedRows(false)
 	//	for _, row := range rows {
-	//		mylog.Struct(row.RowCells)
+	//		mylog.Struct("todo",row.RowCells)
 	//		// todo icon edit
 	//		//app.RunWithIco("edit row #"+fmt.Sprint(i), rowPngBuffer, func(w *Window) {
 	//		//	content := w.Content()
@@ -1306,7 +1306,7 @@ func (t *TreeTable[T]) ColumnCell(row, col int, foreground, background color.NRG
 
 func (t *TreeTable[T]) drawContextArea(gtx C, menuState *component.MenuState) D {
 	return layout.Center.Layout(gtx, func(gtx C) D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
-		// mylog.Struct(gtx.Constraints)
+		// mylog.Struct("todo",gtx.Constraints)
 		menuStyle := component.Menu(th.Theme, menuState)
 		menuStyle.SurfaceStyle = component.SurfaceStyle{
 			Theme: th.Theme,

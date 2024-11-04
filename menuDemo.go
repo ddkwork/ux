@@ -88,7 +88,7 @@ func (p *MenuObj) Layout(gtx layout.Context) layout.Dimensions {
 
 func (p *MenuObj) drawContextArea(gtx C, th *material.Theme) D {
 	return layout.Center.Layout(gtx, func(gtx C) D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
-		// mylog.Struct(gtx.Constraints)
+		// mylog.Struct("todo",gtx.Constraints)
 		menuStyle := component.Menu(th, &p.menuState)
 		menuStyle.SurfaceStyle = component.SurfaceStyle{
 			Theme: th,

@@ -74,8 +74,8 @@ func (b ButtonStyle) LayoutText_(gtx layout.Context, icon *giosvg.Icon, pointer 
 	gtx.Constraints.Min.X = fixedSize
 	gtx.Constraints.Max.Y = fixedSize
 	gtx.Constraints.Min.Y = fixedSize
-	// mylog.Struct(gtx.Constraints.Min)
-	// mylog.Struct(gtx.Constraints.Max)
+	// mylog.Struct("todo",gtx.Constraints.Min)
+	// mylog.Struct("todo",gtx.Constraints.Max)
 
 	// 使用统一的内边距
 	inset := layout.UniformInset(1)

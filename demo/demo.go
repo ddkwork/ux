@@ -617,10 +617,10 @@ func treeTable() ux.Widget { // todo 调用抓包模块处理超长url
 		},
 		UnmarshalRow: nil,
 		RowSelectedCallback: func(node *ux.Node[packet]) {
-			mylog.Struct(node.Data)
+			mylog.Struct("todo",node.Data)
 		},
 		RowDoubleClickCallback: func(node *ux.Node[packet]) {
-			//	mylog.Struct(node.Data)
+			//	mylog.Struct("todo",node.Data)
 		},
 		LongPressCallback:   nil,
 		SetRootRowsCallBack: nil,
@@ -713,12 +713,12 @@ func table() ux.Widget {
 	table := ux.NewTable(datatable)
 	table.SelectionChangedCallback = func(gtx layout.Context, row, col int) {
 		data := table.GetRow(row)
-		mylog.Struct(data) // todo check data
+		mylog.Struct("todo",data) // todo check data
 	}
 
 	table.DoubleClickCallback = func(gtx layout.Context, row, col int) {
 		// data := table.GetRow(row)
-		// mylog.Struct(data)
+		// mylog.Struct("todo",data)
 		mylog.Info("double click for edit row data")
 	}
 

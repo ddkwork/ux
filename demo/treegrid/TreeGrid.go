@@ -672,7 +672,7 @@ func init() {
 
 func (t *TreeTable) drawContextArea(gtx C, node *Node) D {
 	return layout.Center.Layout(gtx, func(gtx C) D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
-		// mylog.Struct(gtx.Constraints)
+		// mylog.Struct("todo",gtx.Constraints)
 		menuStyle := component.Menu(th.Theme, &node.contextMenu)
 		menuStyle.SurfaceStyle = component.SurfaceStyle{
 			Theme: th.Theme,
