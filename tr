@@ -13,7 +13,6 @@ curl -LO https://gitee.com/mo2/linux/raw/2/2.awk
 awk -f 2.awk
 sudo pacman -S vulkan-headers
 go env -w GOPROXY=https://goproxy.cn,direct
-git clone https://git.homegu.com/ddkwork/ux
 go run 需要sudo
 ddk ALL=(root) NOPASSWD: ALL
 /etc/sudoers
