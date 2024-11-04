@@ -617,7 +617,7 @@ func treeTable() ux.Widget { // todo 调用抓包模块处理超长url
 		},
 		UnmarshalRow: nil,
 		RowSelectedCallback: func(node *ux.Node[packet]) {
-			mylog.Struct("todo",node.Data)
+			mylog.Struct("todo", node.Data)
 		},
 		RowDoubleClickCallback: func(node *ux.Node[packet]) {
 			//	mylog.Struct("todo",node.Data)
@@ -713,7 +713,7 @@ func table() ux.Widget {
 	table := ux.NewTable(datatable)
 	table.SelectionChangedCallback = func(gtx layout.Context, row, col int) {
 		data := table.GetRow(row)
-		mylog.Struct("todo",data) // todo check data
+		mylog.Struct("todo", data) // todo check data
 	}
 
 	table.DoubleClickCallback = func(gtx layout.Context, row, col int) {
