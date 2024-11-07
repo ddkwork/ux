@@ -5,7 +5,7 @@ import (
 
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/stretchr/testify/assert"
+	"github.com/ddkwork/golibrary/assert"
 )
 
 func TestCalculateTextWidth(t *testing.T) {

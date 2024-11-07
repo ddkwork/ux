@@ -3,7 +3,7 @@ package files
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/ddkwork/golibrary/assert"
 )
 
 func TestBuildFile(t *testing.T) {

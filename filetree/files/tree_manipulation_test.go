@@ -3,7 +3,7 @@ package files
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/ddkwork/golibrary/assert"
 )
 
 func TestSortFolder(t *testing.T) {
