@@ -50,8 +50,8 @@ func main() {
 	})
 
 	var zero ux.Widget
-	m := stream.NewOrderedMap(InvalidDemoType, zero)
-	for _, Type := range InvalidDemoType.Types() {
+	m := stream.NewOrderedMap(TreeTableType, zero)
+	for _, Type := range TreeTableType.EnumTypes() {
 		switch Type {
 		case TreeTableType:
 			m.Set(TreeTableType, treeTable())
@@ -367,7 +367,6 @@ func main() {
 		case TodoListType:
 		case DropFileType:
 		case DarkThemeType:
-		case InvalidDemoType:
 		}
 	}
 
