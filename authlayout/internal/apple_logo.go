@@ -16,21 +16,21 @@ var (
 	_, _, _, _, _, _, _, _               = (*f32.Point)(nil), (*op.Ops)(nil), (*clip.Op)(nil), (*paint.PaintOp)(nil), (*giosvg.Vector)(nil), (*color.NRGBA)(nil), (*layout.Dimensions)(nil), (*image.Image)(nil)
 	VectorAppleLogo        giosvg.Vector = func(ops *op.Ops, constraints giosvg.Constraints) layout.Dimensions {
 		var w, h float32
-		if constraints.Max != constraints.Min {
+		if stream.Max != stream.Min {
 
 			d := float32(1.219512)
-			if constraints.Max.X*d > constraints.Max.Y {
-				w, h = constraints.Max.Y/d, constraints.Max.Y
+			if stream.Max.X*d > stream.Max.Y {
+				w, h = stream.Max.Y/d, stream.Max.Y
 			} else {
-				w, h = constraints.Max.X, constraints.Max.X*d
+				w, h = stream.Max.X, stream.Max.X*d
 			}
 		}
 
-		if constraints.Min.X > w {
-			w = constraints.Min.X
+		if stream.Min.X > w {
+			w = stream.Min.X
 		}
-		if constraints.Min.Y > h {
-			h = constraints.Min.Y
+		if stream.Min.Y > h {
+			h = stream.Min.Y
 		}
 
 		var (
