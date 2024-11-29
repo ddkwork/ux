@@ -211,7 +211,7 @@ func (w *window) SetTitleBarIsDark(isDark bool) {
 		8)                                // sizeof(darkMode)
 
 	if ret != 0 { // err is always non-nil, we check return value
-		//fmt.Println("failed to set window title bar color", "err", err)
+		// fmt.Println("failed to set window title bar color", "err", err)
 	}
 }
 
