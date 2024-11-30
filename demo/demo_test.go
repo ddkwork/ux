@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/goradd/maps"
 	"testing"
+
+	"github.com/goradd/maps"
 
 	"github.com/ddkwork/golibrary/stream"
 )

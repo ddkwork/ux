@@ -3,10 +3,11 @@ package main
 import (
 	_ "embed"
 	"fmt"
-	"github.com/goradd/maps"
 	"image/color"
 	"net/http"
 	"time"
+
+	"github.com/goradd/maps"
 
 	"gioui.org/layout"
 	"gioui.org/unit"
