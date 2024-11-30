@@ -1105,7 +1105,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 								item := ContextMenuItem{}
 								for _, kind := range InvalidContextMenuItemKind.Kinds() {
 									switch kind {
-									case CopyRowKind:
+									case CopyRowType:
 										item = ContextMenuItem{
 											Title:     "",
 											Icon:      IconCopy,
@@ -1113,7 +1113,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Do:        func() { node.CopyRow(gtx) },
 											Clickable: widget.Clickable{},
 										}
-									case ConvertToContainerKind:
+									case ConvertToContainerType:
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconClean,
@@ -1125,7 +1125,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											},
 											Clickable: widget.Clickable{},
 										}
-									case ConvertToNonContainerKind:
+									case ConvertToNonContainerType:
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconActionCode,
@@ -1138,7 +1138,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											AppendDivider: true,
 											Clickable:     widget.Clickable{},
 										}
-									case NewKind:
+									case NewType:
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconArrowDropDown,
@@ -1179,7 +1179,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											},
 											Clickable: widget.Clickable{},
 										}
-									case NewContainerKind:
+									case NewContainerType:
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconAdd,
@@ -1191,7 +1191,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											},
 											Clickable: widget.Clickable{},
 										}
-									case DeleteKind:
+									case DeleteType:
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconDelete,
@@ -1203,7 +1203,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											},
 											Clickable: widget.Clickable{},
 										}
-									case DuplicateKind:
+									case DuplicateType:
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconActionUpdate,
@@ -1215,7 +1215,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											},
 											Clickable: widget.Clickable{},
 										}
-									case EditKind:
+									case EditType:
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconEdit,
@@ -1228,7 +1228,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											AppendDivider: true,
 											Clickable:     widget.Clickable{},
 										}
-									case OpenAllKind:
+									case OpenAllType:
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconFileFolderOpen,
@@ -1240,7 +1240,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											},
 											Clickable: widget.Clickable{},
 										}
-									case CloseAllKind:
+									case CloseAllType:
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconClose,
@@ -1252,7 +1252,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											},
 											Clickable: widget.Clickable{},
 										}
-									case InvalidContextMenuItemKind:
+									case InvalidContextMenuItemType:
 									}
 									item.Title = kind.String()
 									items = append(items, item)
