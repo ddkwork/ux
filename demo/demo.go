@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"github.com/goradd/maps"
 	"image/color"
 	"net/http"
 	"time"
@@ -49,8 +50,7 @@ func main() {
 		println(text)
 	})
 
-	var zero ux.Widget
-	m := stream.NewOrderedMap(TreeTableType, zero)
+	m := new(maps.SafeSliceMap[DemoType, ux.Widget])
 	for _, Type := range TreeTableType.EnumTypes() {
 		switch Type {
 		case TreeTableType:
