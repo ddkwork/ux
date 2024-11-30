@@ -1103,7 +1103,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 								node.contextMenu = NewContextMenu()
 								var items []ContextMenuItem
 								item := ContextMenuItem{}
-								for _, kind := range InvalidContextMenuItemKind.Kinds() {
+								for _, kind := range CopyRowType.EnumTypes() {
 									switch kind {
 									case CopyRowType:
 										item = ContextMenuItem{
@@ -1252,7 +1252,6 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											},
 											Clickable: widget.Clickable{},
 										}
-									case InvalidContextMenuItemType:
 									}
 									item.Title = kind.String()
 									items = append(items, item)

@@ -14,7 +14,6 @@ import (
 	"gioui.org/widget"
 	"gioui.org/x/outlay"
 	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/keygen"
 	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/terminal"
@@ -385,10 +384,11 @@ func main() {
 	m.Set(SplitViewType, sp.Layout)
 
 	vtab := ux.NewTabView(layout.Vertical)
-	for _, p := range m.List() {
-		tab := ux.NewTabItem(p.Key.String(), p.Value)
+	m.Range(func(key DemoType, value ux.Widget) bool {
+		tab := ux.NewTabItem(key.String(), value)
 		vtab.AddTab(tab)
-	}
+		return true
+	})
 	// mylog.Success("test append log")
 	// mylog.Warning("test append log")
 	// mylog.Trace("test append log")

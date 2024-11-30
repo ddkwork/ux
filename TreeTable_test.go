@@ -1,9 +1,10 @@
 package ux
 
 import (
+	"testing"
+
 	"github.com/ddkwork/golibrary/stream"
 	"github.com/goradd/maps"
-	"testing"
 )
 
 func TestTreeTable_ContextMenuItem(t1 *testing.T) {
