@@ -1,13 +1,14 @@
 package main
 
 import (
+	"github.com/goradd/maps"
 	"testing"
 
 	"github.com/ddkwork/golibrary/stream"
 )
 
 func TestName(t *testing.T) {
-	m := stream.NewOrderedMap("", "")
+	m := new(maps.SafeSliceMap[string, string])
 	m.Set("treeTable", "treeTable")
 	m.Set("tree", "tree")
 	m.Set("table2", "table2")
