@@ -1,6 +1,10 @@
 package ux
 
 import (
+	"image"
+	"image/color"
+	"unicode"
+
 	"gioui.org/font"
 	"gioui.org/gesture"
 	"gioui.org/io/event"
@@ -12,9 +16,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
-	"image"
-	"image/color"
-	"unicode"
+	"github.com/ddkwork/golibrary/safemap"
 )
 
 var (

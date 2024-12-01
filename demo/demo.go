@@ -3,7 +3,6 @@ package main
 import (
 	_ "embed"
 	"fmt"
-
 	"image/color"
 	"net/http"
 	"time"
