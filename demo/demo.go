@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"fmt"
+
 	"image/color"
 	"net/http"
 	"time"
@@ -12,6 +13,7 @@ import (
 	"gioui.org/widget"
 	"gioui.org/x/outlay"
 	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/safemap"
 	"github.com/ddkwork/keygen"
 	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/terminal"
@@ -48,7 +50,7 @@ func main() {
 		println(text)
 	})
 
-	m := new(safemap.SafeMap[DemoType, ux.Widget])
+	m := new(safemap.M[DemoType, ux.Widget])
 	for _, Type := range TreeTableType.EnumTypes() {
 		switch Type {
 		case TreeTableType:

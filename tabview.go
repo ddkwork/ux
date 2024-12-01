@@ -1,14 +1,7 @@
 package ux
 
 import (
-	"image"
-	"image/color"
-	"unicode"
-
 	"gioui.org/font"
-	"gioui.org/widget"
-	"github.com/ddkwork/ux/safemap"
-
 	"gioui.org/gesture"
 	"gioui.org/io/event"
 	"gioui.org/io/pointer"
@@ -17,7 +10,11 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
+	"gioui.org/widget"
 	"gioui.org/widget/material"
+	"image"
+	"image/color"
+	"unicode"
 )
 
 var (
@@ -61,7 +58,7 @@ type TabItem struct {
 	onClose       func(t *TabItem)
 	isClosed      bool
 
-	Meta *safemap.Map[string]
+	Meta *safemap.M[string, string]
 }
 
 func (t *TabItem) SetOnSelectedChange(onSelectedChange func(int)) *TabItem {
