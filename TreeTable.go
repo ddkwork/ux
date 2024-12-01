@@ -1491,7 +1491,7 @@ func (n *Node[T]) CellDataForSort(col int) string {
 //		rowPanel.SetLayout(&FlexLayout{Columns: len(tokens)})
 //		parent.AddChild(rowPanel)
 //		for _, token := range tokens {
-//			colour := style.Get(token.Type).Colour
+//			colour := style.GetMust(token.Type).Colour
 //			keys := NewRichLabel()
 //			color := RGB(
 //				int(colour.Red()),

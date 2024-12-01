@@ -730,10 +730,10 @@ func (w *window) Configure(options []Option) {
 	case Windowed:
 		style |= winStyle
 		showMode = windows.SW_SHOWNORMAL
-		// Get target for client area size.
+		// GetMust target for client area size.
 		width = int32(w.config.Size.X)
 		height = int32(w.config.Size.Y)
-		// Get the current window size and position.
+		// GetMust the current window size and position.
 		wr := windows.GetWindowRect(w.hwnd)
 		x = wr.Left
 		y = wr.Top

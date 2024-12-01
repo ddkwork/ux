@@ -28,7 +28,7 @@ func calculateDirSize(basePath string) (int64, int64, error) {
 	var size int64 = 0
 	var numChildren int64 = 0
 	mylog.Check(filepath.WalkDir(basePath, func(path string, dire os.DirEntry, err error) error {
-		// Get the size if not a directory
+		// GetMust the size if not a directory
 		fileinfo := mylog.Check2(os.Stat(path))
 		if err == nil {
 			size += fileinfo.Size()
