@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/goradd/maps"
-
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -50,7 +48,7 @@ func main() {
 		println(text)
 	})
 
-	m := new(maps.SafeSliceMap[DemoType, ux.Widget])
+	m := new(safemap.SafeMap[DemoType, ux.Widget])
 	for _, Type := range TreeTableType.EnumTypes() {
 		switch Type {
 		case TreeTableType:

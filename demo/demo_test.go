@@ -3,13 +3,11 @@ package main
 import (
 	"testing"
 
-	"github.com/goradd/maps"
-
 	"github.com/ddkwork/golibrary/stream"
 )
 
 func TestName(t *testing.T) {
-	m := new(maps.SafeSliceMap[string, string])
+	m := safemap.NewOrdered[string, string]()
 	m.Set("treeTable", "treeTable")
 	m.Set("tree", "tree")
 	m.Set("table2", "table2")

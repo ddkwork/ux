@@ -4,11 +4,10 @@ import (
 	"testing"
 
 	"github.com/ddkwork/golibrary/stream"
-	"github.com/goradd/maps"
 )
 
 func TestTreeTable_ContextMenuItem(t1 *testing.T) {
-	m := new(maps.SafeSliceMap[string, string])
+	m := safemap.NewOrdered[string, string]()
 	m.Set("CopyRow", "CopyRow")
 	m.Set("ConvertToContainer", "ConvertToContainer")
 	m.Set("ConvertToNonContainer", "ConvertToNonContainer")
