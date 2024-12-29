@@ -233,7 +233,7 @@ func (n *Node) MaxColumnCellWidth() unit.Dp {
 	HierarchyIndent := unit.Dp(1)
 	DividerWidth := align.StringWidth[unit.Dp](" │ ")    // todo test
 	iconWidth := align.StringWidth[unit.Dp](childPrefix) // todo test
-	return n.MaxDepth()*HierarchyIndent + // 最大深度的左缩进
+	return n.MaxDepth()*HierarchyIndent +                // 最大深度的左缩进
 		iconWidth + // 图标宽度,不管深度是多少，每一行都只会有一个层级图标
 		n.maxLevelColumnCellTextWidth + 5 + //(8 * 2) + 20 + // 左右padding,20是sort图标的宽度或者容器节点求和的文本宽度
 		DividerWidth // 列分隔条宽度
