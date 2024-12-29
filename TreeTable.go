@@ -446,7 +446,7 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 				t.maxColumnTexts[i] = data.Text
 			}
 			if isTui {
-				t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth(data.Text))
+				t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Text))
 			} else {
 				t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], CalculateTextWidth(gtx, data.Text))
 			}
@@ -1891,7 +1891,7 @@ func (t *TreeTable[T]) FormatHeader(maxColumnCellTextWidths []unit.Dp) *stream.B
 	for _, width := range maxColumnCellTextWidths {
 		all += width
 	}
-	all += align.StringWidth("│")*unit.Dp(len(maxColumnCellTextWidths)) + 4 //?
+	all += align.StringWidth[unit.Dp]("│")*unit.Dp(len(maxColumnCellTextWidths)) + 4 //?
 
 	buf.WriteStringLn("┌─" + strings.Repeat("─", int(all)))
 	buf.WriteString("│")
@@ -1930,8 +1930,8 @@ func (t *TreeTable[T]) FormatChildren(out *stream.Buffer, children []*Node[T]) {
 					HierarchyColumBuf.WriteString("├──")
 				}
 				HierarchyColumBuf.WriteString(cell.Text)
-				if align.StringWidth(HierarchyColumBuf.String()) < t.maxColumnCellWidth {
-					HierarchyColumBuf.WriteString(strings.Repeat(" ", int(t.maxColumnCellWidth-align.StringWidth(HierarchyColumBuf.String()))))
+				if align.StringWidth[unit.Dp](HierarchyColumBuf.String()) < t.maxColumnCellWidth {
+					HierarchyColumBuf.WriteString(strings.Repeat(" ", int(t.maxColumnCellWidth-align.StringWidth[unit.Dp](HierarchyColumBuf.String()))))
 				}
 				HierarchyColumBuf.WriteString(" │ ")
 				out.WriteString(HierarchyColumBuf.String())
@@ -1939,8 +1939,8 @@ func (t *TreeTable[T]) FormatChildren(out *stream.Buffer, children []*Node[T]) {
 				continue
 			}
 			out.WriteString(cell.Text)
-			if align.StringWidth(cell.Text) < t.maxColumnTextWidths[j] {
-				out.WriteString(strings.Repeat(" ", int(t.maxColumnTextWidths[j]-align.StringWidth(cell.Text))))
+			if align.StringWidth[unit.Dp](cell.Text) < t.maxColumnTextWidths[j] {
+				out.WriteString(strings.Repeat(" ", int(t.maxColumnTextWidths[j]-align.StringWidth[unit.Dp](cell.Text))))
 			}
 			out.WriteString(" │ ")
 		}
@@ -1960,8 +1960,8 @@ const (
 
 func (t *TreeTable[T]) MaxColumnCellWidth() unit.Dp {
 	HierarchyIndent := unit.Dp(1)
-	DividerWidth := align.StringWidth(" │ ")
-	iconWidth := align.StringWidth(childPrefix)
+	DividerWidth := align.StringWidth[unit.Dp](" │ ")
+	iconWidth := align.StringWidth[unit.Dp](childPrefix)
 	return t.MaxDepth()*HierarchyIndent + // 最大深度的左缩进
 		iconWidth + // 图标宽度,不管深度是多少，每一行都只会有一个层级图标
 		t.maxColumnTextWidths[0] + 5 + //(8 * 2) + 20 + // 左右padding,20是sort图标的宽度或者容器节点求和的文本宽度

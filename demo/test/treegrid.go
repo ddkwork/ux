@@ -99,7 +99,7 @@ func (n *Node) MaxColumnCellTextWidths(columns [][]CellData) []unit.Dp {
 			if columnIndex == columnHeaderCount { // todo bug  0- (columnHeaderCount-1) == columnIndex
 				break
 			}
-			width := align.StringWidth(cell.Text) // 这里应该是导致非层级右边距太大的原因
+			width := align.StringWidth[unit.Dp](cell.Text) // 这里应该是导致非层级右边距太大的原因
 			if width > columnWidths[columnIndex] {
 				columnWidths[columnIndex] = width
 
@@ -231,9 +231,9 @@ const (
 
 func (n *Node) MaxColumnCellWidth() unit.Dp {
 	HierarchyIndent := unit.Dp(1)
-	DividerWidth := align.StringWidth(" │ ")    // todo test
-	iconWidth := align.StringWidth(childPrefix) // todo test
-	return n.MaxDepth()*HierarchyIndent +       // 最大深度的左缩进
+	DividerWidth := align.StringWidth[unit.Dp](" │ ")    // todo test
+	iconWidth := align.StringWidth[unit.Dp](childPrefix) // todo test
+	return n.MaxDepth()*HierarchyIndent + // 最大深度的左缩进
 		iconWidth + // 图标宽度,不管深度是多少，每一行都只会有一个层级图标
 		n.maxLevelColumnCellTextWidth + 5 + //(8 * 2) + 20 + // 左右padding,20是sort图标的宽度或者容器节点求和的文本宽度
 		DividerWidth // 列分隔条宽度
@@ -246,7 +246,7 @@ func (n *Node) drawHeader(maxColumnCellTextWidths []unit.Dp) *stream.Buffer {
 	for _, width := range maxColumnCellTextWidths[1:] {
 		all += width
 	}
-	all += align.StringWidth("│")*unit.Dp(len(maxColumnCellTextWidths)) + 1 // 最后一个分隔符的宽度
+	all += align.StringWidth[unit.Dp]("│")*unit.Dp(len(maxColumnCellTextWidths)) + 1 // 最后一个分隔符的宽度
 
 	buf.WriteStringLn("┌─" + strings.Repeat("─", int(all)))
 	buf.WriteString("│")
@@ -288,8 +288,8 @@ func (n *Node) printChildren(out *stream.Buffer, children []*Node, parentPrefix 
 		// 打印层级列
 		leftIndent := parentPrefix + prefix
 		rightIndent := ""
-		if align.StringWidth(leftIndent)+align.StringWidth(child.RowCells[0].Text) < n.maxColumnCellWidth {
-			rightIndent = strings.Repeat(".", int(n.maxColumnCellWidth-align.StringWidth(leftIndent)-align.StringWidth(child.RowCells[0].Text)))
+		if align.StringWidth[unit.Dp](leftIndent)+align.StringWidth[unit.Dp](child.RowCells[0].Text) < n.maxColumnCellWidth {
+			rightIndent = strings.Repeat(".", int(n.maxColumnCellWidth-align.StringWidth[unit.Dp](leftIndent)-align.StringWidth[unit.Dp](child.RowCells[0].Text)))
 		}
 
 		// 打印层级列内容
