@@ -13,7 +13,6 @@ import (
 	"gioui.org/x/outlay"
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/golibrary/safemap"
-	"github.com/ddkwork/keygen"
 	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/terminal"
 )
@@ -225,7 +224,7 @@ func main() {
 			form.Add("username", userName.Layout)
 			form.Add("password", password.Layout)
 			form.Add("email", email.Layout)
-			dropDown := ux.NewDropDown(keygen.SuperRecovery2Type.Names()...)
+			dropDown := ux.NewDropDown(SuperRecovery2Type.Names()...)
 			form.InsertAt(0, "choose a app", dropDown.Layout)
 
 			// form.Add("", ux.BlueButton(&clickable, "submit", unit.Dp(100)).Layout)
