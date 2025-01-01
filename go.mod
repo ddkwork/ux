@@ -9,7 +9,7 @@ require (
 	gioui.org/x v0.7.1
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0
 	github.com/alecthomas/chroma/v2 v2.14.0
-	github.com/ddkwork/golibrary v0.0.0-20241109061650-bd3e94f7b3cf
+	github.com/ddkwork/golibrary v0.0.0-20250101083646-7f7ce7d4075c
 	github.com/dustin/go-humanize v1.0.1
 	github.com/enrichman/gh-iter/v66 v66.0.0
 	github.com/gen2brain/dlgs v0.0.0-20220603100644-40c77870fa8d
@@ -23,14 +23,14 @@ require (
 	github.com/tc-hib/winres v0.3.1
 	github.com/x-module/gioui-plugins v0.0.3
 	golang.design/x/clipboard v0.7.0
-	golang.org/x/crypto v0.28.0
+	golang.org/x/crypto v0.31.0
 	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c
 	golang.org/x/exp/shiny v0.0.0-20241009180824-f66d83c29e7c
-	golang.org/x/image v0.21.0
+	golang.org/x/image v0.23.0
 	golang.org/x/oauth2 v0.23.0
-	golang.org/x/sync v0.8.0
-	golang.org/x/sys v0.26.0
-	golang.org/x/tools v0.26.0
+	golang.org/x/sync v0.10.0
+	golang.org/x/sys v0.28.0
+	golang.org/x/tools v0.28.0
 )
 
 require (
@@ -62,9 +62,9 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/yuin/goldmark v1.7.6 // indirect
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a // indirect
-	golang.org/x/mod v0.21.0 // indirect
-	golang.org/x/net v0.30.0 // indirect
-	golang.org/x/text v0.19.0 // indirect
+	golang.org/x/mod v0.22.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
 	gonum.org/v1/gonum v0.8.2 // indirect
 	mvdan.cc/gofumpt v0.7.0 // indirect
 )
