@@ -45,6 +45,8 @@ github.com/ddkwork/golibrary v0.0.0-20241109061650-bd3e94f7b3cf h1:KMEqQ0haYTMet
 github.com/ddkwork/golibrary v0.0.0-20241109061650-bd3e94f7b3cf/go.mod h1:qiMzDxTwpLJ9hDTOdffR1FHJ44sZbshtVl5fvt2l/Cs=
 github.com/ddkwork/golibrary v0.0.0-20250101083646-7f7ce7d4075c h1:aRjCD0Un5kbwxfXL0Bpiqc+FTm4xHMBZQRFftGbYT98=
 github.com/ddkwork/golibrary v0.0.0-20250101083646-7f7ce7d4075c/go.mod h1:fzfhl61kUu+Sn22VCEojlYr9lE8X0SZmbOocICR+0s0=
+github.com/ddkwork/golibrary v0.0.0-20250101093329-d96f6524ebe4 h1:V32GfCpHQp5dZXTKw8K4BhKbtbmaUaP31t5eRpInN/g=
+github.com/ddkwork/golibrary v0.0.0-20250101093329-d96f6524ebe4/go.mod h1:fzfhl61kUu+Sn22VCEojlYr9lE8X0SZmbOocICR+0s0=
 github.com/dlclark/regexp2 v1.11.4 h1:rPYF9/LECdNymJufQKmri9gV604RvvABwgOA8un7yAo=
 github.com/dlclark/regexp2 v1.11.4/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
 github.com/dustin/go-humanize v1.0.1 h1:GzkhY7T5VNhEkwH0PVJgjz+fX1rhBrR7pRT3mDkpeCY=
