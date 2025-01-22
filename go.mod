@@ -57,6 +57,6 @@ require (
 	golang.org/x/text v0.21.0 // indirect
 	gonum.org/v1/gonum v0.8.2 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/protobuf v1.26.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	mvdan.cc/gofumpt v0.7.0 // indirect
 )
