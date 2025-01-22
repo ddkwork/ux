@@ -508,7 +508,7 @@ func initHeader(data any) (Columns []CellData) {
 	fields := stream.ReflectVisibleFields(data)
 	Columns = make([]CellData, 0)
 	for i, field := range fields {
-		if field.Tag.Get("table") != "" { // 中文列表头简短
+		if field.Tag.Get("table") != "" { // 中文表头简短
 			field.Name = field.Tag.Get("table")
 		}
 		Columns = append(Columns, CellData{
