@@ -1,13 +1,14 @@
 package ux
 
 import (
+	"github.com/ddkwork/golibrary/safemap"
 	"testing"
 
 	"github.com/ddkwork/golibrary/stream"
 )
 
 func TestTreeTable_ContextMenuItem(t1 *testing.T) {
-	m := safemap.NewOrdered[string, string]()
+	m := new(safemap.M[string, string])
 	m.Set("CopyRow", "CopyRow")
 	m.Set("ConvertToContainer", "ConvertToContainer")
 	m.Set("ConvertToNonContainer", "ConvertToNonContainer")
