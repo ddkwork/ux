@@ -26,7 +26,7 @@ import (
 	_ "gioui.org/example/explorer"
 	_ "gioui.org/example/fps-table"
 	_ "gioui.org/example/galaxy"
-	_ "gioui.org/example/glfw"
+	//_ "gioui.org/example/glfw"
 	_ "gioui.org/example/gophers"
 	_ "gioui.org/example/haptic"
 	_ "gioui.org/example/hello"

@@ -22,7 +22,6 @@ import (
 	"gioui.org/widget/material"
 	"gioui.org/x/richtext"
 	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/ux/android_background_service"
 )
 
 type Widget layout.Widget
@@ -163,7 +162,7 @@ func NewWindow(title string) *app.Window {
 		app.Size(1200, 600),
 	)
 	w.Perform(system.ActionCenter)
-	mylog.Check(android_background_service.Start()) // todo fix xml
+	//mylog.Check(android_background_service.Start()) // todo fix xml
 	return w
 }
 
