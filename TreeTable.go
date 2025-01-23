@@ -746,7 +746,7 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions
 					nextCol.Current = minWidth      // 将下一个列宽度设为最小宽度
 					col.Current -= d                // 更新当前列宽度
 				}
-			} else { // 如果不需要收缩
+			} else {                        // 如果不需要收缩
 				if col.Current < minWidth { // 如果当前列宽度小于最小宽度
 					col.Current = minWidth // 将当前列宽度设为最小宽度
 				}
@@ -935,6 +935,7 @@ const (
 	iconWidth       = unit.Dp(12)
 )
 
+// 计算最大列单元格宽度
 func calculateMaxColumnCellWidth(c CellData) unit.Dp {
 	return c.maxDepth*HierarchyIndent + // 最大深度的左缩进
 		iconWidth + // 图标宽度,不管深度是多少，每一行都只会有一个层级图标
@@ -942,6 +943,7 @@ func calculateMaxColumnCellWidth(c CellData) unit.Dp {
 		DividerWidth // 列分隔条宽度
 }
 
+// 奇偶行背景色
 func RowColor(rowIndex int) color.NRGBA {
 	bgColor := color.NRGBA{R: 57, G: 57, B: 57, A: 255}
 	if rowIndex%2 != 0 {
@@ -955,7 +957,7 @@ var modal = NewModal()
 // var editNode *StructView
 func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int) layout.Dimensions {
 	node.RowCells = t.MarshalRow(node)
-	for i := range node.RowCells {
+	for i := range node.RowCells { //对齐表头和数据列
 		node.RowCells[i].maxColumnTextWidth = t.maxColumnTextWidths[i]
 		node.RowCells[i].leftIndent = node.Depth() * HierarchyIndent
 		node.RowCells[i].RowID = rowIndex
@@ -996,10 +998,10 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 	}
 
 	bgColor := RowColor(rowIndex)
-	if rowClick.Hovered() {
+	if rowClick.Hovered() { //设置悬停背景色
 		bgColor = th.Color.TreeHoveredBgColor
 	}
-	if t.selectedNode == node {
+	if t.selectedNode == node { //设置选中背景色
 		bgColor = ColorPink
 	}
 
@@ -1014,9 +1016,12 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 		if node.parent.IsRoot() && !node.CanHaveChildren() {
 			c.leftIndent = HierarchyIndent + iconWidth + 4 // 根节点HierarchyIndent + 图标宽度 + 左padding
 		}
+
+		//自适应列宽，这在动态插入节点的情况下可能影响性能
 		maxColumnCellWidth := calculateMaxColumnCellWidth(c)
 		gtx.Constraints.Min.X = int(maxColumnCellWidth)
 		gtx.Constraints.Max.X = int(maxColumnCellWidth)
+
 		return layout.Flex{Axis: layout.Horizontal, Spacing: layout.SpaceBetween}.Layout(gtx,
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -1092,7 +1097,10 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 
 										所以合理的方案是patch官方的contextAreas和gtx的input source代码，支持长按事件
 									*/
-									Activation:       pointer.ButtonSecondary,
+									Activation: pointer.ButtonSecondary,
+									//todo 根据gioview的作者提示，安卓上需要过滤长按手势事件实现如下:
+									//计算pointer Press到Release的持续时长就可以了，Gio在处理触摸事件和鼠标事件是统一的，
+									//安卓应该也是一致的处理方式，只是event Source变成了Touch。
 									AbsolutePosition: true,
 									PositionHint:     0,
 								}

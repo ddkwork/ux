@@ -142,12 +142,9 @@ func BackgroundDark(gtx layout.Context) {
 
 func drawImageBackground(gtx layout.Context) {
 	data := mylog.Check2(os.ReadFile("asset/background.png"))
-
 	img := mylog.Check2(png.Decode(bytes.NewReader(data)))
-
 	dst := image.NewRGBA(image.Rect(0, 0, gtx.Constraints.Max.X, gtx.Constraints.Max.Y))
 	draw.Draw(dst, dst.Bounds(), img, image.Point{}, draw.Over)
-
 	paint.NewImageOp(dst).Add(gtx.Ops)
 	paint.PaintOp{}.Add(gtx.Ops)
 }
