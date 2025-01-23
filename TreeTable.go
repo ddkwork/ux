@@ -1101,6 +1101,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 									//todo 根据gioview的作者提示，安卓上需要过滤长按手势事件实现如下:
 									//计算pointer Press到Release的持续时长就可以了，Gio在处理触摸事件和鼠标事件是统一的，
 									//安卓应该也是一致的处理方式，只是event Source变成了Touch。
+									//需要制作一个过滤touch事件的apk测试
 									AbsolutePosition: true,
 									PositionHint:     0,
 								}
