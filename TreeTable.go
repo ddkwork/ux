@@ -931,7 +931,7 @@ func (t *TreeTable[T]) SortNodes() {
 }
 
 const (
-	HierarchyIndent = unit.Dp(4)
+	HierarchyIndent = unit.Dp(8)
 	iconWidth       = unit.Dp(12)
 )
 
