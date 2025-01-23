@@ -20,7 +20,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget/material"
-	"gioui.org/x/richtext"
 	"github.com/ddkwork/golibrary/mylog"
 )
 
@@ -258,28 +257,33 @@ func WithAlpha(c color.NRGBA, a uint8) color.NRGBA {
 func CalculateTextWidth(gtx layout.Context, text string) unit.Dp {
 	// fmt.Printf("Calculating text width for: %s\n", text)
 	// fmt.Printf("Current Min.X: %v\n", gtx.Constraints.Min.X)
-	richText := NewRichText()
-	richText.AddSpan(richtext.SpanStyle{
-		// Font:        font.Font{},
-		Size:        unit.Sp(12),
-		Color:       White,
-		Content:     text,
-		Interactive: false,
-	})
-	recording := Record(gtx, func(gtx layout.Context) layout.Dimensions {
-		gtx.Constraints.Min.X = 0
-		return richText.Layout(gtx)
-	})
-	// fmt.Printf("Calculated width: %v\n", unit.Dp(recording.Dimensions.Size.X))
-	return unit.Dp(recording.Dimensions.Size.X)
+	//richText := NewRichText()
+	//richText.AddSpan(richtext.SpanStyle{
+	//	// Font:        font.Font{},
+	//	Size:        unit.Sp(12),
+	//	Color:       White,
+	//	Content:     text,
+	//	Interactive: false,
+	//})
+	//recording := Record(gtx, func(gtx layout.Context) layout.Dimensions {
+	//	gtx.Constraints.Min.X = 0
+	//	return richText.Layout(gtx)
+	//})
+	//// fmt.Printf("Calculated width: %v\n", unit.Dp(recording.Dimensions.Size.X))
+	//return unit.Dp(recording.Dimensions.Size.X)
 
 	body := material.Body1(th.Theme, text)
 	body.MaxLines = 1
-	recording = Record(gtx, func(gtx layout.Context) layout.Dimensions {
+	recording := Record(gtx, func(gtx layout.Context) layout.Dimensions {
 		gtx.Constraints.Min.X = 0
 		return body.Layout(gtx)
 	})
-	return unit.Dp(recording.Dimensions.Size.X)
+	x := unit.Dp(recording.Dimensions.Size.X)
+	return x * 2 // todo 临时解决方案，后续需要调整
+	if x < 15 {  //todo
+		x *= 2
+	}
+	return x
 }
 
 type Recording struct {

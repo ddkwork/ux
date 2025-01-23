@@ -14,7 +14,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/inkeliz/giosvg v0.0.0-20240821232107-3208d4350d55
 	github.com/lmittmann/tint v1.0.6
-	github.com/oligo/gioview v0.8.1
+	github.com/oligo/gioview v0.8.2
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/tanema/gween v0.0.0-20221212145351-621cc8a459d1
 	github.com/tc-hib/winres v0.3.1

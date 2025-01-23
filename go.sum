@@ -99,8 +99,8 @@ github.com/mailru/easyjson v0.7.0 h1:aizVhC/NAAcKWb+5QsU1iNOZb4Yws5UO2I+aIprQITM
 github.com/mailru/easyjson v0.7.0/go.mod h1:KAzv3t3aY1NaHWoQz1+4F1ccyAH66Jk7yos7ldAVICs=
 github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 h1:zYyBkD/k9seD2A7fsi6Oo2LfFZAehjjQMERAvZLEDnQ=
 github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646/go.mod h1:jpp1/29i3P1S/RLdc7JQKbRpFeM1dOBd8T9ki5s+AY8=
-github.com/oligo/gioview v0.8.1 h1:IPG7CU3g+bVhp3QaOEqssHJ3bZUT3Sbjp+93jcRChhs=
-github.com/oligo/gioview v0.8.1/go.mod h1:aCAAlRa9GZFtrBoA5nJMYBjiHRixlnVIOSP2Ct63oSk=
+github.com/oligo/gioview v0.8.2 h1:j6niDZpYcLV6bdqFoxxRly9MamKrJyaumYe34xGcxQI=
+github.com/oligo/gioview v0.8.2/go.mod h1:QZ8MpLvy/oYZD4Rj6gP9iNfcP4VTS1lnTnPeByxOI1c=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=

@@ -23,7 +23,6 @@ import (
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"gioui.org/x/component"
-	"gioui.org/x/richtext"
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/golibrary/stream/align"
@@ -747,7 +746,7 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions
 					nextCol.Current = minWidth      // 将下一个列宽度设为最小宽度
 					col.Current -= d                // 更新当前列宽度
 				}
-			} else {                        // 如果不需要收缩
+			} else { // 如果不需要收缩
 				if col.Current < minWidth { // 如果当前列宽度小于最小宽度
 					col.Current = minWidth // 将当前列宽度设为最小宽度
 				}
@@ -944,9 +943,9 @@ func calculateMaxColumnCellWidth(c CellData) unit.Dp {
 }
 
 func RowColor(rowIndex int) color.NRGBA {
-	bgColor := color.NRGBA{R: 32, G: 32, B: 32, A: 255}
+	bgColor := color.NRGBA{R: 57, G: 57, B: 57, A: 255}
 	if rowIndex%2 != 0 {
-		bgColor = color.NRGBA{R: 42, G: 42, B: 42, A: 255}
+		bgColor = color.NRGBA{R: 45, G: 45, B: 45, A: 255}
 	}
 	return bgColor
 }
@@ -1280,7 +1279,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 	rows := []layout.FlexChild{ // 合成层级列和其他列的单元格为一行,并设置该行的背景和行高
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return Background{bgColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(22)) // 行高,todo bug 增加了上下文菜单后设置更改的分割线高度不生效,除非删除这一行，但是这样高度太低了
+				gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(12)) // 行高,todo bug 增加了上下文菜单后设置更改的分割线高度不生效,除非删除这一行，但是这样高度太低了
 				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, rowCells...)
 			})
 		}),
@@ -1564,25 +1563,26 @@ func (n *Node[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions
 	if data.FgColor == (color.NRGBA{}) {
 		data.FgColor = White
 	}
-	richText := NewRichText()
-	richText.AddSpan(richtext.SpanStyle{
-		// Font:        font.Font{},
-		Size:        unit.Sp(12),
-		Color:       data.FgColor,
-		Content:     data.Text,
-		Interactive: false,
-	})
+	//richText := NewRichText()
+	//richText.AddSpan(richtext.SpanStyle{
+	//	// Font:        font.Font{},
+	//	Size:        unit.Sp(12),
+	//	Color:       data.FgColor,
+	//	Content:     data.Text,
+	//	Interactive: false,
+	//})
 	inset := layout.Inset{
-		Top:    4, // 文本居中，drawColumnDivider需要设置tallestHeight := gtx.Dp(unit.Dp(32))增加高度避免虚线
+		Top:    0, // 文本居中，drawColumnDivider需要设置tallestHeight := gtx.Dp(unit.Dp(32))增加高度避免虚线
 		Bottom: 0,
 		Left:   8,
 		Right:  8,
 	}
-	if data.IsHeader {
-		inset.Top = 6
-		inset.Bottom = 6
+	if data.IsHeader { //加高表头高度
+		inset.Top = 2
+		inset.Bottom = 2
 	}
-	return inset.Layout(gtx, richText.Layout)
+	return inset.Layout(gtx, material.Body1(th.Theme, data.Text).Layout)
+	//return inset.Layout(gtx, richText.Layout)
 }
 
 func (n *Node[T]) RootRows() []*Node[T] {
