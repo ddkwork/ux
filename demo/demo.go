@@ -408,7 +408,136 @@ func main() {
 	ux.Run(panel)
 }
 
-func treeTable() ux.Widget { // todo 调用抓包模块处理超长url
+func treeTable() ux.Widget {
+
+	type packet struct {
+		Scheme        string        // 请求协议
+		Method        string        // 请求方式
+		Host          string        // 请求主机
+		Path          string        // 请求路径
+		ContentType   string        // 收发都有
+		ContentLength int           // 收发都有
+		Status        string        // 返回的状态码文本
+		Note          string        // 注释
+		Process       string        // 进程
+		PadTime       time.Duration // 请求到返回耗时
+	}
+
+	t := ux.NewTreeTable(packet{}, ux.TableContext[packet]{
+		ContextMenuItems: func(node *ux.Node[packet], gtx layout.Context) (items []ux.ContextMenuItem) {
+			return
+		},
+		MarshalRow: func(node *ux.Node[packet]) (cells []ux.CellData) {
+			if node.Container() {
+				node.Data.Scheme = node.Sum()
+				sumBytes := 0
+				sumTime := time.Duration(0)
+				node.Data.ContentLength = sumBytes
+				node.Data.PadTime = sumTime
+				node.Walk(func(node *ux.Node[packet]) {
+					sumBytes += node.Data.ContentLength
+					sumTime += node.Data.PadTime
+				})
+				node.Data.ContentLength = sumBytes
+				node.Data.PadTime = sumTime
+			}
+			return []ux.CellData{
+				{Text: node.Data.Scheme, FgColor: ux.Orange100},
+				{Text: node.Data.Method, FgColor: ux.ColorPink},
+				{Text: node.Data.Host},
+				{Text: node.Data.Path},
+				{Text: node.Data.ContentType},
+				{Text: fmt.Sprintf("%d", node.Data.ContentLength)},
+				{Text: node.Data.Status},
+				{Text: node.Data.Note},
+				{Text: node.Data.Process},
+				{Text: fmt.Sprintf("%s", node.Data.PadTime)},
+			}
+		},
+		UnmarshalRow: nil,
+		RowSelectedCallback: func(node *ux.Node[packet]) {
+			mylog.Struct("todo", node.Data)
+		},
+		RowDoubleClickCallback: func(node *ux.Node[packet]) {
+			mylog.Info("node:", node.Data.Path, " double clicked")
+		},
+		LongPressCallback:   nil,
+		SetRootRowsCallBack: nil,
+		JsonName:            "",
+		IsDocument:          false,
+	})
+
+	topLevelRowsToMake := 100
+	rows := make([]*ux.Node[packet], topLevelRowsToMake)
+	for i := 0; i < topLevelRowsToMake; i++ {
+		data := packet{
+			Scheme:        "http",
+			Method:        http.MethodGet,
+			Host:          "example.com",
+			Path:          fmt.Sprintf("/api/v%d/resource", i+1),
+			ContentType:   "application/json",
+			ContentLength: i + 100,
+			Status:        http.StatusText(http.StatusOK),
+			Note:          fmt.Sprintf("获取资源%d", i+1),
+			Process:       fmt.Sprintf("process%d.exe", i+1),
+			PadTime:       time.Duration(i+1) * time.Second,
+		}
+		var node *ux.Node[packet]
+		if i%10 == 3 {
+			node = ux.NewContainerNode(fmt.Sprintf("Root %d", i+1), data)
+			node.SetParent(t.Root)
+			//node.Open = true
+			node.Children = make([]*ux.Node[packet], 5)
+			for j := 0; j < 5; j++ {
+				subData := packet{
+					Scheme:        "http",
+					Method:        http.MethodGet,
+					Host:          "example.com",
+					Path:          fmt.Sprintf("/api/v%d/resource%d", i+1, j+1),
+					ContentType:   "application/json",
+					ContentLength: i + 100 + j + 1,
+					Status:        http.StatusText(http.StatusOK),
+					Note:          fmt.Sprintf("获取资源%d-%d", i+1, j+1),
+					Process:       fmt.Sprintf("process%d-%d.exe", i+1, j+1),
+					PadTime:       time.Duration(i+1+j+1) * time.Second,
+				}
+				subNode := ux.NewNode(subData)
+				subNode.SetParent(node)
+				node.Children[j] = subNode
+				if j < 2 {
+					subNode.Children = make([]*ux.Node[packet], 2)
+					for k := 0; k < 2; k++ {
+						subSubData := packet{
+							Scheme:        "http",
+							Method:        http.MethodGet,
+							Host:          "example.com",
+							Path:          fmt.Sprintf("/api/v%d/resource%d-%d", i+1, j+1, k+1),
+							ContentType:   "application/json",
+							ContentLength: i + 100 + j + 1 + k + 1,
+							Status:        http.StatusText(http.StatusOK),
+							Note:          fmt.Sprintf("获取资源%d-%d-%d", i+1, j+1, k+1),
+							Process:       fmt.Sprintf("process%d-%d-%d.exe", i+1, j+1, k+1),
+							PadTime:       time.Duration(i+1+j+1+k+1) * time.Second,
+						}
+						subSubNode := ux.NewNode(subSubData)
+						subSubNode.SetParent(subNode)
+						subNode.Children[k] = subSubNode
+					}
+				}
+			}
+		} else {
+			node = ux.NewNode(data)
+		}
+		rows[i] = node
+	}
+
+	t.Root.SetRootRows(rows)
+	t.Format()
+
+	return t.Layout
+}
+
+func treeTable_() ux.Widget { // todo 调用抓包模块处理超长url
 	type packet struct {
 		Scheme        string        // 请求协议
 		Method        string        // 请求方式
@@ -625,74 +754,65 @@ func treeTable() ux.Widget { // todo 调用抓包模块处理超长url
 		JsonName:            "",
 		IsDocument:          false,
 	})
+
+	topLevelRowsToMake := 100
+	rows := make([]*ux.Node[packet], topLevelRowsToMake)
+	for i := range rows {
+		data := packet{
+			Scheme:        "http",
+			Method:        http.MethodGet,
+			Host:          "example.com",
+			Path:          fmt.Sprintf("/api/v%d/resource", i+1),
+			ContentType:   "application/json",
+			ContentLength: i + 100,
+			Status:        http.StatusText(http.StatusOK),
+			Note:          fmt.Sprintf("获取资源%d", i+1),
+			Process:       fmt.Sprintf("process%d.exe", i+1),
+			PadTime:       time.Duration(i+1) * time.Second,
+		}
+		row := ux.NewNode(data)
+		if i%10 == 3 {
+			row = ux.NewContainerNode(fmt.Sprintf("Sub Row %d", i+1), data)
+			row.Children = make([]*ux.Node[packet], 5)
+			for j, child := range row.Children {
+				if j < 2 {
+					child.Children = make([]*ux.Node[packet], 2)
+				}
+			}
+		}
+	}
+
 	t.Root.AddChildByData(packet{Scheme: "http0", Method: http.MethodGet, Host: "example.com1", Path: "/api/v1/resource1", ContentType: "application/json1", ContentLength: 100, Status: http.StatusText(http.StatusOK), Note: "获取资源1", Process: "process1.exe", PadTime: 30})
 	t.Root.AddChildByData(packet{Scheme: "http1", Method: http.MethodPost, Host: "example.co2m", Path: "/api/v1/resource2", ContentType: "application/json2", ContentLength: 101, Status: http.StatusText(http.StatusOK), Note: "创建资源2", Process: "process2.exe", PadTime: 20})
-	//增加
 	containerNode1 := ux.NewContainerNode("Sub Row 1", packet{})
 	t.Root.AddChild(containerNode1)
 	containerNode1.AddChildByData(packet{Scheme: "http0", Method: http.MethodGet, Host: "example.com1", Path: "/api/v1/resource1", ContentType: "application/json1", ContentLength: 100, Status: http.StatusText(http.StatusOK), Note: "获取资源1", Process: "process1.exe", PadTime: 30})
 	containerNode1.AddChildByData(packet{Scheme: "http1", Method: http.MethodPost, Host: "example.co2m", Path: "/api/v1/resource2", ContentType: "application/json2", ContentLength: 101, Status: http.StatusText(http.StatusOK), Note: "创建资源2", Process: "process2.exe", PadTime: 20})
-	//containerNode1.AddChildByData(packet{Scheme: "http2", Method: http.MethodPut, Host: "example.com3", Path: "/api/v1/resource3", ContentType: "application/json3", ContentLength: 102, Status: http.StatusText(http.StatusOK), Note: "更新资源3", Process: "process3.exe", PadTime: 10})
-	//containerNode1.AddChildByData(packet{Scheme: "http3", Method: http.MethodDelete, Host: "example.com4", Path: "/api/v1/ooo", ContentType: "application/json4", ContentLength: 103, Status: http.StatusText(http.StatusOK), Note: "删除资源4", Process: "process4.exe", PadTime: 5})
-	//containerNode1.AddChildByData(packet{Scheme: "https4", Method: http.MethodGet, Host: "example.com5", Path: "/api/v1/resource5", ContentType: "application/json5", ContentLength: 104, Status: http.StatusText(http.StatusOK), Note: "获取资源5", Process: "process5.exe", PadTime: 30})
-	//containerNode1.AddChildByData(packet{Scheme: "https5", Method: http.MethodPost, Host: "example.com6", Path: "/api/v1/resource6", ContentType: "application/json6", ContentLength: 105, Status: http.StatusText(http.StatusOK), Note: "创建资源6", Process: "process6.exe", PadTime: 20})
-	//containerNode1.AddChildByData(packet{Scheme: "https6", Method: http.MethodPut, Host: "example.com7", Path: "/api/v1/resource7", ContentType: "application/json7", ContentLength: 106, Status: http.StatusText(http.StatusOK), Note: "更新资源7", Process: "process7.exe", PadTime: 10})
-	//containerNode1.AddChildByData(packet{Scheme: "https7", Method: http.MethodDelete, Host: "example.com8", Path: "/api/v1/resource8", ContentType: "application/json8", ContentLength: 107, Status: http.StatusText(http.StatusOK), Note: "删除资源8", Process: "process8.exe", PadTime: 5})
 
 	containerNode2 := ux.NewContainerNode("Sub Row 1", packet{})
 	containerNode1.AddChild(containerNode2)
 	containerNode2.AddChildByData(packet{Scheme: "http0", Method: http.MethodGet, Host: "example.com1", Path: "/api/v1/resource1", ContentType: "application/json1", ContentLength: 100, Status: http.StatusText(http.StatusOK), Note: "获取资源1", Process: "process1.exe", PadTime: 30})
 	containerNode2.AddChildByData(packet{Scheme: "http1", Method: http.MethodPost, Host: "example.co2m", Path: "/api/v1/resource2", ContentType: "application/json2", ContentLength: 101, Status: http.StatusText(http.StatusOK), Note: "创建资源2", Process: "process2.exe", PadTime: 20})
-	//containerNode2.AddChildByData(packet{Scheme: "http2", Method: http.MethodPut, Host: "example.com3", Path: "/api/v1/resource3", ContentType: "application/json3", ContentLength: 102, Status: http.StatusText(http.StatusOK), Note: "更新资源3", Process: "process3.exe", PadTime: 10})
-	//containerNode2.AddChildByData(packet{Scheme: "http3", Method: http.MethodDelete, Host: "example.com4", Path: "/api/v1/resource4", ContentType: "application/json4", ContentLength: 103, Status: http.StatusText(http.StatusOK), Note: "删除资源4", Process: "process4.exe", PadTime: 5})
-	//containerNode2.AddChildByData(packet{Scheme: "https4", Method: http.MethodGet, Host: "example.com5", Path: "/api/v1/resource5", ContentType: "application/json5", ContentLength: 104, Status: http.StatusText(http.StatusOK), Note: "获取资源5", Process: "process5.exe", PadTime: 30})
-	//containerNode2.AddChildByData(packet{Scheme: "https5", Method: http.MethodPost, Host: "example.com6", Path: "/api/v1/resource6", ContentType: "application/json6", ContentLength: 105, Status: http.StatusText(http.StatusOK), Note: "创建资源6", Process: "process6.exe", PadTime: 20})
-	//containerNode2.AddChildByData(packet{Scheme: "https6", Method: http.MethodPut, Host: "example.com7", Path: "/api/v1/resource7", ContentType: "application/json7", ContentLength: 106, Status: http.StatusText(http.StatusOK), Note: "更新资源7", Process: "process7.exe", PadTime: 10})
-	//containerNode2.AddChildByData(packet{Scheme: "https7", Method: http.MethodDelete, Host: "example.com8", Path: "/api/v1/resource8", ContentType: "application/json8", ContentLength: 107, Status: http.StatusText(http.StatusOK), Note: "删除资源8", Process: "process8.exe", PadTime: 5})
 
 	containerNode3 := ux.NewContainerNode("Sub Row 2", packet{})
 	containerNode2.AddChild(containerNode3)
 	containerNode3.AddChildByData(packet{Scheme: "http0", Method: http.MethodGet, Host: "example.com1", Path: "/api/v1/resource1", ContentType: "application/json1", ContentLength: 100, Status: http.StatusText(http.StatusOK), Note: "获取资源1", Process: "process1.exe", PadTime: 30})
 	containerNode3.AddChildByData(packet{Scheme: "http1", Method: http.MethodPost, Host: "example.co2m", Path: "/api/v1/resource2", ContentType: "application/json2", ContentLength: 101, Status: http.StatusText(http.StatusOK), Note: "创建资源2", Process: "process2.exe", PadTime: 20})
-	//containerNode3.AddChildByData(packet{Scheme: "http2", Method: http.MethodPut, Host: "example.com3", Path: "/api/v1/resource3", ContentType: "application/json3", ContentLength: 102, Status: http.StatusText(http.StatusOK), Note: "更新资源3", Process: "process3.exe", PadTime: 10})
-	//containerNode3.AddChildByData(packet{Scheme: "http3", Method: http.MethodDelete, Host: "example.com4", Path: "/api/v1/resource4", ContentType: "application/json4", ContentLength: 103, Status: http.StatusText(http.StatusOK), Note: "删除资源4", Process: "process4.exe", PadTime: 5})
-	//containerNode3.AddChildByData(packet{Scheme: "https4", Method: http.MethodGet, Host: "example.com5", Path: "/api/v1/resource5", ContentType: "application/json5", ContentLength: 104, Status: http.StatusText(http.StatusOK), Note: "获取资源5", Process: "process5.exe", PadTime: 30})
-	//containerNode3.AddChildByData(packet{Scheme: "https5", Method: http.MethodPost, Host: "example.com6", Path: "/api/v1/resource6", ContentType: "application/json6", ContentLength: 105, Status: http.StatusText(http.StatusOK), Note: "创建资源6", Process: "process6.exe", PadTime: 20})
-	//containerNode3.AddChildByData(packet{Scheme: "https6", Method: http.MethodPut, Host: "example.com7", Path: "/api/v1/resource7", ContentType: "application/json7", ContentLength: 106, Status: http.StatusText(http.StatusOK), Note: "更新资源7", Process: "process7.exe", PadTime: 10})
-	//containerNode3.AddChildByData(packet{Scheme: "https7", Method: http.MethodDelete, Host: "example.com8", Path: "/api/v1/resource8", ContentType: "application/json8", ContentLength: 107, Status: http.StatusText(http.StatusOK), Note: "删除资源8", Process: "process8.exe", PadTime: 5})
 
 	containerNode4 := ux.NewContainerNode("Sub Row 2", packet{})
 	t.Root.AddChild(containerNode4)
 	containerNode4.AddChildByData(packet{Scheme: "http0", Method: http.MethodGet, Host: "example.com1", Path: "/api/v1/resource1", ContentType: "application/json1", ContentLength: 100, Status: http.StatusText(http.StatusOK), Note: "获取资源1", Process: "process1.exe", PadTime: 30})
 	containerNode4.AddChildByData(packet{Scheme: "http1", Method: http.MethodPost, Host: "example.co2m", Path: "/api/v1/resource2", ContentType: "application/json2", ContentLength: 101, Status: http.StatusText(http.StatusOK), Note: "创建资源2", Process: "process2.exe", PadTime: 20})
-	//containerNode4.AddChildByData(packet{Scheme: "http2", Method: http.MethodPut, Host: "example.com3", Path: "/api/v1/resource3", ContentType: "application/json3", ContentLength: 102, Status: http.StatusText(http.StatusOK), Note: "更新资源3", Process: "process3.exe", PadTime: 10})
-	//containerNode4.AddChildByData(packet{Scheme: "http3", Method: http.MethodDelete, Host: "example.com4", Path: "/api/v1/resource4", ContentType: "application/json4", ContentLength: 103, Status: http.StatusText(http.StatusOK), Note: "删除资源4", Process: "process4.exe", PadTime: 5})
-	//containerNode4.AddChildByData(packet{Scheme: "https4", Method: http.MethodGet, Host: "example.com5", Path: "/api/v1/resource5", ContentType: "application/json5", ContentLength: 104, Status: http.StatusText(http.StatusOK), Note: "获取资源5", Process: "process5.exe", PadTime: 30})
-	//containerNode4.AddChildByData(packet{Scheme: "https5", Method: http.MethodPost, Host: "example.com6", Path: "/api/v1/resource6", ContentType: "application/json6", ContentLength: 105, Status: http.StatusText(http.StatusOK), Note: "创建资源6", Process: "process6.exe", PadTime: 20})
-	//containerNode4.AddChildByData(packet{Scheme: "https6", Method: http.MethodPut, Host: "example.com7", Path: "/api/v1/resource7", ContentType: "application/json7", ContentLength: 106, Status: http.StatusText(http.StatusOK), Note: "更新资源7", Process: "process7.exe", PadTime: 10})
-	//containerNode4.AddChildByData(packet{Scheme: "https7", Method: http.MethodDelete, Host: "example.com8", Path: "/api/v1/resource8", ContentType: "application/json8", ContentLength: 107, Status: http.StatusText(http.StatusOK), Note: "删除资源8", Process: "process8.exe", PadTime: 5})
 
 	containerNode5 := ux.NewContainerNode("Sub Row 1", packet{})
 	containerNode4.AddChild(containerNode5)
 	containerNode5.AddChildByData(packet{Scheme: "http0", Method: http.MethodGet, Host: "example.com1", Path: "/api/v1/resource1", ContentType: "application/json1", ContentLength: 100, Status: http.StatusText(http.StatusOK), Note: "获取资源1", Process: "process1.exe", PadTime: 30})
 	containerNode5.AddChildByData(packet{Scheme: "http1", Method: http.MethodPost, Host: "example.co2m", Path: "/api/v1/resource2", ContentType: "application/json2", ContentLength: 101, Status: http.StatusText(http.StatusOK), Note: "创建资源2", Process: "process2.exe", PadTime: 20})
-	//containerNode5.AddChildByData(packet{Scheme: "http2", Method: http.MethodPut, Host: "example.com3", Path: "/api/v1/resource3", ContentType: "application/json3", ContentLength: 102, Status: http.StatusText(http.StatusOK), Note: "更新资源3", Process: "process3.exe", PadTime: 10})
-	//containerNode5.AddChildByData(packet{Scheme: "http3", Method: http.MethodDelete, Host: "example.com4", Path: "/api/v1/resource4", ContentType: "application/json4", ContentLength: 103, Status: http.StatusText(http.StatusOK), Note: "删除资源4", Process: "process4.exe", PadTime: 5})
-	//containerNode5.AddChildByData(packet{Scheme: "https4", Method: http.MethodGet, Host: "example.com5", Path: "/api/v1/resource5", ContentType: "application/json5", ContentLength: 104, Status: http.StatusText(http.StatusOK), Note: "获取资源5", Process: "process5.exe", PadTime: 30})
-	//containerNode5.AddChildByData(packet{Scheme: "https5", Method: http.MethodPost, Host: "example.com6", Path: "/api/v1/resource6", ContentType: "application/json6", ContentLength: 105, Status: http.StatusText(http.StatusOK), Note: "创建资源6", Process: "process6.exe", PadTime: 20})
-	//containerNode5.AddChildByData(packet{Scheme: "https6", Method: http.MethodPut, Host: "example.com7", Path: "/api/v1/resource7", ContentType: "application/json7", ContentLength: 106, Status: http.StatusText(http.StatusOK), Note: "更新资源7", Process: "process7.exe", PadTime: 10})
-	//containerNode5.AddChildByData(packet{Scheme: "https7", Method: http.MethodDelete, Host: "example.com8", Path: "/api/v1/resource8", ContentType: "application/json8", ContentLength: 107, Status: http.StatusText(http.StatusOK), Note: "删除资源8", Process: "process8.exe", PadTime: 5})
 
 	t.Root.AddChildByData(packet{Scheme: "https8", Method: http.MethodGet, Host: "example.com9", Path: "/api/v1/resource9", ContentType: "application/json9", ContentLength: 108, Status: http.StatusText(http.StatusOK), Note: "获取资源9", Process: "process9.exe", PadTime: 30})
 	t.Root.AddChildByData(packet{Scheme: "https9", Method: http.MethodPost, Host: "example.com10", Path: "/api/v1/resource10", ContentType: "application/json10", ContentLength: 109, Status: http.StatusText(http.StatusOK), Note: "创建资源10", Process: "process10.exe", PadTime: 20})
 	t.Root.AddChildByData(packet{Scheme: "https10", Method: http.MethodPut, Host: "example.com11", Path: "/api/v1/resource11", ContentType: "application/json11", ContentLength: 110, Status: http.StatusText(http.StatusOK), Note: "更新资源11", Process: "process11.exe", PadTime: 10})
-	//t.Root.AddChildByData(packet{Scheme: "https11", Method: http.MethodDelete, Host: "example.com12", Path: "/api/v1/resource12", ContentType: "application/json12", ContentLength: 111, Status: http.StatusText(http.StatusOK), Note: "删除资源12", Process: "process12.exe", PadTime: 5})
-	//t.Root.AddChildByData(packet{Scheme: "https12", Method: http.MethodGet, Host: "example.com13", Path: "/api/v1/resource13", ContentType: "application/json13", ContentLength: 112, Status: http.StatusText(http.StatusOK), Note: "获取资源13", Process: "process13.exe", PadTime: 30})
-	//t.Root.AddChildByData(packet{Scheme: "https13", Method: http.MethodPost, Host: "example.com14", Path: "/api/v1/resource14", ContentType: "application/json14", ContentLength: 113, Status: http.StatusText(http.StatusOK), Note: "创建资源14", Process: "process14.exe", PadTime: 20})
-	//t.Root.AddChildByData(packet{Scheme: "https14", Method: http.MethodPut, Host: "example.com15", Path: "/api/v1/resource15", ContentType: "application/json15", ContentLength: 114, Status: http.StatusText(http.StatusOK), Note: "更新资源15", Process: "process15.exe", PadTime: 10})
-	//t.Root.AddChildByData(packet{Scheme: "https15", Method: http.MethodDelete, Host: "example.com16", Path: "/api/v1/resource16", ContentType: "application/json16", ContentLength: 115, Status: http.StatusText(http.StatusOK), Note: "删除资源16", Process: "process16.exe", PadTime: 5})
-	//t.Root.AddChildByData(packet{Scheme: "https16", Method: http.MethodGet, Host: "example.com17", Path: "/api/v1/resource17", ContentType: "application/json17", ContentLength: 116, Status: http.StatusText(http.StatusOK), Note: "获取资源17", Process: "process17.exe", PadTime: 30})
-	//
+
 	t.Format()
 	return t.Layout
 }

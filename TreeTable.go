@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"gioui.org/gesture"
 	"gioui.org/io/clipboard"
@@ -269,7 +270,12 @@ func newTable[T any](data T, ctx TableContext[T]) {
 	//
 	//return root, header
 }
-func (n *Node[T]) IsRoot() bool { return n.parent == nil }
+func (n *Node[T]) IsRoot() bool {
+	if n == nil { //todo bug
+		return false
+	}
+	return n.parent == nil
+}
 func newNode[T any](typeKey string, isContainer bool, data T) *Node[T] {
 	if isContainer {
 		typeKey += ContainerKeyPostfix
@@ -346,6 +352,49 @@ type Node[T any] struct {
 	wasDragged               bool
 	dividerDrag              bool
 	RowCells                 []CellData
+
+	LongPressCallback func(node *Node[T]) // 长按回调
+	pressStarted      time.Time           // 按压开始时间
+	longPressed       bool                // 是否已经触发长按事件
+}
+
+func (n *Node[T]) UpdateTouch(gtx layout.Context) {
+	// 检测触摸事件
+	//for _, ev := range gtx.Events(n) {
+	//	if e, ok := ev.(pointer.Event); ok {
+	//		switch e.Type {
+	//		case pointer.Press:
+	//			n.pressStarted = time.Now() // 记录按压开始时间
+	//			n.longPressed = false       // 重置长按状态
+	//		case pointer.Release:
+	//			if n.longPressed {
+	//				// 如果已经触发了长按事件，不需要额外处理
+	//				return
+	//			}
+	//			// 检查是否是点击事件
+	//			if time.Since(n.pressStarted) < LongPressDuration {
+	//				// 处理点击事件
+	//				if n.rowClick.Clicked() {
+	//					n.isOpen = !n.isOpen
+	//					if n.CellClickedCallback != nil {
+	//						n.CellClickedCallback(n)
+	//					}
+	//					if t.RowSelectedCallback != nil {
+	//						t.RowSelectedCallback(n)
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+
+	// 检测长按事件
+	if gtx.Now.Sub(n.pressStarted) > LongPressDuration && !n.longPressed {
+		n.longPressed = true
+		if n.LongPressCallback != nil {
+			n.LongPressCallback(n)
+		}
+	}
 }
 
 // ----------------------------------------------------------
@@ -373,7 +422,28 @@ type TableTheme struct {
 	ShowColumnDivider bool
 }
 
+const LongPressDuration = 500 * time.Millisecond // 自定义长按持续时间
+
 func (t *TreeTable[T]) SetRootRows(rootRows []*Node[T]) *TreeTable[T] {
+	for _, row := range rootRows {
+		t.expandNode(row)
+		// 设置长按回调
+		row.LongPressCallback = func(node *Node[T]) {
+			// 长按时执行的操作
+			t.header.clickedColumnIndex = -1 // 重置点击列索引（如果需要）
+			t.selectedNode = node            // 设置选中节点
+			// 显示上下文菜单
+			//t.header.contextMenu.Show(gtx, func(gtx layout.Context) layout.Dimensions {
+			//	return t.drawContextArea(gtx, &t.header.contextMenu.MenuState)
+			//})
+		}
+		//row.UpdateTouch(gtx) // 初始化触摸事件处理
+	}
+	t.Children = rootRows
+	return t
+}
+
+func (t *TreeTable[T]) SetRootRows2(rootRows []*Node[T]) *TreeTable[T] {
 	for _, row := range rootRows {
 		t.expandNode(row) // 将每个节点展开
 	}
@@ -476,6 +546,9 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions { // 相当�
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return list.Layout(gtx, len(t.Children), func(gtx layout.Context, index int) layout.Dimensions {
+				node := t.Children[index]
+				node.UpdateTouch(gtx) // 更新触摸事件处理逻辑
+				return t.RowFrame(gtx, node, index)
 				return t.RowFrame(gtx, t.Children[index], index)
 				//t.inLayoutHeader = false
 				//return t.layoutDrag(gtx, func(gtx layout.Context, row int) layout.Dimensions {
