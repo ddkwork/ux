@@ -1,14 +1,14 @@
 module github.com/ddkwork/ux
 
-go 1.23.3
+go 1.24.0
 
 require (
 	gioui.org v0.8.0
 	gioui.org/cmd v0.8.0
 	gioui.org/example v0.8.0
 	gioui.org/x v0.8.1
-	github.com/alecthomas/chroma/v2 v2.14.0
-	github.com/ddkwork/golibrary v0.0.0-20250101093329-d96f6524ebe4
+	github.com/alecthomas/chroma/v2 v2.15.0
+	github.com/ddkwork/golibrary v0.0.88-0.20250216081829-938757a0a8d6
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gen2brain/dlgs v0.0.0-20220603100644-40c77870fa8d
 	github.com/google/uuid v1.6.0
@@ -20,12 +20,12 @@ require (
 	github.com/tc-hib/winres v0.3.1
 	github.com/x-module/gioui-plugins v0.0.5
 	golang.design/x/clipboard v0.7.0
-	golang.org/x/crypto v0.32.0
+	golang.org/x/crypto v0.33.0
 	golang.org/x/exp/shiny v0.0.0-20250106191152-7588d65b2ba8
-	golang.org/x/image v0.23.0
-	golang.org/x/sync v0.10.0
-	golang.org/x/sys v0.29.0
-	golang.org/x/tools v0.28.0
+	golang.org/x/image v0.24.0
+	golang.org/x/sync v0.11.0
+	golang.org/x/sys v0.30.0
+	golang.org/x/tools v0.30.0
 )
 
 require (
@@ -36,7 +36,7 @@ require (
 	github.com/akavel/rsrc v0.10.1 // indirect
 	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394 // indirect
 	github.com/dc0d/caseconv v0.5.0 // indirect
-	github.com/dlclark/regexp2 v1.11.4 // indirect
+	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/esiqveland/notify v0.11.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-text/typesetting v0.2.1 // indirect
@@ -51,10 +51,10 @@ require (
 	github.com/yuin/goldmark v1.7.1 // indirect
 	golang.org/x/exp v0.0.0-20240707233637-46b078467d37 // indirect
 	golang.org/x/mobile v0.0.0-20231127183840-76ac6878050a // indirect
-	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.33.0 // indirect
+	golang.org/x/mod v0.23.0 // indirect
+	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	gonum.org/v1/gonum v0.8.2 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
