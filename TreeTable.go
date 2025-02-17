@@ -1151,7 +1151,6 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 								// 然后双击编辑行的时候从富文本取出完整行并换行显示，structView需要好好设计一下这个
 								// 这个在抓包场景很那个，url列一般都长
 							}
-							// cell.Minimum = CalculateTextWidth(gtx, cell.Text)
 							return node.CellFrame(gtx, cell)
 						}),
 						layout.Expanded(func(gtx layout.Context) layout.Dimensions {
@@ -1426,11 +1425,12 @@ func DrawColumnDivider(gtx layout.Context, col int) {
 	if col > 0 { //层级列不要绘制分隔线
 		dividerWidth := DividerWidth
 		// 使用默认的行高作为分隔线的高度
-		tallestHeight := gtx.Dp(unit.Dp(32)) // 或其他合适的高度
+		//tallestHeight := gtx.Dp(unit.Dp(32))
+		tallestHeight := gtx.Dp(unit.Dp(gtx.Constraints.Max.Y))
 		// 或者这里可以从单元格的内容获取最大高度
-		if gtx.Constraints.Min.Y > tallestHeight {
-			tallestHeight = gtx.Constraints.Min.Y
-		}
+		//if gtx.Constraints.Min.Y > tallestHeight {
+		//tallestHeight = gtx.Constraints.Min.Y
+		//}
 		stack3 := clip.Rect{Max: image.Pt(int(dividerWidth), tallestHeight)}.Push(gtx.Ops)
 		paint.Fill(gtx.Ops, DividerFg)
 		stack3.Pop()
@@ -1605,8 +1605,11 @@ func (n *Node[T]) AddChild(child *Node[T]) {
 }
 
 func (n *Node[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions {
+
+	//固定单元格宽度为计算好的每列最大宽度
 	gtx.Constraints.Min.X = int(data.Minimum)
 	gtx.Constraints.Max.X = int(data.Minimum)
+
 	DrawColumnDivider(gtx, data.ColumID) // 为每列绘制列分隔条
 	if data.FgColor == (color.NRGBA{}) {
 		data.FgColor = White
