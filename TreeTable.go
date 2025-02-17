@@ -1110,6 +1110,11 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 						})
 					}
 					return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						if node.isOpen {
+							return NewButton("Hex Editor", nil).SetRectIcon(true).SetSVGIcon(CircledChevronDown).Layout(gtx)
+						}
+						return NewButton("Hex Editor", nil).SetRectIcon(true).SetSVGIcon(CircledChevronRight).Layout(gtx)
+
 						return reDrawIcon(gtx, icon)
 					})
 				})

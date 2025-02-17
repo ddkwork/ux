@@ -385,7 +385,8 @@ var ActionFullIcon *widget.Icon = func() *widget.Icon {
 }()
 
 var ArrowRightIcon *widget.Icon = func() *widget.Icon {
-	icon, _ := widget.NewIcon(icons.HardwareKeyboardArrowRight)
+	//icon, _ := widget.NewIcon(icons.HardwareKeyboardArrowRight)
+	icon, _ := widget.NewIcon(icons.NavigationChevronRight)
 	return icon
 }()
 

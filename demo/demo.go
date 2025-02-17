@@ -368,16 +368,16 @@ func main() {
 		}
 	}
 
-	m.Set(CodeEditorType, ux.NewCodeEditor(tabGo, ux.CodeLanguageGO).Layout) // todo 增加滚动条
-	m.Set(LogViewType, ux.LogView())                                         // todo 日志没有对齐，控制台是对齐的，增加滚动条
+	m.Set(CodeEditorType, ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout) // todo 增加滚动条
+	m.Set(LogViewType, ux.LogView())                                             // todo 日志没有对齐，控制台是对齐的，增加滚动条
 	// m.Set(ComBoxType, combox(w))//newselect
 
 	sp := ux.NewSplit(ux.Split{
 		Ratio:  0, // 布局比例，0 表示居中，-1 表示完全靠左，1 表示完全靠右
 		Bar:    10,
 		Axis:   layout.Horizontal,
-		First:  ux.NewCodeEditor(tabGo, ux.CodeLanguageGO).Layout,
-		Second: ux.NewCodeEditor(tabGo, ux.CodeLanguageGO).Layout,
+		First:  ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout,
+		Second: ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout,
 	})
 	m.Set(SplitViewType, sp.Layout)
 
