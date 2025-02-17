@@ -819,7 +819,7 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions
 					nextCol.Current = minWidth      // 将下一个列宽度设为最小宽度
 					col.Current -= d                // 更新当前列宽度
 				}
-			} else { // 如果不需要收缩
+			} else {                        // 如果不需要收缩
 				if col.Current < minWidth { // 如果当前列宽度小于最小宽度
 					col.Current = minWidth // 将当前列宽度设为最小宽度
 				}
@@ -1106,10 +1106,6 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					// 制层级图绘标-----------------------------------------------------------------------------------------------------------------
 					HierarchyInsert := layout.Inset{Left: c.leftIndent, Top: 2}
-					icon := ArrowRightIcon
-					if node.isOpen {
-						icon = ArrowDownIcon
-					}
 					if !node.CanHaveChildren() {
 						return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							return layout.Dimensions{}
@@ -1117,11 +1113,9 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 					}
 					return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						if node.isOpen {
-							return NewButton("Hex Editor", nil).SetRectIcon(true).SetSVGIcon(CircledChevronDown).Layout(gtx)
+							return NewButton("open node", nil).SetRectIcon(true).SetSVGIcon(CircledChevronDown).Layout(gtx)
 						}
-						return NewButton("Hex Editor", nil).SetRectIcon(true).SetSVGIcon(CircledChevronRight).Layout(gtx)
-
-						return reDrawIcon(gtx, icon)
+						return NewButton("close node", nil).SetRectIcon(true).SetSVGIcon(CircledChevronRight).Layout(gtx)
 					})
 				})
 			}),
@@ -1419,50 +1413,6 @@ func (t *TreeTable[T]) drawContextArea(gtx C, menuState *component.MenuState) D 
 const iconSize = unit.Dp(12)
 
 var svgButtonTest *GoogleDummyButton
-
-func reDrawIcon(gtx layout.Context, icon *widget.Icon) layout.Dimensions {
-	return reDrawIcon2(gtx, icon)
-	size := gtx.Dp(iconSize)
-	point := image.Pt(size, size)
-	return layout.Stack{}.Layout(gtx,
-		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-			radius := size
-			return component.Rect{Color: White, Size: point, Radii: radius}.Layout(gtx)
-		}),
-		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-			gtx.Constraints.Min = image.Point{X: size}
-			// icon.Layout(gtx, Black)
-
-			svgButtonTest = NewSVGButton("", Svg2Icon([]byte(CircledChevronRight)), func() {
-				mylog.Info("svg button clicked")
-			})
-			return Background{Color: Black}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return svgButtonTest.Layout(gtx)
-			})
-			return layout.Dimensions{
-				Size: image.Pt(size, size),
-			}
-		}),
-	)
-}
-
-func reDrawIcon2(gtx layout.Context, icon *widget.Icon) layout.Dimensions {
-	size := gtx.Dp(iconSize)
-	point := image.Pt(size, size)
-	return layout.Stack{Alignment: layout.Center}.Layout(gtx,
-		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-			radius := size / 2
-			return component.Rect{Color: White, Size: point, Radii: radius}.Layout(gtx)
-		}),
-		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-			gtx.Constraints.Min = image.Point{X: size}
-			icon.Layout(gtx, Black)
-			return layout.Dimensions{
-				Size: image.Pt(size, size),
-			}
-		}),
-	)
-}
 
 const DividerWidth = unit.Dp(1)
 
