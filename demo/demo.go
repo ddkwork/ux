@@ -471,7 +471,7 @@ func treeTable() ux.Widget {
 	rows := make([]*ux.Node[packet], topLevelRowsToMake)
 	for i := 0; i < topLevelRowsToMake; i++ {
 		data := packet{
-			Scheme:        "http" + fmt.Sprint(i+1),
+			Scheme:        "Row" + fmt.Sprint(i+1),
 			Method:        http.MethodGet,
 			Host:          "example.com",
 			Path:          fmt.Sprintf("/api/v%d/resource", i+1),
@@ -490,7 +490,7 @@ func treeTable() ux.Widget {
 			node.Children = make([]*ux.Node[packet], 5)
 			for j := 0; j < 5; j++ {
 				subData := packet{
-					Scheme:        "http" + fmt.Sprint(j+1),
+					Scheme:        "Row" + fmt.Sprint(j+1),
 					Method:        http.MethodGet,
 					Host:          "example.com",
 					Path:          fmt.Sprintf("/api/v%d/resource%d", i+1, j+1),
@@ -501,14 +501,14 @@ func treeTable() ux.Widget {
 					Process:       fmt.Sprintf("process%d-%d.exe", i+1, j+1),
 					PadTime:       time.Duration(i+1+j+1) * time.Second,
 				}
-				subNode := ux.NewNode(subData)
+				subNode := ux.NewContainerNode("subSubRow "+fmt.Sprint(j+1), subData)
 				subNode.SetParent(node)
 				node.Children[j] = subNode
 				if j < 2 {
 					subNode.Children = make([]*ux.Node[packet], 2)
 					for k := 0; k < 2; k++ {
 						subSubData := packet{
-							Scheme:        "http" + fmt.Sprint(k+1),
+							Scheme:        "Row" + fmt.Sprint(k+1),
 							Method:        http.MethodGet,
 							Host:          "example.com",
 							Path:          fmt.Sprintf("/api/v%d/resource%d-%d", i+1, j+1, k+1),
@@ -519,7 +519,7 @@ func treeTable() ux.Widget {
 							Process:       fmt.Sprintf("process%d-%d-%d.exe", i+1, j+1, k+1),
 							PadTime:       time.Duration(i+1+j+1+k+1) * time.Second,
 						}
-						subSubNode := ux.NewNode(subSubData)
+						subSubNode := ux.NewContainerNode("subSubSubRow "+fmt.Sprint(k+1), subSubData)
 						subSubNode.SetParent(subNode)
 						subNode.Children[k] = subSubNode
 					}
@@ -759,7 +759,7 @@ func treeTable_() ux.Widget { // todo 调用抓包模块处理超长url
 	rows := make([]*ux.Node[packet], topLevelRowsToMake)
 	for i := range rows {
 		data := packet{
-			Scheme:        "http" + fmt.Sprint(i+1),
+			Scheme:        "Row" + fmt.Sprint(i+1),
 			Method:        http.MethodGet,
 			Host:          "example.com",
 			Path:          fmt.Sprintf("/api/v%d/resource", i+1),
