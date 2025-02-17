@@ -484,7 +484,7 @@ func treeTable() ux.Widget {
 		}
 		var node *ux.Node[packet]
 		if i%10 == 3 {
-			node = ux.NewContainerNode(fmt.Sprintf("SubRow %d", i+1), data)
+			node = ux.NewContainerNode(fmt.Sprintf("Sub Row %d", i+1), data)
 			node.SetParent(t.Root)
 			//node.Open = true
 			node.Children = make([]*ux.Node[packet], 5)
@@ -501,7 +501,7 @@ func treeTable() ux.Widget {
 					Process:       fmt.Sprintf("process%d-%d.exe", i+1, j+1),
 					PadTime:       time.Duration(i+1+j+1) * time.Second,
 				}
-				subNode := ux.NewContainerNode("subSubRow "+fmt.Sprint(j+1), subData)
+				subNode := ux.NewContainerNode("Sub Sub Row "+fmt.Sprint(j+1), subData)
 				subNode.SetParent(node)
 				node.Children[j] = subNode
 				if j < 2 {
@@ -519,7 +519,7 @@ func treeTable() ux.Widget {
 							Process:       fmt.Sprintf("process%d-%d-%d.exe", i+1, j+1, k+1),
 							PadTime:       time.Duration(i+1+j+1+k+1) * time.Second,
 						}
-						subSubNode := ux.NewContainerNode("subSubRow "+fmt.Sprint(k+1), subSubData)
+						subSubNode := ux.NewContainerNode("Sub Sub Row "+fmt.Sprint(k+1), subSubData)
 						subSubNode.SetParent(subNode)
 						subNode.Children[k] = subSubNode
 					}

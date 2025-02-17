@@ -1092,8 +1092,11 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 		if !node.CanHaveChildren() {
 			c.leftIndent += 8
 		}
-		if node.parent.IsRoot() && !node.CanHaveChildren() {
-			c.leftIndent = HierarchyIndent + iconWidth + 4 // 根节点HierarchyIndent + 图标宽度 + 左padding
+		if node.parent.IsRoot() {
+			c.leftIndent = HierarchyIndent
+			if !node.CanHaveChildren() {
+				c.leftIndent = HierarchyIndent + iconWidth + 4 // 根节点HierarchyIndent + 图标宽度 + 左padding
+			}
 		}
 
 		//自适应列宽，这在动态插入节点的情况下可能影响性能
@@ -1112,10 +1115,11 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 						})
 					}
 					return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						svg := CircledChevronRight
 						if node.isOpen {
-							return NewButton("open node", nil).SetRectIcon(true).SetSVGIcon(CircledChevronDown).Layout(gtx)
+							svg = CircledChevronDown
 						}
-						return NewButton("close node", nil).SetRectIcon(true).SetSVGIcon(CircledChevronRight).Layout(gtx)
+						return NewButton("", nil).SetRectIcon(true).SetSVGIcon(svg).Layout(gtx)
 					})
 				})
 			}),
