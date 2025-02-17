@@ -1038,6 +1038,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 		node.RowCells[i].Maximum = t.header.ColumnCells[i].Minimum
 		node.RowCells[i].Current = t.header.ColumnCells[i].Minimum
 		node.RowCells[i].maxDepth = t.header.ColumnCells[i].maxDepth
+		node.RowCells[i].ColumID = t.header.ColumnCells[i].ColumID
 	}
 	rowClick := &node.rowClick
 
@@ -1151,7 +1152,6 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 								// 这个在抓包场景很那个，url列一般都长
 							}
 							// cell.Minimum = CalculateTextWidth(gtx, cell.Text)
-							cell.ColumID = t.header.ColumnCells[i].ColumID
 							return node.CellFrame(gtx, cell)
 						}),
 						layout.Expanded(func(gtx layout.Context) layout.Dimensions {
