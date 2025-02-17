@@ -1,13 +1,14 @@
 package main
 
 import (
+	"github.com/ddkwork/golibrary/safemap"
 	"testing"
 
 	"github.com/ddkwork/golibrary/stream"
 )
 
 func TestName(t *testing.T) {
-	m := safemap.NewOrdered[string, string]()
+	m := new(safemap.M[string, string])
 	m.Set("treeTable", "treeTable")
 	m.Set("tree", "tree")
 	m.Set("table2", "table2")

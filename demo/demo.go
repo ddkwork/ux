@@ -471,7 +471,7 @@ func treeTable() ux.Widget {
 	rows := make([]*ux.Node[packet], topLevelRowsToMake)
 	for i := 0; i < topLevelRowsToMake; i++ {
 		data := packet{
-			Scheme:        "http",
+			Scheme:        "http" + fmt.Sprint(i+1),
 			Method:        http.MethodGet,
 			Host:          "example.com",
 			Path:          fmt.Sprintf("/api/v%d/resource", i+1),
@@ -484,13 +484,13 @@ func treeTable() ux.Widget {
 		}
 		var node *ux.Node[packet]
 		if i%10 == 3 {
-			node = ux.NewContainerNode(fmt.Sprintf("Root %d", i+1), data)
+			node = ux.NewContainerNode(fmt.Sprintf("SubRow %d", i+1), data)
 			node.SetParent(t.Root)
 			//node.Open = true
 			node.Children = make([]*ux.Node[packet], 5)
 			for j := 0; j < 5; j++ {
 				subData := packet{
-					Scheme:        "http",
+					Scheme:        "http" + fmt.Sprint(j+1),
 					Method:        http.MethodGet,
 					Host:          "example.com",
 					Path:          fmt.Sprintf("/api/v%d/resource%d", i+1, j+1),
@@ -508,7 +508,7 @@ func treeTable() ux.Widget {
 					subNode.Children = make([]*ux.Node[packet], 2)
 					for k := 0; k < 2; k++ {
 						subSubData := packet{
-							Scheme:        "http",
+							Scheme:        "http" + fmt.Sprint(k+1),
 							Method:        http.MethodGet,
 							Host:          "example.com",
 							Path:          fmt.Sprintf("/api/v%d/resource%d-%d", i+1, j+1, k+1),
@@ -759,7 +759,7 @@ func treeTable_() ux.Widget { // todo 调用抓包模块处理超长url
 	rows := make([]*ux.Node[packet], topLevelRowsToMake)
 	for i := range rows {
 		data := packet{
-			Scheme:        "http",
+			Scheme:        "http" + fmt.Sprint(i+1),
 			Method:        http.MethodGet,
 			Host:          "example.com",
 			Path:          fmt.Sprintf("/api/v%d/resource", i+1),
