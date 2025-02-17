@@ -1423,15 +1423,8 @@ const DividerWidth = unit.Dp(1)
 // 分隔线绘制函数
 func DrawColumnDivider(gtx layout.Context, col int) {
 	if col > 0 { //层级列不要绘制分隔线
-		dividerWidth := DividerWidth
-		// 使用默认的行高作为分隔线的高度
-		//tallestHeight := gtx.Dp(unit.Dp(32))
 		tallestHeight := gtx.Dp(unit.Dp(gtx.Constraints.Max.Y))
-		// 或者这里可以从单元格的内容获取最大高度
-		//if gtx.Constraints.Min.Y > tallestHeight {
-		//tallestHeight = gtx.Constraints.Min.Y
-		//}
-		stack3 := clip.Rect{Max: image.Pt(int(dividerWidth), tallestHeight)}.Push(gtx.Ops)
+		stack3 := clip.Rect{Max: image.Pt(int(DividerWidth), tallestHeight)}.Push(gtx.Ops)
 		paint.Fill(gtx.Ops, DividerFg)
 		stack3.Pop()
 	}
