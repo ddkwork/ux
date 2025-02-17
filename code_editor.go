@@ -100,7 +100,7 @@ func NewCodeEditor(code string, lang string) *CodeEditor {
 			Shaper:          shaper,
 			TextColor:       th.Fg,
 			Bg:              th.Bg,
-			SelectionColor:  Blue50, //todo
+			SelectionColor:  Blue500, //todo
 			TypeFace:        editorFont.Font.Typeface,
 			TextSize:        unit.Sp(14),
 			LineHeightScale: 1,
@@ -116,9 +116,8 @@ func NewCodeEditor(code string, lang string) *CodeEditor {
 	}
 
 	c.vScrollbarStyle = material.Scrollbar(th.Theme, &c.vScrollbar)
-
 	c.border = widget.Border{
-		Color:        Yellow50, //todo
+		Color:        rgb(0x6c6f76), //todo
 		Width:        unit.Dp(1),
 		CornerRadius: unit.Dp(4),
 	}
