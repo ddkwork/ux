@@ -1076,6 +1076,12 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 	}
 	if t.selectedNode == node { //设置选中背景色
 		bgColor = ColorPink
+		bgColor = color.NRGBA{
+			R: 255,
+			G: 186,
+			B: 44,
+			A: 91,
+		}
 	}
 
 	var rowCells []layout.FlexChild
@@ -1366,7 +1372,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 	rows := []layout.FlexChild{ // 合成层级列和其他列的单元格为一行,并设置该行的背景和行高
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return Background{bgColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(12)) // 行高,todo bug 增加了上下文菜单后设置更改的分割线高度不生效,除非删除这一行，但是这样高度太低了
+				//gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(12)) // 行高,todo bug 增加了上下文菜单后设置更改的分割线高度不生效,除非删除这一行，但是这样高度太低了
 				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, rowCells...)
 			})
 		}),
@@ -1870,7 +1876,7 @@ func (n *Node[T]) DiscloseRow(row *Node[T], delaySync bool) bool { // todo merge
 
 //-----------------------------------------------------------------------------
 
-func CountTableRows[T any](rows []*Node[T]) int { // 正个表的总行数
+func CountTableRows[T any](rows []*Node[T]) int { // 计算整个表的总行数
 	count := len(rows)
 	for _, row := range rows {
 		if row.CanHaveChildren() {

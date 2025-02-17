@@ -12,9 +12,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
-	"gioui.org/x/component"
 	"github.com/ddkwork/ux/animationButton"
-	"github.com/ddkwork/ux/f32color"
 	"github.com/inkeliz/giosvg"
 )
 
@@ -156,44 +154,30 @@ func (m *Button) Layout(gtx layout.Context) layout.Dimensions {
 	if m.text == "" && m.icon != nil || m.svgIcon != nil { // 树形层级图标，没有文字
 		if m.iconRect { // 带图标的编辑框，图标背景色和按钮背景色一致
 			return material.Clickable(gtx, m.Clickable, func(gtx C) D {
-				const defaultIconSize = unit.Dp(24)
+				const defaultIconSize = unit.Dp(12)
 				sz := gtx.Dp(defaultIconSize)
 				size := image.Pt(sz, sz)
 				gtx.Constraints.Min = size
 				gtx.Constraints.Max = size
-
 				background := func(gtx C) D {
-					// th.Color.InputFocusedBgColor
-					defer clip.Rect{Max: gtx.Constraints.Max}.Push(gtx.Ops).Pop()
+					defer clip.UniformRRect(image.Rectangle{Max: gtx.Constraints.Max}, sz/2).Push(gtx.Ops).Pop() // 使用UniformRRect绘制圆形背景
+					var backgroundColor color.NRGBA
 					if m.Hovered() || gtx.Focused(m) {
-						// paint.Fill(gtx.Ops, (th.Color.InputFocusedBgColor))
-						paint.Fill(gtx.Ops, f32color.Hovered(color.NRGBA{}))
+						backgroundColor = th.Fg // 悬停或聚焦时的颜色
+					} else {
+						backgroundColor = th.Color.InputFocusedBgColor // 默认颜色
 					}
-					//for _, c := range m.History() {
-					//	drawInk(gtx, c)
-					//}
+					paint.Fill(gtx.Ops, backgroundColor)
 					return layout.Dimensions{Size: gtx.Constraints.Min}
 				}
-
 				if m.icon != nil {
 					return layout.Background{}.Layout(gtx, background, func(gtx layout.Context) layout.Dimensions {
-						return m.icon.Layout(gtx, th.Theme.Fg)
+						return m.icon.Layout(gtx, th.Theme.Bg)
 					})
 				}
-				size2 := gtx.Dp(iconSize)
-				point := image.Pt(size2, size2)
-				return layout.Stack{Alignment: layout.Center}.Layout(gtx,
-					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-						radius := size2 / 2
-						return component.Rect{Color: White, Size: point, Radii: radius}.Layout(gtx)
-					}),
-					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-						gtx.Constraints.Min = image.Point{X: size2}
-						return Background{Color: BackgroundColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-							return m.svgIcon.Layout(gtx)
-						})
-					}),
-				)
+				return layout.Background{}.Layout(gtx, background, func(gtx layout.Context) layout.Dimensions {
+					return m.svgIcon.Layout(gtx)
+				})
 			})
 		}
 		btn := material.IconButton(th.Theme, m.Clickable, m.icon, m.text)
@@ -319,7 +303,6 @@ func (ib *IconButton2) Layout(gtx layout.Context) layout.Dimensions {
 
 	return ib.Clickable.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		semantic.Button.Add(gtx.Ops)
-
 		return layout.Background{}.Layout(gtx,
 			func(gtx layout.Context) layout.Dimensions {
 				defer clip.UniformRRect(image.Rectangle{Max: gtx.Constraints.Min}, 4).Push(gtx.Ops).Pop()
