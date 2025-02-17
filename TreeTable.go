@@ -1151,6 +1151,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 								// 这个在抓包场景很那个，url列一般都长
 							}
 							// cell.Minimum = CalculateTextWidth(gtx, cell.Text)
+							cell.ColumID = t.header.ColumnCells[i].ColumID
 							return node.CellFrame(gtx, cell)
 						}),
 						layout.Expanded(func(gtx layout.Context) layout.Dimensions {
@@ -1422,7 +1423,7 @@ const DividerWidth = unit.Dp(1)
 
 // 分隔线绘制函数
 func DrawColumnDivider(gtx layout.Context, col int) {
-	if col > 0 {
+	if col > 0 { //层级列不要绘制分隔线
 		dividerWidth := DividerWidth
 		// 使用默认的行高作为分隔线的高度
 		tallestHeight := gtx.Dp(unit.Dp(32)) // 或其他合适的高度
