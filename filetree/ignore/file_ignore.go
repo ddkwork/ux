@@ -2,7 +2,7 @@ package ignore
 
 import (
 	"bufio"
-	"log"
+
 	"os"
 	"os/user"
 	"path/filepath"

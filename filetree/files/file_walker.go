@@ -1,7 +1,6 @@
 package files
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"

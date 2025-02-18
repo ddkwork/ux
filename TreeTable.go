@@ -685,7 +685,7 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions
 					nextCol.Current = minWidth      // 将下一个列宽度设为最小宽度
 					col.Current -= d                // 更新当前列宽度
 				}
-			} else {                        // 如果不需要收缩
+			} else { // 如果不需要收缩
 				if col.Current < minWidth { // 如果当前列宽度小于最小宽度
 					col.Current = minWidth // 将当前列宽度设为最小宽度
 				}
@@ -1891,132 +1891,132 @@ func (n *Node[T]) Clone() (newNode *Node[T]) {
 	return NewNode(n.Data)
 }
 
-// ---------------------- todo delete
-func NewTable3[T any](data T, ctx TableContext[T]) {
-	if ctx.JsonName == "" {
-		mylog.Check("JsonName is empty")
-	}
-	ctx.JsonName = strings.TrimSuffix(ctx.JsonName, ".json")
-
-	mylog.CheckNil(ctx.UnmarshalRow)
-	// mylog.CheckNil(ctx.SetRootRowsCallBack)//mitmproxy
-	mylog.CheckNil(ctx.RowSelectedCallback)
-
-	//table, header = newTable(data, ctx)
-	//fnUpdate := func() {
-	//	table.SetRootRows(table.Children)
-	//	table.SizeColumnsToFit(true)
-	//	stream.MarshalJsonToFile(table, filepath.Join("cache", ctx.JsonName+".json"))
-	//	stream.WriteTruncate(filepath.Join("cache", ctx.JsonName+".txt"), table.Document())
-	//	if ctx.IsDocument {
-	//		b := stream.NewBuffer("")
-	//		b.WriteStringLn("# " + ctx.JsonName + " document table")
-	//		b.WriteStringLn("```text")
-	//		b.WriteStringLn(table.Document())
-	//		b.WriteStringLn("```")
-	//		stream.WriteTruncate("README.md", b.String())
-	//	}
-	//}
-
-	//if ctx.SetRootRowsCallBack != nil { // mitmproxy
-	//	ctx.SetRootRowsCallBack(table)
-	//}
-	//table.RowSelectedCallback = func() { ctx.RowSelectedCallback(table) }
-	//
-	//app.FileDropCallback(func(files []string) {
-	//	if filepath.Ext(files[0]) == ".json" {
-	//		mylog.Info("dropped file", files[0])
-	//		table.ResetChildren()
-	//		b := stream.NewBuffer(files[0])
-	//		mylog.Check(json.Unmarshal(b.Bytes(), table)) // todo test need a zero table?
-	//		fnUpdate()
-	//	}
-	//	mylog.Struct("todo",files)
-	//})
-	//
-	//table.RowDoubleClickCallback = func() {
-	//	rows := table.SelectedRows(false)
-	//	for _, row := range rows {
-	//		mylog.Struct("todo",row.RowCells)
-	//		// todo icon edit
-	//		//app.RunWithIco("edit row #"+fmt.Sprint(i), rowPngBuffer, func(w *Window) {
-	//		//	content := w.Content()
-	//		//	nodeEditor, RowPanel := NewStructView(row.Cell, func(data T) (values []CellData) {
-	//		//		return table.MarshalRow(row)
-	//		//	})
-	//		//	content.AddChild(nodeEditor)
-	//		//	content.AddChild(RowPanel)
-	//		//	panel := NewButtonsPanel(
-	//		//		[]string{
-	//		//			"apply", "cancel",
-	//		//		},
-	//		//		func() {
-	//		//			ctx.UnmarshalRow(row, nodeEditor.getFieldValues())
-	//		//			nodeEditor.Update(row.Cell)
-	//		//			table.SyncToModel()
-	//		//			stream.MarshalJsonToFile(table.Children, ctx.JsonName+".json")
-	//		//			// w.Dispose()
-	//		//		},
-	//		//		func() {
-	//		//			w.Dispose()
-	//		//		},
-	//		//	)
-	//		//	RowPanel.AddChild(panel)
-	//		//	RowPanel.AddChild(NewVSpacer())
-	//		//})
-	//	}
-	//}
-	//fnUpdate()
-	return
-}
-func newTable[T any](data T, ctx TableContext[T]) {
-	//for i, column := range root.Columns {
-	//	text := NewText(column.Cell, &TextDecoration{
-	//		Font:           LabelFont,
-	//		Background:     nil,
-	//		Foreground:     nil,
-	//		BaselineOffset: 0,
-	//		Underline:      false,
-	//		StrikeThrough:  false,
-	//	})
-	//	root.Columns[i].Minimum = text.Current() + root.Padding.Left + root.Padding.Right
-	//}
-	//
-	//root.KeyDownCallback = func(keyCode KeyCode, mod Modifiers, repeat bool) bool {
-	//	if mod == 0 && (keyCode == KeyBackspace || keyCode == KeyDelete) {
-	//		root.PerformCmd(root, DeleteItemID)
-	//		return true
-	//	}
-	//	return root.DefaultKeyDown(keyCode, mod, repeat) // todo add delete,move to ctx menu,exporter need delete file or dir
-	//}
-	//
-	//root.InstallDragSupport(nil, "dragKey", "singularName", "pluralName")
-	//InstallDropSupport[T, any](root, "dragKey", func(from, to *Node[T]) bool { return from == to }, nil, nil)
-	//
-	//header = NewTableHeader[T](root)
-	//for _, column := range root.Columns {
-	//	columnHeader := NewTableColumnHeader[T](column.Cell, "")
-	//	columnHeader.MouseDownCallback = func(where Point, button, clickCount int, mod Modifiers) bool {
-	//		return true
-	//	}
-	//	NewContextMenuItems(columnHeader, columnHeader.CellsLabel.MouseDownCallback,
-	//		ContextMenuItem{
-	//			Title: "copy column",
-	//			id:    0,
-	//			Can: func(a any) bool {
-	//				return true
-	//			},
-	//			Do: func(a any) { root.CopyColumn() },
-	//		},
-	//	).Install()
-	//	header.ColumnHeaders = append(header.ColumnHeaders, columnHeader)
-	//}
-	//
-	//return root, header
-}
-
 //go:embed EditIni.png
 var rowPngBuffer []byte
+
+// ---------------------- todo delete
+//func NewTable3[T any](data T, ctx TableContext[T]) {
+//	if ctx.JsonName == "" {
+//		mylog.Check("JsonName is empty")
+//	}
+//	ctx.JsonName = strings.TrimSuffix(ctx.JsonName, ".json")
+//
+//	mylog.CheckNil(ctx.UnmarshalRow)
+//	// mylog.CheckNil(ctx.SetRootRowsCallBack)//mitmproxy
+//	mylog.CheckNil(ctx.RowSelectedCallback)
+//
+//	//table, header = newTable(data, ctx)
+//	//fnUpdate := func() {
+//	//	table.SetRootRows(table.Children)
+//	//	table.SizeColumnsToFit(true)
+//	//	stream.MarshalJsonToFile(table, filepath.Join("cache", ctx.JsonName+".json"))
+//	//	stream.WriteTruncate(filepath.Join("cache", ctx.JsonName+".txt"), table.Document())
+//	//	if ctx.IsDocument {
+//	//		b := stream.NewBuffer("")
+//	//		b.WriteStringLn("# " + ctx.JsonName + " document table")
+//	//		b.WriteStringLn("```text")
+//	//		b.WriteStringLn(table.Document())
+//	//		b.WriteStringLn("```")
+//	//		stream.WriteTruncate("README.md", b.String())
+//	//	}
+//	//}
+//
+//	//if ctx.SetRootRowsCallBack != nil { // mitmproxy
+//	//	ctx.SetRootRowsCallBack(table)
+//	//}
+//	//table.RowSelectedCallback = func() { ctx.RowSelectedCallback(table) }
+//	//
+//	//app.FileDropCallback(func(files []string) {
+//	//	if filepath.Ext(files[0]) == ".json" {
+//	//		mylog.Info("dropped file", files[0])
+//	//		table.ResetChildren()
+//	//		b := stream.NewBuffer(files[0])
+//	//		mylog.Check(json.Unmarshal(b.Bytes(), table)) // todo test need a zero table?
+//	//		fnUpdate()
+//	//	}
+//	//	mylog.Struct("todo",files)
+//	//})
+//	//
+//	//table.RowDoubleClickCallback = func() {
+//	//	rows := table.SelectedRows(false)
+//	//	for _, row := range rows {
+//	//		mylog.Struct("todo",row.RowCells)
+//	//		// todo icon edit
+//	//		//app.RunWithIco("edit row #"+fmt.Sprint(i), rowPngBuffer, func(w *Window) {
+//	//		//	content := w.Content()
+//	//		//	nodeEditor, RowPanel := NewStructView(row.Cell, func(data T) (values []CellData) {
+//	//		//		return table.MarshalRow(row)
+//	//		//	})
+//	//		//	content.AddChild(nodeEditor)
+//	//		//	content.AddChild(RowPanel)
+//	//		//	panel := NewButtonsPanel(
+//	//		//		[]string{
+//	//		//			"apply", "cancel",
+//	//		//		},
+//	//		//		func() {
+//	//		//			ctx.UnmarshalRow(row, nodeEditor.getFieldValues())
+//	//		//			nodeEditor.Update(row.Cell)
+//	//		//			table.SyncToModel()
+//	//		//			stream.MarshalJsonToFile(table.Children, ctx.JsonName+".json")
+//	//		//			// w.Dispose()
+//	//		//		},
+//	//		//		func() {
+//	//		//			w.Dispose()
+//	//		//		},
+//	//		//	)
+//	//		//	RowPanel.AddChild(panel)
+//	//		//	RowPanel.AddChild(NewVSpacer())
+//	//		//})
+//	//	}
+//	//}
+//	//fnUpdate()
+//	return
+//}
+//func newTable[T any](data T, ctx TableContext[T]) {
+//	//for i, column := range root.Columns {
+//	//	text := NewText(column.Cell, &TextDecoration{
+//	//		Font:           LabelFont,
+//	//		Background:     nil,
+//	//		Foreground:     nil,
+//	//		BaselineOffset: 0,
+//	//		Underline:      false,
+//	//		StrikeThrough:  false,
+//	//	})
+//	//	root.Columns[i].Minimum = text.Current() + root.Padding.Left + root.Padding.Right
+//	//}
+//	//
+//	//root.KeyDownCallback = func(keyCode KeyCode, mod Modifiers, repeat bool) bool {
+//	//	if mod == 0 && (keyCode == KeyBackspace || keyCode == KeyDelete) {
+//	//		root.PerformCmd(root, DeleteItemID)
+//	//		return true
+//	//	}
+//	//	return root.DefaultKeyDown(keyCode, mod, repeat) // todo add delete,move to ctx menu,exporter need delete file or dir
+//	//}
+//	//
+//	//root.InstallDragSupport(nil, "dragKey", "singularName", "pluralName")
+//	//InstallDropSupport[T, any](root, "dragKey", func(from, to *Node[T]) bool { return from == to }, nil, nil)
+//	//
+//	//header = NewTableHeader[T](root)
+//	//for _, column := range root.Columns {
+//	//	columnHeader := NewTableColumnHeader[T](column.Cell, "")
+//	//	columnHeader.MouseDownCallback = func(where Point, button, clickCount int, mod Modifiers) bool {
+//	//		return true
+//	//	}
+//	//	NewContextMenuItems(columnHeader, columnHeader.CellsLabel.MouseDownCallback,
+//	//		ContextMenuItem{
+//	//			Title: "copy column",
+//	//			id:    0,
+//	//			Can: func(a any) bool {
+//	//				return true
+//	//			},
+//	//			Do: func(a any) { root.CopyColumn() },
+//	//		},
+//	//	).Install()
+//	//	header.ColumnHeaders = append(header.ColumnHeaders, columnHeader)
+//	//}
+//	//
+//	//return root, header
+//}
 
 // func addWrappedText(parent *Node[T], ink color.NRGBA, font font.Face, data CellData) {
 //
@@ -2087,12 +2087,12 @@ var rowPngBuffer []byte
 //
 // }
 
-const iconSize = unit.Dp(12)
-
-var svgButtonTest *GoogleDummyButton
-
-func (t *TreeTable[T]) ColumnCell(row, col int, foreground, background color.NRGBA, selected, indirectlySelected, focused bool) layout.Dimensions {
-	return layout.Dimensions{}
-}
+//const iconSize = unit.Dp(12)
+//
+//var svgButtonTest *GoogleDummyButton
+//
+//func (t *TreeTable[T]) ColumnCell(row, col int, foreground, background color.NRGBA, selected, indirectlySelected, focused bool) layout.Dimensions {
+//	return layout.Dimensions{}
+//}
 
 // var editNode *StructView

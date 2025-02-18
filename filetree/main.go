@@ -289,9 +289,7 @@ func main() {
 		)
 
 		// Run main loop
-		if mylog.Check(Run(w)); err != nil {
-			log.Fatal(err)
-		}
+		mylog.Check(Run(w))
 		os.Exit(0)
 	}()
 	app.Main()
