@@ -819,7 +819,7 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions
 					nextCol.Current = minWidth      // 将下一个列宽度设为最小宽度
 					col.Current -= d                // 更新当前列宽度
 				}
-			} else { // 如果不需要收缩
+			} else {                        // 如果不需要收缩
 				if col.Current < minWidth { // 如果当前列宽度小于最小宽度
 					col.Current = minWidth // 将当前列宽度设为最小宽度
 				}
@@ -1042,12 +1042,33 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 	}
 	rowClick := &node.rowClick
 
+	evt, ok := gtx.Source.Event(pointer.Filter{
+		//Target: &node.RowCells[i].Clickable, // todo 检查这个的正确性
+		Target: rowClick, // todo 检查这个的正确性
+		Kinds:  pointer.Press | pointer.Release,
+	})
+	if ok {
+		e, ok := evt.(pointer.Event)
+		if ok {
+			if e.Kind == pointer.Press { //长按应该是touch类型而不是press类型?
+				t.selectedNode = node
+			}
+			switch e.Buttons {
+			case pointer.ButtonPrimary, pointer.ButtonSecondary:
+				if e.Kind == pointer.Press {
+					t.selectedNode = node
+				}
+			}
+		}
+	}
+
 	click, ok := rowClick.Update(gtx)
 	if ok {
 		switch click.NumClicks {
 		case 1:
 			node.isOpen = !node.isOpen // 切换展开状态
-			t.selectedNode = node      // 记录被点击的节点,todo 右击也需要填充它,但是在右键菜单中干这个事情似乎时机不对,上下文区域需要支持手动激活方法
+			//todo bug 左键,右键，长按按下选中设置选中节点,但是目前只有左键按下才会被设置
+			t.selectedNode = node // 记录被点击的节点,todo 右击也需要填充它,但是在右键菜单中干这个事情似乎时机不对,上下文区域需要支持手动激活方法
 			if node.CellClickedCallback != nil {
 				node.CellClickedCallback(node) // 单元格点击回调
 			}
@@ -1236,29 +1257,14 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 												return true
 											},
 											Do: func() {
-												evt, ok := gtx.Source.Event(pointer.Filter{
-													Target: &node.RowCells[i].Clickable, // todo 检查这个的正确性
-													Kinds:  pointer.Press | pointer.Release,
-												})
-												if ok {
-													e, ok := evt.(pointer.Event)
-													if ok {
-														switch e.Buttons {
-														case pointer.ButtonPrimary:
-														case pointer.ButtonSecondary:
-															if e.Kind == pointer.Press {
-																t.selectedNode = node
-															}
-														}
-													}
-												}
 												mylog.CheckNil(t.selectedNode)
 												clone := t.selectedNode.Clone()
 												var zero T
-												clone.Data = zero
-												if t.selectedNode.CanHaveChildren() {
-													t.selectedNode.AddChild(clone)
-												} else {
+												clone.Data = zero //
+												switch {
+												case t.selectedNode.CanHaveChildren(), t.selectedNode.IsRoot():
+													t.selectedNode.AddChild(clone) //todo 应该插入到选中的孩子下标的后一个，这样是插入到最后一个去了
+												default:
 													t.selectedNode.parent.AddChild(clone)
 												}
 												// 这里应该取已选中的节点，但是这里取右键按下事件并给选中节点赋值，然而右键菜单会因事件执激活菜单失败，弹不出菜单。
