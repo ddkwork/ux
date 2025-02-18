@@ -1076,13 +1076,13 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 		bgColor = th.Color.TreeHoveredBgColor
 	}
 	if t.selectedNode == node { //设置选中背景色
-		bgColor = ColorPink
 		bgColor = color.NRGBA{
 			R: 255,
 			G: 186,
 			B: 44,
 			A: 91,
 		}
+		//bgColor = Orange300
 	}
 
 	var rowCells []layout.FlexChild
@@ -1625,7 +1625,7 @@ func (n *Node[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions
 		inset.Top = 2
 		inset.Bottom = 2
 	}
-	return inset.Layout(gtx, material.Body1(th.Theme, data.Text).Layout)
+	return inset.Layout(gtx, material.Body2(th.Theme, data.Text).Layout)
 	//return inset.Layout(gtx, richText.Layout)
 }
 
