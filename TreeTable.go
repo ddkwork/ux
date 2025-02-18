@@ -1109,7 +1109,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					// 制层级图绘标-----------------------------------------------------------------------------------------------------------------
-					HierarchyInsert := layout.Inset{Left: c.leftIndent, Top: 2}
+					HierarchyInsert := layout.Inset{Left: c.leftIndent, Top: 4}
 					if !node.CanHaveChildren() {
 						return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							return layout.Dimensions{}
