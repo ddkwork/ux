@@ -1,0 +1,72 @@
+package main
+
+import (
+	_ "embed"
+
+
+)
+
+//go:generate go build -x .
+//go:generate go install .
+
+//go:embed fleet.svg
+var icon []byte
+
+// https://faststone-photo-resizer.en.lo4d.com/windows
+func main() {
+	// icons.AddFS()
+	gi.TheApp.SetIconBytes(icon)
+	b := gi.NewBody("fleet")
+	b.AddAppBar(func(tb *gi.Toolbar) {
+		widget.NewButton(tb).SetTooltip("open").SetIcon(icons.Add)
+		widget.NewButton(tb).SetTooltip("open").SetIcon(icons.Add)
+		widget.NewButton(tb).SetTooltip("open").SetIcon(icons.Add)
+		widget.NewButton(tb).SetTooltip("open").SetIcon(icons.Add)
+		widget.NewButton(tb).SetTooltip("open").SetIcon(icons.Add)
+		widget.NewButton(tb).SetTooltip("open").SetIcon(icons.Add)
+		widget.NewButton(tb).SetTooltip("open").SetIcon(icons.Add)
+		widget.NewButton(tb).SetTooltip("open").SetIcon(icons.Add)
+		widget.NewButton(tb).SetTooltip("open").SetIcon(icons.Add)
+		widget.NewButton(tb).SetTooltip("open").SetIcon(icons.Add)
+		widget.NewButton(tb).SetTooltip("open").SetIcon(icons.Add)
+		widget.NewButton(tb).SetTooltip("open").SetIcon(icons.Add)
+		widget.NewButton(tb).SetTooltip("open").SetIcon(icons.Add)
+	})
+	tabs := gi.NewTabs(b)
+	tabs.SetType(gi.NavigationRail) // left
+	projecttab := tabs.NewTab("project")
+	projecttab.Style(func(s *styles.Style) {}) // s.Text.Direction
+
+	// todo tab widget单机显示与隐藏，标题文本方向为垂直
+	// 左侧tab，第一页为工程page，左树两个节点，右侧动态创建tab
+	// 问题tab窗口应该垂直布局，不要使用拆分布
+
+	topFrame := gi.NewFrame(projecttab)
+	hSplits := gi.NewSplits(topFrame)
+	treeView := giv.NewTreeView(hSplits)
+
+	treeView.AddChild(filetree.NewTree(treeView)) // todo mgr source file
+	treeView.AddChild(filetree.NewTree(treeView)) // todo mgr library file
+
+	editor := texteditor.NewEditor(hSplits)
+	editor.SetBuf(nil)
+	hSplits.SetSplits(.2, .8)
+
+	bottomFrame := gi.NewFrame(projecttab)
+	newTabs := gi.NewTabs(bottomFrame)
+	newTabs.SetType(gi.NavigationBar)
+	newTabs.NewTab("git")
+	newTabs.NewTab("todo")
+	issueTab := gi.NewTabs(newTabs.NewTab("issue"))
+	issueTab.NewTab("file")    // todo tree view
+	issueTab.NewTab("project") // todo tree view
+	newTabs.NewTab("terminal")
+	newTabs.NewTab("service")
+
+	tabs.NewTab("bookMark").Style(func(s *styles.Style) {})
+	tabs.NewTab("commit").Style(func(s *styles.Style) {})
+	tabs.NewTab("mergePr").Style(func(s *styles.Style) {})
+	tabs.NewTab("struct").Style(func(s *styles.Style) {})
+	widget.NewWindowRunAndWait(b, func(names []string) {
+	})
+}
