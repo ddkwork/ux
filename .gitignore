@@ -4,3 +4,5 @@ log.log
 *.zip
 rep
 tr
+/demo/qt/
+/assets2/

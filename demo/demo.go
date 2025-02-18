@@ -409,7 +409,6 @@ func main() {
 }
 
 func treeTable() ux.Widget {
-
 	type packet struct {
 		Scheme        string        // 请求协议
 		Method        string        // 请求方式
@@ -422,7 +421,6 @@ func treeTable() ux.Widget {
 		Process       string        // 进程
 		PadTime       time.Duration // 请求到返回耗时
 	}
-
 	t := ux.NewTreeTable(packet{}, ux.TableContext[packet]{
 		ContextMenuItems: func(node *ux.Node[packet], gtx layout.Context) (items []ux.ContextMenuItem) {
 			return
@@ -466,7 +464,6 @@ func treeTable() ux.Widget {
 		JsonName:            "",
 		IsDocument:          false,
 	})
-
 	topLevelRowsToMake := 100
 	rows := make([]*ux.Node[packet], topLevelRowsToMake)
 	for i := 0; i < topLevelRowsToMake; i++ {
@@ -530,10 +527,8 @@ func treeTable() ux.Widget {
 		}
 		rows[i] = node
 	}
-
 	t.Root.SetRootRows(rows)
 	t.Format()
-
 	return t.Layout
 }
 
