@@ -819,7 +819,7 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions
 					nextCol.Current = minWidth      // 将下一个列宽度设为最小宽度
 					col.Current -= d                // 更新当前列宽度
 				}
-			} else {                        // 如果不需要收缩
+			} else { // 如果不需要收缩
 				if col.Current < minWidth { // 如果当前列宽度小于最小宽度
 					col.Current = minWidth // 将当前列宽度设为最小宽度
 				}
@@ -1618,8 +1618,8 @@ func (n *Node[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions
 	inset := layout.Inset{
 		Top:    0, // 文本居中，drawColumnDivider需要设置tallestHeight := gtx.Dp(unit.Dp(32))增加高度避免虚线
 		Bottom: 0,
-		Left:   8,
-		Right:  8,
+		Left:   8 / 2,
+		Right:  8 / 2,
 	}
 	if data.IsHeader { //加高表头高度
 		inset.Top = 2
