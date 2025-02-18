@@ -275,8 +275,7 @@ func CalculateTextWidth(gtx layout.Context, text string) unit.Dp {
 		gtx.Constraints.Min.X = 0
 		return body.Layout(gtx)
 	})
-	x := unit.Dp(recording.Dimensions.Size.X)
-	return x // todo bug
+	return unit.Dp(recording.Dimensions.Size.X)
 }
 
 type Recording struct {
