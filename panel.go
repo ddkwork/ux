@@ -268,7 +268,7 @@ func CalculateTextWidth(gtx layout.Context, text string) unit.Dp {
 	//})
 	//// fmt.Printf("Calculated width: %v\n", unit.Dp(recording.Dimensions.Size.X))
 	//return unit.Dp(recording.Dimensions.Size.X)
-
+	text += "⇧" //为排序图标留位置
 	body := material.Body1(th.Theme, text)
 	body.MaxLines = 1
 	recording := Record(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -276,11 +276,7 @@ func CalculateTextWidth(gtx layout.Context, text string) unit.Dp {
 		return body.Layout(gtx)
 	})
 	x := unit.Dp(recording.Dimensions.Size.X)
-	return x * 2 // todo 临时解决方案，后续需要调整
-	if x < 15 {  //todo
-		x *= 2
-	}
-	return x
+	return x // todo bug
 }
 
 type Recording struct {
