@@ -8,7 +8,7 @@ require (
 	gioui.org/example v0.8.1
 	gioui.org/x v0.8.1
 	github.com/alecthomas/chroma/v2 v2.15.0
-	github.com/ddkwork/golibrary v0.0.88-0.20250216081829-938757a0a8d6
+	github.com/ddkwork/golibrary v0.0.90
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gen2brain/dlgs v0.0.0-20220603100644-40c77870fa8d
 	github.com/google/uuid v1.6.0

@@ -1,2 +1,2 @@
-adb connect 192.168.43.1:5675
+adb connect 0.0.0.0:5667
 adb logcat -v time > apk.log
