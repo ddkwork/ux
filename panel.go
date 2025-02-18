@@ -23,9 +23,9 @@ import (
 	"github.com/ddkwork/golibrary/mylog"
 )
 
-func init() {
-	mylog.ApkDataDir = mylog.Check2(app.DataDir())
-}
+//func init() {
+//	mylog.ApkDataDir = mylog.Check2(app.DataDir())
+//}
 
 type Widget layout.Widget
 

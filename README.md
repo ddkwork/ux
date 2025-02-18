@@ -15,4 +15,5 @@ https://github.com/tonyhallett/TreeGrid
 
 ![demo](demo/tui.png)
 ![demo](demo/treeGrid.png)
-![demo](demo/mobile.jpg)
+![demo](demo/mobile1.jpg)
+![demo](demo/mobile2.jpg)
