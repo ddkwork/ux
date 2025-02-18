@@ -1261,6 +1261,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 												clone := t.selectedNode.Clone()
 												var zero T
 												clone.Data = zero //
+												//t.selectedNode.//todo,从父级取出下标作为插入位置
 												switch {
 												case t.selectedNode.CanHaveChildren(), t.selectedNode.IsRoot():
 													t.selectedNode.AddChild(clone) //todo 应该插入到选中的孩子下标的后一个，这样是插入到最后一个去了
@@ -1268,7 +1269,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 													t.selectedNode.parent.AddChild(clone)
 												}
 												// 这里应该取已选中的节点，但是这里取右键按下事件并给选中节点赋值，然而右键菜单会因事件执激活菜单失败，弹不出菜单。
-												t.SizeColumnsToFit(gtx, false) // 非得排序才能刷新成功
+												t.SizeColumnsToFit(gtx, false) // 非得排序才能刷新成功新增的节点
 												t.List.Update(gtx, layout.Vertical, 0, 0)
 
 												// todo open editor window,把双击编辑节点的代码提到单独的函数，然后调用它
