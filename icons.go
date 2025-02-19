@@ -73,10 +73,10 @@ var (
 	DarkIcon       = mylog.Check2(widget.NewIcon(icons.ActionSubject))
 )
 
-//go:embed CircledChevronDown.svg
+//go:embed resources/images/CircledChevronDown.svg
 var CircledChevronDown string
 
-//go:embed CircledChevronRight.svg
+//go:embed resources/images/CircledChevronRight.svg
 var CircledChevronRight string
 
 type Icon struct {

@@ -70,7 +70,7 @@ type CodeEditor struct {
 var DraculaXML []byte
 var Dracula *chroma.Style
 
-//go:embed consolas.ttf
+//go:embed resources/fonts/consolas.ttf
 var consolas []byte
 
 func init() {
