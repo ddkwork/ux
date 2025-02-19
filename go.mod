@@ -17,7 +17,6 @@ require (
 	github.com/oligo/gioview v0.8.2
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/tanema/gween v0.0.0-20221212145351-621cc8a459d1
-	github.com/tc-hib/winres v0.3.1
 	github.com/x-module/gioui-plugins v0.0.5
 	golang.design/x/clipboard v0.7.0
 	golang.org/x/crypto v0.33.0
@@ -41,13 +40,11 @@ require (
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-text/typesetting v0.2.1 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
-	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-github/v24 v24.0.1 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/inkeliz/giohyperlink v0.0.0-20220903215451-2ac5d54abdce // indirect
-	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/yuin/goldmark v1.7.8 // indirect
 	golang.org/x/exp v0.0.0-20250215185904-eff6e970281f // indirect
 	golang.org/x/mobile v0.0.0-20250210185054-b38b8813d607 // indirect
@@ -56,7 +53,5 @@ require (
 	golang.org/x/oauth2 v0.26.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
 	gonum.org/v1/gonum v0.15.1 // indirect
-	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/protobuf v1.36.5 // indirect
 	mvdan.cc/gofumpt v0.7.0 // indirect
 )
