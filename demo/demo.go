@@ -17,6 +17,8 @@ import (
 	"github.com/ddkwork/ux/terminal"
 )
 
+var appBar *ux.AppBar
+
 func main() {
 	// stream.FileServerWindowsDisk()
 	// stream.FileServer()
@@ -43,7 +45,7 @@ func main() {
 		ux.NewTooltipButton(ux.IconDownload, "action build", nil),
 	}
 
-	appBar := ux.InitAppBar(hPanel, tipIconButtons, speechTxt)
+	appBar = ux.InitAppBar(hPanel, tipIconButtons, speechTxt)
 	appBar.Search.SetonChanged(func(text string) {
 		println(text)
 	})
@@ -463,6 +465,10 @@ func treeTable() ux.Widget {
 		SetRootRowsCallBack: nil,
 		JsonName:            "",
 		IsDocument:          false,
+	})
+	appBar.Search.SetonChanged(func(text string) {
+		//t.Filter(text)
+		t.Root.ApplyFilter_(text) //todo bug runtime: goroutine stack exceeds 1000000000-byte limit
 	})
 	topLevelRowsToMake := 100
 	rows := make([]*ux.Node[packet], topLevelRowsToMake)
