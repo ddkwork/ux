@@ -399,6 +399,23 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 	t.Children = t.Root.Children
 }
 
+// TransposeMatrix 函数将输入的行切片矩阵转置为列切片,用于计算最大列宽的参数
+func TransposeMatrix[T any](rows [][]T) (columns [][]T) {
+	if len(rows) == 0 {
+		return [][]T{}
+	}
+	columns = make([][]T, len(rows[0]))
+	for i := range columns {
+		columns[i] = make([]T, len(rows))
+	}
+	for i, row := range rows {
+		for j := range row {
+			columns[j][i] = row[j]
+		}
+	}
+	return
+}
+
 func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions { // 相当于syncModel,内部也是渲染之前调用 heightForColumns 调整列宽的
 	t.SizeColumnsToFit(gtx, false)
 	list := material.List(th.Theme, &t.List)
@@ -423,23 +440,6 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions { // 相当�
 			})
 		}),
 	)
-}
-
-// TransposeMatrix 函数将输入的行切片矩阵转置为列切片,用于计算最大列宽的参数
-func TransposeMatrix[T any](rows [][]T) (columns [][]T) {
-	if len(rows) == 0 {
-		return [][]T{}
-	}
-	columns = make([][]T, len(rows[0]))
-	for i := range columns {
-		columns[i] = make([]T, len(rows))
-	}
-	for i, row := range rows {
-		for j := range row {
-			columns[j][i] = row[j]
-		}
-	}
-	return
 }
 
 func initHeader(data any) (Columns []CellData) {
