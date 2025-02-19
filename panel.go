@@ -158,7 +158,7 @@ func NewWindow(title string) *app.Window {
 		app.Size(1200, 600),
 	)
 	w.Perform(system.ActionCenter)
-	//mylog.Check(android_background_service.Start()) // todo fix xml
+	// mylog.Check(android_background_service.Start()) // todo fix xml
 	return w
 }
 
@@ -268,7 +268,7 @@ func CalculateTextWidth(gtx layout.Context, text string) unit.Dp {
 	//})
 	//// fmt.Printf("Calculated width: %v\n", unit.Dp(recording.Dimensions.Size.X))
 	//return unit.Dp(recording.Dimensions.Size.X)
-	text += "⇧" //为排序图标留位置
+	text += "⇧" // 为排序图标留位置
 	body := material.Body1(th.Theme, text)
 	body.MaxLines = 1
 	recording := Record(gtx, func(gtx layout.Context) layout.Dimensions {

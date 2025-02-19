@@ -1,9 +1,10 @@
 package main
 
 import (
-	"demo/hashicon"
 	"os"
 	"strconv"
+
+	"demo/hashicon"
 
 	"gioui.org/app"
 	"gioui.org/layout"

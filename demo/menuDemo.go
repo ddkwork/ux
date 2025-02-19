@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/ddkwork/ux"
 	"image/color"
+
+	"github.com/ddkwork/ux"
 
 	"gioui.org/layout"
 	"gioui.org/unit"

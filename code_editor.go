@@ -3,10 +3,11 @@ package ux
 import (
 	"bytes"
 	_ "embed"
-	"gioui.org/font/opentype"
-	"github.com/ddkwork/golibrary/mylog"
 	"image/color"
 	"strings"
+
+	"gioui.org/font/opentype"
+	"github.com/ddkwork/golibrary/mylog"
 
 	"gioui.org/font"
 	"gioui.org/layout"
@@ -100,7 +101,7 @@ func NewCodeEditor(code string, lang string) *CodeEditor {
 			Shaper:          shaper,
 			TextColor:       th.Fg,
 			Bg:              th.Bg,
-			SelectionColor:  Blue500, //todo
+			SelectionColor:  Blue500, // todo
 			TypeFace:        editorFont.Font.Typeface,
 			TextSize:        unit.Sp(14),
 			LineHeightScale: 1,
@@ -117,7 +118,7 @@ func NewCodeEditor(code string, lang string) *CodeEditor {
 
 	c.vScrollbarStyle = material.Scrollbar(th.Theme, &c.vScrollbar)
 	c.border = widget.Border{
-		Color:        rgb(0x6c6f76), //todo
+		Color:        rgb(0x6c6f76), // todo
 		Width:        unit.Dp(1),
 		CornerRadius: unit.Dp(4),
 	}
@@ -129,7 +130,7 @@ func NewCodeEditor(code string, lang string) *CodeEditor {
 		style = styles.Fallback
 	}
 
-	c.codeStyle = style //todo delete this
+	c.codeStyle = style // todo delete this
 	c.codeStyle = Dracula
 
 	c.editor.WrapPolicy = text.WrapGraphemes
@@ -221,7 +222,7 @@ func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 						return layout.Dimensions{}
 					}
 
-					//btn := Button(th.Material(), &c.loadExample, RefreshIcon, IconPositionStart, "Load Example")
+					// btn := Button(th.Material(), &c.loadExample, RefreshIcon, IconPositionStart, "Load Example")
 					btn := NewNavButton("Load Example")
 
 					//btn.Color = theme.ButtonTextColor

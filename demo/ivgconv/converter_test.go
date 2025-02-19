@@ -2,8 +2,9 @@ package ivgconv
 
 import (
 	"bytes"
-	"demo/ivgconv/testdata"
 	"testing"
+
+	"demo/ivgconv/testdata"
 
 	"github.com/ddkwork/golibrary/mylog"
 )

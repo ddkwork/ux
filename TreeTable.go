@@ -145,11 +145,12 @@ func NewRoot[T any](data T) *Node[T] {
 }
 
 func (n *Node[T]) IsRoot() bool {
-	if n == nil { //todo bug
+	if n == nil { // todo bug
 		return false
 	}
 	return n.parent == nil
 }
+
 func newNode[T any](typeKey string, isContainer bool, data T) *Node[T] {
 	if isContainer {
 		typeKey += ContainerKeyPostfix
@@ -311,7 +312,7 @@ func (t *TreeTable[T]) SetRootRows(rootRows []*Node[T]) *TreeTable[T] {
 			//	return t.drawContextArea(gtx, &t.header.contextMenu.MenuState)
 			//})
 		}
-		//row.UpdateTouch(gtx) // 初始化触摸事件处理
+		// row.UpdateTouch(gtx) // 初始化触摸事件处理
 	}
 	t.Children = rootRows
 	return t
@@ -896,7 +897,7 @@ var modal = NewModal()
 
 func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int) layout.Dimensions {
 	node.RowCells = t.MarshalRow(node)
-	for i := range node.RowCells { //对齐表头和数据列
+	for i := range node.RowCells { // 对齐表头和数据列
 		node.RowCells[i].maxColumnTextWidth = t.maxColumnTextWidths[i]
 		node.RowCells[i].leftIndent = node.Depth() * HierarchyIndent
 		node.RowCells[i].RowID = rowIndex
@@ -915,7 +916,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 	if ok {
 		e, ok := evt.(pointer.Event)
 		if ok {
-			if e.Kind == pointer.Press { //长按应该是touch类型而不是press类型?
+			if e.Kind == pointer.Press { // 长按应该是touch类型而不是press类型?
 				t.selectedNode = node
 			}
 			switch e.Buttons {
@@ -932,7 +933,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 		switch click.NumClicks {
 		case 1:
 			node.isOpen = !node.isOpen // 切换展开状态
-			//todo bug 左键,右键，长按按下选中设置选中节点,但是目前只有左键按下才会被设置
+			// todo bug 左键,右键，长按按下选中设置选中节点,但是目前只有左键按下才会被设置
 			t.selectedNode = node // 记录被点击的节点,todo 右击也需要填充它,但是在右键菜单中干这个事情似乎时机不对,上下文区域需要支持手动激活方法
 			if node.CellClickedCallback != nil {
 				node.CellClickedCallback(node) // 单元格点击回调
@@ -958,17 +959,17 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 	}
 
 	bgColor := RowColor(rowIndex)
-	if rowClick.Hovered() { //设置悬停背景色
+	if rowClick.Hovered() { // 设置悬停背景色
 		bgColor = th.Color.TreeHoveredBgColor
 	}
-	if t.selectedNode == node { //设置选中背景色
+	if t.selectedNode == node { // 设置选中背景色
 		bgColor = color.NRGBA{
 			R: 255,
 			G: 186,
 			B: 44,
 			A: 91,
 		}
-		//bgColor = Orange300
+		// bgColor = Orange300
 	}
 
 	var rowCells []layout.FlexChild
@@ -986,7 +987,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 			}
 		}
 
-		//自适应列宽，这在动态插入节点的情况下可能影响性能
+		// 自适应列宽，这在动态插入节点的情况下可能影响性能
 		maxColumnCellWidth := calculateMaxColumnCellWidth(c)
 		gtx.Constraints.Min.X = int(maxColumnCellWidth)
 		gtx.Constraints.Max.X = int(maxColumnCellWidth)
@@ -1066,10 +1067,10 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 										所以合理的方案是patch官方的contextAreas和gtx的input source代码，支持长按事件
 									*/
 									Activation: pointer.ButtonSecondary,
-									//todo 根据gioview的作者提示，安卓上需要过滤长按手势事件实现如下:
-									//计算pointer Press到Release的持续时长就可以了，Gio在处理触摸事件和鼠标事件是统一的，
-									//安卓应该也是一致的处理方式，只是event Source变成了Touch。
-									//需要制作一个过滤touch事件的apk测试
+									// todo 根据gioview的作者提示，安卓上需要过滤长按手势事件实现如下:
+									// 计算pointer Press到Release的持续时长就可以了，Gio在处理触摸事件和鼠标事件是统一的，
+									// 安卓应该也是一致的处理方式，只是event Source变成了Touch。
+									// 需要制作一个过滤touch事件的apk测试
 									AbsolutePosition: true,
 									PositionHint:     0,
 								}
@@ -1124,19 +1125,19 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Do: func() {
 												mylog.CheckNil(t.selectedNode)
 												var zero T
-												clone := NewNode(zero) //todo 为什么生成了容器节点？
+												clone := NewNode(zero) // todo 为什么生成了容器节点？
 												clone.SetParent(t.selectedNode)
 
-												//clone := t.selectedNode.Clone()
-												//clone.Data = zero //
+												// clone := t.selectedNode.Clone()
+												// clone.Data = zero //
 
 												index := t.selectedNode.RowToIndex() + 1
 												switch {
 												case t.selectedNode.CanHaveChildren(), t.selectedNode.IsRoot():
-													//t.selectedNode.AddChild(clone) //todo 应该插入到选中的孩子下标的后一个，这样是插入到最后一个去了
+													// t.selectedNode.AddChild(clone) //todo 应该插入到选中的孩子下标的后一个，这样是插入到最后一个去了
 													t.selectedNode.Children = slices.Insert(t.selectedNode.Children, index, clone)
 												default:
-													//t.selectedNode.parent.AddChild(clone)
+													// t.selectedNode.parent.AddChild(clone)
 													t.selectedNode.Children = slices.Insert(t.selectedNode.Children, index, clone)
 												}
 												// 这里应该取已选中的节点，但是这里取右键按下事件并给选中节点赋值，然而右键菜单会因事件执激活菜单失败，弹不出菜单。
@@ -1248,7 +1249,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 	rows := []layout.FlexChild{ // 合成层级列和其他列的单元格为一行,并设置该行的背景和行高
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return Background{bgColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				//gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(12)) // 行高,todo bug 增加了上下文菜单后设置更改的分割线高度不生效,除非删除这一行，但是这样高度太低了
+				// gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(12)) // 行高,todo bug 增加了上下文菜单后设置更改的分割线高度不生效,除非删除这一行，但是这样高度太低了
 				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, rowCells...)
 			})
 		}),
@@ -1292,7 +1293,7 @@ const DividerWidth = unit.Dp(1)
 
 // 分隔线绘制函数
 func DrawColumnDivider(gtx layout.Context, col int) {
-	if col > 0 { //层级列不要绘制分隔线
+	if col > 0 { // 层级列不要绘制分隔线
 		tallestHeight := gtx.Dp(unit.Dp(gtx.Constraints.Max.Y))
 		stack3 := clip.Rect{Max: image.Pt(int(DividerWidth), tallestHeight)}.Push(gtx.Ops)
 		paint.Fill(gtx.Ops, DividerFg)
@@ -1399,8 +1400,7 @@ func (n *Node[T]) AddChild(child *Node[T]) {
 }
 
 func (n *Node[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions {
-
-	//固定单元格宽度为计算好的每列最大宽度
+	// 固定单元格宽度为计算好的每列最大宽度
 	gtx.Constraints.Min.X = int(data.Minimum)
 	gtx.Constraints.Max.X = int(data.Minimum)
 
@@ -1422,12 +1422,12 @@ func (n *Node[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions
 		Left:   8 / 2,
 		Right:  8 / 2,
 	}
-	if data.IsHeader { //加高表头高度
+	if data.IsHeader { // 加高表头高度
 		inset.Top = 2
 		inset.Bottom = 2
 	}
 	return inset.Layout(gtx, material.Body2(th.Theme, data.Text).Layout)
-	//return inset.Layout(gtx, richText.Layout)
+	// return inset.Layout(gtx, richText.Layout)
 }
 
 func (n *Node[T]) RootRows() []*Node[T] {
@@ -1451,6 +1451,7 @@ func (n *Node[T]) RowToIndex() int {
 	}
 	return -1
 }
+
 func (n *Node[T]) SyncToModel() {
 	//rowCount := 0
 	//roots := n.RootRows()
