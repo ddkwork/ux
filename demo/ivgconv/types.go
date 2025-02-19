@@ -66,8 +66,6 @@ func (vb *ViewBox) UnmarshalXMLAttr(attr xml.Attr) error {
 	if attr.Name.Local != "viewBox" {
 		return nil
 	}
-	if _ := mylog.Check2(fmt.Sscanf(attr.Value, "%f %f %f %f", &vb.MinX, &vb.MinY, &vb.Width, &vb.Height)); err != nil {
-		return err
-	}
+	mylog.Check2(fmt.Sscanf(attr.Value, "%f %f %f %f", &vb.MinX, &vb.MinY, &vb.Width, &vb.Height))
 	return nil
 }

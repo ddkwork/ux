@@ -64,18 +64,14 @@ func parseSVG(svg SVG, opts ConverterOptions) ([]byte, error) {
 			continue
 		}
 		// Generate the iconVG path from the SVG path.
-		if mylog.Check(genPath(&enc, &p, adjs, svgSize, offset, outSize, svg.Circles)); err != nil {
-			return nil, err
-		}
+		mylog.Check(genPath(&enc, &p, adjs, svgSize, offset, outSize, svg.Circles))
 		svg.Circles = nil
 	}
 
 	// Generate the iconVG circle.
 	if len(svg.Circles) != 0 {
 		// Generate the iconVG path from the SVG circle.
-		if mylog.Check(genPath(&enc, &Path{}, adjs, svgSize, offset, outSize, svg.Circles)); err != nil {
-			return nil, err
-		}
+		mylog.Check(genPath(&enc, &Path{}, adjs, svgSize, offset, outSize, svg.Circles))
 		svg.Circles = nil
 	}
 
@@ -110,9 +106,7 @@ func genPath(enc *iconvg.Encoder, p *Path, adjs map[float32]uint8, size float32,
 	needStartPath := true
 	if p.D != "" {
 		needStartPath = false
-		if mylog.Check(genPathData(enc, adj, p.D, size, offset, outSize)); err != nil {
-			return err
-		}
+		mylog.Check(genPathData(enc, adj, p.D, size, offset, outSize))
 	}
 
 	// Generate the circle.
@@ -244,15 +238,11 @@ func scan(args *[7]float32, r *strings.Reader, n int) error {
 	for i := 0; i < n; i++ {
 		for {
 			if b, _ := r.ReadByte(); b != ' ' && b != ',' {
-				if mylog.Check(r.UnreadByte()); err != nil {
-					return err
-				}
+				mylog.Check(r.UnreadByte())
 				break
 			}
 		}
-		if _ := mylog.Check2(fmt.Fscanf(r, "%f", &args[i])); err != nil {
-			return err
-		}
+		mylog.Check2(fmt.Fscanf(r, "%f", &args[i]))
 	}
 	// Clear the remaining arguments.
 	for i := n; i < 7; i++ {

@@ -45,13 +45,9 @@ func FromContent(content []byte, options ...Option) ([]byte, error) {
 	}
 	// Parse the SVG file.
 	var svg SVG
-	if mylog.Check(xml.Unmarshal(content, &svg)); err != nil {
-		return nil, err
-	}
+	mylog.Check(xml.Unmarshal(content, &svg))
 	// Check if the SVG file is valid.
-	if mylog.Check(svg.Validate()); err != nil {
-		return nil, err
-	}
+	mylog.Check(svg.Validate())
 	// Encode the SVG file as IconVG.
 	return parseSVG(svg, opts)
 }
