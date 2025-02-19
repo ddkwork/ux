@@ -66,7 +66,7 @@ type CodeEditor struct {
 	vScrollbarStyle material.ScrollbarStyle
 }
 
-//go:embed dracula.xml
+//go:embed resources/dracula.xml
 var DraculaXML []byte
 var Dracula *chroma.Style
 

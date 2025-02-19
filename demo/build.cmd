@@ -1,3 +1,4 @@
 gogio -x  -target android .
-go build -x   .
+gogio -x  -target windows .
+::go build -x   .
 pause

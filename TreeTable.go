@@ -1891,9 +1891,6 @@ func (n *Node[T]) Clone() (newNode *Node[T]) {
 	return NewNode(n.Data)
 }
 
-//go:embed EditIni.png
-var rowPngBuffer []byte
-
 // ---------------------- todo delete
 //func NewTable3[T any](data T, ctx TableContext[T]) {
 //	if ctx.JsonName == "" {
