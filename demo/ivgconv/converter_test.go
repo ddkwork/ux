@@ -2,10 +2,10 @@ package ivgconv
 
 import (
 	"bytes"
+	"demo/ivgconv/testdata"
 	"testing"
 
 	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/ux/ivgconv/testdata"
 )
 
 func TestFromFile(t *testing.T) {

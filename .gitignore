@@ -12,3 +12,4 @@ tr
 /go.work.sum
 /go.work
 /update go workspace.cmd
+/vendor/

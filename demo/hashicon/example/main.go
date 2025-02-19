@@ -1,6 +1,7 @@
 package main
 
 import (
+	"demo/hashicon"
 	"os"
 	"strconv"
 
@@ -9,7 +10,6 @@ import (
 	"gioui.org/op"
 	"gioui.org/unit"
 	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/ux/hashicon"
 )
 
 func main() {
