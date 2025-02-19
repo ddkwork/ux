@@ -255,8 +255,6 @@ func main() {
 			//CircledChevronDownButton := ux.NewSVGButton("", ux.Svg2Icon([]byte(ux.CircledChevronDown)), func() {
 			//	mylog.Info("svg button clicked")
 			//})
-
-			// todo download svg icon has bug with Rotate 90°,we should use  f32.Affine2D{}
 			m.Set(MobileType, ux.NewButton("Hex Editor", nil).SetRectIcon(true).SetSVGIcon(ux.CircledChevronRight).Layout)
 
 		//case SvgButtonType:
@@ -289,6 +287,7 @@ func main() {
 		//})
 		//m.Set(SvgButtonType, svgButton.Layout)
 		case CodeEditorType:
+			m.Set(CodeEditorType, ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout)
 		case AsmViewType:
 		case LogViewType:
 
@@ -370,8 +369,7 @@ func main() {
 		}
 	}
 
-	m.Set(CodeEditorType, ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout) // todo 增加滚动条
-	m.Set(LogViewType, ux.LogView())                                             // todo 日志没有对齐，控制台是对齐的，增加滚动条
+	m.Set(LogViewType, ux.LogView()) // todo 日志没有对齐，控制台是对齐的，增加滚动条
 	// m.Set(ComBoxType, combox(w))//newselect
 
 	sp := ux.NewSplit(ux.Split{
