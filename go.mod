@@ -20,7 +20,7 @@ require (
 	github.com/x-module/gioui-plugins v0.0.5
 	golang.design/x/clipboard v0.7.0
 	golang.org/x/crypto v0.33.0
-	golang.org/x/exp/shiny v0.0.0-20250215185904-eff6e970281f
+	golang.org/x/exp/shiny v0.0.0-20250218142911-aa4b98e5adaa
 	golang.org/x/image v0.24.0
 	golang.org/x/sync v0.11.0
 	golang.org/x/sys v0.30.0
@@ -46,8 +46,8 @@ require (
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/inkeliz/giohyperlink v0.0.0-20220903215451-2ac5d54abdce // indirect
 	github.com/yuin/goldmark v1.7.8 // indirect
-	golang.org/x/exp v0.0.0-20250215185904-eff6e970281f // indirect
-	golang.org/x/mobile v0.0.0-20250210185054-b38b8813d607 // indirect
+	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa // indirect
+	golang.org/x/mobile v0.0.0-20250218173827-cd096645fcd3 // indirect
 	golang.org/x/mod v0.23.0 // indirect
 	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/oauth2 v0.26.0 // indirect
