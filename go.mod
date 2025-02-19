@@ -9,17 +9,13 @@ require (
 	gioui.org/x v0.8.1
 	github.com/alecthomas/chroma/v2 v2.15.0
 	github.com/ddkwork/golibrary v0.0.91-0.20250218042444-9cd6d330f714
-	github.com/dustin/go-humanize v1.0.1
 	github.com/gen2brain/dlgs v0.0.0-20220603100644-40c77870fa8d
 	github.com/google/uuid v1.6.0
 	github.com/inkeliz/giosvg v0.0.0-20240821232107-3208d4350d55
 	github.com/lmittmann/tint v1.0.7
 	github.com/oligo/gioview v0.8.2
-	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/tanema/gween v0.0.0-20221212145351-621cc8a459d1
 	github.com/x-module/gioui-plugins v0.0.5
-	golang.design/x/clipboard v0.7.0
-	golang.org/x/crypto v0.33.0
 	golang.org/x/exp/shiny v0.0.0-20250218142911-aa4b98e5adaa
 	golang.org/x/image v0.24.0
 	golang.org/x/sync v0.11.0
@@ -47,7 +43,6 @@ require (
 	github.com/inkeliz/giohyperlink v0.0.0-20220903215451-2ac5d54abdce // indirect
 	github.com/yuin/goldmark v1.7.8 // indirect
 	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa // indirect
-	golang.org/x/mobile v0.0.0-20250218173827-cd096645fcd3 // indirect
 	golang.org/x/mod v0.23.0 // indirect
 	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/oauth2 v0.26.0 // indirect
