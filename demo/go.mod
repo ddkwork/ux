@@ -8,8 +8,10 @@ require (
 	github.com/ddkwork/golibrary v0.0.91-0.20250218042444-9cd6d330f714
 	github.com/ddkwork/ux v0.0.0-20250219092428-ce8cf7f61948
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
+	golang.org/x/crypto v0.33.0
+	golang.org/x/exp/shiny v0.0.0-20250218142911-aa4b98e5adaa
+	golang.org/x/image v0.24.0
 )
-
 
 require (
 	eliasnaur.com/font v0.0.0-20230308162249-dd43949cb42d // indirect
@@ -41,8 +43,6 @@ require (
 	github.com/x-module/gioui-plugins v0.0.5 // indirect
 	github.com/yuin/goldmark v1.7.8 // indirect
 	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa // indirect
-	golang.org/x/exp/shiny v0.0.0-20250218142911-aa4b98e5adaa // indirect
-	golang.org/x/image v0.24.0 // indirect
 	golang.org/x/mod v0.23.0 // indirect
 	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/oauth2 v0.26.0 // indirect
