@@ -2,7 +2,6 @@ package ux
 
 //
 //import (
-//	"github.com/x-module/gioui-plugins/theme"
 //	"image"
 //	"image/color"
 //

@@ -3,6 +3,7 @@ package ux
 import (
 	"fmt"
 	"image"
+	"image/color"
 
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -13,7 +14,6 @@ import (
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"gioui.org/x/component"
-	"github.com/x-module/gioui-plugins/utils"
 )
 
 type MenuBarAction func()
@@ -80,7 +80,7 @@ func (m *MenuBar) Layout(gtx layout.Context) layout.Dimensions {
 												return m.menus[key].Items[subKey].click.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 													if m.menus[key].Items[subKey].click.Hovered() {
 														fmt.Println("hovered")
-														utils.DrawBackground(gtx, gtx.Constraints.Max, th.Color.MenuBarHoveredColor)
+														DrawBackground(gtx, gtx.Constraints.Max, th.Color.MenuBarHoveredColor)
 														gtx.Execute(op.InvalidateCmd{})
 													}
 													return material.Body2(th.Theme, m.menus[key].Items[subKey].Name).Layout(gtx)
@@ -120,6 +120,12 @@ func (m *MenuBar) Layout(gtx layout.Context) layout.Dimensions {
 		}))
 	}
 	return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, items...)
+}
+
+// DrawBackground 在给定的尺寸上绘制一个背景颜色
+func DrawBackground(gtx layout.Context, size image.Point, col color.NRGBA) {
+	defer clip.Rect{Max: size}.Push(gtx.Ops).Pop()
+	paint.Fill(gtx.Ops, col)
 }
 
 //

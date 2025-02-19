@@ -1,7 +1,7 @@
 //go:build tools
 // +build tools
 
-package ux
+package main
 
 import (
 	gogio "gioui.org/cmd/gogio"

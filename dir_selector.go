@@ -8,7 +8,6 @@ import (
 	"gioui.org/widget"
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/gen2brain/dlgs"
-	"github.com/x-module/gioui-plugins/resource"
 )
 
 type DirSelector struct {
@@ -104,14 +103,14 @@ func (b *DirSelector) updateIcon() {
 		b.input.SetAfter(func(gtx layout.Context) layout.Dimensions {
 			return b.actionClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Max.X = gtx.Dp(th.Size.DefaultIconSize)
-				return resource.DeleteIcon.Layout(gtx, th.Color.DefaultIconColor)
+				return DeleteIcon.Layout(gtx, th.Color.DefaultIconColor)
 			})
 		})
 	} else {
 		b.input.SetAfter(func(gtx layout.Context) layout.Dimensions {
 			return b.actionClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Max.X = gtx.Dp(th.Size.DefaultIconSize)
-				return resource.UploadIcon.Layout(gtx, th.Color.DefaultIconColor)
+				return UploadIcon.Layout(gtx, th.Color.DefaultIconColor)
 			})
 		})
 	}

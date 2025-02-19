@@ -10,7 +10,6 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/widget"
-	"github.com/x-module/gioui-plugins/utils"
 )
 
 type Clickable struct {
@@ -64,7 +63,7 @@ func (c *Clickable) Layout(gtx layout.Context) layout.Dimensions {
 				}}, gtx.Dp(th.Size.DefaultElementRadiusSize))
 				defer rect.Push(gtx.Ops).Pop()
 				if gtx.Source == (input.Source{}) {
-					paint.Fill(gtx.Ops, utils.Disabled(c.bgColorHover))
+					paint.Fill(gtx.Ops, Disabled(c.bgColorHover))
 				} else if c.clickable.Hovered() {
 					// paint.Fill(gtx.Ops, c.bgColorHover)
 				}

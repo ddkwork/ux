@@ -6,8 +6,6 @@ package ux
 //	"gioui.org/op/paint"
 //	"gioui.org/widget"
 //	"gioui.org/widget/material"
-//	"github.com/x-module/gioui-plugins/resource"
-//	"github.com/x-module/gioui-plugins/theme"
 //	"image"
 //	"time"
 //

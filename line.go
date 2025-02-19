@@ -8,11 +8,9 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
-	"github.com/x-module/gioui-plugins/theme"
 )
 
 type Line struct {
-	theme      *theme.Theme
 	width      float32 // 线条宽度
 	dashLength float32 // 选线中间的虚线长度
 	sap        float32

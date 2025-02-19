@@ -10,7 +10,6 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget/material"
 	"gioui.org/x/component"
-	"github.com/x-module/gioui-plugins/resource"
 )
 
 func Nav(gtx layout.Context) layout.Dimensions {
@@ -19,15 +18,15 @@ func Nav(gtx layout.Context) layout.Dimensions {
 	nav := component.NewNav("Hello", "--subtitle")
 	nav.AddNavItem(component.NavItem{
 		Name: "aaaaaaaaa",
-		Icon: resource.PlusIcon,
+		Icon: PlusIcon,
 	})
 	nav.AddNavItem(component.NavItem{
 		Name: "bbbb",
-		Icon: resource.PlusIcon,
+		Icon: PlusIcon,
 	})
 	nav.AddNavItem(component.NavItem{
 		Name: "cccc",
-		Icon: resource.PlusIcon,
+		Icon: PlusIcon,
 	})
 	resize := component.Resize{
 		Axis:  layout.Horizontal,

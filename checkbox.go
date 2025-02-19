@@ -12,7 +12,6 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"github.com/x-module/gioui-plugins/theme"
 )
 
 type Checkbox struct {
@@ -45,7 +44,7 @@ func NewCheckBox(checkBox *widget.Bool, label string) Checkbox {
 }
 
 // SetSize 设置Size
-func (c *Checkbox) SetSize(size theme.ElementStyle) {
+func (c *Checkbox) SetSize(size ElementStyle) {
 	c.Size = size.IconSize
 	c.TextSize = size.TextSize
 }

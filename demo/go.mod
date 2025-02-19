@@ -4,6 +4,8 @@ go 1.24.0
 
 require (
 	gioui.org v0.8.0
+	gioui.org/cmd v0.8.0
+	gioui.org/example v0.8.1
 	gioui.org/x v0.8.1
 	github.com/ddkwork/golibrary v0.0.91-0.20250218042444-9cd6d330f714
 	github.com/ddkwork/ux v0.0.0-20250219092428-ce8cf7f61948
@@ -15,8 +17,6 @@ require (
 
 require (
 	eliasnaur.com/font v0.0.0-20230308162249-dd43949cb42d // indirect
-	gioui.org/cmd v0.8.0 // indirect
-	gioui.org/example v0.8.1 // indirect
 	gioui.org/shader v1.0.8 // indirect
 	git.sr.ht/~jackmordaunt/go-toast v1.1.2 // indirect
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0 // indirect

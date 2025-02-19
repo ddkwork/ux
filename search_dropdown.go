@@ -13,7 +13,6 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/x/component"
-	"github.com/x-module/gioui-plugins/resource"
 )
 
 type SearchDropDown struct {
@@ -130,7 +129,7 @@ func NewSearchDropDown() *SearchDropDown {
 	// c.SearchInput.SetBefore(func(gtx layout.Context) layout.Dimensions {
 	// 	return resource.SearchIcon.Layout(gtx, th.Color.DefaultIconColor)
 	// })
-	c.SearchInput.SetIcon(resource.SearchIcon)
+	c.SearchInput.SetIcon(SearchIcon)
 	size := ElementStyle{TextSize: unit.Sp(14), Height: unit.Dp(15), Inset: layout.UniformInset(unit.Dp(5)), IconSize: unit.Dp(18)}
 	c.SearchInput.SetSize(size)
 	return c

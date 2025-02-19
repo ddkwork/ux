@@ -13,7 +13,6 @@ import (
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"gioui.org/x/component"
-	"github.com/x-module/gioui-plugins/resource"
 )
 
 type DropDown struct {
@@ -259,7 +258,7 @@ func (c *DropDown) box(gtx layout.Context, text string, maxWidth unit.Dp) layout
 							}),
 							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 								gtx.Constraints.Min.X = gtx.Dp(16)
-								return resource.ExpandIcon.Layout(gtx, th.Color.DefaultTextWhiteColor)
+								return ExpandIcon.Layout(gtx, th.Color.DefaultTextWhiteColor)
 							}),
 						)
 					})

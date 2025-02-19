@@ -8,8 +8,6 @@ package ux
 //	"gioui.org/unit"
 //	"gioui.org/widget"
 //	"gioui.org/widget/material"
-//	"github.com/x-module/gioui-plugins/resource"
-//	"github.com/x-module/gioui-plugins/utils"
 //	"image"
 //)
 //
