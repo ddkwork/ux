@@ -39,6 +39,8 @@ github.com/ddkwork/golibrary v0.0.91-0.20250218042444-9cd6d330f714 h1:0DOse2fOkW
 github.com/ddkwork/golibrary v0.0.91-0.20250218042444-9cd6d330f714/go.mod h1:1gL0UKrg1P09z/AiaAWWtWxMT7a8+X8mWU6Ok9sYc8s=
 github.com/ddkwork/ux v0.0.0-20250219092428-ce8cf7f61948 h1:ZtbOXT8c4Ydx2cv4hyEXZ5s79uSIuF0hsTjRVtWE6HA=
 github.com/ddkwork/ux v0.0.0-20250219092428-ce8cf7f61948/go.mod h1:pl+rqiENOuKaMPdMgKL2B2pxCPYNpIqZ+PJ8uA3xDxI=
+github.com/ddkwork/ux v0.0.0-20250219115313-c7f101952985 h1:4vbIALdfY133iHBemGcQxxrLwjnSse+Y2Mv+OWC+1fo=
+github.com/ddkwork/ux v0.0.0-20250219115313-c7f101952985/go.mod h1:j/yIIk7xrl0dKHoKnDtydAWkBBst4gq75uSjBYUkxr8=
 github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
 github.com/dlclark/regexp2 v1.11.5/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
 github.com/esiqveland/notify v0.13.3 h1:QCMw6o1n+6rl+oLUfg8P1IIDSFsDEb2WlXvVvIJbI/o=
@@ -65,6 +67,7 @@ github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5y
 github.com/google/go-cmp v0.5.2/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
+github.com/google/go-github v17.0.0+incompatible h1:N0LgJ1j65A7kfXrZnUDaYCs/Sf4rEjNlfyDHW9dolSY=
 github.com/google/go-github v17.0.0+incompatible/go.mod h1:zLgOLi98H3fifZn+44m+umXrS52loVEgC2AApnigrVQ=
 github.com/google/go-github/v24 v24.0.1 h1:KCt1LjMJEey1qvPXxa9SjaWxwTsCWSq6p2Ju57UR4Q4=
 github.com/google/go-github/v24 v24.0.1/go.mod h1:CRqaW1Uns1TCkP0wqTpxYyRxRjxwvKU/XSS44u6X74M=

@@ -8,7 +8,7 @@ require (
 	gioui.org/example v0.8.1
 	gioui.org/x v0.8.1
 	github.com/ddkwork/golibrary v0.0.91-0.20250218042444-9cd6d330f714
-	github.com/ddkwork/ux v0.0.0-20250219092428-ce8cf7f61948
+	github.com/ddkwork/ux v0.0.0-20250219115313-c7f101952985
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	golang.org/x/crypto v0.33.0
 	golang.org/x/exp/shiny v0.0.0-20250218142911-aa4b98e5adaa
