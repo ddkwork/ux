@@ -19,6 +19,5 @@ func TestTreeTable_ContextMenuItem(t1 *testing.T) {
 	m.Set("Edit", "Edit")
 	m.Set("OpenAll", "OpenAll")
 	m.Set("CloseAll", "CloseAll")
-	g := stream.NewGeneratedFile()
-	g.EnumTypes("ContextMenuItem", m)
+	stream.NewGeneratedFile().EnumTypes("ContextMenuItem", m)
 }
