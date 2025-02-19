@@ -104,7 +104,7 @@ func main() {
 			})
 			m.Set(TreeType, tree.Layout)
 		case Table2Type:
-			t := ux.NewGoroutineList(ux.Packets)
+			t := table2(Packets)
 			m.Set(Table2Type, t.Layout)
 		case TableType:
 			m.Set(TableType, table())

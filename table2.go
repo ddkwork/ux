@@ -30,7 +30,7 @@ type (
 		drags              []tableDrag
 		headers            []*widget.Clickable
 		cells              []*widget.Clickable // 单元格单击事件
-		clickedColumnIndex int
+		ClickedColumnIndex int
 		manualWidthSet     []bool // 新增状态标志数组，记录列是否被手动调整
 
 		*widget.List
@@ -63,7 +63,7 @@ func NewTable2(columns []Column2) *Table2 {
 		drags:              nil,
 		headers:            headers,
 		cells:              nil,
-		clickedColumnIndex: -1,
+		ClickedColumnIndex: -1,
 		List: &widget.List{
 			Scrollbar: widget.Scrollbar{},
 			List: layout.List{
@@ -156,7 +156,7 @@ func (t *Table2) Layout(gtx layout.Context, w layout.Widget) layout.Dimensions {
 }
 
 func (t *Table2) ClickedColumn() (int, bool) {
-	index := t.clickedColumnIndex
+	index := t.ClickedColumnIndex
 	return index, index >= 0
 }
 
@@ -309,7 +309,7 @@ func (row *TableRowStyle) Layout(gtx layout.Context, w RowFn) layout.Dimensions 
 					nextCol.Width = minWidth      // 将下一个列宽度设为最小宽度
 					col.Width -= d                // 更新当前列宽度
 				}
-			} else { // 如果不需要收缩
+			} else {                      // 如果不需要收缩
 				if col.Width < minWidth { // 如果当前列宽度小于最小宽度
 					col.Width = minWidth // 将当前列宽度设为最小宽度
 				}
@@ -467,7 +467,7 @@ func (row *TableHeaderRowStyle) Layout(gtx layout.Context) layout.Dimensions {
 		)
 		if button.Clicked(gtx) {
 			mylog.Trace("header clicked", col)
-			row.Table.clickedColumnIndex = col
+			row.Table.ClickedColumnIndex = col
 		}
 		gtx.Constraints.Min.Y = gtx.Dp(20)                                                // 限制行高
 		paint.FillShape(gtx.Ops, ColorHeaderFg, clip.Rect{Max: gtx.Constraints.Max}.Op()) // 表头背景色
