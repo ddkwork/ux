@@ -309,7 +309,8 @@ func (row *TableRowStyle) Layout(gtx layout.Context, w RowFn) layout.Dimensions 
 					nextCol.Width = minWidth      // 将下一个列宽度设为最小宽度
 					col.Width -= d                // 更新当前列宽度
 				}
-			} else {                      // 如果不需要收缩
+			} else {
+				// 如果不需要收缩
 				if col.Width < minWidth { // 如果当前列宽度小于最小宽度
 					col.Width = minWidth // 将当前列宽度设为最小宽度
 				}
