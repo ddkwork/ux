@@ -685,7 +685,7 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions
 					nextCol.Current = minWidth      // 将下一个列宽度设为最小宽度
 					col.Current -= d                // 更新当前列宽度
 				}
-			} else { // 如果不需要收缩
+			} else {                        // 如果不需要收缩
 				if col.Current < minWidth { // 如果当前列宽度小于最小宽度
 					col.Current = minWidth // 将当前列宽度设为最小宽度
 				}
@@ -908,8 +908,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 	rowClick := &node.rowClick
 
 	evt, ok := gtx.Source.Event(pointer.Filter{
-		//Target: &node.RowCells[i].Clickable, // todo 检查这个的正确性
-		Target: rowClick, // todo 检查这个的正确性
+		Target: rowClick,
 		Kinds:  pointer.Press | pointer.Release,
 	})
 	if ok {
