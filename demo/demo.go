@@ -312,7 +312,7 @@ func main() {
 		case DockViewType:
 		case Gif123Type:
 		case HexEditorType:
-			obj := ux.NewMenuObj()
+			obj := NewMenuObj()
 			m.Set(HexEditorType, obj.Layout)
 		case ImageEditorType:
 		case MediaPlayerType:
