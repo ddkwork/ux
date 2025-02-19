@@ -10,6 +10,7 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 )
 
+
 require (
 	eliasnaur.com/font v0.0.0-20230308162249-dd43949cb42d // indirect
 	gioui.org/cmd v0.8.0 // indirect

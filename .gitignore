@@ -9,3 +9,6 @@ tr
 /demo/demo.apk
 /demo/ManPiecework/ManPiecework.exe
 /demo/canvas.png
+/go.work.sum
+/go.work
+/update go workspace.cmd
