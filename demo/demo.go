@@ -521,7 +521,7 @@ func treeTable() ux.Widget {
 							Process:       fmt.Sprintf("process%d-%d-%d.exe", i+1, j+1, k+1),
 							PadTime:       time.Duration(i+1+j+1+k+1) * time.Second,
 						}
-						subSubNode := ux.NewContainerNode("Sub Sub Row "+fmt.Sprint(k+1), subSubData)
+						subSubNode := ux.NewNode(subSubData)
 						subSubNode.SetParent(subNode)
 						subNode.Children[k] = subSubNode
 					}

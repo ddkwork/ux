@@ -1121,32 +1121,18 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconArrowDropDown,
-											Can: func() bool {
-												return true
-											},
+											Can:   func() bool { return true },
 											Do: func() {
 												mylog.CheckNil(t.selectedNode)
 												var zero T
-												clone := NewNode(zero) // todo 为什么生成了容器节点？
-												clone.SetParent(t.selectedNode)
-
-												// clone := t.selectedNode.Clone()
-												// clone.Data = zero //
-
+												clone := NewNode(zero)
 												index := t.selectedNode.RowToIndex() + 1
 												switch {
-												case t.selectedNode.CanHaveChildren(), t.selectedNode.IsRoot():
-													// t.selectedNode.AddChild(clone) //todo 应该插入到选中的孩子下标的后一个，这样是插入到最后一个去了
+												case t.selectedNode.Container():
 													t.selectedNode.Children = slices.Insert(t.selectedNode.Children, index, clone)
 												default:
-													// t.selectedNode.parent.AddChild(clone)
-													t.selectedNode.Children = slices.Insert(t.selectedNode.Children, index, clone)
+													t.selectedNode.parent.Children = slices.Insert(t.selectedNode.parent.Children, index, clone)
 												}
-												// 这里应该取已选中的节点，但是这里取右键按下事件并给选中节点赋值，然而右键菜单会因事件执激活菜单失败，弹不出菜单。
-												t.SizeColumnsToFit(gtx, false) // 非得排序才能刷新成功新增的节点
-												t.List.Update(gtx, layout.Vertical, 0, 0)
-
-												// todo open editor window,把双击编辑节点的代码提到单独的函数，然后调用它
 											},
 											Clickable: widget.Clickable{},
 										}
@@ -1433,7 +1419,7 @@ func (n *Node[T]) SetRootRows(rows []*Node[T]) {
 }
 
 func (n *Node[T]) RowToIndex() int {
-	for row, data := range n.Children {
+	for row, data := range n.parent.Children {
 		if data.ID == n.ID {
 			return row
 		}
