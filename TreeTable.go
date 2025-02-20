@@ -1127,7 +1127,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 												var zero T
 												clone := NewNode(zero)
 												index := t.selectedNode.RowToIndex() + 1
-												switch {
+												switch { //回头看gcs的insetItem CreatItem,太复杂了，所以应该保持目前的实线，模型和树形数据结构合并,渲染的话，表头保持目前的结果方便和rows传递表头特性来控制row的属性,比如表头和rows对齐，最大列宽，排序的选中行等等，应该高耦合
 												case t.selectedNode.parent.IsRoot():
 													t.Root.Children = slices.Insert(t.Root.Children, index, clone)
 												case t.selectedNode.Container():
@@ -1641,11 +1641,25 @@ func RowContainsRow[T any](ancestor, descendant *Node[T]) bool { // todo use wal
 }
 
 func (n *Node[T]) RemoveFromParent() {
-	mylog.CheckNil(n.parent)
+	if n.IsRoot() {
+		n.Remove(n.ID)
+		return
+	}
+	mylog.CheckNil(n.parent) //从demo来看，这种一般是实例化节点错误造成的,这里捕获堆栈有助于定位到业务初始化节点错误的代码片段
 	n.parent.Remove(n.ID)
 }
 
+// todo 增加insert方法并传入父节点，这样业务代码就不会犯错了,同时应该不要导出children字段？避免访问，这样才能保证安全操作不会panic
 func (n *Node[T]) Remove(id uuid.UUID) { // todo add remove callback
+	if n.IsRoot() {
+		for i, child := range n.Children {
+			if child.ID == id {
+				n.Children = slices.Delete(n.Children, i, i+1)
+				return
+			}
+		}
+	}
+
 	if n.ID == id {
 		n.parent.Remove(id)
 		return
