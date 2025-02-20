@@ -1227,9 +1227,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 									item.Title = kind.String()
 									node.contextMenu.AddItem(item)
 								}
-								contextMenuItems := t.ContextMenuItems(node, gtx)
-								if contextMenuItems != nil {
-									for _, item := range contextMenuItems {
+								if items := t.ContextMenuItems(node, gtx); items != nil {
+									for _, item := range items {
 										node.contextMenu.AddItem(item)
 									}
 								}
