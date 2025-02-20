@@ -1164,23 +1164,17 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 										}
 									case DeleteType:
 										item = ContextMenuItem{
-											Title: "",
-											Icon:  IconDelete,
-											Can: func() bool {
-												return true
-											},
-											Do: func() {
-												mylog.Info("delete")
-											},
+											Title:     "",
+											Icon:      IconDelete,
+											Can:       func() bool { return true },
+											Do:        func() { node.RemoveFromParent() },
 											Clickable: widget.Clickable{},
 										}
 									case DuplicateType:
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconActionUpdate,
-											Can: func() bool {
-												return true
-											},
+											Can:   func() bool { return true },
 											Do: func() {
 												mylog.Info("duplicate")
 											},
@@ -1201,26 +1195,18 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 										}
 									case OpenAllType:
 										item = ContextMenuItem{
-											Title: "",
-											Icon:  IconFileFolderOpen,
-											Can: func() bool {
-												return true
-											},
-											Do: func() {
-												mylog.Info("open all")
-											},
+											Title:     "",
+											Icon:      IconFileFolderOpen,
+											Can:       func() bool { return true },
+											Do:        func() { node.OpenAll() },
 											Clickable: widget.Clickable{},
 										}
 									case CloseAllType:
 										item = ContextMenuItem{
-											Title: "",
-											Icon:  IconClose,
-											Can: func() bool {
-												return true
-											},
-											Do: func() {
-												mylog.Info("close all")
-											},
+											Title:     "",
+											Icon:      IconClose,
+											Can:       func() bool { return true },
+											Do:        func() { node.CloseAll() },
 											Clickable: widget.Clickable{},
 										}
 									}
