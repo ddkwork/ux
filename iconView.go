@@ -38,7 +38,7 @@ func NewIconView() *IconView {
 		keyWords: "Edi",
 		elements: make([]layout.Widget, 0, len(iconList)),
 	}
-	i.filter.SetonChanged(func(text string) {
+	i.filter.SetOnChanged(func(text string) {
 		fmt.Println("change:", i.filter.GetText())
 		i.keyWords = i.filter.GetText()
 	})

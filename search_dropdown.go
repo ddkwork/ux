@@ -228,7 +228,7 @@ func (c *SearchDropDown) SetMinWidth(minWidth unit.Dp) {
 //
 //// update
 //func (c *SearchDropDown) update(gtx layout.Context) {
-//	c.SearchInput.SetonChanged(func(gtx layout.Context) {
+//	c.SearchInput.SetOnChanged(func(gtx layout.Context) {
 //		fmt.Println("current text:", c.SearchInput.GetText())
 //		c.updateMenuItems(c.SearchInput.GetText())
 //		gtx.Execute(op.InvalidateCmd{})

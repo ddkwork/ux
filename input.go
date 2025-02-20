@@ -110,7 +110,7 @@ func (i *Input) SetOnIconClick(f ActionFun) *Input {
 	return i
 }
 
-func (i *Input) SetonChanged(f func(text string)) *Input {
+func (i *Input) SetOnChanged(f func(text string)) *Input {
 	i.onChange = f
 	return i
 }
