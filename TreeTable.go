@@ -1129,10 +1129,13 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 												index := t.selectedNode.RowToIndex() + 1
 												switch { //回头看gcs的insetItem CreatItem,太复杂了，所以应该保持目前的实线，模型和树形数据结构合并,渲染的话，表头保持目前的结果方便和rows传递表头特性来控制row的属性,比如表头和rows对齐，最大列宽，排序的选中行等等，应该高耦合
 												case t.selectedNode.parent.IsRoot():
+													clone.SetParent(t.Root)
 													t.Root.Children = slices.Insert(t.Root.Children, index, clone)
 												case t.selectedNode.Container():
+													clone.SetParent(t.selectedNode)
 													t.selectedNode.Children = slices.Insert(t.selectedNode.Children, index, clone)
 												default:
+													clone.SetParent(t.selectedNode.parent)
 													t.selectedNode.parent.Children = slices.Insert(t.selectedNode.parent.Children, index, clone)
 												}
 											},
@@ -1152,10 +1155,16 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 										}
 									case DeleteType:
 										item = ContextMenuItem{
-											Title:     "",
-											Icon:      IconDelete,
-											Can:       func() bool { return true },
-											Do:        func() { node.RemoveFromParent() },
+											Title: "",
+											Icon:  IconDelete,
+											Can:   func() bool { return true },
+											Do: func() {
+												if t.selectedNode.parent.IsRoot() {
+													t.selectedNode.RemoveFromRoot(t.Root)
+													return
+												}
+												t.selectedNode.RemoveFromParent()
+											},
 											Clickable: widget.Clickable{},
 										}
 									case DuplicateType:
@@ -1640,26 +1649,21 @@ func RowContainsRow[T any](ancestor, descendant *Node[T]) bool { // todo use wal
 	return descendant == ancestor
 }
 
-func (n *Node[T]) RemoveFromParent() {
-	if n.IsRoot() {
-		n.Remove(n.ID)
-		return
+func (n *Node[T]) RemoveFromRoot(root *Node[T]) {
+	for i, child := range root.Children {
+		if child.ID == n.ID {
+			root.Children = slices.Delete(root.Children, i, i+1)
+			break
+		}
 	}
+}
+func (n *Node[T]) RemoveFromParent() {
 	mylog.CheckNil(n.parent) //从demo来看，这种一般是实例化节点错误造成的,这里捕获堆栈有助于定位到业务初始化节点错误的代码片段
 	n.parent.Remove(n.ID)
 }
 
 // todo 增加insert方法并传入父节点，这样业务代码就不会犯错了,同时应该不要导出children字段？避免访问，这样才能保证安全操作不会panic
 func (n *Node[T]) Remove(id uuid.UUID) { // todo add remove callback
-	if n.IsRoot() {
-		for i, child := range n.Children {
-			if child.ID == id {
-				n.Children = slices.Delete(n.Children, i, i+1)
-				return
-			}
-		}
-	}
-
 	if n.ID == id {
 		n.parent.Remove(id)
 		return
