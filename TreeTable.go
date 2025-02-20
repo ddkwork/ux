@@ -1198,15 +1198,17 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Title:     "",
 											Icon:      IconFileFolderOpen,
 											Can:       func() bool { return true },
-											Do:        func() { node.OpenAll() },
+											Do:        func() { t.Root.OpenAll() },
 											Clickable: widget.Clickable{},
 										}
 									case CloseAllType:
 										item = ContextMenuItem{
-											Title:     "",
-											Icon:      IconClose,
-											Can:       func() bool { return true },
-											Do:        func() { node.CloseAll() },
+											Title: "",
+											Icon:  IconClose,
+											Can:   func() bool { return true },
+											Do: func() {
+												t.Root.CloseAll()
+											},
 											Clickable: widget.Clickable{},
 										}
 									}
