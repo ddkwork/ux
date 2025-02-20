@@ -249,7 +249,7 @@ func (n *Node[T]) UpdateTouch(gtx layout.Context) {
 	//			// 检查是否是点击事件
 	//			if time.Since(n.pressStarted) < LongPressDuration {
 	//				// 处理点击事件
-	//				if n.rowClick.Clicked() {
+	//				if n.rowClick.OnClicked() {
 	//					n.isOpen = !n.isOpen
 	//					if n.CellClickedCallback != nil {
 	//						n.CellClickedCallback(n)
@@ -602,7 +602,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 								Clickable:     widget.Clickable{},
 							})
 						}
-						t.header.contextMenu.Clicked(gtx)
+						t.header.contextMenu.OnClicked(gtx)
 						return contextArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							return t.drawContextArea(gtx, &t.header.contextMenu.MenuState)
 						})
@@ -1238,7 +1238,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 									}
 								}
 							}
-							node.contextMenu.Clicked(gtx)
+							node.contextMenu.OnClicked(gtx)
 							return contextArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 								return t.drawContextArea(gtx, &node.contextMenu.MenuState)
 							})

@@ -179,7 +179,7 @@ package ux
 //						}
 //						for i := range p.options {
 //							i := i
-//							if p.options[i].Button.Clicked(gtx) {
+//							if p.options[i].Button.OnClicked(gtx) {
 //								p.result = p.options[i].Text
 //								p.submit()
 //							}

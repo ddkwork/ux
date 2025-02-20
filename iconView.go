@@ -77,7 +77,7 @@ func (i *IconView) getElements() {
 		if i.keyWords == "" || strings.Contains(strings.ToLower(name), strings.ToLower(i.keyWords)) {
 			// fmt.Println("keywords:", keyWords, "name:", name)
 			i.elements = append(i.elements, func(gtx layout.Context) layout.Dimensions {
-				//if clickMap[name].Clicked(gtx) {
+				//if clickMap[name].OnClicked(gtx) {
 				//	copyResponse(gtx, name)
 				//}
 				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,

@@ -38,7 +38,7 @@ func (m *ContextMenu) AddItem(item ContextMenuItem) {
 	m.Items = append(m.Items, &item)
 }
 
-func (m *ContextMenu) Clicked(gtx C) {
+func (m *ContextMenu) OnClicked(gtx C) {
 	for _, item := range m.Items {
 		if item.Clicked(gtx) {
 			if item.Do != nil {

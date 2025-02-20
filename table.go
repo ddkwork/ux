@@ -312,7 +312,7 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 					}
 					m.cellsAreas[idx] = cellMenu
 				}
-				m.menu.Clicked(gtx) // callback
+				m.menu.OnClicked(gtx) // callback
 
 				return layout.Stack{}.Layout(gtx,
 					layout.Stacked(func(gtx C) D {

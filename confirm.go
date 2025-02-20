@@ -96,13 +96,13 @@ package ux
 //		// 绘制全屏半透明遮罩层
 //		paint.Fill(gtx.Ops, th.Color.DefaultMaskBgColor)
 //	}
-//	for c.cancelClickable.Clicked(gtx) {
+//	for c.cancelClickable.OnClicked(gtx) {
 //		c.visible = false
 //		if c.cancelFunc != nil {
 //			c.cancelFunc()
 //		}
 //	}
-//	for c.confirmClickable.Clicked(gtx) {
+//	for c.confirmClickable.OnClicked(gtx) {
 //		c.visible = false
 //		if c.confirmFunc != nil {
 //			c.confirmFunc()
