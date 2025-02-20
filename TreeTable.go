@@ -957,8 +957,11 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 			//}
 		}
 	}
-
+	//if node.LenChildren()%2 == 1 {
+	//	rowIndex--
+	//}
 	bgColor := RowColor(rowIndex)
+
 	if rowClick.Hovered() { // 设置悬停背景色
 		bgColor = th.Color.TreeHoveredBgColor
 	}
@@ -978,12 +981,12 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 		c := node.RowCells[0]
 		c.leftIndent = node.Depth() * HierarchyIndent
 		if !node.CanHaveChildren() {
-			c.leftIndent += 8
+			c.leftIndent += iconWidth
 		}
 		if node.parent.IsRoot() {
 			c.leftIndent = HierarchyIndent
 			if !node.CanHaveChildren() {
-				c.leftIndent = HierarchyIndent + iconWidth + 4 // 根节点HierarchyIndent + 图标宽度 + 左padding
+				c.leftIndent = HierarchyIndent + iconWidth // 根节点HierarchyIndent + 图标宽度 + 左padding
 			}
 		}
 
