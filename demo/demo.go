@@ -465,12 +465,10 @@ func treeTable() ux.Widget {
 		IsDocument:          false,
 	})
 	appBar.Search.SetOnChanged(func(text string) {
-		// t.Filter(text)
 		// todo 这里可以设计一个类似aggrid的高级搜索功能：把n叉树的元数据结构体取出来，然后通过反射结构体布局一个所有字段值的过滤综合条件，最后设置过滤结果填充到表格的过滤rows中
-		t.Root.ApplyFilter_(text) // todo bug runtime: goroutine stack exceeds 1000000000-byte limit
+		t.Filter(text)
 	})
 	topLevelRowsToMake := 100
-	rows := make([]*ux.Node[packet], topLevelRowsToMake)
 	for i := 0; i < topLevelRowsToMake; i++ {
 		data := packet{
 			Scheme:        "Row" + fmt.Sprint(i+1),
@@ -487,9 +485,7 @@ func treeTable() ux.Widget {
 		var node *ux.Node[packet]
 		if i%10 == 3 {
 			node = ux.NewContainerNode(fmt.Sprintf("Sub Row %d", i+1), data)
-			node.SetParent(t.Root)
-			// node.Open = true
-			node.Children = make([]*ux.Node[packet], 5)
+			t.Root.AddChild(node)
 			for j := 0; j < 5; j++ {
 				subData := packet{
 					Scheme:        "Row" + fmt.Sprint(j+1),
@@ -504,10 +500,8 @@ func treeTable() ux.Widget {
 					PadTime:       time.Duration(i+1+j+1) * time.Second,
 				}
 				subNode := ux.NewContainerNode("Sub Sub Row "+fmt.Sprint(j+1), subData)
-				subNode.SetParent(node)
-				node.Children[j] = subNode
+				node.AddChild(subNode)
 				if j < 2 {
-					subNode.Children = make([]*ux.Node[packet], 2)
 					for k := 0; k < 2; k++ {
 						subSubData := packet{
 							Scheme:        "Row" + fmt.Sprint(k+1),
@@ -522,22 +516,15 @@ func treeTable() ux.Widget {
 							PadTime:       time.Duration(i+1+j+1+k+1) * time.Second,
 						}
 						subSubNode := ux.NewNode(subSubData)
-						subSubNode.SetParent(subNode)
-						subNode.Children[k] = subSubNode
+						subNode.AddChild(subSubNode)
 					}
-				} else {
-					subNode = ux.NewNode(subData)
-					subNode.SetParent(node)
-					node.Children[j] = subNode
 				}
 			}
 		} else {
-			node = ux.NewNode(data)
-			node.SetParent(t.Root)
+			t.Root.AddChild(ux.NewNode(data))
 		}
-		rows[i] = node
 	}
-	t.Root.SetRootRows(rows)
+	t.OpenAll()
 	t.Format()
 	return t.Layout
 }

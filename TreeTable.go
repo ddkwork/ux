@@ -32,11 +32,11 @@ import (
 
 type (
 	TreeTable[T any] struct {
-		Root         *Node[T] //？ how to use it?
-		Children     []*Node[T]
+		Root         *Node[T]
+		children     []*Node[T] //for back root rows
+		filteredRows []*Node[T]
 		selectedNode *Node[T]
 		filterText   string
-		filteredRows []*Node[T]
 
 		header            TableHeader[T]
 		columnHeaderCount int
@@ -109,7 +109,7 @@ func NewTreeTable[T any](data T, ctx TableContext[T]) *TreeTable[T] {
 	root.MarshalRow = ctx.MarshalRow
 	return &TreeTable[T]{
 		Root:         root,
-		Children:     nil,
+		children:     nil,
 		selectedNode: nil,
 		filterText:   "",
 		filteredRows: nil,
@@ -169,13 +169,12 @@ func newNode[T any](typeKey string, isContainer bool, data T) *Node[T] {
 		Type:                     typeKey,
 		parent:                   nil,
 		Data:                     data,
-		Children:                 nil,
+		children:                 nil,
 		isOpen:                   isContainer,
 		SelectionChangedCallback: nil,
 		DoubleClickCallback:      nil,
 		DragRemovedRowsCallback:  nil,
 		DropOccurredCallback:     nil,
-		filteredRows:             nil,
 		columnResizeStart:        0,
 		columnResizeBase:         0,
 		columnResizeOverhead:     0,
@@ -209,14 +208,13 @@ type Node[T any] struct {
 	Type     string    `json:"type"`
 	parent   *Node[T]
 	Data     T
-	Children []*Node[T] `json:"children,omitempty"`
+	children []*Node[T] `json:"children,omitempty"`
 	isOpen   bool
 
-	SelectionChangedCallback func()     `json:"-"`
-	DoubleClickCallback      func()     `json:"-"`
-	DragRemovedRowsCallback  func()     `json:"-"` // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
-	DropOccurredCallback     func()     `json:"-"` // Called whenever a drop occurs that modifies the model.
-	filteredRows             []*Node[T] // todo move into treeTable
+	SelectionChangedCallback func() `json:"-"`
+	DoubleClickCallback      func() `json:"-"`
+	DragRemovedRowsCallback  func() `json:"-"` // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
+	DropOccurredCallback     func() `json:"-"` // Called whenever a drop occurs that modifies the model.
 
 	columnResizeStart        unit.Dp
 	columnResizeBase         unit.Dp
@@ -297,36 +295,6 @@ type TableTheme struct {
 	ShowColumnDivider bool
 }
 
-const LongPressDuration = 500 * time.Millisecond // 自定义长按持续时间
-
-func (t *TreeTable[T]) SetRootRows(rootRows []*Node[T]) *TreeTable[T] {
-	for _, row := range rootRows {
-		t.expandNode(row)
-		// 设置长按回调
-		row.LongPressCallback = func(node *Node[T]) {
-			// 长按时执行的操作
-			t.header.clickedColumnIndex = -1 // 重置点击列索引（如果需要）
-			t.selectedNode = node            // 设置选中节点
-			// 显示上下文菜单
-			//t.header.contextMenu.Show(gtx, func(gtx layout.Context) layout.Dimensions {
-			//	return t.drawContextArea(gtx, &t.header.contextMenu.MenuState)
-			//})
-		}
-		// row.UpdateTouch(gtx) // 初始化触摸事件处理
-	}
-	t.Children = rootRows
-	return t
-}
-
-func (n *Node[T]) SetParents(children []*Node[T], parent *Node[T]) {
-	for _, child := range children {
-		child.parent = parent
-		if len(child.Children) > 0 {
-			n.SetParents(child.Children, child)
-		}
-	}
-}
-
 // 递归函数，获取树形结构中的最大深度
 func (t *TreeTable[T]) MaxDepth() unit.Dp {
 	maxDepth := unit.Dp(1)
@@ -358,7 +326,7 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 		// mylog.Json("-------> col: "+fmt.Sprint(column[0].ColumID), b.String())
 	}
 
-	t.Rows = make([][]CellData, 0, len(t.Children)) // 用于存储所有行
+	t.Rows = make([][]CellData, 0, len(t.children)) // 用于存储所有行
 	t.Root.Walk(func(node *Node[T]) {
 		rowCells := t.MarshalRow(node)
 		t.Rows = append(t.Rows, rowCells)
@@ -399,7 +367,7 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 	}
 	gtx.Constraints = originalConstraints
 
-	t.Children = t.Root.Children
+	t.children = t.Root.children
 }
 
 // TransposeMatrix 把行切片矩阵置换为列切片,用于计算最大列宽的参数
@@ -431,14 +399,14 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 			})
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return list.Layout(gtx, len(t.Children), func(gtx layout.Context, index int) layout.Dimensions {
-				node := t.Children[index]
+			return list.Layout(gtx, len(t.children), func(gtx layout.Context, index int) layout.Dimensions {
+				node := t.children[index]
 				node.UpdateTouch(gtx) // 更新触摸事件处理逻辑
 				return t.RowFrame(gtx, node, index)
-				return t.RowFrame(gtx, t.Children[index], index)
+				return t.RowFrame(gtx, t.children[index], index)
 				//t.inLayoutHeader = false
 				//return t.layoutDrag(gtx, func(gtx layout.Context, row int) layout.Dimensions {
-				//	return t.RowFrame(gtx, t.Children[index], index)
+				//	return t.RowFrame(gtx, t.children[index], index)
 				//})
 			})
 		}),
@@ -514,7 +482,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 				case SortDescending:
 					t.header.ColumnCells[i].Text += " ⇩"
 				}
-				t.SortNodes()
+				t.Sort()
 				// t.header.clickedColumnIndex = -1 //重置点击列索引
 			}
 		}
@@ -837,7 +805,7 @@ func NewNode[T any](data T) (child *Node[T]) {
 
 func NewContainerNode[T any](typeKey string, data T) (container *Node[T]) {
 	n := newNode(typeKey, true, data)
-	n.Children = make([]*Node[T], 0)
+	n.children = make([]*Node[T], 0)
 	return n
 }
 
@@ -851,26 +819,6 @@ func NewContainerNodes[T any](typeKeys []string, objects ...T) (containerNodes [
 		containerNodes = append(containerNodes, NewContainerNode(key, data))
 	}
 	return
-}
-
-func (t *TreeTable[T]) SortNodes() {
-	if len(t.Children) == 0 || t.header.SortedBy >= len(t.Children[0].RowCells) {
-		return // 如果没有子节点或者列索引无效，直接返回
-	}
-	sort.Slice(t.Children, func(i, j int) bool {
-		if t.Children[i].RowCells == nil { // why? module do not need this
-			t.Children[i].RowCells = t.MarshalRow(t.Children[i])
-		}
-		if t.Children[j].RowCells == nil {
-			t.Children[j].RowCells = t.MarshalRow(t.Children[j])
-		}
-		cellI := t.Children[i].RowCells[t.header.SortedBy].Text
-		cellJ := t.Children[j].RowCells[t.header.SortedBy].Text
-		if t.header.sortAscending {
-			return cellI < cellJ
-		}
-		return cellI > cellJ
-	})
 }
 
 const (
@@ -1125,18 +1073,15 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Do: func() {
 												mylog.CheckNil(t.selectedNode)
 												var zero T
-												clone := NewNode(zero)
-												index := t.selectedNode.RowToIndex() + 1
+												empty := NewNode(zero)
+												index := t.RowToIndex(t.selectedNode) + 1
 												switch { //回头看gcs的insetItem CreatItem,太复杂了，所以应该保持目前的实线，模型和树形数据结构合并,渲染的话，表头保持目前的结果方便和rows传递表头特性来控制row的属性,比如表头和rows对齐，最大列宽，排序的选中行等等，应该高耦合
 												case t.selectedNode.parent.IsRoot():
-													clone.SetParent(t.Root)
-													t.Root.Children = slices.Insert(t.Root.Children, index, clone)
+													empty.Insert(t.Root, index, empty)
 												case t.selectedNode.Container():
-													clone.SetParent(t.selectedNode)
-													t.selectedNode.Children = slices.Insert(t.selectedNode.Children, index, clone)
+													empty.Insert(t.selectedNode, index, empty)
 												default:
-													clone.SetParent(t.selectedNode.parent)
-													t.selectedNode.parent.Children = slices.Insert(t.selectedNode.parent.Children, index, clone)
+													empty.Insert(t.selectedNode.parent, index, empty)
 												}
 											},
 											Clickable: widget.Clickable{},
@@ -1159,11 +1104,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Icon:  IconDelete,
 											Can:   func() bool { return true },
 											Do: func() {
-												if t.selectedNode.parent.IsRoot() {
-													t.selectedNode.RemoveFromRoot(t.Root)
-													return
-												}
-												t.selectedNode.RemoveFromParent()
+												t.Remove(t.selectedNode.ID)
 											},
 											Clickable: widget.Clickable{},
 										}
@@ -1195,7 +1136,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Title:     "",
 											Icon:      IconFileFolderOpen,
 											Can:       func() bool { return true },
-											Do:        func() { t.Root.OpenAll() },
+											Do:        func() { t.OpenAll() },
 											Clickable: widget.Clickable{},
 										}
 									case CloseAllType:
@@ -1203,7 +1144,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Title:     "",
 											Icon:      IconClose,
 											Can:       func() bool { return true },
-											Do:        func() { t.Root.CloseAll() },
+											Do:        func() { t.CloseAll() },
 											Clickable: widget.Clickable{},
 										}
 									}
@@ -1237,7 +1178,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 		}),
 	}
 	if node.CanHaveChildren() && node.isOpen { // 如果是容器节点则递归填充孩子节点形成多行
-		for _, child := range node.Children {
+		for _, child := range node.children {
 			rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				rowIndex++
 				return t.RowFrame(gtx, child, rowIndex)
@@ -1356,9 +1297,13 @@ func (n *Node[T]) SetParent(parent *Node[T]) {
 
 func (n *Node[T]) clearUnusedFields() {
 	if !n.Container() {
-		n.Children = nil
+		n.children = nil
 		n.isOpen = false
 	}
+}
+
+func (n *Node[T]) ResetChildren() {
+	n.children = nil
 }
 
 func (n *Node[T]) CanHaveChildren() bool {
@@ -1366,11 +1311,11 @@ func (n *Node[T]) CanHaveChildren() bool {
 }
 
 func (n *Node[T]) HasChildren() bool {
-	return n.Container() && len(n.Children) > 0
+	return n.Container() && len(n.children) > 0
 }
 
 func (n *Node[T]) SetChildren(children []*Node[T]) {
-	n.Children = children
+	n.children = children
 }
 
 func (n *Node[T]) CellDataForSort(col int) string {
@@ -1379,7 +1324,7 @@ func (n *Node[T]) CellDataForSort(col int) string {
 
 func (n *Node[T]) AddChild(child *Node[T]) {
 	child.parent = n
-	n.Children = append(n.Children, child)
+	n.children = append(n.children, child)
 }
 
 func (n *Node[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions {
@@ -1412,49 +1357,6 @@ func (n *Node[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions
 	}
 	return inset.Layout(gtx, material.Body2(th.Theme, data.Text).Layout)
 	// return inset.Layout(gtx, richText.Layout)
-}
-
-func (n *Node[T]) RootRows() []*Node[T] {
-	if n.filteredRows != nil {
-		return n.filteredRows
-	}
-	return n.Children
-}
-
-func (n *Node[T]) SetRootRows(rows []*Node[T]) {
-	n.filteredRows = nil
-	n.Children = rows
-	n.SyncToModel()
-}
-
-func (n *Node[T]) RowToIndex() int {
-	if n.IsRoot() {
-		for row, data := range n.Children {
-			if data.ID == n.ID {
-				return row
-			}
-		}
-	}
-	if n.parent == nil { //todo why?
-		return -1
-	}
-	for row, data := range n.parent.Children {
-		if data.ID == n.ID {
-			return row
-		}
-	}
-	return -1
-}
-
-func (n *Node[T]) SyncToModel() {
-	//rowCount := 0
-	//roots := n.RootRows()
-	//if n.filteredRows != nil {
-	//	rowCount = len(n.filteredRows)
-	//} else {
-	//	for _, row := range roots {
-	//	}
-	//}
 }
 
 type Point struct {
@@ -1500,133 +1402,102 @@ func (n *Node[T]) CopyRow(gtx layout.Context) string {
 	return b.String()
 }
 
-func (n *Node[T]) IsFiltered() bool {
-	return n.filteredRows != nil
+const LongPressDuration = 500 * time.Millisecond // 自定义长按持续时间
+
+func (t *TreeTable[T]) RootRows() []*Node[T] {
+	if t.filteredRows != nil {
+		return t.filteredRows
+	}
+	return t.children
 }
 
-func (n *Node[T]) ApplyFilter(filter func(row *Node[T]) bool) {
-	if filter == nil {
-		if n.filteredRows == nil {
-			return
-		}
-		n.filteredRows = nil
-	} else {
-		n.filteredRows = make([]*Node[T], 0)
-		for _, row := range n.RootRows() {
-			n.applyFilter(row, filter)
+func (n *Node[T]) SetParents(children []*Node[T], parent *Node[T]) {
+	for _, child := range children {
+		child.parent = parent
+		if len(child.children) > 0 {
+			n.SetParents(child.children, child)
 		}
 	}
-	n.SyncToModel()
-	//if n.header != nil && n.header.HasSort() {
-	//	n.header.ApplySort()
+}
+
+// todo 克隆所有字段
+func (n *Node[T]) Clone() (from *Node[T]) {
+	if n.Container() {
+		return NewContainerNode(n.Type, n.Data)
+	}
+	return NewNode(n.Data)
+}
+func (n *Node[T]) CopyFrom(from *Node[T]) *Node[T] {
+	*n = *from
+	return n
+}
+func (n *Node[T]) ApplyTo(to *Node[T]) *Node[T] {
+	*to = *n
+	return n
+}
+
+func (t *TreeTable[T]) backRootRows() { //todo增删改查之后需要刷新备份？
+	//todo back root rows 调用clone方法，并将clone的结果放入备份数组，然后在增删改查之后刷新备份数组
+	//t.childrenBack= make([]*Node[T], t.Root.LenChildren())
+	//for i, child := range t.Root.children {
+	//
 	//}
+
 }
 
-func (n *Node[T]) applyFilter(row *Node[T], filter func(row *Node[T]) bool) {
-	if !filter(row) {
-		n.filteredRows = append(n.filteredRows, row)
-	}
-	if row.CanHaveChildren() {
-		for _, child := range row.Children {
-			n.applyFilter(child, filter)
-		}
-	}
+func (t *TreeTable[T]) IsFiltered() bool {
+	return t.filteredRows != nil
 }
 
 func (t *TreeTable[T]) Filter(text string) {
 	t.filterText = text
-
 	if text == "" {
-		t.filteredRows = make([]*Node[T], 0)
+		t.Root.children = t.children
+		t.OpenAll()
 		return
 	}
-
-	items := make([]*Node[T], 0)
-	//for i, item := range t.Children {
-	//	if strings.Contains(item.RowCells[i].Cell, text) {
-	//		items = append(items, item)
-	//	}
-	//
-	//	for i, child := range item.Children {
-	//		if strings.Contains(child.RowCells[i].Cell, text) {
-	//			items = append(items, child)
-	//		}
-	//	}
-	//}
-
-	t.filteredRows = items
-}
-
-func (n *Node[T]) ApplyFilter_(tag string) {
-	n.filteredRows = make([]*Node[T], 0)
-	// var node *Node[T]
-	// node = n.Root()
-
-	n.WalkContainer(func(node *Node[T]) {
+	t.backRootRows()
+	t.filteredRows = make([]*Node[T], 0)
+	t.Root.WalkContainer(func(node *Node[T]) {
 		if node.Container() {
-			cells := n.MarshalRow(node)
+			cells := node.MarshalRow(node)
 			for _, cell := range cells {
-				if strings.EqualFold(cell.Text, tag) {
-					n.filteredRows = append(n.filteredRows, node) // 先过滤所有容器节点
+				if strings.EqualFold(cell.Text, text) {
+					t.filteredRows = append(t.filteredRows, node) // 先过滤所有容器节点
 				}
 			}
 		}
 	})
-
-	for i, row := range n.filteredRows {
+	for i, row := range t.filteredRows {
 		children := make([]*Node[T], 0)
 		row.Walk(func(node *Node[T]) {
-			cells := n.MarshalRow(node)
+			cells := row.MarshalRow(node)
 			for _, cell := range cells {
-				if strings.EqualFold(cell.Text, tag) {
+				if strings.EqualFold(cell.Text, text) {
 					children = append(children, node) // 过滤子节点
 				}
 			}
 		})
-		n.filteredRows[i].SetChildren(children)
+		t.filteredRows[i].SetChildren(children)
 	}
-
-	n.SetChildren(n.filteredRows)
+	t.Root.SetChildren(t.filteredRows)
+	t.OpenAll()
 }
 
-func (n *Node[T]) OpenAll() {
-	n.WalkContainer(func(node *Node[T]) {
+func (t *TreeTable[T]) OpenAll() {
+	t.Root.WalkContainer(func(node *Node[T]) {
 		if node.Container() {
 			node.SetOpen(true)
 		}
 	})
 }
 
-func (t *TreeTable[T]) expandNode(node *Node[T]) {
-	node.isOpen = true // 设置节点为展开状态
-	for _, child := range node.Children {
-		t.expandNode(child) // 递归展开子节点
-	}
-}
-
-func (n *Node[T]) CloseAll() {
-	n.WalkContainer(func(node *Node[T]) {
+func (t *TreeTable[T]) CloseAll() {
+	t.Root.WalkContainer(func(node *Node[T]) {
 		if node.Container() {
 			node.SetOpen(false)
 		}
 	})
-}
-
-func (n *Node[T]) DiscloseRow(row *Node[T], delaySync bool) bool { // todo merge CloseAll and DiscloseRow
-	modified := false
-	p := row.Parent()
-	var zero *Node[T]
-	for p != zero {
-		if !p.IsOpen() {
-			p.SetOpen(true)
-			modified = true
-		}
-		p = p.Parent()
-	}
-	if modified {
-		n.SyncToModel() // todo 加入是否处于过滤状态的字段，以及重设rootRows后重新layout刷新
-	}
-	return modified
 }
 
 //-----------------------------------------------------------------------------
@@ -1635,74 +1506,73 @@ func CountTableRows[T any](rows []*Node[T]) int { // 计算整个表的总行数
 	count := len(rows)
 	for _, row := range rows {
 		if row.CanHaveChildren() {
-			count += CountTableRows(row.Children)
+			count += CountTableRows(row.children)
 		}
 	}
 	return count
 }
 
-func RowContainsRow[T any](ancestor, descendant *Node[T]) bool { // todo use walk and  rename to Contains
-	var zero *Node[T]
-	for descendant != zero && descendant != ancestor {
-		descendant = descendant.Parent()
-	}
-	return descendant == ancestor
-}
-
-func (n *Node[T]) RemoveFromRoot(root *Node[T]) {
-	for i, child := range root.Children {
-		if child.ID == n.ID {
-			root.Children = slices.Delete(root.Children, i, i+1)
-			break
-		}
-	}
-}
-func (n *Node[T]) RemoveFromParent() {
-	mylog.CheckNil(n.parent) //从demo来看，这种一般是实例化节点错误造成的,这里捕获堆栈有助于定位到业务初始化节点错误的代码片段
-	n.parent.Remove(n.ID)
-}
-
-// todo 增加insert方法并传入父节点，这样业务代码就不会犯错了,同时应该不要导出children字段？避免访问，这样才能保证安全操作不会panic
-func (n *Node[T]) Remove(id uuid.UUID) { // todo add remove callback
-	if n.ID == id {
-		n.parent.Remove(id)
-		return
-	}
-	for i, child := range n.Children {
+func (t *TreeTable[T]) Remove(id uuid.UUID) {
+	found := t.Find(id)
+	for i, child := range found.parent.children {
 		if child.ID == id {
-			n.Children = slices.Delete(n.Children, i, i+1)
+			found.parent.children = slices.Delete(found.parent.children, i, i+1)
 			return
 		}
 	}
-	mylog.Check("Node not found in parent")
 }
 
-func (n *Node[T]) Find(id uuid.UUID) *Node[T] {
-	if n.ID == id {
-		return n
-	}
-	for _, child := range n.Children {
-		found := child.Find(id)
-		if found != nil {
-			return found
+func (t *TreeTable[T]) Find(id uuid.UUID) (found *Node[T]) {
+	t.Root.Walk(func(node *Node[T]) {
+		if node.ID == id {
+			found = node
+			return
 		}
-	}
-	return nil
+	})
+	return
 }
 
-func (n *Node[T]) Sort(cmp func(a T, b T) bool) { // todo merge
-	sort.SliceStable(n.Children, func(i, j int) bool {
-		return cmp(n.Children[i].Data, n.Children[j].Data)
-	})
-	for _, child := range n.Children {
-		child.Sort(cmp)
+func (t *TreeTable[T]) Sort() {
+	if len(t.children) == 0 || t.header.SortedBy >= len(t.children[0].RowCells) {
+		return // 如果没有子节点或者列索引无效，直接返回
 	}
+	sort.Slice(t.children, func(i, j int) bool {
+		if t.children[i].RowCells == nil { // why? module do not need this
+			t.children[i].RowCells = t.MarshalRow(t.children[i])
+		}
+		if t.children[j].RowCells == nil {
+			t.children[j].RowCells = t.MarshalRow(t.children[j])
+		}
+		cellI := t.children[i].RowCells[t.header.SortedBy].Text
+		cellJ := t.children[j].RowCells[t.header.SortedBy].Text
+		if t.header.sortAscending {
+			return cellI < cellJ
+		}
+		return cellI > cellJ
+	})
 }
 
 func (n *Node[T]) Walk(callback func(node *Node[T])) {
 	callback(n)
-	for _, child := range n.Children {
+	for _, child := range n.children {
 		child.Walk(callback)
+	}
+}
+
+func (n *Node[T]) Containers() []*Node[T] {
+	containers := make([]*Node[T], 0)
+	for _, child := range n.children {
+		if child.Container() {
+			containers = append(containers, child)
+		}
+	}
+	return containers
+}
+
+func (n *Node[T]) WalkContainer(callback func(node *Node[T])) {
+	callback(n)
+	for _, container := range n.Containers() {
+		container.Walk(callback)
 	}
 }
 
@@ -1712,33 +1582,31 @@ func (n *Node[T]) WalkQueue(callback func(node *Node[T])) {
 		node := queue[0]
 		queue = queue[1:]
 		callback(node)
-		for _, child := range node.Children {
+		for _, child := range node.children {
 			queue = append(queue, child)
 		}
 	}
 }
 
-func (n *Node[T]) Containers() []*Node[T] {
-	containers := make([]*Node[T], 0)
-	for _, child := range n.Children {
-		if child.Container() {
-			containers = append(containers, child)
-		}
-	}
-	return containers
+func (n *Node[T]) Insert(parent *Node[T], index int, child *Node[T]) {
+	child.parent = parent
+	parent.children = slices.Insert(parent.children, index, child)
 }
 
-func (n *Node[T]) WalkContainer(callback func(node *Node[T])) {
-	callback(n) // always walk root here
-	containers := make([]*Node[T], 0)
-	for _, child := range n.Children {
-		if child.Container() {
-			containers = append(containers, child)
+func (t *TreeTable[T]) RowToIndex(row *Node[T]) int {
+	if row.IsRoot() {
+		for i, data := range t.children {
+			if data.ID == row.ID {
+				return i
+			}
 		}
 	}
-	for _, container := range containers {
-		container.Walk(callback)
+	for i, data := range row.parent.children {
+		if data.ID == row.ID {
+			return i
+		}
 	}
+	return -1
 }
 
 func (t *TreeTable[T]) FormatHeader(maxColumnCellTextWidths []unit.Dp) *stream.Buffer {
@@ -1802,8 +1670,8 @@ func (t *TreeTable[T]) FormatChildren(out *stream.Buffer, children []*Node[T]) {
 			out.WriteString(" │ ")
 		}
 		out.NewLine()
-		if len(child.Children) > 0 {
-			t.FormatChildren(out, child.Children)
+		if len(child.children) > 0 {
+			t.FormatChildren(out, child.children)
 		}
 	}
 }
@@ -1829,7 +1697,7 @@ func (t *TreeTable[T]) Format() *stream.Buffer {
 	t.SizeColumnsToFit(layout.Context{}, true)
 	t.maxColumnCellWidth = t.MaxColumnCellWidth()
 	buf := t.FormatHeader(t.maxColumnTextWidths)
-	t.FormatChildren(buf, t.Children) // 传入子节点打印函数
+	t.FormatChildren(buf, t.children) // 传入子节点打印函数
 	mylog.Json("RootRows", buf.String())
 	return buf
 }
@@ -1858,242 +1726,16 @@ func (n *Node[T]) Depth() unit.Dp {
 }
 
 func (n *Node[T]) LenChildren() int {
-	return len(n.Children)
+	return len(n.children)
 }
 
 func (n *Node[T]) LastChild() (lastChild *Node[T]) {
 	if n.IsRoot() {
-		return n.Children[len(n.Children)-1]
+		return n.children[len(n.children)-1]
 	}
-	return n.parent.Children[len(n.parent.Children)-1]
+	return n.parent.children[len(n.parent.children)-1]
 }
 
 func (n *Node[T]) IsLastChild() bool {
 	return n.LastChild() == n
 }
-
-func (n *Node[T]) ResetChildren() {
-	n.Children = nil
-	n.filteredRows = nil
-}
-
-func (n *Node[T]) CopyFrom(from *Node[T]) *Node[T] {
-	*n = *from
-	return n
-}
-
-func (n *Node[T]) ApplyTo(to *Node[T]) *Node[T] {
-	*to = *n
-	return n
-}
-
-func (n *Node[T]) Clone() (newNode *Node[T]) {
-	defer n.SyncToModel()
-	if n.Container() {
-		return NewContainerNode(n.Type, n.Data)
-	}
-	return NewNode(n.Data)
-}
-
-// ---------------------- todo delete
-//func NewTable3[T any](data T, ctx TableContext[T]) {
-//	if ctx.JsonName == "" {
-//		mylog.Check("JsonName is empty")
-//	}
-//	ctx.JsonName = strings.TrimSuffix(ctx.JsonName, ".json")
-//
-//	mylog.CheckNil(ctx.UnmarshalRow)
-//	// mylog.CheckNil(ctx.SetRootRowsCallBack)//mitmproxy
-//	mylog.CheckNil(ctx.RowSelectedCallback)
-//
-//	//table, header = newTable(data, ctx)
-//	//fnUpdate := func() {
-//	//	table.SetRootRows(table.Children)
-//	//	table.SizeColumnsToFit(true)
-//	//	stream.MarshalJsonToFile(table, filepath.Join("cache", ctx.JsonName+".json"))
-//	//	stream.WriteTruncate(filepath.Join("cache", ctx.JsonName+".txt"), table.Document())
-//	//	if ctx.IsDocument {
-//	//		b := stream.NewBuffer("")
-//	//		b.WriteStringLn("# " + ctx.JsonName + " document table")
-//	//		b.WriteStringLn("```text")
-//	//		b.WriteStringLn(table.Document())
-//	//		b.WriteStringLn("```")
-//	//		stream.WriteTruncate("README.md", b.String())
-//	//	}
-//	//}
-//
-//	//if ctx.SetRootRowsCallBack != nil { // mitmproxy
-//	//	ctx.SetRootRowsCallBack(table)
-//	//}
-//	//table.RowSelectedCallback = func() { ctx.RowSelectedCallback(table) }
-//	//
-//	//app.FileDropCallback(func(files []string) {
-//	//	if filepath.Ext(files[0]) == ".json" {
-//	//		mylog.Info("dropped file", files[0])
-//	//		table.ResetChildren()
-//	//		b := stream.NewBuffer(files[0])
-//	//		mylog.Check(json.Unmarshal(b.Bytes(), table)) // todo test need a zero table?
-//	//		fnUpdate()
-//	//	}
-//	//	mylog.Struct("todo",files)
-//	//})
-//	//
-//	//table.RowDoubleClickCallback = func() {
-//	//	rows := table.SelectedRows(false)
-//	//	for _, row := range rows {
-//	//		mylog.Struct("todo",row.RowCells)
-//	//		// todo icon edit
-//	//		//app.RunWithIco("edit row #"+fmt.Sprint(i), rowPngBuffer, func(w *Window) {
-//	//		//	content := w.Content()
-//	//		//	nodeEditor, RowPanel := NewStructView(row.Cell, func(data T) (values []CellData) {
-//	//		//		return table.MarshalRow(row)
-//	//		//	})
-//	//		//	content.AddChild(nodeEditor)
-//	//		//	content.AddChild(RowPanel)
-//	//		//	panel := NewButtonsPanel(
-//	//		//		[]string{
-//	//		//			"apply", "cancel",
-//	//		//		},
-//	//		//		func() {
-//	//		//			ctx.UnmarshalRow(row, nodeEditor.getFieldValues())
-//	//		//			nodeEditor.Update(row.Cell)
-//	//		//			table.SyncToModel()
-//	//		//			stream.MarshalJsonToFile(table.Children, ctx.JsonName+".json")
-//	//		//			// w.Dispose()
-//	//		//		},
-//	//		//		func() {
-//	//		//			w.Dispose()
-//	//		//		},
-//	//		//	)
-//	//		//	RowPanel.AddChild(panel)
-//	//		//	RowPanel.AddChild(NewVSpacer())
-//	//		//})
-//	//	}
-//	//}
-//	//fnUpdate()
-//	return
-//}
-//func newTable[T any](data T, ctx TableContext[T]) {
-//	//for i, column := range root.Columns {
-//	//	text := NewText(column.Cell, &TextDecoration{
-//	//		Font:           LabelFont,
-//	//		Background:     nil,
-//	//		Foreground:     nil,
-//	//		BaselineOffset: 0,
-//	//		Underline:      false,
-//	//		StrikeThrough:  false,
-//	//	})
-//	//	root.Columns[i].Minimum = text.Current() + root.Padding.Left + root.Padding.Right
-//	//}
-//	//
-//	//root.KeyDownCallback = func(keyCode KeyCode, mod Modifiers, repeat bool) bool {
-//	//	if mod == 0 && (keyCode == KeyBackspace || keyCode == KeyDelete) {
-//	//		root.PerformCmd(root, DeleteItemID)
-//	//		return true
-//	//	}
-//	//	return root.DefaultKeyDown(keyCode, mod, repeat) // todo add delete,move to ctx menu,exporter need delete file or dir
-//	//}
-//	//
-//	//root.InstallDragSupport(nil, "dragKey", "singularName", "pluralName")
-//	//InstallDropSupport[T, any](root, "dragKey", func(from, to *Node[T]) bool { return from == to }, nil, nil)
-//	//
-//	//header = NewTableHeader[T](root)
-//	//for _, column := range root.Columns {
-//	//	columnHeader := NewTableColumnHeader[T](column.Cell, "")
-//	//	columnHeader.MouseDownCallback = func(where Point, button, clickCount int, mod Modifiers) bool {
-//	//		return true
-//	//	}
-//	//	NewContextMenuItems(columnHeader, columnHeader.CellsLabel.MouseDownCallback,
-//	//		ContextMenuItem{
-//	//			Title: "copy column",
-//	//			id:    0,
-//	//			Can: func(a any) bool {
-//	//				return true
-//	//			},
-//	//			Do: func(a any) { root.CopyColumn() },
-//	//		},
-//	//	).Install()
-//	//	header.ColumnHeaders = append(header.ColumnHeaders, columnHeader)
-//	//}
-//	//
-//	//return root, header
-//}
-
-// func addWrappedText(parent *Node[T], ink color.NRGBA, font font.Face, data CellData) {
-//
-//	if data.IsNasm {
-//		tokens, style := languages.GetTokens(stream.NewBuffer(data.Content), languages.NasmKind)
-//		rowPanel := NewPanel()
-//		rowPanel.SetLayout(&FlexLayout{Columns: len(tokens)})
-//		parent.AddChild(rowPanel)
-//		for _, token := range tokens {
-//			colour := style.GetMust(token.Type).Colour
-//			keys := NewRichLabel()
-//			color := RGB(
-//				int(colour.Red()),
-//				int(colour.Green()),
-//				int(colour.Blue()),
-//			)
-//			keys.Content = NewText(token.Value, &TextDecoration{
-//				Font:           font,
-//				Foreground:     color,
-//				Background:     ContentColor,
-//				BaselineOffset: 0,
-//				Underline:      false,
-//				StrikeThrough:  false,
-//			})
-//			keys.OnBackgroundInk = ink
-//			rowPanel.AddChild(keys)
-//		}
-//		return
-//	}
-//
-// decoration := &TextDecoration{Font: font}
-// var lines []*Content
-//
-//	if data.MaxWidth > 0 {
-//		lines = NewTextWrappedLines(data.Content, decoration, data.MaxWidth)
-//	} else {
-//
-//		lines = NewTextLines(data.Content, decoration)
-//	}
-//
-//	for _, line := range lines {
-//		keys := NewLabel()
-//		keys.Content = line.String()
-//		keys.Font = font
-//		keys.LabelTheme.OnBackgroundInk = ink
-//		if data.FgColor != 0 {
-//			keys.LabelTheme.OnBackgroundInk = data.FgColor
-//		}
-//		if data.Disabled {
-//			keys.LabelTheme.OnBackgroundInk = DarkRed
-//		}
-//		size := LabelFont.Size() + 7
-//		if data.ImageBuffer != nil {
-//			keys.Drawable = &SizedDrawable{
-//				Drawable: nil,
-//				Size:     NewSize(size, size),
-//			}
-//		}
-//		if data.SvgBuffer != "" {
-//			keys.Drawable = &DrawableSVG{
-//				SVG:  nil,
-//				Size: NewSize(size, size),
-//			}
-//		}
-//		// LabelStyle(keys)
-//		parent.AddChild(keys)
-//	}
-//
-// }
-
-//const iconSize = unit.Dp(12)
-//
-//var svgButtonTest *GoogleDummyButton
-//
-//func (t *TreeTable[T]) ColumnCell(row, col int, foreground, background color.NRGBA, selected, indirectlySelected, focused bool) layout.Dimensions {
-//	return layout.Dimensions{}
-//}
-
-// var editNode *StructView
