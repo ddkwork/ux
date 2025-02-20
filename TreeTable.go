@@ -342,6 +342,7 @@ func (t *TreeTable[T]) MaxDepth() unit.Dp {
 func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 	originalConstraints := gtx.Constraints // 保存原始约束
 	fmtRow := func(row []CellData, id int) {
+		return
 		b := stream.NewBuffer("")
 		for _, data := range row {
 			b.WriteString(fmt.Sprintf("%-20s", data.Text))
@@ -349,6 +350,7 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 		// mylog.Warning("rowCells "+fmt.Sprint(id), b.String())
 	}
 	fmtColumn := func(column []CellData) {
+		return
 		b := stream.NewBuffer("")
 		for _, data := range column {
 			b.WriteStringLn(data.Text)
@@ -400,7 +402,7 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 	t.Children = t.Root.Children
 }
 
-// TransposeMatrix 函数将输入的行切片矩阵转置为列切片,用于计算最大列宽的参数
+// TransposeMatrix 把行切片矩阵置换为列切片,用于计算最大列宽的参数
 func TransposeMatrix[T any](rows [][]T) (columns [][]T) {
 	if len(rows) == 0 {
 		return [][]T{}
@@ -417,7 +419,7 @@ func TransposeMatrix[T any](rows [][]T) (columns [][]T) {
 	return
 }
 
-func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions { // 相当于syncModel,内部也是渲染之前调用 heightForColumns 调整列宽的
+func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 	t.SizeColumnsToFit(gtx, false)
 	list := material.List(th.Theme, &t.List)
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
@@ -876,16 +878,14 @@ const (
 	iconWidth       = unit.Dp(12)
 )
 
-// 计算最大列单元格宽度
-func calculateMaxColumnCellWidth(c CellData) unit.Dp {
+func calculateMaxColumnCellWidth(c CellData) unit.Dp { // 计算最大列单元格宽度
 	return c.maxDepth*HierarchyIndent + // 最大深度的左缩进
 		iconWidth + // 图标宽度,不管深度是多少，每一行都只会有一个层级图标
 		c.maxColumnTextWidth + unit.Dp(8*2) + 20 + // 左右padding,20是sort图标的宽度或者容器节点求和的文本宽度
 		DividerWidth // 列分隔条宽度
 }
 
-// 奇偶行背景色
-func RowColor(rowIndex int) color.NRGBA {
+func RowColor(rowIndex int) color.NRGBA { // 奇偶行背景色
 	bgColor := color.NRGBA{R: 57, G: 57, B: 57, A: 255}
 	if rowIndex%2 != 0 {
 		bgColor = color.NRGBA{R: 45, G: 45, B: 45, A: 255}
@@ -996,7 +996,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					// 绘制层级图标-----------------------------------------------------------------------------------------------------------------
-					HierarchyInsert := layout.Inset{Left: c.leftIndent, Top: 4}
+					HierarchyInsert := layout.Inset{Left: c.leftIndent, Top: 0} // 层级图标居中,行高调整后这里需要下移使得图标居中
 					if !node.CanHaveChildren() {
 						return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							return layout.Dimensions{}
@@ -1249,7 +1249,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 	rows := []layout.FlexChild{ // 合成层级列和其他列的单元格为一行,并设置该行的背景和行高
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return Background{bgColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				// gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(12)) // 行高,todo bug 增加了上下文菜单后设置更改的分割线高度不生效,除非删除这一行，但是这样高度太低了
+				gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(19)) //
+				gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(19)) //限制行高以避免列分割线呈现虚线视觉
 				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, rowCells...)
 			})
 		}),
@@ -1271,6 +1272,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 func (t *TreeTable[T]) drawContextArea(gtx C, menuState *component.MenuState) D {
 	return layout.Center.Layout(gtx, func(gtx C) D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
 		// mylog.Struct("todo",gtx.Constraints)
+		gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(4000)) //当行高限制后，这里需要取消限制，理想值是取表格高度或者屏幕高度，其次是增加滚动条或者树形右键菜单
 		menuStyle := component.Menu(th.Theme, menuState)
 		menuStyle.SurfaceStyle = component.SurfaceStyle{
 			Theme: th.Theme,
@@ -1405,6 +1407,7 @@ func (n *Node[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions
 	gtx.Constraints.Max.X = int(data.Minimum)
 
 	DrawColumnDivider(gtx, data.ColumID) // 为每列绘制列分隔条
+
 	if data.FgColor == (color.NRGBA{}) {
 		data.FgColor = White
 	}
@@ -1417,7 +1420,7 @@ func (n *Node[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions
 	//	Interactive: false,
 	//})
 	inset := layout.Inset{
-		Top:    0, // 文本居中，drawColumnDivider需要设置tallestHeight := gtx.Dp(unit.Dp(32))增加高度避免虚线
+		Top:    0,
 		Bottom: 0,
 		Left:   8 / 2,
 		Right:  8 / 2,

@@ -126,8 +126,8 @@ func (m *Button) Layout(gtx layout.Context) layout.Dimensions {
 	// svgAndText := m.svgIcon != nil && m.text != ""
 
 	if m.icon == nil && m.svgIcon == nil && m.text != "" { // 只有文字
-		btn := material.Button(th.Theme, m.Clickable, m.text)
-		btn.Inset = layout.UniformInset(2) // todo test
+		//btn := material.Button(th.Theme, m.Clickable, m.text)
+		//btn.Inset = layout.UniformInset(2) // todo test
 
 		return material.ButtonLayoutStyle{
 			Background:   th.Color.InputFocusedBgColor,
@@ -154,7 +154,7 @@ func (m *Button) Layout(gtx layout.Context) layout.Dimensions {
 	if m.text == "" && m.icon != nil || m.svgIcon != nil { // 树形层级图标，没有文字
 		if m.iconRect { // 带图标的编辑框，图标背景色和按钮背景色一致
 			return material.Clickable(gtx, m.Clickable, func(gtx C) D {
-				const defaultIconSize = unit.Dp(12)
+				const defaultIconSize = unit.Dp(10)
 				sz := gtx.Dp(defaultIconSize)
 				size := image.Pt(sz, sz)
 				gtx.Constraints.Min = size
