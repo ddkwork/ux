@@ -1128,6 +1128,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 												clone := NewNode(zero)
 												index := t.selectedNode.RowToIndex() + 1
 												switch {
+												case t.selectedNode.parent.IsRoot():
+													t.Root.Children = slices.Insert(t.Root.Children, index, clone)
 												case t.selectedNode.Container():
 													t.selectedNode.Children = slices.Insert(t.selectedNode.Children, index, clone)
 												default:
@@ -1419,6 +1421,16 @@ func (n *Node[T]) SetRootRows(rows []*Node[T]) {
 }
 
 func (n *Node[T]) RowToIndex() int {
+	if n.IsRoot() {
+		for row, data := range n.Children {
+			if data.ID == n.ID {
+				return row
+			}
+		}
+	}
+	if n.parent == nil { //todo why?
+		return -1
+	}
 	for row, data := range n.parent.Children {
 		if data.ID == n.ID {
 			return row

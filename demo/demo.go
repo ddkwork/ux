@@ -525,10 +525,15 @@ func treeTable() ux.Widget {
 						subSubNode.SetParent(subNode)
 						subNode.Children[k] = subSubNode
 					}
+				} else {
+					subNode = ux.NewNode(subData)
+					subNode.SetParent(node)
+					node.Children[j] = subNode
 				}
 			}
 		} else {
 			node = ux.NewNode(data)
+			node.SetParent(t.Root)
 		}
 		rows[i] = node
 	}
