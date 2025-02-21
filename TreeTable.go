@@ -1038,16 +1038,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Do: func() {
 												mylog.CheckNil(t.selectedNode)
 												var zero T
-												empty := NewNode(zero)
-												index := t.RowToIndex(t.selectedNode) + 1
-												switch {
-												case t.selectedNode.parent.IsRoot():
-													empty.Insert(t.Root, index, empty)
-												case t.selectedNode.Container():
-													empty.Insert(t.selectedNode, index, empty)
-												default:
-													empty.Insert(t.selectedNode.parent, index, empty)
-												}
+												t.selectedNode.InsertAfter(NewNode(zero))
 											},
 											Clickable: widget.Clickable{},
 										}
@@ -1058,17 +1049,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Can:   func() bool { return true },
 											Do: func() {
 												mylog.CheckNil(t.selectedNode)
-												var zero T
-												empty := NewContainerNode("NewContainerNode", zero) //todo edit type?
-												index := t.RowToIndex(t.selectedNode) + 1
-												switch {
-												case t.selectedNode.parent.IsRoot():
-													empty.Insert(t.Root, index, empty)
-												case t.selectedNode.Container():
-													empty.Insert(t.selectedNode, index, empty)
-												default:
-													empty.Insert(t.selectedNode.parent, index, empty)
-												}
+												var zero T //todo edit type?
+												t.selectedNode.InsertAfter(NewContainerNode("NewContainerNode", zero))
 											},
 											Clickable: widget.Clickable{},
 										}
@@ -1089,16 +1071,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Can:   func() bool { return true },
 											Do: func() {
 												mylog.CheckNil(t.selectedNode)
-												empty := t.selectedNode.Clone()
-												index := t.RowToIndex(t.selectedNode) + 1
-												switch {
-												case t.selectedNode.parent.IsRoot():
-													empty.Insert(t.Root, index, empty)
-												case t.selectedNode.Container():
-													empty.Insert(t.selectedNode, index, empty)
-												default:
-													empty.Insert(t.selectedNode.parent, index, empty)
-												}
+												t.selectedNode.InsertAfter(t.selectedNode.Clone())
 											},
 											Clickable: widget.Clickable{},
 										}
@@ -1587,35 +1560,18 @@ func (n *Node[T]) WalkQueue() iter.Seq[*Node[T]] {
 	}
 }
 
-func (n *Node[T]) Insert(parent *Node[T], index int, child *Node[T]) {
-	child.parent = parent
-	parent.Children = slices.Insert(parent.Children, index, child)
+func (n *Node[T]) InsertAfter(after *Node[T]) {
+	after.parent = n.parent
+	n.parent.Children = slices.Insert(n.parent.Children, n.Index()+1, after)
 }
 
-func (t *TreeTable[T]) RowToIndex(row *Node[T]) int {
-	if row.IsRoot() {
-		for i, data := range t.rootRows {
-			if data.ID == row.ID {
-				return i
-			}
-		}
-	}
-	for i, data := range row.parent.Children {
-		if data.ID == row.ID {
+func (n *Node[T]) Index() int {
+	for i, child := range n.parent.Children {
+		if n.ID == child.ID {
 			return i
 		}
 	}
-	return -1
-}
-
-func (t *TreeTable[T]) MaxColumnCellWidth() unit.Dp {
-	HierarchyIndent := unit.Dp(1)
-	DividerWidth := align.StringWidth[unit.Dp](" │ ")
-	iconWidth := align.StringWidth[unit.Dp](childPrefix)
-	return t.MaxDepth()*HierarchyIndent + // 最大深度的左缩进
-		iconWidth + // 图标宽度,不管深度是多少，每一行都只会有一个层级图标
-		t.maxColumnTextWidths[0] + 5 + //(8 * 2) + 20 + // 左右padding,20是sort图标的宽度或者容器节点求和的文本宽度
-		DividerWidth // 列分隔条宽度
+	panic("not found") //永远不可能选中root，所以可以放心panic，root不显示，只显示它的children作为rootRows
 }
 
 func (n *Node[T]) Depth() unit.Dp {
@@ -1640,7 +1596,16 @@ func (n *Node[T]) IsLastChild() bool {
 	return n.LastChild() == n
 }
 
-//-------------------------tui
+// -------------------------tui
+func (t *TreeTable[T]) MaxColumnCellWidth() unit.Dp {
+	HierarchyIndent := unit.Dp(1)
+	DividerWidth := align.StringWidth[unit.Dp](" │ ")
+	iconWidth := align.StringWidth[unit.Dp](childPrefix)
+	return t.MaxDepth()*HierarchyIndent + // 最大深度的左缩进
+		iconWidth + // 图标宽度,不管深度是多少，每一行都只会有一个层级图标
+		t.maxColumnTextWidths[0] + 5 + //(8 * 2) + 20 + // 左右padding,20是sort图标的宽度或者容器节点求和的文本宽度
+		DividerWidth // 列分隔条宽度
+}
 
 func (t *TreeTable[T]) Format() *stream.Buffer {
 	t.SizeColumnsToFit(layout.Context{}, true)
