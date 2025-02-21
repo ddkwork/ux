@@ -518,7 +518,7 @@ func treeTable() ux.Widget {
 						subNode.AddChild(subSubNode)
 					}
 				} else {
-					subData.Scheme = "Sub Sub Row" + fmt.Sprint(j+1)
+					subData.Scheme = "Sub Row" + fmt.Sprint(j+1)
 					subNode := ux.NewNode(subData)
 					node.AddChild(subNode)
 				}

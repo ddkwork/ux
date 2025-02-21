@@ -787,14 +787,14 @@ func NewContainerNodes[T any](typeKeys []string, objects ...T) (containerNodes [
 }
 
 const (
-	HierarchyIndent = unit.Dp(8)
-	iconWidth       = unit.Dp(12)
+	HierarchyIndent = unit.Dp(8 * 2)
+	defaultIconSize = unit.Dp(10)
 )
 
-func calculateMaxColumnCellWidth(c CellData) unit.Dp { // 计算最大列单元格宽度
+func calculateMaxColumnCellWidth(c CellData) unit.Dp { // 计算层级列最大列单元格宽度
 	return c.maxDepth*HierarchyIndent + // 最大深度的左缩进
-		iconWidth + // 图标宽度,不管深度是多少，每一行都只会有一个层级图标
-		c.maxColumnTextWidth + unit.Dp(8*2) + 20 + // 左右padding,20是sort图标的宽度或者容器节点求和的文本宽度
+		defaultIconSize + // 图标宽度
+		c.maxColumnTextWidth + 20 + 8 + // 左右padding,20是sort图标的宽度或者容器节点求和的文本宽度
 		DividerWidth // 列分隔条宽度
 }
 
@@ -893,13 +893,17 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 	layoutHierarchyColumn := func(gtx layout.Context, cell CellData) layout.Dimensions {
 		c := node.RowCells[0]
 		c.leftIndent = node.Depth() * HierarchyIndent
-		if !node.CanHaveChildren() {
-			c.leftIndent += iconWidth
+		if !node.Container() {
+			c.leftIndent += defaultIconSize
 		}
 		if node.parent.IsRoot() {
-			c.leftIndent = HierarchyIndent
-			if !node.CanHaveChildren() {
-				c.leftIndent = HierarchyIndent + iconWidth // 根节点HierarchyIndent + 图标宽度 + 左padding
+			c.leftIndent = HierarchyIndent / 2
+			if !node.Container() {
+				c.leftIndent = HierarchyIndent/2 + defaultIconSize // 根节点HierarchyIndent + 图标宽度 + 左padding
+			}
+		} else {
+			if node.parent.Container() {
+				c.leftIndent -= HierarchyIndent + defaultIconSize
 			}
 		}
 
