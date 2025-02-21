@@ -6,6 +6,7 @@ import (
 	"image"
 	"image/color"
 	"io"
+	"iter"
 	"slices"
 	"sort"
 	"strconv"
@@ -33,7 +34,7 @@ import (
 type (
 	TreeTable[T any] struct {
 		Root         *Node[T]
-		children     []*Node[T] // for back root rows
+		rootRowsBack []*Node[T]
 		filteredRows []*Node[T]
 		selectedNode *Node[T]
 		filterText   string
@@ -109,7 +110,7 @@ func NewTreeTable[T any](data T, ctx TableContext[T]) *TreeTable[T] {
 	root.MarshalRow = ctx.MarshalRow
 	return &TreeTable[T]{
 		Root:         root,
-		children:     nil,
+		rootRowsBack: nil,
 		selectedNode: nil,
 		filterText:   "",
 		filteredRows: nil,
@@ -208,7 +209,7 @@ type Node[T any] struct {
 	Type     string    `json:"type"`
 	parent   *Node[T]
 	Data     T
-	children []*Node[T] `json:"children,omitempty"`
+	children []*Node[T] `json:"rootRowsBack,omitempty"`
 	isOpen   bool
 
 	SelectionChangedCallback func() `json:"-"`
@@ -298,18 +299,18 @@ type TableTheme struct {
 // 递归函数，获取树形结构中的最大深度
 func (t *TreeTable[T]) MaxDepth() unit.Dp {
 	maxDepth := unit.Dp(1)
-	t.Root.Walk(func(node *Node[T]) {
+	for node := range t.Root.Walk() {
 		childDepth := node.Depth()
 		if childDepth > maxDepth {
 			maxDepth = childDepth
 		}
-	})
+	}
 	return maxDepth
 }
 
 func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
-	originalConstraints := gtx.Constraints // 保存原始约束
-	fmtRow := func(row []CellData, id int) {
+	originalConstraints := gtx.Constraints   // 保存原始约束
+	fmtRow := func(row []CellData, id int) { //todo remove
 		return
 		b := stream.NewBuffer("")
 		for _, data := range row {
@@ -317,7 +318,7 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 		}
 		// mylog.Warning("rowCells "+fmt.Sprint(id), b.String())
 	}
-	fmtColumn := func(column []CellData) {
+	fmtColumn := func(column []CellData) { //todo remove
 		return
 		b := stream.NewBuffer("")
 		for _, data := range column {
@@ -326,20 +327,20 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 		// mylog.Json("-------> col: "+fmt.Sprint(column[0].ColumID), b.String())
 	}
 
-	t.Rows = make([][]CellData, 0, len(t.children)) // 用于存储所有行
-	t.Root.Walk(func(node *Node[T]) {
+	t.Rows = make([][]CellData, 0, len(t.rootRowsBack)) // 用于存储所有行
+	for node := range t.Root.Walk() {
 		rowCells := t.MarshalRow(node)
 		t.Rows = append(t.Rows, rowCells)
-	})
+	}
 	t.Rows = slices.Insert(t.Rows, 0, t.header.ColumnCells) // 插入表头行
 	for row, rowCells := range t.Rows {
 		fmtRow(rowCells, row)
 	}
 
-	t.Columns = TransposeMatrix(t.Rows)
+	t.Columns = TransposeMatrix(t.Rows) //todo use iter
 
-	t.maxColumnTextWidths = make([]unit.Dp, len(t.header.ColumnCells))
-	t.maxColumnTexts = make([]string, len(t.header.ColumnCells))
+	t.maxColumnTextWidths = make([]unit.Dp, len(t.header.ColumnCells)) //todo once init
+	t.maxColumnTexts = make([]string, len(t.header.ColumnCells))       //todo once init
 	for i, column := range t.Columns {
 		fmtColumn(column)
 		if t.header.manualWidthSet[i] { // 如果该列已手动调整
@@ -367,7 +368,7 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 	}
 	gtx.Constraints = originalConstraints
 
-	t.children = t.Root.children
+	t.rootRowsBack = t.Root.children
 }
 
 // TransposeMatrix 把行切片矩阵置换为列切片,用于计算最大列宽的参数
@@ -399,14 +400,14 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 			})
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return list.Layout(gtx, len(t.children), func(gtx layout.Context, index int) layout.Dimensions {
-				node := t.children[index]
+			return list.Layout(gtx, len(t.rootRowsBack), func(gtx layout.Context, index int) layout.Dimensions {
+				node := t.rootRowsBack[index]
 				node.UpdateTouch(gtx) // 更新触摸事件处理逻辑
 				return t.RowFrame(gtx, node, index)
-				return t.RowFrame(gtx, t.children[index], index)
+				return t.RowFrame(gtx, t.rootRowsBack[index], index)
 				//t.inLayoutHeader = false
 				//return t.layoutDrag(gtx, func(gtx layout.Context, row int) layout.Dimensions {
-				//	return t.RowFrame(gtx, t.children[index], index)
+				//	return t.RowFrame(gtx, t.rootRowsBack[index], index)
 				//})
 			})
 		}),
@@ -1408,7 +1409,7 @@ func (t *TreeTable[T]) RootRows() []*Node[T] {
 	if t.filteredRows != nil {
 		return t.filteredRows
 	}
-	return t.children
+	return t.rootRowsBack
 }
 
 func (n *Node[T]) SetParents(children []*Node[T], parent *Node[T]) {
@@ -1441,7 +1442,7 @@ func (n *Node[T]) ApplyTo(to *Node[T]) *Node[T] {
 func (t *TreeTable[T]) backRootRows() { // todo增删改查之后需要刷新备份？
 	//todo back root rows 调用clone方法，并将clone的结果放入备份数组，然后在增删改查之后刷新备份数组
 	//t.childrenBack= make([]*Node[T], t.Root.LenChildren())
-	//for i, child := range t.Root.children {
+	//for i, child := range t.Root.rootRowsBack {
 	//
 	//}
 }
@@ -1453,13 +1454,13 @@ func (t *TreeTable[T]) IsFiltered() bool {
 func (t *TreeTable[T]) Filter(text string) {
 	t.filterText = text
 	if text == "" {
-		t.Root.children = t.children
+		t.Root.children = t.rootRowsBack
 		t.OpenAll()
 		return
 	}
 	t.backRootRows()
 	t.filteredRows = make([]*Node[T], 0)
-	t.Root.WalkContainer(func(node *Node[T]) {
+	for node := range t.Root.WalkContainer() {
 		if node.Container() {
 			cells := node.MarshalRow(node)
 			for _, cell := range cells {
@@ -1468,17 +1469,17 @@ func (t *TreeTable[T]) Filter(text string) {
 				}
 			}
 		}
-	})
+	}
 	for i, row := range t.filteredRows {
 		children := make([]*Node[T], 0)
-		row.Walk(func(node *Node[T]) {
+		for node := range row.Walk() {
 			cells := row.MarshalRow(node)
 			for _, cell := range cells {
 				if strings.EqualFold(cell.Text, text) {
 					children = append(children, node) // 过滤子节点
 				}
 			}
-		})
+		}
 		t.filteredRows[i].SetChildren(children)
 	}
 	t.Root.SetChildren(t.filteredRows)
@@ -1486,19 +1487,19 @@ func (t *TreeTable[T]) Filter(text string) {
 }
 
 func (t *TreeTable[T]) OpenAll() {
-	t.Root.WalkContainer(func(node *Node[T]) {
+	for node := range t.Root.WalkContainer() {
 		if node.Container() {
 			node.SetOpen(true)
 		}
-	})
+	}
 }
 
 func (t *TreeTable[T]) CloseAll() {
-	t.Root.WalkContainer(func(node *Node[T]) {
+	for node := range t.Root.WalkContainer() {
 		if node.Container() {
 			node.SetOpen(false)
 		}
-	})
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1524,28 +1525,28 @@ func (t *TreeTable[T]) Remove(id uuid.UUID) {
 }
 
 func (t *TreeTable[T]) Find(id uuid.UUID) (found *Node[T]) {
-	t.Root.Walk(func(node *Node[T]) {
+	for node := range t.Root.Walk() {
 		if node.ID == id {
 			found = node
 			return
 		}
-	})
+	}
 	return
 }
 
 func (t *TreeTable[T]) Sort() {
-	if len(t.children) == 0 || t.header.SortedBy >= len(t.children[0].RowCells) {
+	if len(t.rootRowsBack) == 0 || t.header.SortedBy >= len(t.rootRowsBack[0].RowCells) {
 		return // 如果没有子节点或者列索引无效，直接返回
 	}
-	sort.Slice(t.children, func(i, j int) bool {
-		if t.children[i].RowCells == nil { // why? module do not need this
-			t.children[i].RowCells = t.MarshalRow(t.children[i])
+	sort.Slice(t.rootRowsBack, func(i, j int) bool {
+		if t.rootRowsBack[i].RowCells == nil { // why? module do not need this
+			t.rootRowsBack[i].RowCells = t.MarshalRow(t.rootRowsBack[i])
 		}
-		if t.children[j].RowCells == nil {
-			t.children[j].RowCells = t.MarshalRow(t.children[j])
+		if t.rootRowsBack[j].RowCells == nil {
+			t.rootRowsBack[j].RowCells = t.MarshalRow(t.rootRowsBack[j])
 		}
-		cellI := t.children[i].RowCells[t.header.SortedBy].Text
-		cellJ := t.children[j].RowCells[t.header.SortedBy].Text
+		cellI := t.rootRowsBack[i].RowCells[t.header.SortedBy].Text
+		cellJ := t.rootRowsBack[j].RowCells[t.header.SortedBy].Text
 		if t.header.sortAscending {
 			return cellI < cellJ
 		}
@@ -1553,38 +1554,59 @@ func (t *TreeTable[T]) Sort() {
 	})
 }
 
-func (n *Node[T]) Walk(callback func(node *Node[T])) {
-	callback(n)
-	for _, child := range n.children {
-		child.Walk(callback)
-	}
-}
-
-func (n *Node[T]) Containers() []*Node[T] {
-	containers := make([]*Node[T], 0)
-	for _, child := range n.children {
-		if child.Container() {
-			containers = append(containers, child)
+func (n *Node[T]) Walk() iter.Seq[*Node[T]] {
+	return func(yield func(*Node[T]) bool) {
+		if !yield(n) {
+			return
+		}
+		for _, child := range n.children {
+			if !yield(child) {
+				break
+			}
+			child.Walk()
 		}
 	}
-	return containers
 }
 
-func (n *Node[T]) WalkContainer(callback func(node *Node[T])) {
-	callback(n)
-	for _, container := range n.Containers() {
-		container.Walk(callback)
+func (n *Node[T]) Containers() iter.Seq[*Node[T]] {
+	return func(yield func(*Node[T]) bool) {
+		for _, child := range n.children {
+			if child.Container() {
+				if !yield(child) {
+					break
+				}
+			}
+		}
 	}
 }
 
-func (n *Node[T]) WalkQueue(callback func(node *Node[T])) {
-	queue := []*Node[T]{n}
-	for len(queue) > 0 {
-		node := queue[0]
-		queue = queue[1:]
-		callback(node)
-		for _, child := range node.children {
-			queue = append(queue, child)
+func (n *Node[T]) WalkContainer() iter.Seq[*Node[T]] {
+	return func(yield func(*Node[T]) bool) {
+		if n.Container() {
+			if !yield(n) {
+				return
+			}
+		}
+		for container := range n.Containers() {
+			if !yield(container) {
+				break
+			}
+		}
+	}
+}
+
+func (n *Node[T]) WalkQueue() iter.Seq[*Node[T]] {
+	return func(yield func(*Node[T]) bool) {
+		queue := []*Node[T]{n} //todo 这种应该性能不好，应该删除这个方法
+		for len(queue) > 0 {
+			node := queue[0]
+			queue = queue[1:]
+			if !yield(node) {
+				break
+			}
+			for _, child := range node.children {
+				queue = append(queue, child) //todo 这种应该性能不好，应该删除这个方法
+			}
 		}
 	}
 }
@@ -1596,7 +1618,7 @@ func (n *Node[T]) Insert(parent *Node[T], index int, child *Node[T]) {
 
 func (t *TreeTable[T]) RowToIndex(row *Node[T]) int {
 	if row.IsRoot() {
-		for i, data := range t.children {
+		for i, data := range t.rootRowsBack {
 			if data.ID == row.ID {
 				return i
 			}
@@ -1698,7 +1720,7 @@ func (t *TreeTable[T]) Format() *stream.Buffer {
 	t.SizeColumnsToFit(layout.Context{}, true)
 	t.maxColumnCellWidth = t.MaxColumnCellWidth()
 	buf := t.FormatHeader(t.maxColumnTextWidths)
-	t.FormatChildren(buf, t.children) // 传入子节点打印函数
+	t.FormatChildren(buf, t.rootRowsBack) // 传入子节点打印函数
 	mylog.Json("RootRows", buf.String())
 	return buf
 }

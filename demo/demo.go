@@ -432,10 +432,10 @@ func treeTable() ux.Widget {
 				sumTime := time.Duration(0)
 				node.Data.ContentLength = sumBytes
 				node.Data.PadTime = sumTime
-				node.Walk(func(node *ux.Node[packet]) {
+				for node := range node.Walk() {
 					sumBytes += node.Data.ContentLength
 					sumTime += node.Data.PadTime
-				})
+				}
 				node.Data.ContentLength = sumBytes
 				node.Data.PadTime = sumTime
 			}
