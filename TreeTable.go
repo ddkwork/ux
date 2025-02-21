@@ -33,7 +33,7 @@ import (
 type (
 	TreeTable[T any] struct {
 		Root         *Node[T]
-		children     []*Node[T] //for back root rows
+		children     []*Node[T] // for back root rows
 		filteredRows []*Node[T]
 		selectedNode *Node[T]
 		filterText   string
@@ -1075,7 +1075,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 												var zero T
 												empty := NewNode(zero)
 												index := t.RowToIndex(t.selectedNode) + 1
-												switch { //回头看gcs的insetItem CreatItem,太复杂了，所以应该保持目前的实线，模型和树形数据结构合并,渲染的话，表头保持目前的结果方便和rows传递表头特性来控制row的属性,比如表头和rows对齐，最大列宽，排序的选中行等等，应该高耦合
+												switch { // 回头看gcs的insetItem CreatItem,太复杂了，所以应该保持目前的实线，模型和树形数据结构合并,渲染的话，表头保持目前的结果方便和rows传递表头特性来控制row的属性,比如表头和rows对齐，最大列宽，排序的选中行等等，应该高耦合
 												case t.selectedNode.parent.IsRoot():
 													empty.Insert(t.Root, index, empty)
 												case t.selectedNode.Container():
@@ -1172,7 +1172,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return Background{bgColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(19)) //
-				gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(19)) //限制行高以避免列分割线呈现虚线视觉
+				gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(19)) // 限制行高以避免列分割线呈现虚线视觉
 				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, rowCells...)
 			})
 		}),
@@ -1194,7 +1194,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 func (t *TreeTable[T]) drawContextArea(gtx C, menuState *component.MenuState) D {
 	return layout.Center.Layout(gtx, func(gtx C) D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
 		// mylog.Struct("todo",gtx.Constraints)
-		gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(4000)) //当行高限制后，这里需要取消限制，理想值是取表格高度或者屏幕高度，其次是增加滚动条或者树形右键菜单
+		gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(4000)) // 当行高限制后，这里需要取消限制，理想值是取表格高度或者屏幕高度，其次是增加滚动条或者树形右键菜单
 		menuStyle := component.Menu(th.Theme, menuState)
 		menuStyle.SurfaceStyle = component.SurfaceStyle{
 			Theme: th.Theme,
@@ -1427,22 +1427,23 @@ func (n *Node[T]) Clone() (from *Node[T]) {
 	}
 	return NewNode(n.Data)
 }
+
 func (n *Node[T]) CopyFrom(from *Node[T]) *Node[T] {
 	*n = *from
 	return n
 }
+
 func (n *Node[T]) ApplyTo(to *Node[T]) *Node[T] {
 	*to = *n
 	return n
 }
 
-func (t *TreeTable[T]) backRootRows() { //todo增删改查之后需要刷新备份？
+func (t *TreeTable[T]) backRootRows() { // todo增删改查之后需要刷新备份？
 	//todo back root rows 调用clone方法，并将clone的结果放入备份数组，然后在增删改查之后刷新备份数组
 	//t.childrenBack= make([]*Node[T], t.Root.LenChildren())
 	//for i, child := range t.Root.children {
 	//
 	//}
-
 }
 
 func (t *TreeTable[T]) IsFiltered() bool {
