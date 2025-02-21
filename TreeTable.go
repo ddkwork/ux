@@ -1711,8 +1711,7 @@ func (t *TreeTable[T]) Document() string {
 	s := stream.NewBuffer("")
 	// s.WriteStringLn("// interface or method name here")
 	// s.WriteStringLn("/*")
-	lines := t.Format().ToLines()
-	for _, line := range lines {
+	for line := range t.Format().ToLines() {
 		s.WriteStringLn("  " + line)
 	}
 	// s.WriteStringLn("*/")
