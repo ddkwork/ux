@@ -25,7 +25,7 @@ require (
 	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394 // indirect
 	github.com/dc0d/caseconv v0.5.0 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
-	github.com/go-text/typesetting v0.2.1 // indirect
+	github.com/go-text/typesetting v0.3.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa // indirect

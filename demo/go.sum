@@ -35,16 +35,12 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dc0d/caseconv v0.5.0 h1:z3Ki2zszD03beetWyNAGa3NOAbnDJk+bX0tvcx9BKjQ=
 github.com/dc0d/caseconv v0.5.0/go.mod h1:/CrBBNtMoPTPf0INHrwyyhDrDjAJ9PFE+WuxSJHU0ZE=
-github.com/ddkwork/golibrary v0.0.91-0.20250218042444-9cd6d330f714 h1:0DOse2fOkWMsRqiFcUEofwrlDTFGnC6Ehs/tnFEiorM=
-github.com/ddkwork/golibrary v0.0.91-0.20250218042444-9cd6d330f714/go.mod h1:1gL0UKrg1P09z/AiaAWWtWxMT7a8+X8mWU6Ok9sYc8s=
-github.com/ddkwork/golibrary v0.0.91-0.20250221042854-2f9e8bc45b92 h1:Be4l8KskZlsUQA4Zim5erRpI9RAWemCJo+lTTKtKXJc=
-github.com/ddkwork/golibrary v0.0.91-0.20250221042854-2f9e8bc45b92/go.mod h1:1gL0UKrg1P09z/AiaAWWtWxMT7a8+X8mWU6Ok9sYc8s=
 github.com/ddkwork/golibrary v0.0.91-0.20250221114559-8a02d569f328 h1:sd23iR6brHy0yWR+rTZ5HiGeqQ2/wQW/8xMq/Nu4IsA=
 github.com/ddkwork/golibrary v0.0.91-0.20250221114559-8a02d569f328/go.mod h1:1gL0UKrg1P09z/AiaAWWtWxMT7a8+X8mWU6Ok9sYc8s=
-github.com/ddkwork/ux v0.0.0-20250219092428-ce8cf7f61948 h1:ZtbOXT8c4Ydx2cv4hyEXZ5s79uSIuF0hsTjRVtWE6HA=
-github.com/ddkwork/ux v0.0.0-20250219092428-ce8cf7f61948/go.mod h1:pl+rqiENOuKaMPdMgKL2B2pxCPYNpIqZ+PJ8uA3xDxI=
 github.com/ddkwork/ux v0.0.0-20250219115313-c7f101952985 h1:4vbIALdfY133iHBemGcQxxrLwjnSse+Y2Mv+OWC+1fo=
 github.com/ddkwork/ux v0.0.0-20250219115313-c7f101952985/go.mod h1:j/yIIk7xrl0dKHoKnDtydAWkBBst4gq75uSjBYUkxr8=
+github.com/ddkwork/ux v0.0.0-20250221125641-d4b951dc33be h1:HLJGDefnZ1Yw0egYJU7SnKx5Ks+cqXB12+6PMpQN7bU=
+github.com/ddkwork/ux v0.0.0-20250221125641-d4b951dc33be/go.mod h1:IH0xUqgbIuGrpqusrrYYimohvONBO+eF8HxeROf6nzE=
 github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
 github.com/dlclark/regexp2 v1.11.5/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
 github.com/esiqveland/notify v0.13.3 h1:QCMw6o1n+6rl+oLUfg8P1IIDSFsDEb2WlXvVvIJbI/o=
@@ -57,6 +53,8 @@ github.com/go-quicktest/qt v1.101.0 h1:O1K29Txy5P2OK0dGo59b7b0LR6wKfIhttaAhHUyn7
 github.com/go-quicktest/qt v1.101.0/go.mod h1:14Bz/f7NwaXPtdYEgzsx46kqSxVwTbzVZsDC26tQJow=
 github.com/go-text/typesetting v0.2.1 h1:x0jMOGyO3d1qFAPI0j4GSsh7M0Q3Ypjzr4+CEVg82V8=
 github.com/go-text/typesetting v0.2.1/go.mod h1:mTOxEwasOFpAMBjEQDhdWRckoLLeI/+qrQeBCTGEt6M=
+github.com/go-text/typesetting v0.3.0 h1:OWCgYpp8njoxSRpwrdd1bQOxdjOXDj9Rqart9ML4iF4=
+github.com/go-text/typesetting v0.3.0/go.mod h1:qjZLkhRgOEYMhU9eHBr3AR4sfnGJvOXNLt8yRAySFuY=
 github.com/go-text/typesetting-utils v0.0.0-20241103174707-87a29e9e6066 h1:qCuYC+94v2xrb1PoS4NIDe7DGYtLnU2wWiQe9a1B1c0=
 github.com/go-text/typesetting-utils v0.0.0-20241103174707-87a29e9e6066/go.mod h1:DDxDdQEnB70R8owOx3LVpEFvpMK9eeH1o2r0yZhFI9o=
 github.com/gobwas/httphead v0.0.0-20180130184737-2c6c146eadee h1:s+21KNqlpePfkah2I+gwHF8xmJWRjooY+5248k6m4A0=
