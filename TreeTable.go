@@ -794,7 +794,7 @@ const (
 func calculateMaxColumnCellWidth(c CellData) unit.Dp { // 计算层级列最大列单元格宽度
 	return c.maxDepth*HierarchyIndent + // 最大深度的左缩进
 		defaultIconSize + // 图标宽度
-		c.maxColumnTextWidth + 20 + 8 + // 左右padding,20是sort图标的宽度或者容器节点求和的文本宽度
+		c.maxColumnTextWidth + // 左右padding+最长的单元格文本宽度
 		DividerWidth // 列分隔条宽度
 }
 
