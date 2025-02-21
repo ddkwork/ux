@@ -917,7 +917,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					// 绘制层级图标-----------------------------------------------------------------------------------------------------------------
 					HierarchyInsert := layout.Inset{Left: c.leftIndent, Top: 0} // 层级图标居中,行高调整后这里需要下移使得图标居中
-					if !node.CanHaveChildren() {
+					if !node.Container() {                                      //todo see gcs
 						return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							return layout.Dimensions{}
 						})
@@ -1013,9 +1013,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconClean,
-											Can: func() bool {
-												return node.CanHaveChildren()
-											},
+											Can:   func() bool { return !node.Container() },
 											Do: func() {
 												mylog.Info("convert to container")
 											},
@@ -1025,9 +1023,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconActionCode,
-											Can: func() bool {
-												return node.CanHaveChildren()
-											},
+											Can:   func() bool { return node.Container() }, //if has children, how to do? see gcs
 											Do: func() {
 												mylog.Info("convert to non-container")
 											},
@@ -1044,7 +1040,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 												var zero T
 												empty := NewNode(zero)
 												index := t.RowToIndex(t.selectedNode) + 1
-												switch { // 回头看gcs的insetItem CreatItem,太复杂了，所以应该保持目前的实线，模型和树形数据结构合并,渲染的话，表头保持目前的结果方便和rows传递表头特性来控制row的属性,比如表头和rows对齐，最大列宽，排序的选中行等等，应该高耦合
+												switch {
 												case t.selectedNode.parent.IsRoot():
 													empty.Insert(t.Root, index, empty)
 												case t.selectedNode.Container():
@@ -1059,11 +1055,20 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconAdd,
-											Can: func() bool {
-												return true
-											},
+											Can:   func() bool { return true },
 											Do: func() {
-												mylog.Info("new container")
+												mylog.CheckNil(t.selectedNode)
+												var zero T
+												empty := NewContainerNode("NewContainerNode", zero) //todo edit type?
+												index := t.RowToIndex(t.selectedNode) + 1
+												switch {
+												case t.selectedNode.parent.IsRoot():
+													empty.Insert(t.Root, index, empty)
+												case t.selectedNode.Container():
+													empty.Insert(t.selectedNode, index, empty)
+												default:
+													empty.Insert(t.selectedNode.parent, index, empty)
+												}
 											},
 											Clickable: widget.Clickable{},
 										}
@@ -1083,7 +1088,17 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Icon:  IconActionUpdate,
 											Can:   func() bool { return true },
 											Do: func() {
-												mylog.Info("duplicate")
+												mylog.CheckNil(t.selectedNode)
+												empty := t.selectedNode.Clone()
+												index := t.RowToIndex(t.selectedNode) + 1
+												switch {
+												case t.selectedNode.parent.IsRoot():
+													empty.Insert(t.Root, index, empty)
+												case t.selectedNode.Container():
+													empty.Insert(t.selectedNode, index, empty)
+												default:
+													empty.Insert(t.selectedNode.parent, index, empty)
+												}
 											},
 											Clickable: widget.Clickable{},
 										}
@@ -1091,9 +1106,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconEdit,
-											Can: func() bool {
-												return true
-											},
+											Can:   func() bool { return true },
 											Do: func() {
 												mylog.Info("edit")
 											},
