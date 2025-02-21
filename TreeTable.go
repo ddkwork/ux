@@ -33,24 +33,17 @@ import (
 
 type (
 	TreeTable[T any] struct {
-		Root         *Node[T]
-		rootRowsBack []*Node[T]
-		filteredRows []*Node[T]
-		selectedNode *Node[T]
-		filterText   string
-
-		header            TableHeader[T]
-		columnHeaderCount int
-		inLayoutHeader    bool // for drag
+		Root                *Node[T]
+		rootRows            []*Node[T] //from root.children
+		filteredRows        []*Node[T]
+		selectedNode        *Node[T]
+		header              TableHeader[T]
+		columnCount         int
+		maxColumnTextWidths []unit.Dp
+		inLayoutHeader      bool // for drag
 		TableContext[T]
 		widget.List
-
-		maxColumnTextWidths []unit.Dp
-		maxColumnTexts      []string
-
-		Rows               [][]CellData
-		Columns            [][]CellData
-		maxColumnCellWidth unit.Dp
+		columns [][]CellData
 	}
 	TableContext[T any] struct {
 		ContextMenuItems       func(node *Node[T], gtx layout.Context) (items []ContextMenuItem)
@@ -78,8 +71,9 @@ type (
 		ColumID int // 列id
 		RowID   int // 行id
 
-		Text     string  // 单元格文本
-		maxDepth unit.Dp // 层级
+		Text       string  // 单元格文本
+		maxDepth   unit.Dp // 最大层级深度
+		leftIndent unit.Dp //左缩进宽度
 
 		maxColumnTextWidth unit.Dp
 		maxColumnText      string
@@ -98,7 +92,6 @@ type (
 		IsHeader    bool
 		widget.Clickable
 		RichText
-		leftIndent unit.Dp
 	}
 )
 
@@ -106,13 +99,13 @@ const ContainerKeyPostfix = "_container"
 
 func NewTreeTable[T any](data T, ctx TableContext[T]) *TreeTable[T] {
 	columnCells := initHeader(data)
+	columnCount := len(columnCells)
 	root := NewRoot(data)
 	root.MarshalRow = ctx.MarshalRow
 	return &TreeTable[T]{
 		Root:         root,
-		rootRowsBack: nil,
+		rootRows:     nil,
 		selectedNode: nil,
-		filterText:   "",
 		filteredRows: nil,
 		header: TableHeader[T]{
 			SortOrder:          0,
@@ -120,11 +113,11 @@ func NewTreeTable[T any](data T, ctx TableContext[T]) *TreeTable[T] {
 			drags:              make([]tableDrag, 0),
 			ColumnCells:        columnCells,
 			clickedColumnIndex: -1,
-			manualWidthSet:     make([]bool, len(columnCells)),
+			manualWidthSet:     make([]bool, columnCount),
 		},
-		columnHeaderCount: len(columnCells),
-		inLayoutHeader:    false,
-		TableContext:      ctx,
+		columnCount:    columnCount,
+		inLayoutHeader: false,
+		TableContext:   ctx,
 		List: widget.List{
 			Scrollbar: widget.Scrollbar{},
 			List: layout.List{
@@ -135,9 +128,6 @@ func NewTreeTable[T any](data T, ctx TableContext[T]) *TreeTable[T] {
 			},
 		},
 		maxColumnTextWidths: nil,
-		maxColumnTexts:      nil,
-		Rows:                nil,
-		Columns:             nil,
 	}
 }
 
@@ -145,12 +135,7 @@ func NewRoot[T any](data T) *Node[T] {
 	return NewContainerNode("root", data)
 }
 
-func (n *Node[T]) IsRoot() bool {
-	if n == nil { // todo bug
-		return false
-	}
-	return n.parent == nil
-}
+func (n *Node[T]) IsRoot() bool { return n.parent == nil }
 
 func newNode[T any](typeKey string, isContainer bool, data T) *Node[T] {
 	if isContainer {
@@ -191,7 +176,6 @@ func newNode[T any](typeKey string, isContainer bool, data T) *Node[T] {
 }
 
 type Node[T any] struct {
-	// TableContext[T]
 	MarshalRow   func(node *Node[T]) (cells []CellData) `json:"-"`
 	MarshalColum func(node *Node[T]) (cells []CellData) `json:"-"`
 
@@ -209,7 +193,7 @@ type Node[T any] struct {
 	Type     string    `json:"type"`
 	parent   *Node[T]
 	Data     T
-	children []*Node[T] `json:"rootRowsBack,omitempty"`
+	children []*Node[T] `json:"rootRows,omitempty"`
 	isOpen   bool
 
 	SelectionChangedCallback func() `json:"-"`
@@ -309,48 +293,24 @@ func (t *TreeTable[T]) MaxDepth() unit.Dp {
 }
 
 func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
-	originalConstraints := gtx.Constraints   // 保存原始约束
-	fmtRow := func(row []CellData, id int) { //todo remove
-		return
-		b := stream.NewBuffer("")
-		for _, data := range row {
-			b.WriteString(fmt.Sprintf("%-20s", data.Text))
-		}
-		// mylog.Warning("rowCells "+fmt.Sprint(id), b.String())
-	}
-	fmtColumn := func(column []CellData) { //todo remove
-		return
-		b := stream.NewBuffer("")
-		for _, data := range column {
-			b.WriteStringLn(data.Text)
-		}
-		// mylog.Json("-------> col: "+fmt.Sprint(column[0].ColumID), b.String())
-	}
-
-	t.Rows = make([][]CellData, 0, len(t.rootRowsBack)) // 用于存储所有行
+	originalConstraints := gtx.Constraints         // 保存原始约束
+	rows := make([][]CellData, 0, len(t.rootRows)) // 用于存储所有行
 	for node := range t.Root.Walk() {
-		rowCells := t.MarshalRow(node)
-		t.Rows = append(t.Rows, rowCells)
+		rows = append(rows, t.MarshalRow(node))
 	}
-	t.Rows = slices.Insert(t.Rows, 0, t.header.ColumnCells) // 插入表头行
-	for row, rowCells := range t.Rows {
-		fmtRow(rowCells, row)
-	}
-
-	t.Columns = TransposeMatrix(t.Rows) //todo use iter
-
-	t.maxColumnTextWidths = make([]unit.Dp, len(t.header.ColumnCells)) //todo once init
-	t.maxColumnTexts = make([]string, len(t.header.ColumnCells))       //todo once init
-	for i, column := range t.Columns {
-		fmtColumn(column)
+	rows = slices.Insert(rows, 0, t.header.ColumnCells) // 插入表头行
+	t.columns = TransposeMatrix(rows)
+	t.maxColumnTextWidths = make([]unit.Dp, len(t.header.ColumnCells))
+	maxColumnTexts := make([]string, len(t.header.ColumnCells))
+	for i, column := range t.columns {
 		if t.header.manualWidthSet[i] { // 如果该列已手动调整
 			continue // 跳过，保留用户手动调整的宽度
 		}
 		t.maxColumnTextWidths[i] = 0
-		t.maxColumnTexts[i] = ""
+		maxColumnTexts[i] = ""
 		for _, data := range column {
-			if len(data.Text) > len(t.maxColumnTexts[i]) {
-				t.maxColumnTexts[i] = data.Text
+			if len(data.Text) > len(maxColumnTexts[i]) {
+				maxColumnTexts[i] = data.Text
 			}
 			if isTui {
 				t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Text))
@@ -359,7 +319,6 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 			}
 		}
 	}
-
 	maxDepth := t.MaxDepth()
 	for i, maxWidth := range t.maxColumnTextWidths {
 		t.header.ColumnCells[i].Minimum = maxWidth
@@ -367,8 +326,8 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 		t.header.ColumnCells[i].maxDepth = maxDepth
 	}
 	gtx.Constraints = originalConstraints
-
-	t.rootRowsBack = t.Root.children
+	t.rootRows = t.Root.children
+	return
 }
 
 // TransposeMatrix 把行切片矩阵置换为列切片,用于计算最大列宽的参数
@@ -400,14 +359,14 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 			})
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return list.Layout(gtx, len(t.rootRowsBack), func(gtx layout.Context, index int) layout.Dimensions {
-				node := t.rootRowsBack[index]
+			return list.Layout(gtx, len(t.rootRows), func(gtx layout.Context, index int) layout.Dimensions {
+				node := t.rootRows[index]
 				node.UpdateTouch(gtx) // 更新触摸事件处理逻辑
 				return t.RowFrame(gtx, node, index)
-				return t.RowFrame(gtx, t.rootRowsBack[index], index)
+				return t.RowFrame(gtx, t.rootRows[index], index)
 				//t.inLayoutHeader = false
 				//return t.layoutDrag(gtx, func(gtx layout.Context, row int) layout.Dimensions {
-				//	return t.RowFrame(gtx, t.rootRowsBack[index], index)
+				//	return t.RowFrame(gtx, t.rootRows[index], index)
 				//})
 			})
 		}),
@@ -422,21 +381,27 @@ func initHeader(data any) (Columns []CellData) {
 			field.Name = field.Tag.Get("table")
 		}
 		Columns = append(Columns, CellData{
-			ColumID:     i,
-			Text:        field.Name,
-			Current:     20,
-			Minimum:     20,
-			Maximum:     10000,
-			AutoMinimum: 0,
-			AutoMaximum: 0,
-			Disabled:    false,
-			Tooltip:     "",
-			SvgBuffer:   "",
-			ImageBuffer: nil,
-			FgColor:     color.NRGBA{},
-			IsNasm:      false,
-			Clickable:   widget.Clickable{},
-			RichText:    RichText{},
+			ColumID:            i,
+			RowID:              0,
+			Text:               field.Name,
+			maxDepth:           0,
+			leftIndent:         0,
+			maxColumnTextWidth: 0,
+			maxColumnText:      "",
+			Current:            20,
+			Minimum:            20,
+			Maximum:            10000,
+			AutoMinimum:        0,
+			AutoMaximum:        0,
+			Disabled:           false,
+			Tooltip:            "",
+			SvgBuffer:          "",
+			ImageBuffer:        nil,
+			FgColor:            color.NRGBA{},
+			IsNasm:             false,
+			IsHeader:           false,
+			Clickable:          widget.Clickable{},
+			RichText:           RichText{},
 		})
 	}
 	return
@@ -596,8 +561,9 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 var resizeWidget *Resize
 
 func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions {
+	columns := t.columns
 	var (
-		cols          = len(t.Columns)        // 获取列的数量
+		cols          = t.columnCount         // 获取列的数量
 		dividers      = cols                  // 列的分隔数
 		tallestHeight = gtx.Constraints.Min.Y // 初始化最高的行高
 
@@ -621,7 +587,7 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions
 	// OPT(dh): we don't need to do this for each t, only once per table
 	for i := range t.header.drags { // 遍历每个拖动对象
 		drag := &t.header.drags[i]    // 获取当前拖动对象
-		col := &t.Columns[i][0]       // 获取当前列
+		col := &columns[i][0]         // 获取当前列
 		drag.hover.Update(gtx.Source) // 更新当前列的悬停状态
 		// OPT(dh): Events allocates
 		var delta unit.Dp // 初始化偏移量
@@ -643,11 +609,11 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions
 			}
 		}
 		if delta != 0 { // 如果存在拖动偏移量
-			col.Current += delta                              // 更新列的宽度
-			if drag.shrinkNeighbor && i != len(t.Columns)-1 { // 如果需要收缩相邻列且不是最后一列
-				nextCol := &t.Columns[i+1][0] // 获取下一个列
-				nextCol.Current -= delta      // 更新下一个列的宽度
-				if col.Current < minWidth {   // 如果当前列宽度小于最小宽度
+			col.Current += delta                            // 更新列的宽度
+			if drag.shrinkNeighbor && i != len(columns)-1 { // 如果需要收缩相邻列且不是最后一列
+				nextCol := &columns[i+1][0] // 获取下一个列
+				nextCol.Current -= delta    // 更新下一个列的宽度
+				if col.Current < minWidth { // 如果当前列宽度小于最小宽度
 					d := minWidth - col.Current // 计算需要增加的宽度
 					col.Current = minWidth      // 将当前列宽度设为最小宽度
 					nextCol.Current -= d        // 更新下一个列的宽度
@@ -668,13 +634,13 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions
 				col.Minimum = col.Current // 更新列的最小宽度为当前宽度
 			}
 
-			var total unit.Dp               // 初始化总宽度
-			for _, col := range t.Columns { // 遍历所有列计算总宽度
+			var total unit.Dp             // 初始化总宽度
+			for _, col := range columns { // 遍历所有列计算总宽度
 				total += col[0].Current // 累加当前列的宽度
 			}
-			total += unit.Dp(len(t.Columns) * gtx.Dp(DefaultDividerWidth)) // 加上所有分隔符的总宽度
-			if total < unit.Dp(gtx.Constraints.Min.X) {                    // 如果总宽度小于最小约束宽度
-				t.Columns[len(t.Columns)-1][0].Current += unit.Dp(gtx.Constraints.Min.X) - total // 调整最后一列的宽度以适应
+			total += unit.Dp(len(columns) * gtx.Dp(DefaultDividerWidth)) // 加上所有分隔符的总宽度
+			if total < unit.Dp(gtx.Constraints.Min.X) {                  // 如果总宽度小于最小约束宽度
+				columns[len(columns)-1][0].Current += unit.Dp(gtx.Constraints.Min.X) - total // 调整最后一列的宽度以适应
 			}
 		}
 	}
@@ -685,18 +651,18 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions
 			start             = 0             // 初始化当前位置
 			origTallestHeight = tallestHeight // 记录最初的高度
 		)
-		r := op.Record(gtx.Ops)    // 记录当前操作集合
-		totalWidth := 0            // 初始化总宽度
-		for i := range t.Columns { // 遍历所有列
-			colWidth := int(t.Columns[i][0].Current) // 获取当前列的宽度
-			totalWidth += colWidth                   // 更新总宽度
+		r := op.Record(gtx.Ops)  // 记录当前操作集合
+		totalWidth := 0          // 初始化总宽度
+		for i := range columns { // 遍历所有列
+			colWidth := int(columns[i][0].Current) // 获取当前列的宽度
+			totalWidth += colWidth                 // 更新总宽度
 		}
-		extra := gtx.Constraints.Min.X - len(t.Columns)*gtx.Dp(DefaultDividerWidth) - totalWidth // 计算多余宽度
-		colExtra := extra                                                                        // 将多余宽度赋值给列额外宽度
+		extra := gtx.Constraints.Min.X - len(columns)*gtx.Dp(DefaultDividerWidth) - totalWidth // 计算多余宽度
+		colExtra := extra                                                                      // 将多余宽度赋值给列额外宽度
 
-		for i := range t.Columns { // 绘制所有列
-			colWidth := int(t.Columns[i][0].Current) // 获取当前列宽度
-			if colExtra > 0 {                        // 如果有多余宽度
+		for i := range columns { // 绘制所有列
+			colWidth := int(columns[i][0].Current) // 获取当前列宽度
+			if colExtra > 0 {                      // 如果有多余宽度
 				colWidth++ // 当前列宽度加一
 				colExtra-- // 多余宽度减一
 			}
@@ -735,8 +701,8 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions
 		)
 		for i := range t.header.drags { // 遍历每个拖动对象
 			var (
-				drag     = &t.header.drags[i]           // 获取当前拖动对象
-				colWidth = int(t.Columns[i][0].Current) // 获取当前列宽度
+				drag     = &t.header.drags[i]         // 获取当前拖动对象
+				colWidth = int(columns[i][0].Current) // 获取当前列宽度
 			)
 			dividerStart += colWidth // 更新分隔符的起始位置
 			if dividerExtra > 0 {    // 如果还有多余的宽度
@@ -1379,7 +1345,7 @@ func (t *TreeTable[T]) CopyColumn(gtx layout.Context) string {
 	b.NewLine()
 	b.WriteString(strconv.Quote(t.header.ColumnCells[t.header.clickedColumnIndex].Text))
 	b.WriteStringLn(",")
-	cellData := t.Columns[t.header.clickedColumnIndex]
+	cellData := t.columns[t.header.clickedColumnIndex]
 	for _, datum := range cellData {
 		b.WriteString(strconv.Quote(datum.Text))
 		b.WriteStringLn(",")
@@ -1409,7 +1375,7 @@ func (t *TreeTable[T]) RootRows() []*Node[T] {
 	if t.filteredRows != nil {
 		return t.filteredRows
 	}
-	return t.rootRowsBack
+	return t.rootRows
 }
 
 func (n *Node[T]) SetParents(children []*Node[T], parent *Node[T]) {
@@ -1442,7 +1408,7 @@ func (n *Node[T]) ApplyTo(to *Node[T]) *Node[T] {
 func (t *TreeTable[T]) backRootRows() { // todo增删改查之后需要刷新备份？
 	//todo back root rows 调用clone方法，并将clone的结果放入备份数组，然后在增删改查之后刷新备份数组
 	//t.childrenBack= make([]*Node[T], t.Root.LenChildren())
-	//for i, child := range t.Root.rootRowsBack {
+	//for i, child := range t.Root.rootRows {
 	//
 	//}
 }
@@ -1452,9 +1418,8 @@ func (t *TreeTable[T]) IsFiltered() bool {
 }
 
 func (t *TreeTable[T]) Filter(text string) {
-	t.filterText = text
 	if text == "" {
-		t.Root.children = t.rootRowsBack
+		t.Root.children = t.rootRows
 		t.OpenAll()
 		return
 	}
@@ -1535,18 +1500,18 @@ func (t *TreeTable[T]) Find(id uuid.UUID) (found *Node[T]) {
 }
 
 func (t *TreeTable[T]) Sort() {
-	if len(t.rootRowsBack) == 0 || t.header.SortedBy >= len(t.rootRowsBack[0].RowCells) {
+	if len(t.rootRows) == 0 || t.header.SortedBy >= len(t.rootRows[0].RowCells) {
 		return // 如果没有子节点或者列索引无效，直接返回
 	}
-	sort.Slice(t.rootRowsBack, func(i, j int) bool {
-		if t.rootRowsBack[i].RowCells == nil { // why? module do not need this
-			t.rootRowsBack[i].RowCells = t.MarshalRow(t.rootRowsBack[i])
+	sort.Slice(t.rootRows, func(i, j int) bool {
+		if t.rootRows[i].RowCells == nil { // why? module do not need this
+			t.rootRows[i].RowCells = t.MarshalRow(t.rootRows[i])
 		}
-		if t.rootRowsBack[j].RowCells == nil {
-			t.rootRowsBack[j].RowCells = t.MarshalRow(t.rootRowsBack[j])
+		if t.rootRows[j].RowCells == nil {
+			t.rootRows[j].RowCells = t.MarshalRow(t.rootRows[j])
 		}
-		cellI := t.rootRowsBack[i].RowCells[t.header.SortedBy].Text
-		cellJ := t.rootRowsBack[j].RowCells[t.header.SortedBy].Text
+		cellI := t.rootRows[i].RowCells[t.header.SortedBy].Text
+		cellJ := t.rootRows[j].RowCells[t.header.SortedBy].Text
 		if t.header.sortAscending {
 			return cellI < cellJ
 		}
@@ -1563,7 +1528,7 @@ func (n *Node[T]) Walk() iter.Seq[*Node[T]] {
 			if !yield(child) {
 				break
 			}
-			child.Walk()
+			child.Walk()(yield)
 		}
 	}
 }
@@ -1597,7 +1562,7 @@ func (n *Node[T]) WalkContainer() iter.Seq[*Node[T]] {
 
 func (n *Node[T]) WalkQueue() iter.Seq[*Node[T]] {
 	return func(yield func(*Node[T]) bool) {
-		queue := []*Node[T]{n} //todo 这种应该性能不好，应该删除这个方法
+		queue := []*Node[T]{n} // todo 这种应该性能不好，应该删除这个方法
 		for len(queue) > 0 {
 			node := queue[0]
 			queue = queue[1:]
@@ -1605,7 +1570,7 @@ func (n *Node[T]) WalkQueue() iter.Seq[*Node[T]] {
 				break
 			}
 			for _, child := range node.children {
-				queue = append(queue, child) //todo 这种应该性能不好，应该删除这个方法
+				queue = append(queue, child) // todo 这种应该性能不好，应该删除这个方法
 			}
 		}
 	}
@@ -1618,7 +1583,7 @@ func (n *Node[T]) Insert(parent *Node[T], index int, child *Node[T]) {
 
 func (t *TreeTable[T]) RowToIndex(row *Node[T]) int {
 	if row.IsRoot() {
-		for i, data := range t.rootRowsBack {
+		for i, data := range t.rootRows {
 			if data.ID == row.ID {
 				return i
 			}
@@ -1632,10 +1597,67 @@ func (t *TreeTable[T]) RowToIndex(row *Node[T]) int {
 	return -1
 }
 
+func (t *TreeTable[T]) MaxColumnCellWidth() unit.Dp {
+	HierarchyIndent := unit.Dp(1)
+	DividerWidth := align.StringWidth[unit.Dp](" │ ")
+	iconWidth := align.StringWidth[unit.Dp](childPrefix)
+	return t.MaxDepth()*HierarchyIndent + // 最大深度的左缩进
+		iconWidth + // 图标宽度,不管深度是多少，每一行都只会有一个层级图标
+		t.maxColumnTextWidths[0] + 5 + //(8 * 2) + 20 + // 左右padding,20是sort图标的宽度或者容器节点求和的文本宽度
+		DividerWidth // 列分隔条宽度
+}
+
+func (n *Node[T]) Depth() unit.Dp {
+	if n.parent != nil {
+		return n.parent.Depth() + 1
+	}
+	return 1
+}
+
+func (n *Node[T]) LenChildren() int {
+	return len(n.children)
+}
+
+func (n *Node[T]) LastChild() (lastChild *Node[T]) {
+	if n.IsRoot() {
+		return n.children[len(n.children)-1]
+	}
+	return n.parent.children[len(n.parent.children)-1]
+}
+
+func (n *Node[T]) IsLastChild() bool {
+	return n.LastChild() == n
+}
+
+//-------------------------tui
+
+func (t *TreeTable[T]) Format() *stream.Buffer {
+	t.SizeColumnsToFit(layout.Context{}, true)
+	buf := t.FormatHeader(t.maxColumnTextWidths)
+	t.FormatChildren(buf, t.rootRows) // 传入子节点打印函数
+	mylog.Json("RootRows", buf.String())
+	return buf
+}
+
+func (t *TreeTable[T]) String() string {
+	return t.Format().String()
+}
+
+func (t *TreeTable[T]) Document() string {
+	s := stream.NewBuffer("")
+	// s.WriteStringLn("// interface or method name here")
+	// s.WriteStringLn("/*")
+	for line := range t.Format().ToLines() {
+		s.WriteStringLn("  " + line)
+	}
+	// s.WriteStringLn("*/")
+	return s.String()
+}
+
 func (t *TreeTable[T]) FormatHeader(maxColumnCellTextWidths []unit.Dp) *stream.Buffer {
 	buf := stream.NewBuffer("")
 
-	all := t.maxColumnCellWidth
+	all := t.MaxColumnCellWidth()
 	for _, width := range maxColumnCellTextWidths {
 		all += width
 	}
@@ -1650,7 +1672,7 @@ func (t *TreeTable[T]) FormatHeader(maxColumnCellTextWidths []unit.Dp) *stream.B
 
 		// 添加左边距，仅在首列进行处理，依据列宽计算
 		if i == 0 {
-			buf.WriteString(strings.Repeat(" ", int(t.maxColumnCellWidth-maxColumnCellTextWidths[i]-1))) // -1是分隔符的空间
+			buf.WriteString(strings.Repeat(" ", int(t.MaxColumnCellWidth()-maxColumnCellTextWidths[i]-1))) // -1是分隔符的空间
 		}
 
 		buf.WriteString(paddedText)
@@ -1678,8 +1700,8 @@ func (t *TreeTable[T]) FormatChildren(out *stream.Buffer, children []*Node[T]) {
 					HierarchyColumBuf.WriteString("├──")
 				}
 				HierarchyColumBuf.WriteString(cell.Text)
-				if align.StringWidth[unit.Dp](HierarchyColumBuf.String()) < t.maxColumnCellWidth {
-					HierarchyColumBuf.WriteString(strings.Repeat(" ", int(t.maxColumnCellWidth-align.StringWidth[unit.Dp](HierarchyColumBuf.String()))))
+				if align.StringWidth[unit.Dp](HierarchyColumBuf.String()) < t.MaxColumnCellWidth() {
+					HierarchyColumBuf.WriteString(strings.Repeat(" ", int(t.MaxColumnCellWidth()-align.StringWidth[unit.Dp](HierarchyColumBuf.String()))))
 				}
 				HierarchyColumBuf.WriteString(" │ ")
 				out.WriteString(HierarchyColumBuf.String())
@@ -1705,59 +1727,3 @@ const (
 	lastChildPrefix = "└───"
 	indentBase      = unit.Dp(3)
 )
-
-func (t *TreeTable[T]) MaxColumnCellWidth() unit.Dp {
-	HierarchyIndent := unit.Dp(1)
-	DividerWidth := align.StringWidth[unit.Dp](" │ ")
-	iconWidth := align.StringWidth[unit.Dp](childPrefix)
-	return t.MaxDepth()*HierarchyIndent + // 最大深度的左缩进
-		iconWidth + // 图标宽度,不管深度是多少，每一行都只会有一个层级图标
-		t.maxColumnTextWidths[0] + 5 + //(8 * 2) + 20 + // 左右padding,20是sort图标的宽度或者容器节点求和的文本宽度
-		DividerWidth // 列分隔条宽度
-}
-
-func (t *TreeTable[T]) Format() *stream.Buffer {
-	t.SizeColumnsToFit(layout.Context{}, true)
-	t.maxColumnCellWidth = t.MaxColumnCellWidth()
-	buf := t.FormatHeader(t.maxColumnTextWidths)
-	t.FormatChildren(buf, t.rootRowsBack) // 传入子节点打印函数
-	mylog.Json("RootRows", buf.String())
-	return buf
-}
-
-func (t *TreeTable[T]) String() string {
-	return t.Format().String()
-}
-
-func (t *TreeTable[T]) Document() string {
-	s := stream.NewBuffer("")
-	// s.WriteStringLn("// interface or method name here")
-	// s.WriteStringLn("/*")
-	for line := range t.Format().ToLines() {
-		s.WriteStringLn("  " + line)
-	}
-	// s.WriteStringLn("*/")
-	return s.String()
-}
-
-func (n *Node[T]) Depth() unit.Dp {
-	if n.parent != nil {
-		return n.parent.Depth() + 1
-	}
-	return 1
-}
-
-func (n *Node[T]) LenChildren() int {
-	return len(n.children)
-}
-
-func (n *Node[T]) LastChild() (lastChild *Node[T]) {
-	if n.IsRoot() {
-		return n.children[len(n.children)-1]
-	}
-	return n.parent.children[len(n.parent.children)-1]
-}
-
-func (n *Node[T]) IsLastChild() bool {
-	return n.LastChild() == n
-}
