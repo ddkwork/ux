@@ -34,7 +34,7 @@ import (
 type (
 	TreeTable[T any] struct {
 		Root                *Node[T]
-		rootRows            []*Node[T] //from root.children
+		rootRows            []*Node[T] // from root.children
 		filteredRows        []*Node[T]
 		selectedNode        *Node[T]
 		header              TableHeader[T]
@@ -73,7 +73,7 @@ type (
 
 		Text       string  // 单元格文本
 		maxDepth   unit.Dp // 最大层级深度
-		leftIndent unit.Dp //左缩进宽度
+		leftIndent unit.Dp // 左缩进宽度
 
 		maxColumnTextWidth unit.Dp
 		maxColumnText      string
