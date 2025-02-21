@@ -468,8 +468,7 @@ func treeTable() ux.Widget {
 		// todo 这里可以设计一个类似aggrid的高级搜索功能：把n叉树的元数据结构体取出来，然后通过反射结构体布局一个所有字段值的过滤综合条件，最后设置过滤结果填充到表格的过滤rows中
 		t.Filter(text)
 	})
-	topLevelRowsToMake := 100
-	for i := 0; i < topLevelRowsToMake; i++ {
+	for i := 0; i < 100; i++ {
 		data := packet{
 			Scheme:        "Row" + fmt.Sprint(i+1),
 			Method:        http.MethodGet,
@@ -484,7 +483,7 @@ func treeTable() ux.Widget {
 		}
 		var node *ux.Node[packet]
 		if i%10 == 3 {
-			node = ux.NewContainerNode(fmt.Sprintf("Sub Row %d", i+1), data)
+			node = ux.NewContainerNode(fmt.Sprintf("Row %d", i+1), data)
 			t.Root.AddChild(node)
 			for j := 0; j < 5; j++ {
 				subData := packet{
@@ -499,12 +498,12 @@ func treeTable() ux.Widget {
 					Process:       fmt.Sprintf("process%d-%d.exe", i+1, j+1),
 					PadTime:       time.Duration(i+1+j+1) * time.Second,
 				}
-				subNode := ux.NewContainerNode("Sub Sub Row "+fmt.Sprint(j+1), subData)
-				node.AddChild(subNode)
 				if j < 2 {
+					subNode := ux.NewContainerNode("Sub Row "+fmt.Sprint(j+1), subData)
+					node.AddChild(subNode)
 					for k := 0; k < 2; k++ {
 						subSubData := packet{
-							Scheme:        "Row" + fmt.Sprint(k+1),
+							Scheme:        "Sub Sub Row" + fmt.Sprint(k+1),
 							Method:        http.MethodGet,
 							Host:          "example.com",
 							Path:          fmt.Sprintf("/api/v%d/resource%d-%d", i+1, j+1, k+1),
@@ -518,6 +517,10 @@ func treeTable() ux.Widget {
 						subSubNode := ux.NewNode(subSubData)
 						subNode.AddChild(subSubNode)
 					}
+				} else {
+					subData.Scheme = "Sub Sub Row" + fmt.Sprint(j+1)
+					subNode := ux.NewNode(subData)
+					node.AddChild(subNode)
 				}
 			}
 		} else {
