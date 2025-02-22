@@ -912,7 +912,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					// 绘制层级图标-----------------------------------------------------------------------------------------------------------------
 					HierarchyInsert := layout.Inset{Left: c.leftIndent, Top: 0} // 层级图标居中,行高调整后这里需要下移使得图标居中
-					if !node.Container() {                                      //todo see gcs
+					if !node.Container() {
 						return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							return layout.Dimensions{}
 						})
