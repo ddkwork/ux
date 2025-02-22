@@ -151,7 +151,7 @@ func newNode[T any](typeKey string, isContainer bool, data T) *Node[T] {
 		rowContextAreas:          nil,
 		contextMenu:              nil,
 		TableTheme:               DefaultTableTheme,
-		ID:                       tid.NewTID('n'),
+		ID:                       NewTID(),
 		Type:                     typeKey,
 		parent:                   nil,
 		Data:                     data,
@@ -1324,22 +1324,30 @@ func (t *TreeTable[T]) RootRows() []*Node[T] {
 }
 
 func (n *Node[T]) SetParents(children []*Node[T], parent *Node[T]) {
+	n.setParents(children, parent, false)
+}
+
+func (n *Node[T]) setParents(children []*Node[T], parent *Node[T], newTid bool) {
 	for _, child := range children {
 		child.parent = parent
-		//todo 对于克隆节点，需要为child生成新的uuid，否则会导致节点的id重复，导致节点的父子关系不正确，看看gcs怎么做的
+		if newTid {
+			child.ID = NewTID()
+		}
 		if child.CanHaveChildren() {
 			n.SetParents(child.Children, child)
 		}
 	}
 }
 
+func NewTID() tid.TID { return tid.NewTID('n') }
+
 func (n *Node[T]) Clone() (to *Node[T]) {
 	to = deepcopy.Copy(n)
 	to.parent = n
+	to.ID = NewTID()
 	if n.CanHaveChildren() {
-		n.SetParents(to.Children, to)
+		n.setParents(to.Children, to, true)
 	}
-	//todo 以上操作似乎还缺少一个东西，uuid需要改变，否则会导致节点的id重复，导致节点的父子关系不正确
 	to.OpenAll()
 	return
 }
