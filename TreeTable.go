@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"github.com/ddkwork/golibrary/stream/deepcopy"
+	"github.com/ddkwork/golibrary/stream/tid"
 	"image"
 	"image/color"
 	"io"
@@ -29,7 +30,6 @@ import (
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/golibrary/stream/align"
-	"github.com/google/uuid"
 )
 
 type (
@@ -151,7 +151,7 @@ func newNode[T any](typeKey string, isContainer bool, data T) *Node[T] {
 		rowContextAreas:          nil,
 		contextMenu:              nil,
 		TableTheme:               DefaultTableTheme,
-		ID:                       NewUUID(),
+		ID:                       tid.NewTID('n'),
 		Type:                     typeKey,
 		parent:                   nil,
 		Data:                     data,
@@ -188,8 +188,8 @@ type Node[T any] struct {
 
 	TableTheme `json:"-"`
 
-	ID       uuid.UUID `json:"id"`
-	Type     string    `json:"type"`
+	ID       tid.TID `json:"id"`
+	Type     string  `json:"type"`
 	parent   *Node[T]
 	Data     T
 	Children []*Node[T] `json:"Children,omitempty"`
@@ -1208,17 +1208,8 @@ func (n *Node[T]) Sum() string {
 	return key
 }
 
-func NewUUID() uuid.UUID {
-	return mylog.Check2(uuid.NewRandom())
-}
-
-func (n *Node[T]) UUID() uuid.UUID {
-	return n.ID
-}
-
-func (n *Node[T]) Container() bool {
-	return strings.HasSuffix(n.Type, ContainerKeyPostfix)
-}
+func (n *Node[T]) UUID() tid.TID   { return n.ID }
+func (n *Node[T]) Container() bool { return strings.HasSuffix(n.Type, ContainerKeyPostfix) }
 
 func (n *Node[T]) kind(base string) string {
 	if n.Container() {
@@ -1227,53 +1218,22 @@ func (n *Node[T]) kind(base string) string {
 	return base
 }
 
-func (n *Node[T]) GetType() string {
-	return n.Type
-}
-
-func (n *Node[T]) SetType(typeKey string) {
-	n.Type = typeKey
-}
-
-func (n *Node[T]) IsOpen() bool {
-	return n.isOpen && n.Container()
-}
-
-func (n *Node[T]) SetOpen(open bool) {
-	n.isOpen = open && n.Container()
-}
-
-func (n *Node[T]) Parent() *Node[T] {
-	return n.parent
-}
-
-func (n *Node[T]) SetParent(parent *Node[T]) {
-	n.parent = parent
-}
-
+func (n *Node[T]) GetType() string           { return n.Type }
+func (n *Node[T]) SetType(typeKey string)    { n.Type = typeKey }
+func (n *Node[T]) IsOpen() bool              { return n.isOpen && n.Container() }
+func (n *Node[T]) SetOpen(open bool)         { n.isOpen = open && n.Container() }
+func (n *Node[T]) Parent() *Node[T]          { return n.parent }
+func (n *Node[T]) SetParent(parent *Node[T]) { n.parent = parent }
 func (n *Node[T]) clearUnusedFields() {
 	if !n.Container() {
 		n.Children = nil
 		n.isOpen = false
 	}
 }
-
-func (n *Node[T]) ResetChildren() {
-	n.Children = nil
-}
-
-func (n *Node[T]) CanHaveChildren() bool {
-	return n.HasChildren()
-}
-
-func (n *Node[T]) HasChildren() bool {
-	return n.Container() && len(n.Children) > 0
-}
-
-func (n *Node[T]) CellDataForSort(col int) string {
-	return n.MarshalRow(n)[col].Text
-}
-
+func (n *Node[T]) ResetChildren()                 { n.Children = nil }
+func (n *Node[T]) CanHaveChildren() bool          { return n.HasChildren() }
+func (n *Node[T]) HasChildren() bool              { return n.Container() && len(n.Children) > 0 }
+func (n *Node[T]) CellDataForSort(col int) string { return n.MarshalRow(n)[col].Text }
 func (n *Node[T]) AddChild(child *Node[T]) {
 	child.parent = n
 	n.Children = append(n.Children, child)
@@ -1366,6 +1326,7 @@ func (t *TreeTable[T]) RootRows() []*Node[T] {
 func (n *Node[T]) SetParents(children []*Node[T], parent *Node[T]) {
 	for _, child := range children {
 		child.parent = parent
+		//todo 对于克隆节点，需要为child生成新的uuid，否则会导致节点的id重复，导致节点的父子关系不正确，看看gcs怎么做的
 		if child.CanHaveChildren() {
 			n.SetParents(child.Children, child)
 		}
@@ -1378,6 +1339,7 @@ func (n *Node[T]) Clone() (to *Node[T]) {
 	if n.CanHaveChildren() {
 		n.SetParents(to.Children, to)
 	}
+	//todo 以上操作似乎还缺少一个东西，uuid需要改变，否则会导致节点的id重复，导致节点的父子关系不正确
 	to.OpenAll()
 	return
 }
@@ -1465,7 +1427,7 @@ func CountTableRows[T any](rows []*Node[T]) int { // 计算整个表的总行数
 	return count
 }
 
-func (t *TreeTable[T]) Remove(id uuid.UUID) {
+func (t *TreeTable[T]) Remove(id tid.TID) {
 	found := t.Find(id)
 	for i, child := range found.parent.Children {
 		if child.ID == id {
@@ -1475,7 +1437,7 @@ func (t *TreeTable[T]) Remove(id uuid.UUID) {
 	}
 }
 
-func (t *TreeTable[T]) Find(id uuid.UUID) (found *Node[T]) {
+func (t *TreeTable[T]) Find(id tid.TID) (found *Node[T]) {
 	for node := range t.Root.Walk() {
 		if node.ID == id {
 			found = node
