@@ -1378,25 +1378,13 @@ func (n *Node[T]) ApplyTo(to *Node[T]) *Node[T] {
 	return n
 }
 
-func (t *TreeTable[T]) backRootRows() { // todo增删改查之后需要刷新备份？
-	//todo back root rows 调用clone方法，并将clone的结果放入备份数组，然后在增删改查之后刷新备份数组
-	//t.childrenBack= make([]*Node[T], t.Root.LenChildren())
-	//for i, child := range t.Root.rootRows {
-	//
-	//}
-}
-
-func (t *TreeTable[T]) IsFiltered() bool {
-	return t.filteredRows != nil
-}
-
+func (t *TreeTable[T]) IsFiltered() bool { return t.filteredRows != nil }
 func (t *TreeTable[T]) Filter(text string) {
 	if text == "" {
 		t.Root.Children = t.rootRows
 		t.OpenAll()
 		return
 	}
-	t.backRootRows()
 	t.filteredRows = make([]*Node[T], 0)
 	for node := range t.Root.WalkContainer() {
 		if node.Container() {
