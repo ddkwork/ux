@@ -1372,9 +1372,16 @@ func (n *Node[T]) SetParents(children []*Node[T], parent *Node[T]) {
 	}
 }
 
-// todo 克隆所有字段
-func (n *Node[T]) Clone() (from *Node[T]) {
-	return deepcopy.Copy(n)
+func (n *Node[T]) Clone() (to *Node[T]) {
+	to = deepcopy.Copy(n)
+	to.parent = n
+	if n.Container() {
+		for _, child := range to.Children {
+			child.parent = to
+			//todo child is container node, need to set its children's parent to to
+		}
+	}
+	return
 	if n.Container() {
 		return NewContainerNode(n.Type, n.Data)
 	}
@@ -1588,9 +1595,6 @@ func (n *Node[T]) LenChildren() int {
 }
 
 func (n *Node[T]) LastChild() (lastChild *Node[T]) {
-	if n.IsRoot() {
-		return n.Children[len(n.Children)-1]
-	}
 	return n.parent.Children[len(n.parent.Children)-1]
 }
 
