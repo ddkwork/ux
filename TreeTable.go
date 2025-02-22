@@ -1411,7 +1411,7 @@ func (t *TreeTable[T]) Filter(text string) {
 		}
 		t.filteredRows[i].Children = children
 	}
-	//todo 检查layou部分是否调用filteredRows以及filteredRows的大小是否是0
+	//todo 检查layou部分是否调用filteredRows以及filteredRows的大小是否是0，清空过滤后恢复原始的rootRows
 	t.Root.Children = t.filteredRows
 	//t.rootRows = t.filteredRows
 	t.OpenAll()
