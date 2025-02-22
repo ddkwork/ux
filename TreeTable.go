@@ -1053,7 +1053,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Icon:  IconDelete,
 											Can:   func() bool { return true },
 											Do: func() {
-												t.Remove(t.selectedNode.ID)
+												t.selectedNode.Remove()
 											},
 											Clickable: widget.Clickable{},
 										}
@@ -1436,20 +1436,19 @@ func CountTableRows[T any](rows []*Node[T]) int { // 计算整个表的总行数
 	return count
 }
 
-func (t *TreeTable[T]) Remove(id uuid.ID) {
-	found := t.Find(id)
-	for i, child := range found.parent.Children {
-		if child.ID == id {
-			found.parent.Children = slices.Delete(found.parent.Children, i, i+1)
+func (n *Node[T]) Remove() {
+	for i, child := range n.parent.Children {
+		if child.ID == n.ID {
+			n.parent.Children = slices.Delete(n.parent.Children, i, i+1)
 			break
 		}
 	}
 }
 
-func (t *TreeTable[T]) Find(id uuid.ID) (found *Node[T]) {
-	for node := range t.Root.Walk() {
-		if node.ID == id {
-			found = node
+func (n *Node[T]) Find() (found *Node[T]) {
+	for _, child := range n.parent.Children {
+		if child.ID == n.ID {
+			found = child
 			break
 		}
 	}
