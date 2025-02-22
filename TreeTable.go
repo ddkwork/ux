@@ -1386,7 +1386,7 @@ func (t *TreeTable[T]) Filter(text string) {
 		return
 	}
 	t.filteredRows = make([]*Node[T], 0)
-	for node := range t.Root.WalkContainer() {
+	for node := range t.Root.WalkContainer() { //todo bug 需要改回之前的回调模式？需要调试
 		if node.Container() {
 			if node.MarshalRow == nil {
 				node.MarshalRow = t.Root.MarshalRow
@@ -1401,7 +1401,7 @@ func (t *TreeTable[T]) Filter(text string) {
 	}
 	for i, row := range t.filteredRows {
 		children := make([]*Node[T], 0)
-		for node := range row.Walk() {
+		for node := range row.Walk() { //todo bug
 			cells := row.MarshalRow(node)
 			for _, cell := range cells {
 				if strings.EqualFold(cell.Text, text) {
