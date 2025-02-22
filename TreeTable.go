@@ -3,8 +3,6 @@ package ux
 import (
 	_ "embed"
 	"fmt"
-	"github.com/ddkwork/golibrary/stream/deepcopy"
-	"github.com/ddkwork/golibrary/stream/uuid"
 	"image"
 	"image/color"
 	"io"
@@ -14,6 +12,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/ddkwork/golibrary/stream/deepcopy"
+	"github.com/ddkwork/golibrary/stream/uuid"
 
 	"gioui.org/gesture"
 	"gioui.org/io/clipboard"
@@ -769,6 +770,7 @@ func NewContainerNode[T any](typeKey string, data T) (container *Node[T]) {
 	n.Children = make([]*Node[T], 0)
 	return n
 }
+
 func NewContainerNodes[T any](typeKeys []string, objects ...T) (containerNodes []*Node[T]) {
 	containerNodes = make([]*Node[T], 0)
 	var data T // it is zero value
@@ -793,14 +795,19 @@ func calculateMaxColumnCellWidth(c CellData) unit.Dp { // 计算层级列最大�
 		DividerWidth // 列分隔条宽度
 }
 
+var modal = NewModal()
+
+var (
+	rowWhiteColor = color.NRGBA{R: 57, G: 57, B: 57, A: 255} // 白色
+	rowBlackColor = color.NRGBA{R: 45, G: 45, B: 45, A: 255} // 黑色
+)
+
 func RowColor(rowIndex int) color.NRGBA { // 奇偶行背景色
 	if rowIndex%2 != 0 {
-		return color.NRGBA{R: 57, G: 57, B: 57, A: 255}
+		return rowWhiteColor
 	}
-	return color.NRGBA{R: 45, G: 45, B: 45, A: 255}
+	return rowBlackColor
 }
-
-var modal = NewModal()
 
 func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int) layout.Dimensions {
 	node.RowCells = t.MarshalRow(node)
@@ -864,17 +871,18 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 			//}
 		}
 	}
-	//if node.LenChildren()%2 == 1 {
-	//	rowIndex--
-	//}
-
 	bgColor := RowColor(rowIndex)
 	switch {
 	case rowClick.Hovered(): // 设置悬停背景色
 		bgColor = th.Color.TreeHoveredBgColor
 	case t.selectedNode == node: // 设置选中背景色
 		bgColor = color.NRGBA{R: 255, G: 186, B: 44, A: 91}
-		// bgColor = Orange300
+	// bgColor = Orange300
+	default:
+		//todo 如果children的最后一个节点是黑色，lenChidren是奇数，那么root的node父级的父级的背景色需要设置为白色,bug
+		//if node.LenChildren()%2 == 1 && bgColor == rowBlackColor {
+		//	bgColor = rowWhiteColor
+		//}
 	}
 
 	var rowCells []layout.FlexChild
@@ -1012,7 +1020,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconActionCode,
-											Can:   func() bool { return node.Container() }, //if has children, how to do? see gcs
+											Can:   func() bool { return node.Container() }, // if has children, how to do? see gcs
 											Do: func() {
 												mylog.Info("convert to non-container")
 											},
@@ -1038,7 +1046,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Can:   func() bool { return true },
 											Do: func() {
 												mylog.CheckNil(t.selectedNode)
-												var zero T //todo edit type?
+												var zero T // todo edit type?
 												t.selectedNode.InsertAfter(NewContainerNode("NewContainerNode", zero))
 											},
 											Clickable: widget.Clickable{},
@@ -1312,6 +1320,7 @@ func (t *TreeTable[T]) RootRows() []*Node[T] {
 func (n *Node[T]) SetParents(children []*Node[T], parent *Node[T]) {
 	n.setParents(children, parent, false)
 }
+
 func (n *Node[T]) setParents(children []*Node[T], parent *Node[T], isNewID bool) {
 	for _, child := range children {
 		child.parent = parent
@@ -1528,14 +1537,14 @@ func (n *Node[T]) Index() int {
 			return i
 		}
 	}
-	panic("not found index") //永远不可能选中root，所以可以放心panic，root不显示，只显示它的children作为rootRows
+	panic("not found index") // 永远不可能选中root，所以可以放心panic，root不显示，只显示它的children作为rootRows
 }
 
 func (n *Node[T]) Depth() unit.Dp {
 	if !n.IsRoot() {
 		return n.parent.Depth() + 1
 	}
-	return 1 //base root depth
+	return 1 // base root depth
 }
 
 func (n *Node[T]) LenChildren() int { return len(n.Children) }
@@ -1544,7 +1553,7 @@ func (n *Node[T]) LastChild() (lastChild *Node[T]) {
 		return n.Children[len(n.Children)-1]
 	}
 	if !n.parent.CanHaveChildren() {
-		return nil //todo
+		return nil // todo
 	}
 	return n.parent.Children[len(n.parent.Children)-1]
 }
