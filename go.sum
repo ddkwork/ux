@@ -17,6 +17,8 @@ github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/ddkwork/golibrary v0.0.91-0.20250222100916-fc8029a3f592 h1:rSCExRy2Ne3P6VlJO3i129+nhUOZ5sDMHyMqUd5w8vU=
 github.com/ddkwork/golibrary v0.0.91-0.20250222100916-fc8029a3f592/go.mod h1:6yNujFwybY0YmjNj7uDegka5mnO2Xg6XMNNtQ9TZ/gI=
+github.com/ddkwork/golibrary v0.0.91-0.20250222134107-b787fdf70afa h1:W0jE6QIxxD/PPQp/yOGWOEDfNQpqGMFmdpbyliCvXqw=
+github.com/ddkwork/golibrary v0.0.91-0.20250222134107-b787fdf70afa/go.mod h1:6yNujFwybY0YmjNj7uDegka5mnO2Xg6XMNNtQ9TZ/gI=
 github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
 github.com/dlclark/regexp2 v1.11.5/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
 github.com/gen2brain/dlgs v0.0.0-20220603100644-40c77870fa8d h1:dHYKX8CBAs1zSGXm3q3M15CLAEwPEkwrK1ed8FCo+Xo=

@@ -6,7 +6,7 @@ require (
 	gioui.org v0.8.0
 	gioui.org/x v0.8.1
 	github.com/alecthomas/chroma/v2 v2.15.0
-	github.com/ddkwork/golibrary v0.0.91-0.20250222100916-fc8029a3f592
+	github.com/ddkwork/golibrary v0.0.91-0.20250222134107-b787fdf70afa
 	github.com/gen2brain/dlgs v0.0.0-20220603100644-40c77870fa8d
 	github.com/inkeliz/giosvg v0.0.0-20240821232107-3208d4350d55
 	github.com/lmittmann/tint v1.0.7

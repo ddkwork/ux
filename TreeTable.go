@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"github.com/ddkwork/golibrary/stream/deepcopy"
-	"github.com/ddkwork/golibrary/stream/tid"
+	"github.com/ddkwork/golibrary/stream/uuid"
 	"image"
 	"image/color"
 	"io"
@@ -98,6 +98,8 @@ type (
 
 const ContainerKeyPostfix = "_container"
 
+func NewRoot[T any](data T) *Node[T] { return NewContainerNode("root", data) }
+
 func NewTreeTable[T any](data T, ctx TableContext[T]) *TreeTable[T] {
 	columnCells := initHeader(data)
 	columnCount := len(columnCells)
@@ -132,10 +134,6 @@ func NewTreeTable[T any](data T, ctx TableContext[T]) *TreeTable[T] {
 	}
 }
 
-func NewRoot[T any](data T) *Node[T] {
-	return NewContainerNode("root", data)
-}
-
 func (n *Node[T]) IsRoot() bool { return n.parent == nil }
 
 func newNode[T any](typeKey string, isContainer bool, data T) *Node[T] {
@@ -151,7 +149,7 @@ func newNode[T any](typeKey string, isContainer bool, data T) *Node[T] {
 		rowContextAreas:          nil,
 		contextMenu:              nil,
 		TableTheme:               DefaultTableTheme,
-		ID:                       NewTID(),
+		ID:                       newID(),
 		Type:                     typeKey,
 		parent:                   nil,
 		Data:                     data,
@@ -188,7 +186,7 @@ type Node[T any] struct {
 
 	TableTheme `json:"-"`
 
-	ID       tid.TID `json:"id"`
+	ID       uuid.ID `json:"id"`
 	Type     string  `json:"type"`
 	parent   *Node[T]
 	Data     T
@@ -765,16 +763,12 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w RowFn) layout.Dimensions
 	}
 }
 
-func NewNode[T any](data T) (child *Node[T]) {
-	return newNode("", false, data)
-}
-
+func NewNode[T any](data T) (child *Node[T]) { return newNode("", false, data) }
 func NewContainerNode[T any](typeKey string, data T) (container *Node[T]) {
 	n := newNode(typeKey, true, data)
 	n.Children = make([]*Node[T], 0)
 	return n
 }
-
 func NewContainerNodes[T any](typeKeys []string, objects ...T) (containerNodes []*Node[T]) {
 	containerNodes = make([]*Node[T], 0)
 	var data T // it is zero value
@@ -1208,7 +1202,7 @@ func (n *Node[T]) Sum() string {
 	return key
 }
 
-func (n *Node[T]) UUID() tid.TID   { return n.ID }
+func (n *Node[T]) UUID() uuid.ID   { return n.ID }
 func (n *Node[T]) Container() bool { return strings.HasSuffix(n.Type, ContainerKeyPostfix) }
 
 func (n *Node[T]) kind(base string) string {
@@ -1243,9 +1237,7 @@ func (n *Node[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions
 	// 固定单元格宽度为计算好的每列最大宽度
 	gtx.Constraints.Min.X = int(data.Minimum)
 	gtx.Constraints.Max.X = int(data.Minimum)
-
 	DrawColumnDivider(gtx, data.ColumID) // 为每列绘制列分隔条
-
 	if data.FgColor == (color.NRGBA{}) {
 		data.FgColor = White
 	}
@@ -1326,12 +1318,11 @@ func (t *TreeTable[T]) RootRows() []*Node[T] {
 func (n *Node[T]) SetParents(children []*Node[T], parent *Node[T]) {
 	n.setParents(children, parent, false)
 }
-
 func (n *Node[T]) setParents(children []*Node[T], parent *Node[T], newTid bool) {
 	for _, child := range children {
 		child.parent = parent
 		if newTid {
-			child.ID = NewTID()
+			child.ID = newID()
 		}
 		if child.CanHaveChildren() {
 			n.SetParents(child.Children, child)
@@ -1339,12 +1330,12 @@ func (n *Node[T]) setParents(children []*Node[T], parent *Node[T], newTid bool) 
 	}
 }
 
-func NewTID() tid.TID { return tid.NewTID('n') }
+func newID() uuid.ID { return uuid.New('n') }
 
 func (n *Node[T]) Clone() (to *Node[T]) {
 	to = deepcopy.Copy(n)
 	to.parent = n
-	to.ID = NewTID()
+	to.ID = newID()
 	if n.CanHaveChildren() {
 		n.setParents(to.Children, to, true)
 	}
@@ -1435,21 +1426,21 @@ func CountTableRows[T any](rows []*Node[T]) int { // 计算整个表的总行数
 	return count
 }
 
-func (t *TreeTable[T]) Remove(id tid.TID) {
+func (t *TreeTable[T]) Remove(id uuid.ID) {
 	found := t.Find(id)
 	for i, child := range found.parent.Children {
 		if child.ID == id {
 			found.parent.Children = slices.Delete(found.parent.Children, i, i+1)
-			return
+			break
 		}
 	}
 }
 
-func (t *TreeTable[T]) Find(id tid.TID) (found *Node[T]) {
+func (t *TreeTable[T]) Find(id uuid.ID) (found *Node[T]) {
 	for node := range t.Root.Walk() {
 		if node.ID == id {
 			found = node
-			return
+			break
 		}
 	}
 	return
@@ -1543,27 +1534,27 @@ func (n *Node[T]) Index() int {
 			return i
 		}
 	}
-	panic("not found") //永远不可能选中root，所以可以放心panic，root不显示，只显示它的children作为rootRows
+	panic("not found index") //永远不可能选中root，所以可以放心panic，root不显示，只显示它的children作为rootRows
 }
 
 func (n *Node[T]) Depth() unit.Dp {
-	if n.parent != nil {
+	if !n.IsRoot() {
 		return n.parent.Depth() + 1
 	}
 	return 1
 }
 
-func (n *Node[T]) LenChildren() int {
-	return len(n.Children)
-}
-
+func (n *Node[T]) LenChildren() int { return len(n.Children) }
 func (n *Node[T]) LastChild() (lastChild *Node[T]) {
+	if n.IsRoot() && n.CanHaveChildren() {
+		return n.Children[len(n.Children)-1]
+	}
+	if !n.parent.CanHaveChildren() {
+		return nil //todo
+	}
 	return n.parent.Children[len(n.parent.Children)-1]
 }
-
-func (n *Node[T]) IsLastChild() bool {
-	return n.LastChild() == n
-}
+func (n *Node[T]) IsLastChild() bool { return n.LastChild() == n }
 
 // -------------------------tui
 func (t *TreeTable[T]) MaxColumnCellWidth() unit.Dp {
@@ -1584,9 +1575,7 @@ func (t *TreeTable[T]) Format() *stream.Buffer {
 	return buf
 }
 
-func (t *TreeTable[T]) String() string {
-	return t.Format().String()
-}
+func (t *TreeTable[T]) String() string { return t.Format().String() }
 
 func (t *TreeTable[T]) Document() string {
 	s := stream.NewBuffer("")
@@ -1601,13 +1590,11 @@ func (t *TreeTable[T]) Document() string {
 
 func (t *TreeTable[T]) FormatHeader(maxColumnCellTextWidths []unit.Dp) *stream.Buffer {
 	buf := stream.NewBuffer("")
-
 	all := t.MaxColumnCellWidth()
 	for _, width := range maxColumnCellTextWidths {
 		all += width
 	}
 	all += align.StringWidth[unit.Dp]("│")*unit.Dp(len(maxColumnCellTextWidths)) + 4 //?
-
 	buf.WriteStringLn("┌─" + strings.Repeat("─", int(all)))
 	buf.WriteString("│")
 
