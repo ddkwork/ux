@@ -1011,9 +1011,9 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Title: "",
 											Icon:  IconClean,
 											Can:   func() bool { return !node.Container() },
-											Do: func() { //gcs
-												t.selectedNode.SetType("xxoo" + ContainerKeyPostfix)
-												t.selectedNode.Children = make([]*Node[T], 0) //todo test
+											Do: func() { //todo gcs 还检查了CanHaveChildren对于非容器节点，它不可能有子节点，所以这里可以直接设置类型？
+												t.selectedNode.SetType("xxoo" + ContainerKeyPostfix) //todo  gcs仅仅只是更新了uuid
+												t.selectedNode.Children = make([]*Node[T], 0)        //todo test
 											},
 											Clickable: widget.Clickable{},
 										}
@@ -1025,9 +1025,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Do: func() {
 												if t.selectedNode.CanHaveChildren() {
 													t.selectedNode.SetType("")
-													//todo child的parent需要更新?
+													//todo child的parent需要更新? gcs仅仅只是更新了uuid
 												}
-												mylog.Info("convert to non-container")
 											},
 											AppendDivider: true,
 											Clickable:     widget.Clickable{},
