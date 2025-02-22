@@ -1388,6 +1388,9 @@ func (t *TreeTable[T]) Filter(text string) {
 	t.filteredRows = make([]*Node[T], 0)
 	for node := range t.Root.WalkContainer() {
 		if node.Container() {
+			if node.MarshalRow == nil {
+				node.MarshalRow = t.Root.MarshalRow
+			}
 			cells := node.MarshalRow(node)
 			for _, cell := range cells {
 				if strings.EqualFold(cell.Text, text) {
@@ -1408,7 +1411,9 @@ func (t *TreeTable[T]) Filter(text string) {
 		}
 		t.filteredRows[i].Children = children
 	}
+	//todo 检查layou部分是否调用filteredRows以及filteredRows的大小是否是0
 	t.Root.Children = t.filteredRows
+	//t.rootRows = t.filteredRows
 	t.OpenAll()
 }
 
