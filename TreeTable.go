@@ -1011,8 +1011,9 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Title: "",
 											Icon:  IconClean,
 											Can:   func() bool { return !node.Container() },
-											Do: func() {
-												mylog.Info("convert to container")
+											Do: func() { //gcs
+												t.selectedNode.SetType("xxoo" + ContainerKeyPostfix)
+												t.selectedNode.Children = make([]*Node[T], 0) //todo test
 											},
 											Clickable: widget.Clickable{},
 										}
@@ -1020,8 +1021,12 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 										item = ContextMenuItem{
 											Title: "",
 											Icon:  IconActionCode,
-											Can:   func() bool { return node.Container() }, // if has children, how to do? see gcs
+											Can:   func() bool { return node.Container() },
 											Do: func() {
+												if t.selectedNode.CanHaveChildren() {
+													t.selectedNode.SetType("")
+													//todo child的parent需要更新?
+												}
 												mylog.Info("convert to non-container")
 											},
 											AppendDivider: true,
@@ -1101,11 +1106,15 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 										}
 									}
 									item.Title = kind.String()
-									node.contextMenu.AddItem(item)
+									if item.Can() {
+										node.contextMenu.AddItem(item)
+									}
 								}
 								if items := t.ContextMenuItems(node, gtx); items != nil {
 									for _, item := range items {
-										node.contextMenu.AddItem(item)
+										if item.Can() {
+											node.contextMenu.AddItem(item)
+										}
 									}
 								}
 							}
@@ -1145,7 +1154,6 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 
 func (t *TreeTable[T]) drawContextArea(gtx C, menuState *component.MenuState) D {
 	return layout.Center.Layout(gtx, func(gtx C) D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
-		// mylog.Struct("todo",gtx.Constraints)
 		gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(4000)) // 当行高限制后，这里需要取消限制，理想值是取表格高度或者屏幕高度，其次是增加滚动条或者树形右键菜单
 		menuStyle := component.Menu(th.Theme, menuState)
 		menuStyle.SurfaceStyle = component.SurfaceStyle{
