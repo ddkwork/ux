@@ -1541,7 +1541,7 @@ func (n *Node[T]) Depth() unit.Dp {
 	if !n.IsRoot() {
 		return n.parent.Depth() + 1
 	}
-	return 1
+	return 1 //base root depth
 }
 
 func (n *Node[T]) LenChildren() int { return len(n.Children) }
