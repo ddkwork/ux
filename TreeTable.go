@@ -3,6 +3,7 @@ package ux
 import (
 	_ "embed"
 	"fmt"
+	"github.com/ddkwork/golibrary/stream/deepcopy"
 	"image"
 	"image/color"
 	"io"
@@ -1373,6 +1374,7 @@ func (n *Node[T]) SetParents(children []*Node[T], parent *Node[T]) {
 
 // todo 克隆所有字段
 func (n *Node[T]) Clone() (from *Node[T]) {
+	return deepcopy.Copy(n)
 	if n.Container() {
 		return NewContainerNode(n.Type, n.Data)
 	}

@@ -6,7 +6,7 @@ require (
 	gioui.org v0.8.0
 	gioui.org/x v0.8.1
 	github.com/alecthomas/chroma/v2 v2.15.0
-	github.com/ddkwork/golibrary v0.0.91-0.20250221114559-8a02d569f328
+	github.com/ddkwork/golibrary v0.0.91-0.20250222100916-fc8029a3f592
 	github.com/gen2brain/dlgs v0.0.0-20220603100644-40c77870fa8d
 	github.com/google/uuid v1.6.0
 	github.com/inkeliz/giosvg v0.0.0-20240821232107-3208d4350d55
@@ -26,7 +26,7 @@ require (
 	github.com/dc0d/caseconv v0.5.0 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/go-text/typesetting v0.3.0 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa // indirect
 	golang.org/x/mod v0.23.0 // indirect

@@ -7,7 +7,7 @@ require (
 	gioui.org/cmd v0.8.0
 	gioui.org/example v0.8.1
 	gioui.org/x v0.8.1
-	github.com/ddkwork/golibrary v0.0.91-0.20250221114559-8a02d569f328
+	github.com/ddkwork/golibrary v0.0.91-0.20250222100916-fc8029a3f592
 	github.com/ddkwork/ux v0.0.0-20250221125641-d4b951dc33be
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	golang.org/x/crypto v0.33.0
@@ -30,7 +30,7 @@ require (
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-text/typesetting v0.3.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-github/v24 v24.0.1 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
