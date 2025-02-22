@@ -869,17 +869,11 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 	//}
 
 	bgColor := RowColor(rowIndex)
-
-	if rowClick.Hovered() { // 设置悬停背景色
+	switch {
+	case rowClick.Hovered(): // 设置悬停背景色
 		bgColor = th.Color.TreeHoveredBgColor
-	}
-	if t.selectedNode == node { // 设置选中背景色
-		bgColor = color.NRGBA{
-			R: 255,
-			G: 186,
-			B: 44,
-			A: 91,
-		}
+	case t.selectedNode == node: // 设置选中背景色
+		bgColor = color.NRGBA{R: 255, G: 186, B: 44, A: 91}
 		// bgColor = Orange300
 	}
 
