@@ -1325,7 +1325,7 @@ func (n *Node[T]) setParents(children []*Node[T], parent *Node[T], isNewID bool)
 			child.ID = newID()
 		}
 		if child.CanHaveChildren() {
-			n.SetParents(child.Children, child)
+			n.setParents(child.Children, child, isNewID)
 		}
 	}
 }
