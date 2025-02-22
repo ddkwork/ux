@@ -1366,7 +1366,7 @@ func (t *TreeTable[T]) RootRows() []*Node[T] {
 func (n *Node[T]) SetParents(children []*Node[T], parent *Node[T]) {
 	for _, child := range children {
 		child.parent = parent
-		if len(child.Children) > 0 {
+		if child.CanHaveChildren() {
 			n.SetParents(child.Children, child)
 		}
 	}
@@ -1375,18 +1375,27 @@ func (n *Node[T]) SetParents(children []*Node[T], parent *Node[T]) {
 func (n *Node[T]) Clone() (to *Node[T]) {
 	to = deepcopy.Copy(n)
 	to.parent = n
-	if n.Container() {
-		for _, child := range to.Children {
-			child.parent = to
-			//todo child is container node, need to set its children's parent to to
-		}
+	if n.CanHaveChildren() {
+		n.SetParents(to.Children, to)
 	}
+	to.OpenAll()
 	return
-	if n.Container() {
-		return NewContainerNode(n.Type, n.Data)
-	}
-	return NewNode(n.Data)
 }
+
+func (n *Node[T]) OpenAll() {
+	for node := range n.WalkContainer() {
+		node.SetOpen(true)
+	}
+}
+
+func (n *Node[T]) CloseAll() {
+	for node := range n.WalkContainer() {
+		node.SetOpen(false)
+	}
+}
+
+func (t *TreeTable[T]) OpenAll()  { t.Root.OpenAll() }
+func (t *TreeTable[T]) CloseAll() { t.Root.CloseAll() }
 
 func (n *Node[T]) CopyFrom(from *Node[T]) *Node[T] {
 	*n = *from
@@ -1442,22 +1451,6 @@ func (t *TreeTable[T]) Filter(text string) {
 	}
 	t.Root.Children = t.filteredRows
 	t.OpenAll()
-}
-
-func (t *TreeTable[T]) OpenAll() {
-	for node := range t.Root.WalkContainer() {
-		if node.Container() {
-			node.SetOpen(true)
-		}
-	}
-}
-
-func (t *TreeTable[T]) CloseAll() {
-	for node := range t.Root.WalkContainer() {
-		if node.Container() {
-			node.SetOpen(false)
-		}
-	}
 }
 
 //-----------------------------------------------------------------------------
