@@ -795,8 +795,6 @@ func calculateMaxColumnCellWidth(c CellData) unit.Dp { // 计算层级列最大�
 		DividerWidth // 列分隔条宽度
 }
 
-var modal = NewModal()
-
 var (
 	rowWhiteColor = color.NRGBA{R: 57, G: 57, B: 57, A: 255} // 白色
 	rowBlackColor = color.NRGBA{R: 45, G: 45, B: 45, A: 255} // 黑色
@@ -809,6 +807,9 @@ func RowColor(rowIndex int) color.NRGBA { // 奇偶行背景色
 	return rowBlackColor
 }
 
+var modal = NewModal()
+
+func (t *TreeTable[T]) IsRowSelected() bool { return t.selectedNode != nil }
 func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int) layout.Dimensions {
 	node.RowCells = t.MarshalRow(node)
 	for i := range node.RowCells { // 对齐表头和数据列
@@ -825,19 +826,16 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 
 	evt, ok := gtx.Source.Event(pointer.Filter{
 		Target: rowClick,
-		Kinds:  pointer.Press | pointer.Release,
+		Kinds:  pointer.Press | pointer.Release | pointer.Drag,
 	})
 	if ok {
 		e, ok := evt.(pointer.Event)
 		if ok {
-			if e.Kind == pointer.Press { // 长按应该是touch类型而不是press类型?
+			switch {
+			case e.Kind == pointer.Press: //左键，右键，双击
 				t.selectedNode = node
-			}
-			switch e.Buttons {
-			case pointer.ButtonPrimary, pointer.ButtonSecondary:
-				if e.Kind == pointer.Press {
-					t.selectedNode = node
-				}
+			case e.Source == pointer.Touch: //todo检查是否长按并测试apk
+				t.selectedNode = node
 			}
 		}
 	}
@@ -847,8 +845,6 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 		switch click.NumClicks {
 		case 1:
 			node.isOpen = !node.isOpen // 切换展开状态
-			// todo bug 左键,右键，长按按下选中设置选中节点,但是目前只有左键按下才会被设置
-			t.selectedNode = node // 记录被点击的节点,todo 右击也需要填充它,但是在右键菜单中干这个事情似乎时机不对,上下文区域需要支持手动激活方法
 			if node.CellClickedCallback != nil {
 				node.CellClickedCallback(node) // 单元格点击回调
 			}
@@ -958,12 +954,6 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 							return node.CellFrame(gtx, cell)
 						}),
 						layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-							if modal.Visible() {
-								return modal.Layout(gtx)
-							}
-							return layout.Dimensions{}
-						}),
-						layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 							if node.rowContextAreas == nil {
 								node.rowContextAreas = make([]*component.ContextArea, len(node.RowCells))
 							}
@@ -1003,7 +993,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Title:     "",
 											Icon:      IconCopy,
 											Can:       func() bool { return true },
-											Do:        func() { node.CopyRow(gtx) },
+											Do:        func() { t.selectedNode.CopyRow(gtx) },
 											Clickable: widget.Clickable{},
 										}
 									case ConvertToContainerType:
@@ -1011,9 +1001,10 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Title: "",
 											Icon:  IconClean,
 											Can:   func() bool { return !node.Container() },
-											Do: func() { //todo gcs 还检查了CanHaveChildren对于非容器节点，它不可能有子节点，所以这里可以直接设置类型？
-												t.selectedNode.SetType("xxoo" + ContainerKeyPostfix) //todo  gcs仅仅只是更新了uuid
-												t.selectedNode.Children = make([]*Node[T], 0)        //todo test
+											Do: func() {
+												t.selectedNode.SetType("ConvertToContainer" + ContainerKeyPostfix) //? todo bug：这里是失败的，导致再次点击这里转换的节点后ConvertToNonContainer没有弹出来
+												t.selectedNode.ID = newID()
+												t.selectedNode.Children = make([]*Node[T], 0)
 											},
 											Clickable: widget.Clickable{},
 										}
@@ -1023,10 +1014,13 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Icon:  IconActionCode,
 											Can:   func() bool { return node.Container() },
 											Do: func() {
-												if t.selectedNode.CanHaveChildren() {
-													t.selectedNode.SetType("")
-													//todo child的parent需要更新? gcs仅仅只是更新了uuid
+												t.selectedNode.SetType("")
+												t.selectedNode.ID = newID()
+												for _, child := range t.selectedNode.Children {
+													child.parent = t.selectedNode.parent
+													child.ID = newID() //todo test
 												}
+												t.selectedNode.ResetChildren()
 											},
 											AppendDivider: true,
 											Clickable:     widget.Clickable{},
@@ -1037,7 +1031,6 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Icon:  IconArrowDropDown,
 											Can:   func() bool { return true },
 											Do: func() {
-												mylog.CheckNil(t.selectedNode)
 												var zero T
 												t.selectedNode.InsertAfter(NewNode(zero))
 											},
@@ -1049,7 +1042,6 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Icon:  IconAdd,
 											Can:   func() bool { return true },
 											Do: func() {
-												mylog.CheckNil(t.selectedNode)
 												var zero T // todo edit type?
 												t.selectedNode.InsertAfter(NewContainerNode("NewContainerNode", zero))
 											},
@@ -1071,7 +1063,6 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Icon:  IconActionUpdate,
 											Can:   func() bool { return true },
 											Do: func() {
-												mylog.CheckNil(t.selectedNode)
 												t.selectedNode.InsertAfter(t.selectedNode.Clone())
 											},
 											Clickable: widget.Clickable{},
@@ -1082,7 +1073,16 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Icon:  IconEdit,
 											Can:   func() bool { return true },
 											Do: func() {
-												mylog.Info("edit")
+												modal.SetTitle("edit row")
+												modal.SetContent(func(gtx layout.Context) layout.Dimensions {
+													editNode := NewStructView(t.selectedNode.Data, func() (elems []CellData) {
+														return t.MarshalRow(t.selectedNode)
+													})
+													return editNode.Layout(gtx)
+												})
+												if modal.Visible() {
+													modal.Layout(gtx)
+												}
 											},
 											AppendDivider: true,
 											Clickable:     widget.Clickable{},
@@ -1090,7 +1090,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 									case OpenAllType:
 										item = ContextMenuItem{
 											Title:     "",
-											Icon:      IconFileFolderOpen,
+											Icon:      IconFileFolderOpen, //todo 这里的图标不太好看
 											Can:       func() bool { return true },
 											Do:        func() { t.OpenAll() },
 											Clickable: widget.Clickable{},
@@ -1098,7 +1098,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 									case CloseAllType:
 										item = ContextMenuItem{
 											Title:     "",
-											Icon:      IconClose,
+											Icon:      IconClose, //todo 这里的图标不太好看
 											Can:       func() bool { return true },
 											Do:        func() { t.CloseAll() },
 											Clickable: widget.Clickable{},
