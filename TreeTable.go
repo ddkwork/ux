@@ -794,11 +794,10 @@ func calculateMaxColumnCellWidth(c CellData) unit.Dp { // 计算层级列最大�
 }
 
 func RowColor(rowIndex int) color.NRGBA { // 奇偶行背景色
-	bgColor := color.NRGBA{R: 57, G: 57, B: 57, A: 255}
 	if rowIndex%2 != 0 {
-		bgColor = color.NRGBA{R: 45, G: 45, B: 45, A: 255}
+		return color.NRGBA{R: 57, G: 57, B: 57, A: 255}
 	}
-	return bgColor
+	return color.NRGBA{R: 45, G: 45, B: 45, A: 255}
 }
 
 var modal = NewModal()
@@ -868,6 +867,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 	//if node.LenChildren()%2 == 1 {
 	//	rowIndex--
 	//}
+
 	bgColor := RowColor(rowIndex)
 
 	if rowClick.Hovered() { // 设置悬停背景色
