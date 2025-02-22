@@ -98,12 +98,12 @@ type (
 
 const ContainerKeyPostfix = "_container"
 
-func NewRoot[T any](data T) *Node[T] { return NewContainerNode("root", data) }
+func newRoot[T any](data T) *Node[T] { return NewContainerNode("root", data) }
 
 func NewTreeTable[T any](data T, ctx TableContext[T]) *TreeTable[T] {
 	columnCells := initHeader(data)
 	columnCount := len(columnCells)
-	root := NewRoot(data)
+	root := newRoot(data)
 	root.MarshalRow = ctx.MarshalRow
 	return &TreeTable[T]{
 		Root:         root,
@@ -1318,10 +1318,10 @@ func (t *TreeTable[T]) RootRows() []*Node[T] {
 func (n *Node[T]) SetParents(children []*Node[T], parent *Node[T]) {
 	n.setParents(children, parent, false)
 }
-func (n *Node[T]) setParents(children []*Node[T], parent *Node[T], newTid bool) {
+func (n *Node[T]) setParents(children []*Node[T], parent *Node[T], isNewID bool) {
 	for _, child := range children {
 		child.parent = parent
-		if newTid {
+		if isNewID {
 			child.ID = newID()
 		}
 		if child.CanHaveChildren() {
