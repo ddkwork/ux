@@ -554,13 +554,13 @@ func (row TableSimpleRowStyle) Layout(gtx layout.Context, rowIdx int, cellFn cel
 		if update.NumClicks == 1 {
 			// c = th.ContrastBg
 			c = ColorPink
-			//HighlightRow(gtx)
+			// HighlightRow(gtx)
 			c = Red400
 			// paint.FillShape(gtx.Ops, ColorPink, clip.Rect{Max: gtx.Constraints.Max}.Op())
 		}
 		if row.Table.cells[rowIdx].Hovered() {
 			c = th.ContrastFg
-			//HighlightRow(gtx)
+			// HighlightRow(gtx)
 		}
 	}
 	return Background{Color: c}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {

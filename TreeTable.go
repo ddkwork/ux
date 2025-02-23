@@ -202,7 +202,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 			switch {
 			case e.Kind == pointer.Press: // 左键，右键，双击
 				t.selectedNode = n
-				//bgColor = Orange300
+				// bgColor = Orange300
 			case e.Source == pointer.Touch: // todo检查是否长按并测试apk
 				t.selectedNode = n
 			}
@@ -243,7 +243,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 		n.rowSelected = true
 		bgColor = color.NRGBA{R: 255, G: 186, B: 44, A: 91}
 	case rowClick.Hovered(): // 设置悬停背景色
-		//https://rgbacolorpicker.com/
+		// https://rgbacolorpicker.com/
 		bgColor = th.Color.TreeHoveredBgColor
 	default:
 		//todo 如果children的最后一个节点是黑色，lenChidren是奇数，那么root的node父级的父级的背景色需要设置为白色,bug
@@ -1624,6 +1624,7 @@ func (n *Node[T]) Clone() (to *Node[T]) {
 func (n *Node[T]) SetParents(children []*Node[T], parent *Node[T]) {
 	n.setParents(children, parent, false)
 }
+
 func (n *Node[T]) setParents(children []*Node[T], parent *Node[T], isNewID bool) {
 	for _, child := range children {
 		child.parent = parent
