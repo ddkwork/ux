@@ -184,7 +184,7 @@ func (n *Node) drawRows1(rows [][]CellData, maxColumnCellTextWidths []int) {
 	buf.WriteStringLn("─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
 	buf.WriteString("│")
 	buf.WriteString("       ")
-	// writeRow(buf, n.Header.RowCells, maxColumnCellTextWidths) // 传入 maxColumnCellTextWidths
+	// writeRow(buf, n.Header.rowCells, maxColumnCellTextWidths) // 传入 maxColumnCellTextWidths
 	buf.NewLine()
 	buf.WriteStringLn("─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
 

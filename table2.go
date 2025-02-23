@@ -25,7 +25,7 @@ type (
 		prevMetric   unit.Metric
 		prevMaxWidth int
 
-		SortOrder          SortOrder
+		SortOrder          sortOrder
 		SortedBy           int
 		drags              []tableDrag
 		headers            []*widget.Clickable
@@ -78,26 +78,26 @@ func NewTable2(columns []Column2) *Table2 {
 }
 
 type (
-	SortOrder uint8
-	CellFn    func(gtx layout.Context, row, col int) layout.Dimensions
-	RowFn     func(gtx layout.Context, row int) layout.Dimensions
+	sortOrder uint8
+	cellFn    func(gtx layout.Context, row, col int) layout.Dimensions
+	rowFn     func(gtx layout.Context, row int) layout.Dimensions
 )
 
 const (
-	SortNone SortOrder = iota
-	SortAscending
-	SortDescending
+	sortNone sortOrder = iota
+	sortAscending
+	sortDescending
 )
 
 const (
-	DefaultDividerWidth                   unit.Dp = 1
-	DefaultDividerMargin                  unit.Dp = 1
-	DefaultDividerHandleMinVerticalMargin unit.Dp = 2
-	DefaultDividerHandleMaxHeight         unit.Dp = 12
-	DefaultDividerHandleWidth             unit.Dp = 3
-	DefaultDividerHandleRadius            unit.Dp = 2
-	DefaultHeaderPadding                  unit.Dp = 5
-	DefaultHeaderBorder                   unit.Dp = 1
+	defaultDividerWidth                   unit.Dp = 1
+	defaultDividerMargin                  unit.Dp = 1
+	defaultDividerHandleMinVerticalMargin unit.Dp = 2
+	defaultDividerHandleMaxHeight         unit.Dp = 12
+	defaultDividerHandleWidth             unit.Dp = 3
+	defaultDividerHandleRadius            unit.Dp = 2
+	defaultHeaderPadding                  unit.Dp = 5
+	defaultHeaderBorder                   unit.Dp = 1
 )
 
 // SetColumns SizeColumnToFit
@@ -111,7 +111,7 @@ func (t *Table2) SetColumns(gtx layout.Context, cols []Column2, cellData [][]str
 		for _, data := range cellData {
 			if i < len(data) {
 				currentWidth := CalculateTextWidth(gtx, data[i])
-				// currentWidth += float32(gtx.Dp(material.Scrollbar(th, nil).Width())) + float32(len(cols)*gtx.Dp(DefaultDividerWidth))
+				// currentWidth += float32(gtx.Dp(material.Scrollbar(th, nil).Width())) + float32(len(cols)*gtx.Dp(defaultDividerWidth))
 				if currentWidth > maxWidth {
 					maxWidth = currentWidth // 更新最大宽度
 				}
@@ -164,18 +164,18 @@ func (t *Table2) SortByClickedColumn() (int, bool) {
 	if col, ok := t.ClickedColumn(); ok {
 		if col == t.SortedBy {
 			switch t.SortOrder {
-			case SortNone:
-				t.SortOrder = SortAscending
-			case SortAscending:
-				t.SortOrder = SortDescending
-			case SortDescending:
-				t.SortOrder = SortAscending
+			case sortNone:
+				t.SortOrder = sortAscending
+			case sortAscending:
+				t.SortOrder = sortDescending
+			case sortDescending:
+				t.SortOrder = sortAscending
 			default:
 				panic(fmt.Sprintf("unhandled case %v", t.SortOrder))
 			}
 		} else {
 			t.SortedBy = col
-			t.SortOrder = SortAscending
+			t.SortOrder = sortAscending
 		}
 		return col, true
 	}
@@ -189,8 +189,8 @@ func (t *Table2) resize(gtx layout.Context) {
 	}
 
 	var (
-		oldAvailable = unit.Dp(t.prevMaxWidth - t.prevMetric.Dp(material.Scrollbar(th.Theme, nil).Width()) - len(t.Columns)*t.prevMetric.Dp(DefaultDividerWidth)) // 之前的可用宽度
-		available    = unit.Dp(gtx.Constraints.Max.X - gtx.Dp(material.Scrollbar(th.Theme, nil).Width()) - len(t.Columns)*gtx.Dp(DefaultDividerWidth))            // 当前可用宽度
+		oldAvailable = unit.Dp(t.prevMaxWidth - t.prevMetric.Dp(material.Scrollbar(th.Theme, nil).Width()) - len(t.Columns)*t.prevMetric.Dp(defaultDividerWidth)) // 之前的可用宽度
+		available    = unit.Dp(gtx.Constraints.Max.X - gtx.Dp(material.Scrollbar(th.Theme, nil).Width()) - len(t.Columns)*gtx.Dp(defaultDividerWidth))            // 当前可用宽度
 	)
 
 	// 避免负值和零导致计算错误
@@ -219,9 +219,9 @@ func (t *Table2) resize(gtx layout.Context) {
 	}
 
 	var (
-		dividerWidth       = gtx.Dp(DefaultDividerWidth)       // 获取分隔符的宽度
-		dividerMargin      = gtx.Dp(DefaultDividerMargin)      // 获取分隔符的边距
-		dividerHandleWidth = gtx.Dp(DefaultDividerHandleWidth) // 获取分隔处理器的宽度
+		dividerWidth       = gtx.Dp(defaultDividerWidth)       // 获取分隔符的宽度
+		dividerMargin      = gtx.Dp(defaultDividerMargin)      // 获取分隔符的边距
+		dividerHandleWidth = gtx.Dp(defaultDividerHandleWidth) // 获取分隔处理器的宽度
 
 		globalMinWidth = unit.Dp(dividerWidth + dividerMargin + dividerHandleWidth) // 计算全局最小宽度
 	)
@@ -247,18 +247,18 @@ func TableRow(tbl *Table2, hdr bool) *TableRowStyle {
 	}
 }
 
-func (row *TableRowStyle) Layout(gtx layout.Context, w RowFn) layout.Dimensions {
+func (row *TableRowStyle) Layout(gtx layout.Context, w rowFn) layout.Dimensions {
 	var (
 		cols          = len(row.Table.Columns) // 获取列的数量
 		dividers      = cols                   // 列的分隔数
 		tallestHeight = gtx.Constraints.Min.Y  // 初始化最高的行高
 
-		dividerWidth                   = gtx.Dp(DefaultDividerWidth)                   // 获取分割线的宽度
-		dividerMargin                  = gtx.Dp(DefaultDividerMargin)                  // 获取分割线的边距
-		dividerHandleMinVerticalMargin = gtx.Dp(DefaultDividerHandleMinVerticalMargin) // 获取分隔处理器的最小垂直边距
-		dividerHandleMaxHeight         = gtx.Dp(DefaultDividerHandleMaxHeight)         // 获取分隔处理器的最大高度
-		dividerHandleWidth             = gtx.Dp(DefaultDividerHandleWidth)             // 获取分隔处理器的宽度
-		dividerHandleRadius            = gtx.Dp(DefaultDividerHandleRadius)            // 获取分隔处理器的圆角半径
+		dividerWidth                   = gtx.Dp(defaultDividerWidth)                   // 获取分割线的宽度
+		dividerMargin                  = gtx.Dp(defaultDividerMargin)                  // 获取分割线的边距
+		dividerHandleMinVerticalMargin = gtx.Dp(defaultDividerHandleMinVerticalMargin) // 获取分隔处理器的最小垂直边距
+		dividerHandleMaxHeight         = gtx.Dp(defaultDividerHandleMaxHeight)         // 获取分隔处理器的最大高度
+		dividerHandleWidth             = gtx.Dp(defaultDividerHandleWidth)             // 获取分隔处理器的宽度
+		dividerHandleRadius            = gtx.Dp(defaultDividerHandleRadius)            // 获取分隔处理器的圆角半径
 
 		minWidth = unit.Dp(dividerWidth + dividerMargin + dividerHandleWidth) // 计算分隔符的最小宽度
 	)
@@ -324,7 +324,7 @@ func (row *TableRowStyle) Layout(gtx layout.Context, w RowFn) layout.Dimensions 
 			for _, col := range row.Table.Columns { // 遍历所有列计算总宽度
 				total += col.Width // 累加当前列的宽度
 			}
-			total += unit.Dp(len(row.Table.Columns) * gtx.Dp(DefaultDividerWidth)) // 加上所有分隔符的总宽度
+			total += unit.Dp(len(row.Table.Columns) * gtx.Dp(defaultDividerWidth)) // 加上所有分隔符的总宽度
 			if total < unit.Dp(gtx.Constraints.Min.X) {                            // 如果总宽度小于最小约束宽度
 				row.Table.Columns[len(row.Table.Columns)-1].Width += unit.Dp(gtx.Constraints.Min.X) - total // 调整最后一列的宽度以适应
 			}
@@ -343,7 +343,7 @@ func (row *TableRowStyle) Layout(gtx layout.Context, w RowFn) layout.Dimensions 
 			colWidth := int(row.Table.Columns[i].Width) // 获取当前列的宽度
 			totalWidth += colWidth                      // 更新总宽度
 		}
-		extra := gtx.Constraints.Min.X - len(row.Table.Columns)*gtx.Dp(DefaultDividerWidth) - totalWidth // 计算多余宽度
+		extra := gtx.Constraints.Min.X - len(row.Table.Columns)*gtx.Dp(defaultDividerWidth) - totalWidth // 计算多余宽度
 		colExtra := extra                                                                                // 将多余宽度赋值给列额外宽度
 
 		for i := range row.Table.Columns { // 绘制所有列
@@ -473,7 +473,7 @@ func (row *TableHeaderRowStyle) Layout(gtx layout.Context) layout.Dimensions {
 		gtx.Constraints.Min.Y = gtx.Dp(20)                                                // 限制行高
 		paint.FillShape(gtx.Ops, ColorHeaderFg, clip.Rect{Max: gtx.Constraints.Max}.Op()) // 表头背景色
 		return layout.Inset{
-			// Top: DefaultHeaderPadding,
+			// Top: defaultHeaderPadding,
 			// Top:    5,
 			// Bottom: 5,
 			// Left:   3,
@@ -483,11 +483,11 @@ func (row *TableHeaderRowStyle) Layout(gtx layout.Context) layout.Dimensions {
 			// OPT(dh): avoid allocations for string building by precomputing and storing the column clickables.
 			if row.Table.SortedBy == col {
 				switch row.Table.SortOrder {
-				case SortNone:
+				case sortNone:
 					s = cell.Name
-				case SortAscending:
+				case sortAscending:
 					s = "⇧" + cell.Name
-				case SortDescending:
+				case sortDescending:
 					s = "⇩" + cell.Name
 				default:
 					panic(fmt.Sprintf("unhandled case %v", row.Table.SortOrder))
@@ -520,7 +520,7 @@ func TableSimpleRow(tbl *Table2) TableSimpleRowStyle {
 	return TableSimpleRowStyle{Table: tbl}
 }
 
-func (row TableSimpleRowStyle) Layout(gtx layout.Context, rowIdx int, cellFn CellFn) layout.Dimensions {
+func (row TableSimpleRowStyle) Layout(gtx layout.Context, rowIdx int, cellFn cellFn) layout.Dimensions {
 	c := color.NRGBA{
 		R: 42,
 		G: 42,
@@ -548,18 +548,19 @@ func (row TableSimpleRowStyle) Layout(gtx layout.Context, rowIdx int, cellFn Cel
 			row.Table.cells[i] = &widget.Clickable{}
 		}
 	}
-	if row.Table.cells[rowIdx].Hovered() {
-		c = th.ContrastFg
-		// ux.HighlightRow(gtx)
-	}
 	hover := row.Table.cells[rowIdx]
 	update, b := hover.Update(gtx)
 	if b {
 		if update.NumClicks == 1 {
 			// c = th.ContrastBg
 			c = ColorPink
-			// ux.HighlightRow(gtx)
+			//HighlightRow(gtx)
+			c = Red400
 			// paint.FillShape(gtx.Ops, ColorPink, clip.Rect{Max: gtx.Constraints.Max}.Op())
+		}
+		if row.Table.cells[rowIdx].Hovered() {
+			c = th.ContrastFg
+			//HighlightRow(gtx)
 		}
 	}
 	return Background{Color: c}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -583,7 +584,7 @@ func (row TableSimpleRowStyle) Layout(gtx layout.Context, rowIdx int, cellFn Cel
 	})
 }
 
-func SimpleTable(gtx layout.Context, tbl *Table2, rows int, cellFn CellFn) layout.Dimensions {
+func SimpleTable(gtx layout.Context, tbl *Table2, rows int, cellFn cellFn) layout.Dimensions {
 	return tbl.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {

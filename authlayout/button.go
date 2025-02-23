@@ -249,7 +249,7 @@ func (b ButtonStyle) LayoutText_bak(gtx layout.Context, icon *giosvg.Icon, point
 		}
 
 		{
-			// RowCells
+			// rowCells
 			if text != "" {
 				gtx := gtx
 				gtx.Constraints.Max.X = gtx.Constraints.Max.X - logoSize - logoPadding

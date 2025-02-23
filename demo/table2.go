@@ -112,7 +112,7 @@ func table2(rows []*packet) *GoroutineList {
 	}
 	table := ux.NewTable2(cols)
 	table.SortedBy = 0
-	table.SortOrder = ux.SortAscending
+	// table.SortOrder = ux.sortAscending
 	return &GoroutineList{
 		cols:       cols,
 		rows:       rows,
