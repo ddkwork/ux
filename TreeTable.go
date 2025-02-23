@@ -44,6 +44,7 @@ type (
 		selectedNode             *Node[T]            // 选中的节点
 		columnCount              int                 // 列数
 		maxColumnTextWidths      []unit.Dp           // 最宽的列文本宽度
+		rows                     [][]CellData        // 矩阵置换参数，行转为列，增删改节点后重新生成它
 		columns                  [][]CellData        // CopyColumn
 		DragRemovedRowsCallback  func(n *Node[T])    // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
 		DropOccurredCallback     func(n *Node[T])    // Called whenever a drop occurs that modifies the model.
@@ -52,7 +53,7 @@ type (
 		columnResizeBase         unit.Dp             //
 		columnResizeOverhead     unit.Dp             //
 		preventUserColumnResize  bool                //
-		awaitingSizeColumnsToFit bool                //
+		AwaitingSizeColumnsToFit bool                //
 		awaitingSyncToModel      bool                //
 		wasDragged               bool                //
 		dividerDrag              bool                //
@@ -76,7 +77,7 @@ type (
 		sortOrder          sortOrder                // 排序方式
 		sortedBy           int                      // 排序列索引
 		drags              []tableDrag              // 拖动表头列参数
-		ColumnCells        []CellData               //? todo
+		rowCells           []CellData               // 每列的最大深度，宽度，
 		clickedColumnIndex int                      // 被点击的列索引
 		manualWidthSet     []bool                   // 新增状态标志数组，记录列是否被手动调整
 		sortAscending      bool                     // 升序还是降序
@@ -109,8 +110,8 @@ type (
 )
 
 func NewTreeTable[T any](data T, ctx TableContext[T]) *TreeTable[T] {
-	columnCells := initHeader(data)
-	columnCount := len(columnCells)
+	rowCells := initHeader(data)
+	columnCount := len(rowCells)
 	return &TreeTable[T]{
 		TableContext: ctx,
 		Root:         newRoot(data),
@@ -121,7 +122,7 @@ func NewTreeTable[T any](data T, ctx TableContext[T]) *TreeTable[T] {
 			sortOrder:          0,
 			sortedBy:           0,
 			drags:              make([]tableDrag, 0),
-			ColumnCells:        columnCells,
+			rowCells:           rowCells,
 			clickedColumnIndex: -1,
 			manualWidthSet:     make([]bool, columnCount),
 		},
@@ -144,7 +145,7 @@ func NewTreeTable[T any](data T, ctx TableContext[T]) *TreeTable[T] {
 		columnResizeBase:         0,
 		columnResizeOverhead:     0,
 		preventUserColumnResize:  false,
-		awaitingSizeColumnsToFit: false,
+		AwaitingSizeColumnsToFit: false,
 		awaitingSyncToModel:      false,
 		wasDragged:               false,
 		dividerDrag:              false,
@@ -157,9 +158,10 @@ func NewTreeTable[T any](data T, ctx TableContext[T]) *TreeTable[T] {
 var once sync.Once
 
 func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
-	once.Do(func() {
-		t.SizeColumnsToFit(gtx, false)
-	})
+	//if t.AwaitingSizeColumnsToFit {
+	t.SizeColumnsToFit(gtx, false)
+	//	t.AwaitingSizeColumnsToFit = false
+	//}
 	list := material.List(th.Theme, &t.List)
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -190,11 +192,11 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 		n.rowCells[i].maxColumnTextWidth = t.maxColumnTextWidths[i]
 		n.rowCells[i].leftIndent = n.Depth() * HierarchyIndent
 		n.rowCells[i].RowID = rowIndex
-		n.rowCells[i].Minimum = t.header.ColumnCells[i].Minimum
-		n.rowCells[i].Maximum = t.header.ColumnCells[i].Minimum
-		n.rowCells[i].Current = t.header.ColumnCells[i].Minimum
-		n.rowCells[i].maxDepth = t.header.ColumnCells[i].maxDepth
-		n.rowCells[i].ColumID = t.header.ColumnCells[i].ColumID
+		n.rowCells[i].Minimum = t.header.rowCells[i].Minimum
+		n.rowCells[i].Maximum = t.header.rowCells[i].Minimum
+		n.rowCells[i].Current = t.header.rowCells[i].Minimum
+		n.rowCells[i].maxDepth = t.header.rowCells[i].maxDepth
+		n.rowCells[i].ColumID = t.header.rowCells[i].ColumID
 	}
 	rowClick := &n.rowClick
 	evt, ok := gtx.Source.Event(pointer.Filter{
@@ -245,7 +247,6 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 	bgColor := RowColor(rowIndex)
 	switch {
 	case t.selectedNode == n: // 设置选中背景色,这个需要在第一的位置
-		n.rowSelected = true
 		bgColor = color.NRGBA{R: 255, G: 186, B: 44, A: 91}
 	case rowClick.Hovered(): // 设置悬停背景色
 		// https://rgbacolorpicker.com/
@@ -579,26 +580,26 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimen
 	// return inset.Layout(gtx, richText.Layout)
 }
 
-func initHeader(data any) (Columns []CellData) {
+func initHeader(data any) (rowCells []CellData) {
 	fields := stream.ReflectVisibleFields(data)
-	Columns = make([]CellData, 0)
+	rowCells = make([]CellData, 0)
 	for i, field := range fields {
 		if field.Tag.Get("table") != "" { // 中文表头简短
 			field.Name = field.Tag.Get("table")
 		}
-		Columns = append(Columns, CellData{
+		rowCells = append(rowCells, CellData{
 			ColumID:            i,
 			RowID:              0,
 			Text:               field.Name,
 			maxDepth:           0,
 			leftIndent:         0,
-			maxColumnTextWidth: 0,
+			maxColumnTextWidth: 20,
 			maxColumnText:      "",
 			Current:            20,
 			Minimum:            20,
 			Maximum:            10000,
-			AutoMinimum:        0,
-			AutoMaximum:        0,
+			AutoMinimum:        20,
+			AutoMaximum:        20,
 			Disabled:           false,
 			Tooltip:            "",
 			SvgBuffer:          "",
@@ -619,10 +620,10 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 	for _, node := range t.Root.Walk() {
 		rows = append(rows, t.MarshalRow(node))
 	}
-	rows = slices.Insert(rows, 0, t.header.ColumnCells) // 插入表头行
+	rows = slices.Insert(rows, 0, t.header.rowCells) // 插入表头行
 	t.columns = TransposeMatrix(rows)
-	t.maxColumnTextWidths = make([]unit.Dp, len(t.header.ColumnCells))
-	maxColumnTexts := make([]string, len(t.header.ColumnCells))
+	t.maxColumnTextWidths = make([]unit.Dp, t.columnCount)
+	maxColumnTexts := make([]string, t.columnCount)
 	for i, column := range t.columns {
 		if t.header.manualWidthSet[i] { // 如果该列已手动调整
 			continue // 跳过，保留用户手动调整的宽度
@@ -640,11 +641,11 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 			}
 		}
 	}
-	maxDepth := t.Root.MaxDepth()
+	maxDepth := t.Root.MaxDepth() //todo 右键菜单增删改，重复节点触发是否被修改状态，准确的说是新建和重复容器节点才触发MaxDepth执行递归，不过可以压力测试
 	for i, maxWidth := range t.maxColumnTextWidths {
-		t.header.ColumnCells[i].Minimum = maxWidth
-		t.header.ColumnCells[i].Current = maxWidth
-		t.header.ColumnCells[i].maxDepth = maxDepth
+		t.header.rowCells[i].Minimum = maxWidth //todo use auto width
+		t.header.rowCells[i].Current = maxWidth
+		t.header.rowCells[i].maxDepth = maxDepth
 	}
 	gtx.Constraints = originalConstraints
 	t.rootRows = t.Root.Children
@@ -671,11 +672,11 @@ func TransposeMatrix[T any](rows [][]T) (columns [][]T) {
 func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 	var cols []layout.FlexChild
 	elems := make([]*Resizable, 0)
-	for i, cell := range t.header.ColumnCells {
+	for i, cell := range t.header.rowCells {
 		if cell.Disabled {
 			continue
 		}
-		clickable := &t.header.ColumnCells[i].Clickable
+		clickable := &t.header.rowCells[i].Clickable
 		if clickable.Clicked(gtx) {
 			t.header.clickedColumnIndex = i
 			if t.header.sortedBy == t.header.clickedColumnIndex {
@@ -698,16 +699,16 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 
 			mylog.Info("clickedColumnIndex", t.header.clickedColumnIndex)
 			if t.header.clickedColumnIndex > -1 && t.header.sortedBy > -1 {
-				for i := range t.header.ColumnCells {
-					t.header.ColumnCells[i].Text = strings.TrimSuffix(t.header.ColumnCells[i].Text, " ⇩")
-					t.header.ColumnCells[i].Text = strings.TrimSuffix(t.header.ColumnCells[i].Text, " ⇧")
+				for i := range t.header.rowCells {
+					t.header.rowCells[i].Text = strings.TrimSuffix(t.header.rowCells[i].Text, " ⇩")
+					t.header.rowCells[i].Text = strings.TrimSuffix(t.header.rowCells[i].Text, " ⇧")
 				}
 				switch t.header.sortOrder {
 				case sortNone:
 				case sortAscending:
-					t.header.ColumnCells[i].Text += " ⇧"
+					t.header.rowCells[i].Text += " ⇧"
 				case sortDescending:
-					t.header.ColumnCells[i].Text += " ⇩"
+					t.header.rowCells[i].Text += " ⇩"
 				}
 				t.Sort()
 				// t.header.clickedColumnIndex = -1 //重置点击列索引
@@ -751,9 +752,9 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 				return layout.Stack{}.Layout(gtx,
 					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 						return material.Clickable(gtx, clickable, func(gtx layout.Context) layout.Dimensions {
-							t.header.ColumnCells[i].IsHeader = true
-							t.header.ColumnCells[0].Minimum += calculateMaxColumnCellWidth(t.header.ColumnCells[0])
-							cellFrame := t.CellFrame(gtx, t.header.ColumnCells[i])
+							t.header.rowCells[i].IsHeader = true
+							t.header.rowCells[0].Minimum += calculateMaxColumnCellWidth(t.header.rowCells[0])
+							cellFrame := t.CellFrame(gtx, t.header.rowCells[i])
 							elems = append(elems, &Resizable{Widget: func(gtx layout.Context) layout.Dimensions {
 								return cellFrame
 							}})
@@ -762,7 +763,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 					}),
 					layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 						if t.header.contextAreas == nil {
-							t.header.contextAreas = make([]*component.ContextArea, len(t.header.ColumnCells))
+							t.header.contextAreas = make([]*component.ContextArea, t.columnCount)
 						}
 						contextArea := t.header.contextAreas[i]
 						if contextArea == nil {
@@ -862,7 +863,7 @@ func (t *TreeTable[T]) CopyColumn(gtx layout.Context) string {
 	}
 	b := stream.NewBuffer("var columnData = []string{")
 	b.NewLine()
-	b.WriteString(strconv.Quote(t.header.ColumnCells[t.header.clickedColumnIndex].Text))
+	b.WriteString(strconv.Quote(t.header.rowCells[t.header.clickedColumnIndex].Text))
 	b.WriteStringLn(",")
 	cellData := t.columns[t.header.clickedColumnIndex]
 	for _, datum := range cellData {
@@ -1261,7 +1262,7 @@ func (t *TreeTable[T]) FormatHeader(maxColumnCellTextWidths []unit.Dp) *stream.B
 	buf.WriteString("│")
 
 	// 计算每个单元格的左边距
-	for i, cell := range t.header.ColumnCells {
+	for i, cell := range t.header.rowCells {
 		paddedText := fmt.Sprintf("%-*s", int(maxColumnCellTextWidths[i]), cell.Text) // 左对齐填充
 
 		// 添加左边距，仅在首列进行处理，依据列宽计算
@@ -1270,7 +1271,7 @@ func (t *TreeTable[T]) FormatHeader(maxColumnCellTextWidths []unit.Dp) *stream.B
 		}
 
 		buf.WriteString(paddedText)
-		if i < len(t.header.ColumnCells)-1 {
+		if i < t.columnCount-1 {
 			buf.WriteString(" │ ") // 在每个单元格之间添加分隔符
 		}
 	}

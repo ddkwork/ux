@@ -528,6 +528,7 @@ func treeTable() ux.Widget {
 	}
 	t.Root.OpenAll()
 	t.Format()
+	t.AwaitingSizeColumnsToFit = true
 	return t.Layout
 }
 
