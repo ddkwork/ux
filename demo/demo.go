@@ -424,31 +424,31 @@ func treeTable() ux.Widget {
 		ContextMenuItems: func(node *ux.Node[packet], gtx layout.Context) (items []ux.ContextMenuItem) {
 			return
 		},
-		MarshalRow: func(node *ux.Node[packet]) (cells []ux.CellData) {
-			if node.Container() {
-				node.Data.Scheme = node.Sum()
+		MarshalRow: func(n *ux.Node[packet]) (cells []ux.CellData) {
+			if n.Container() {
+				n.Data.Scheme = n.Sum()
 				sumBytes := 0
 				sumTime := time.Duration(0)
-				node.Data.ContentLength = sumBytes
-				node.Data.PadTime = sumTime
-				for _, node := range node.Walk() {
+				n.Data.ContentLength = sumBytes
+				n.Data.PadTime = sumTime
+				for _, node := range n.Walk() {
 					sumBytes += node.Data.ContentLength
 					sumTime += node.Data.PadTime
 				}
-				node.Data.ContentLength = sumBytes
-				node.Data.PadTime = sumTime
+				n.Data.ContentLength = sumBytes
+				n.Data.PadTime = sumTime
 			}
 			return []ux.CellData{
-				{Text: node.Data.Scheme, FgColor: ux.Orange100},
-				{Text: node.Data.Method, FgColor: ux.ColorPink},
-				{Text: node.Data.Host},
-				{Text: node.Data.Path},
-				{Text: node.Data.ContentType},
-				{Text: fmt.Sprintf("%d", node.Data.ContentLength)},
-				{Text: node.Data.Status},
-				{Text: node.Data.Note},
-				{Text: node.Data.Process},
-				{Text: fmt.Sprintf("%s", node.Data.PadTime)},
+				{Text: n.Data.Scheme, FgColor: ux.Orange100},
+				{Text: n.Data.Method, FgColor: ux.ColorPink},
+				{Text: n.Data.Host},
+				{Text: n.Data.Path},
+				{Text: n.Data.ContentType},
+				{Text: fmt.Sprintf("%d", n.Data.ContentLength)},
+				{Text: n.Data.Status},
+				{Text: n.Data.Note},
+				{Text: n.Data.Process},
+				{Text: fmt.Sprintf("%s", n.Data.PadTime)},
 			}
 		},
 		UnmarshalRow: nil,
