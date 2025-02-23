@@ -979,7 +979,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Title:     "",
 											Icon:      IconFileFolderOpen, // todo 这里的图标不太好看
 											Can:       func() bool { return true },
-											Do:        func() { t.OpenAll() },
+											Do:        func() { t.Root.OpenAll() },
 											Clickable: widget.Clickable{},
 										}
 									case CloseAllType:
@@ -987,7 +987,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 											Title:     "",
 											Icon:      IconClose, // todo 这里的图标不太好看
 											Can:       func() bool { return true },
-											Do:        func() { t.CloseAll() },
+											Do:        func() { t.Root.CloseAll() },
 											Clickable: widget.Clickable{},
 										}
 									}
@@ -1108,14 +1108,11 @@ func (t *TreeTable[T]) RootRows() []*Node[T] {
 
 func newID() uuid.ID { return uuid.New('n') }
 
-func (t *TreeTable[T]) OpenAll()  { t.Root.OpenAll() }
-func (t *TreeTable[T]) CloseAll() { t.Root.CloseAll() }
-
 func (t *TreeTable[T]) IsFiltered() bool { return t.filteredRows != nil }
 func (t *TreeTable[T]) Filter(text string) {
 	if text == "" {
 		t.Root.Children = t.rootRows
-		t.OpenAll()
+		t.Root.OpenAll()
 		return
 	}
 	t.filteredRows = make([]*Node[T], 0)
@@ -1147,7 +1144,27 @@ func (t *TreeTable[T]) Filter(text string) {
 	// todo 检查layou部分是否调用filteredRows以及filteredRows的大小是否是0，清空过滤后恢复原始的rootRows
 	t.Root.Children = t.filteredRows
 	// t.rootRows = t.filteredRows
-	t.OpenAll()
+	t.Root.OpenAll()
+}
+
+func (t *TreeTable[T]) Sort() {
+	if len(t.rootRows) == 0 || t.header.SortedBy >= len(t.rootRows[0].RowCells) {
+		return // 如果没有子节点或者列索引无效，直接返回
+	}
+	sort.Slice(t.rootRows, func(i, j int) bool {
+		if t.rootRows[i].RowCells == nil { // why? module do not need this
+			t.rootRows[i].RowCells = t.MarshalRow(t.rootRows[i])
+		}
+		if t.rootRows[j].RowCells == nil {
+			t.rootRows[j].RowCells = t.MarshalRow(t.rootRows[j])
+		}
+		cellI := t.rootRows[i].RowCells[t.header.SortedBy].Text
+		cellJ := t.rootRows[j].RowCells[t.header.SortedBy].Text
+		if t.header.sortAscending {
+			return cellI < cellJ
+		}
+		return cellI > cellJ
+	})
 }
 
 // -------------------------tui
@@ -1282,26 +1299,6 @@ func (n *Node[T]) Find() (found *Node[T]) {
 		}
 	}
 	return
-}
-
-func (t *TreeTable[T]) Sort() {
-	if len(t.rootRows) == 0 || t.header.SortedBy >= len(t.rootRows[0].RowCells) {
-		return // 如果没有子节点或者列索引无效，直接返回
-	}
-	sort.Slice(t.rootRows, func(i, j int) bool {
-		if t.rootRows[i].RowCells == nil { // why? module do not need this
-			t.rootRows[i].RowCells = t.MarshalRow(t.rootRows[i])
-		}
-		if t.rootRows[j].RowCells == nil {
-			t.rootRows[j].RowCells = t.MarshalRow(t.rootRows[j])
-		}
-		cellI := t.rootRows[i].RowCells[t.header.SortedBy].Text
-		cellJ := t.rootRows[j].RowCells[t.header.SortedBy].Text
-		if t.header.sortAscending {
-			return cellI < cellJ
-		}
-		return cellI > cellJ
-	})
 }
 
 func (n *Node[T]) Walk() iter.Seq2[int, *Node[T]] {
