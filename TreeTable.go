@@ -1271,17 +1271,19 @@ func (n *Node[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions
 	return inset.Layout(gtx, material.Body2(th.Theme, data.Text).Layout)
 	// return inset.Layout(gtx, richText.Layout)
 }
-
-type Point struct {
-	X, Y unit.Dp
+func (n *Node[T]) CopyRow(gtx layout.Context) string {
+	b := stream.NewBuffer("var rowData = []string{")
+	cells := n.RowCells
+	for i, cell := range cells {
+		b.WriteString(strconv.Quote(cell.Text))
+		if i < len(cells)-1 {
+			b.WriteString(",")
+		}
+	}
+	b.WriteStringLn("}")
+	gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(b.String()))})
+	return b.String()
 }
-
-func (t *TreeTable[T]) ScrollRowIntoView(row int) {
-	t.List.ScrollTo(row)
-}
-
-// -----------------------------------------------------------------------------
-
 func (t *TreeTable[T]) CopyColumn(gtx layout.Context) string {
 	if t.header.clickedColumnIndex < 0 {
 		gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader("t.header.clickedColumnIndex < 0 "))})
@@ -1301,22 +1303,15 @@ func (t *TreeTable[T]) CopyColumn(gtx layout.Context) string {
 	return b.String()
 }
 
-func (n *Node[T]) CopyRow(gtx layout.Context) string {
-	b := stream.NewBuffer("var rowData = []string{")
-	cells := n.RowCells
-	for i, cell := range cells {
-		b.WriteString(strconv.Quote(cell.Text))
-		if i < len(cells)-1 {
-			b.WriteString(",")
-		}
-	}
-	b.WriteStringLn("}")
-	gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(b.String()))})
-	return b.String()
+type Point struct {
+	X, Y unit.Dp
+}
+
+func (t *TreeTable[T]) ScrollRowIntoView(row int) {
+	t.List.ScrollTo(row)
 }
 
 const LongPressDuration = 500 * time.Millisecond // 自定义长按持续时间
-
 func (t *TreeTable[T]) RootRows() []*Node[T] {
 	if t.filteredRows != nil {
 		return t.filteredRows
@@ -1358,13 +1353,11 @@ func (n *Node[T]) OpenAll() {
 		node.SetOpen(true)
 	}
 }
-
 func (n *Node[T]) CloseAll() {
 	for node := range n.WalkContainer() {
 		node.SetOpen(false)
 	}
 }
-
 func (t *TreeTable[T]) OpenAll()  { t.Root.OpenAll() }
 func (t *TreeTable[T]) CloseAll() { t.Root.CloseAll() }
 
@@ -1477,7 +1470,10 @@ func (n *Node[T]) Walk() iter.Seq[*Node[T]] {
 			if !yield(child) {
 				break
 			}
-			child.Walk()(yield)
+			if child.CanHaveChildren() {
+				//函数式编程,Walk 方法返回的是一个函数。这个返回的函数接受一个参数（也是一个函数），这个参数就是 yield
+				child.Walk()(yield) //迭代子节点的子节点
+			}
 		}
 	}
 }
@@ -1485,7 +1481,7 @@ func (n *Node[T]) Walk() iter.Seq[*Node[T]] {
 func (n *Node[T]) Containers() iter.Seq[*Node[T]] {
 	return func(yield func(*Node[T]) bool) {
 		for _, child := range n.Children {
-			if child.Container() {
+			if child.Container() { //迭代当前节点下的所有容器节点
 				if !yield(child) {
 					break
 				}
@@ -1505,13 +1501,18 @@ func (n *Node[T]) WalkContainer() iter.Seq[*Node[T]] {
 			if !yield(container) {
 				break
 			}
+			for _, child := range container.Children {
+				if child.CanHaveChildren() {
+					child.WalkContainer()(yield)
+				}
+			}
 		}
 	}
 }
 
-func (n *Node[T]) WalkQueue() iter.Seq[*Node[T]] {
+func (n *Node[T]) WalkQueue() iter.Seq[*Node[T]] { //todo 删除，性能应该不行，和Walk结果一样的，理论上
 	return func(yield func(*Node[T]) bool) {
-		queue := []*Node[T]{n} // todo 这种应该性能不好，应该删除这个方法
+		queue := []*Node[T]{n}
 		for len(queue) > 0 {
 			node := queue[0]
 			queue = queue[1:]
@@ -1519,7 +1520,12 @@ func (n *Node[T]) WalkQueue() iter.Seq[*Node[T]] {
 				break
 			}
 			for _, child := range node.Children {
-				queue = append(queue, child) // todo 这种应该性能不好，应该删除这个方法
+				queue = append(queue, child) // 这里将子节点添加到队列
+				if child.CanHaveChildren() { // 如果子节点是一个容器，递归地添加它的子节点
+					for _, subChild := range child.Children {
+						queue = append(queue, subChild)
+					}
+				}
 			}
 		}
 	}
