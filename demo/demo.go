@@ -526,7 +526,7 @@ func treeTable() ux.Widget {
 			t.Root.AddChild(ux.NewNode(data))
 		}
 	}
-	t.OpenAll()
+	t.Root.OpenAll()
 	t.Format()
 	return t.Layout
 }
