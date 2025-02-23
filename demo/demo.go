@@ -431,7 +431,7 @@ func treeTable() ux.Widget {
 				sumTime := time.Duration(0)
 				node.Data.ContentLength = sumBytes
 				node.Data.PadTime = sumTime
-				for node := range node.Walk() {
+				for _, node := range node.Walk() {
 					sumBytes += node.Data.ContentLength
 					sumTime += node.Data.PadTime
 				}

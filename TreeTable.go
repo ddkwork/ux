@@ -191,6 +191,7 @@ type Node[T any] struct {
 	Type     string  `json:"type"`
 	parent   *Node[T]
 	Data     T
+	index    int        //在父节点中的位置
 	Children []*Node[T] `json:"Children,omitempty"`
 	isOpen   bool
 
@@ -281,7 +282,7 @@ type TableTheme struct {
 // 递归函数，获取树形结构中的最大深度
 func (t *TreeTable[T]) MaxDepth() unit.Dp {
 	maxDepth := unit.Dp(1)
-	for node := range t.Root.Walk() {
+	for _, node := range t.Root.Walk() {
 		childDepth := node.Depth()
 		if childDepth > maxDepth {
 			maxDepth = childDepth
@@ -293,7 +294,7 @@ func (t *TreeTable[T]) MaxDepth() unit.Dp {
 func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 	originalConstraints := gtx.Constraints         // 保存原始约束
 	rows := make([][]CellData, 0, len(t.rootRows)) // 用于存储所有行
-	for node := range t.Root.Walk() {
+	for _, node := range t.Root.Walk() {
 		rows = append(rows, t.MarshalRow(node))
 	}
 	rows = slices.Insert(rows, 0, t.header.ColumnCells) // 插入表头行
@@ -1351,13 +1352,13 @@ func (n *Node[T]) Clone() (to *Node[T]) {
 }
 
 func (n *Node[T]) OpenAll() {
-	for node := range n.WalkContainer() {
+	for _, node := range n.WalkContainer() {
 		node.SetOpen(true)
 	}
 }
 
 func (n *Node[T]) CloseAll() {
-	for node := range n.WalkContainer() {
+	for _, node := range n.WalkContainer() {
 		node.SetOpen(false)
 	}
 }
@@ -1382,7 +1383,7 @@ func (t *TreeTable[T]) Filter(text string) {
 		return
 	}
 	t.filteredRows = make([]*Node[T], 0)
-	for node := range t.Root.WalkContainer() { // todo bug 需要改回之前的回调模式？需要调试，编辑节点模态窗口bug
+	for _, node := range t.Root.WalkContainer() { // todo bug 需要改回之前的回调模式？需要调试，编辑节点模态窗口bug
 		if node.Container() {
 			if node.MarshalRow == nil {
 				node.MarshalRow = t.Root.MarshalRow
@@ -1397,7 +1398,7 @@ func (t *TreeTable[T]) Filter(text string) {
 	}
 	for i, row := range t.filteredRows {
 		children := make([]*Node[T], 0)
-		for node := range row.Walk() { // todo bug
+		for _, node := range row.Walk() { // todo bug
 			cells := row.MarshalRow(node)
 			for _, cell := range cells {
 				if strings.EqualFold(cell.Text, text) {
@@ -1426,7 +1427,7 @@ func CountTableRows[T any](rows []*Node[T]) int { // 计算整个表的总行数
 }
 
 func (n *Node[T]) Remove() {
-	for i, child := range n.parent.Children {
+	for i, child := range n.parent.Walk() {
 		if child.ID == n.ID {
 			n.parent.Children = slices.Delete(n.parent.Children, i, i+1)
 			break
@@ -1435,8 +1436,9 @@ func (n *Node[T]) Remove() {
 }
 
 func (n *Node[T]) Find() (found *Node[T]) {
-	for _, child := range n.parent.Children {
+	for i, child := range n.parent.Walk() {
 		if child.ID == n.ID {
+			child.index = i
 			found = child
 			break
 		}
@@ -1464,13 +1466,13 @@ func (t *TreeTable[T]) Sort() {
 	})
 }
 
-func (n *Node[T]) Walk() iter.Seq[*Node[T]] {
-	return func(yield func(*Node[T]) bool) {
-		if !yield(n) {
+func (n *Node[T]) Walk() iter.Seq2[int, *Node[T]] {
+	return func(yield func(int, *Node[T]) bool) {
+		if !yield(0, n) { //todo test index
 			return
 		}
-		for _, child := range n.Children {
-			if !yield(child) {
+		for i, child := range n.Children {
+			if !yield(i, child) { //迭代索引是为了insert和remove时定位
 				break
 			}
 			if child.CanHaveChildren() {
@@ -1481,11 +1483,11 @@ func (n *Node[T]) Walk() iter.Seq[*Node[T]] {
 	}
 }
 
-func (n *Node[T]) Containers() iter.Seq[*Node[T]] {
-	return func(yield func(*Node[T]) bool) {
-		for _, child := range n.Children {
+func (n *Node[T]) Containers() iter.Seq2[int, *Node[T]] {
+	return func(yield func(int, *Node[T]) bool) {
+		for i, child := range n.Children {
 			if child.Container() { // 迭代当前节点下的所有容器节点
-				if !yield(child) {
+				if !yield(i, child) {
 					break
 				}
 			}
@@ -1493,15 +1495,15 @@ func (n *Node[T]) Containers() iter.Seq[*Node[T]] {
 	}
 }
 
-func (n *Node[T]) WalkContainer() iter.Seq[*Node[T]] {
-	return func(yield func(*Node[T]) bool) {
+func (n *Node[T]) WalkContainer() iter.Seq2[int, *Node[T]] {
+	return func(yield func(int, *Node[T]) bool) {
 		if n.Container() {
-			if !yield(n) {
+			if !yield(0, n) {
 				return
 			}
 		}
-		for container := range n.Containers() {
-			if !yield(container) {
+		for i, container := range n.Containers() {
+			if !yield(i, container) {
 				break
 			}
 			for _, child := range container.Children {
