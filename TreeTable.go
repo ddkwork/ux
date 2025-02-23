@@ -132,6 +132,35 @@ func NewTreeTable[T any](data T, ctx TableContext[T]) *TreeTable[T] {
 }
 
 // todo 更改为TreeTable的方法
+func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions {
+	// 固定单元格宽度为计算好的每列最大宽度
+	gtx.Constraints.Min.X = int(data.Minimum)
+	gtx.Constraints.Max.X = int(data.Minimum)
+	DrawColumnDivider(gtx, data.ColumID) // 为每列绘制列分隔条
+	if data.FgColor == (color.NRGBA{}) {
+		data.FgColor = White
+	}
+	//richText := NewRichText()
+	//richText.AddSpan(richtext.SpanStyle{
+	//	// Font:        font.Font{},
+	//	Size:        unit.Sp(12),
+	//	Color:       data.FgColor,
+	//	Content:     data.Text,
+	//	Interactive: false,
+	//})
+	inset := layout.Inset{
+		Top:    0,
+		Bottom: 0,
+		Left:   8 / 2,
+		Right:  8 / 2,
+	}
+	if data.IsHeader { // 加高表头高度
+		inset.Top = 2
+		inset.Bottom = 2
+	}
+	return inset.Layout(gtx, material.Body2(th.Theme, data.Text).Layout)
+	// return inset.Layout(gtx, richText.Layout)
+}
 func (n *Node[T]) UpdateTouch(gtx layout.Context) {
 	// 检测触摸事件
 	//for _, ev := range gtx.Events(n) {
@@ -396,7 +425,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 						return material.Clickable(gtx, clickable, func(gtx layout.Context) layout.Dimensions {
 							t.header.ColumnCells[i].IsHeader = true
 							t.header.ColumnCells[0].Minimum += calculateMaxColumnCellWidth(t.header.ColumnCells[0])
-							cellFrame := t.Root.CellFrame(gtx, t.header.ColumnCells[i])
+							cellFrame := t.CellFrame(gtx, t.header.ColumnCells[i])
 							elems = append(elems, &Resizable{Widget: func(gtx layout.Context) layout.Dimensions {
 								return cellFrame
 							}})
@@ -814,7 +843,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				// 绘制层级列文本,和层级图标聚拢在一起-----------------------------------------------------------------------------------------------------------------
 				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return node.CellFrame(gtx, c)
+					return t.CellFrame(gtx, c)
 				})
 			}),
 		)
@@ -838,7 +867,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 								// 然后双击编辑行的时候从富文本取出完整行并换行显示，structView需要好好设计一下这个
 								// 这个在抓包场景很那个，url列一般都长
 							}
-							return node.CellFrame(gtx, cell)
+							return t.CellFrame(gtx, cell)
 						}),
 						layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 							if node.rowContextAreas == nil {
@@ -1271,6 +1300,180 @@ const (
 	indentBase      = unit.Dp(3)
 )
 
+//---------------------------------------泛型n叉树实现------------------------------------------
+
+type Node[T any] struct {
+	MarshalRow   func(n *Node[T]) (cells []CellData) `json:"-"`
+	MarshalColum func(n *Node[T]) (cells []CellData) `json:"-"`
+	RowCells     []CellData                          `json:"-"`
+
+	rowSelected         bool
+	rowClick            widget.Clickable
+	CellClickedCallback func(root *Node[T]) `json:"-"`
+
+	rowContextAreas []*component.ContextArea
+	contextMenu     *ContextMenu
+
+	TableTheme `json:"-"`
+
+	ID       uuid.ID `json:"id"`
+	Type     string  `json:"type"`
+	parent   *Node[T]
+	Data     T
+	index    int        //在父节点中的位置
+	Children []*Node[T] `json:"Children,omitempty"`
+	isOpen   bool
+
+	SelectionChangedCallback func() `json:"-"`
+	DoubleClickCallback      func() `json:"-"`
+	DragRemovedRowsCallback  func() `json:"-"` // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
+	DropOccurredCallback     func() `json:"-"` // Called whenever a drop occurs that modifies the model.
+
+	columnResizeStart        unit.Dp
+	columnResizeBase         unit.Dp
+	columnResizeOverhead     unit.Dp
+	PreventUserColumnResize  bool
+	awaitingSizeColumnsToFit bool
+	awaitingSyncToModel      bool
+	wasDragged               bool
+	dividerDrag              bool
+
+	LongPressCallback func(node *Node[T]) `json:"-"` // 长按回调
+	pressStarted      time.Time           // 按压开始时间
+	longPressed       bool                // 是否已经触发长按事件
+}
+
+const ContainerKeyPostfix = "_container"
+
+func newRoot[T any](data T) *Node[T] { return NewContainerNode("root", data) }
+func (n *Node[T]) IsRoot() bool      { return n.parent == nil }
+
+func NewNode[T any](data T) (child *Node[T]) { return newNode("", false, data) }
+func NewContainerNode[T any](typeKey string, data T) (container *Node[T]) {
+	n := newNode(typeKey, true, data)
+	n.Children = make([]*Node[T], 0)
+	return n
+}
+
+func NewContainerNodes[T any](typeKeys []string, objects ...T) (containerNodes []*Node[T]) {
+	containerNodes = make([]*Node[T], 0)
+	var data T // it is zero value
+	for i, key := range typeKeys {
+		if len(objects) > 0 {
+			data = objects[i]
+		}
+		containerNodes = append(containerNodes, NewContainerNode(key, data))
+	}
+	return
+}
+
+func newNode[T any](typeKey string, isContainer bool, data T) *Node[T] {
+	if isContainer {
+		typeKey += ContainerKeyPostfix
+	}
+	n := &Node[T]{
+		MarshalRow:               nil,
+		MarshalColum:             nil,
+		rowSelected:              false,
+		rowClick:                 widget.Clickable{},
+		CellClickedCallback:      nil,
+		rowContextAreas:          nil,
+		contextMenu:              nil,
+		TableTheme:               DefaultTableTheme,
+		ID:                       newID(),
+		Type:                     typeKey,
+		parent:                   nil,
+		Data:                     data,
+		Children:                 nil,
+		isOpen:                   isContainer,
+		SelectionChangedCallback: nil,
+		DoubleClickCallback:      nil,
+		DragRemovedRowsCallback:  nil,
+		DropOccurredCallback:     nil,
+		columnResizeStart:        0,
+		columnResizeBase:         0,
+		columnResizeOverhead:     0,
+		PreventUserColumnResize:  false,
+		awaitingSizeColumnsToFit: false,
+		awaitingSyncToModel:      false,
+		wasDragged:               false,
+		dividerDrag:              false,
+		RowCells:                 nil,
+	}
+	n.wasDragged = false
+	return n
+}
+
+func (n *Node[T]) AddChildByData(data T) { n.AddChild(NewNode(data)) }
+
+func (n *Node[T]) AddChildrenByDatas(datas ...T) {
+	for _, data := range datas {
+		n.AddChild(NewNode(data))
+	}
+}
+
+func (n *Node[T]) AddContainerByData(typeKey string, data T) (newContainer *Node[T]) { // 我们需要返回新的容器节点用于递归填充它的孩子节点，用例是explorer文件资源管理器
+	newContainer = NewContainerNode(typeKey, data)
+	n.AddChild(newContainer)
+	return newContainer
+}
+
+func (n *Node[T]) Sum() string {
+	// container column 0 key is empty string
+	key := n.Type
+	key = strings.TrimSuffix(key, ContainerKeyPostfix)
+	if n.LenChildren() == 0 {
+		return key
+	}
+	key += " (" + fmt.Sprint(n.LenChildren()) + ")"
+	return key
+}
+
+func (n *Node[T]) UUID() uuid.ID   { return n.ID }
+func (n *Node[T]) Container() bool { return strings.HasSuffix(n.Type, ContainerKeyPostfix) }
+
+func (n *Node[T]) kind(base string) string {
+	if n.Container() {
+		return base + " Container"
+	}
+	return base
+}
+
+func (n *Node[T]) GetType() string           { return n.Type }
+func (n *Node[T]) SetType(typeKey string)    { n.Type = typeKey }
+func (n *Node[T]) IsOpen() bool              { return n.isOpen && n.Container() }
+func (n *Node[T]) SetOpen(open bool)         { n.isOpen = open && n.Container() }
+func (n *Node[T]) Parent() *Node[T]          { return n.parent }
+func (n *Node[T]) SetParent(parent *Node[T]) { n.parent = parent }
+func (n *Node[T]) clearUnusedFields() {
+	if !n.Container() {
+		n.Children = nil
+		n.isOpen = false
+	}
+}
+func (n *Node[T]) ResetChildren()                 { n.Children = nil }
+func (n *Node[T]) CanHaveChildren() bool          { return n.HasChildren() }
+func (n *Node[T]) HasChildren() bool              { return n.Container() && len(n.Children) > 0 }
+func (n *Node[T]) CellDataForSort(col int) string { return n.MarshalRow(n)[col].Text }
+func (n *Node[T]) AddChild(child *Node[T]) {
+	child.parent = n
+	n.Children = append(n.Children, child)
+}
+
+func (n *Node[T]) CopyRow(gtx layout.Context) string {
+	b := stream.NewBuffer("var rowData = []string{")
+	cells := n.RowCells
+	for i, cell := range cells {
+		b.WriteString(strconv.Quote(cell.Text))
+		if i < len(cells)-1 {
+			b.WriteString(",")
+		}
+	}
+	b.WriteStringLn("}")
+	gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(b.String()))})
+	return b.String()
+}
+
 func CountTableRows[T any](rows []*Node[T]) int { // 计算整个表的总行数
 	count := len(rows)
 	for _, row := range rows {
@@ -1427,7 +1630,6 @@ func (n *Node[T]) OpenAll() {
 		node.SetOpen(true)
 	}
 }
-
 func (n *Node[T]) CloseAll() {
 	for _, node := range n.WalkContainer() {
 		node.SetOpen(false)
@@ -1459,208 +1661,4 @@ func (n *Node[T]) setParents(children []*Node[T], parent *Node[T], isNewID bool)
 			n.setParents(child.Children, child, isNewID)
 		}
 	}
-}
-
-//---------------------------------------泛型n叉树实现------------------------------------------
-
-type Node[T any] struct {
-	MarshalRow   func(n *Node[T]) (cells []CellData) `json:"-"`
-	MarshalColum func(n *Node[T]) (cells []CellData) `json:"-"`
-
-	rowSelected         bool
-	rowClick            widget.Clickable
-	CellClickedCallback func(root *Node[T]) `json:"-"`
-
-	rowContextAreas []*component.ContextArea
-	contextMenu     *ContextMenu
-
-	TableTheme `json:"-"`
-
-	ID       uuid.ID `json:"id"`
-	Type     string  `json:"type"`
-	parent   *Node[T]
-	Data     T
-	index    int        //在父节点中的位置
-	Children []*Node[T] `json:"Children,omitempty"`
-	isOpen   bool
-
-	SelectionChangedCallback func() `json:"-"`
-	DoubleClickCallback      func() `json:"-"`
-	DragRemovedRowsCallback  func() `json:"-"` // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
-	DropOccurredCallback     func() `json:"-"` // Called whenever a drop occurs that modifies the model.
-
-	columnResizeStart        unit.Dp
-	columnResizeBase         unit.Dp
-	columnResizeOverhead     unit.Dp
-	PreventUserColumnResize  bool
-	awaitingSizeColumnsToFit bool
-	awaitingSyncToModel      bool
-	wasDragged               bool
-	dividerDrag              bool
-	RowCells                 []CellData `json:"-"`
-
-	LongPressCallback func(node *Node[T]) `json:"-"` // 长按回调
-	pressStarted      time.Time           // 按压开始时间
-	longPressed       bool                // 是否已经触发长按事件
-}
-
-const ContainerKeyPostfix = "_container"
-
-func newRoot[T any](data T) *Node[T] { return NewContainerNode("root", data) }
-func (n *Node[T]) IsRoot() bool      { return n.parent == nil }
-
-func NewNode[T any](data T) (child *Node[T]) { return newNode("", false, data) }
-func NewContainerNode[T any](typeKey string, data T) (container *Node[T]) {
-	n := newNode(typeKey, true, data)
-	n.Children = make([]*Node[T], 0)
-	return n
-}
-
-func NewContainerNodes[T any](typeKeys []string, objects ...T) (containerNodes []*Node[T]) {
-	containerNodes = make([]*Node[T], 0)
-	var data T // it is zero value
-	for i, key := range typeKeys {
-		if len(objects) > 0 {
-			data = objects[i]
-		}
-		containerNodes = append(containerNodes, NewContainerNode(key, data))
-	}
-	return
-}
-
-func newNode[T any](typeKey string, isContainer bool, data T) *Node[T] {
-	if isContainer {
-		typeKey += ContainerKeyPostfix
-	}
-	n := &Node[T]{
-		MarshalRow:               nil,
-		MarshalColum:             nil,
-		rowSelected:              false,
-		rowClick:                 widget.Clickable{},
-		CellClickedCallback:      nil,
-		rowContextAreas:          nil,
-		contextMenu:              nil,
-		TableTheme:               DefaultTableTheme,
-		ID:                       newID(),
-		Type:                     typeKey,
-		parent:                   nil,
-		Data:                     data,
-		Children:                 nil,
-		isOpen:                   isContainer,
-		SelectionChangedCallback: nil,
-		DoubleClickCallback:      nil,
-		DragRemovedRowsCallback:  nil,
-		DropOccurredCallback:     nil,
-		columnResizeStart:        0,
-		columnResizeBase:         0,
-		columnResizeOverhead:     0,
-		PreventUserColumnResize:  false,
-		awaitingSizeColumnsToFit: false,
-		awaitingSyncToModel:      false,
-		wasDragged:               false,
-		dividerDrag:              false,
-		RowCells:                 nil,
-	}
-	n.wasDragged = false
-	return n
-}
-
-func (n *Node[T]) AddChildByData(data T) { n.AddChild(NewNode(data)) }
-
-func (n *Node[T]) AddChildrenByDatas(datas ...T) {
-	for _, data := range datas {
-		n.AddChild(NewNode(data))
-	}
-}
-
-func (n *Node[T]) AddContainerByData(typeKey string, data T) (newContainer *Node[T]) { // 我们需要返回新的容器节点用于递归填充它的孩子节点，用例是explorer文件资源管理器
-	newContainer = NewContainerNode(typeKey, data)
-	n.AddChild(newContainer)
-	return newContainer
-}
-
-func (n *Node[T]) Sum() string {
-	// container column 0 key is empty string
-	key := n.Type
-	key = strings.TrimSuffix(key, ContainerKeyPostfix)
-	if n.LenChildren() == 0 {
-		return key
-	}
-	key += " (" + fmt.Sprint(n.LenChildren()) + ")"
-	return key
-}
-
-func (n *Node[T]) UUID() uuid.ID   { return n.ID }
-func (n *Node[T]) Container() bool { return strings.HasSuffix(n.Type, ContainerKeyPostfix) }
-
-func (n *Node[T]) kind(base string) string {
-	if n.Container() {
-		return base + " Container"
-	}
-	return base
-}
-
-func (n *Node[T]) GetType() string           { return n.Type }
-func (n *Node[T]) SetType(typeKey string)    { n.Type = typeKey }
-func (n *Node[T]) IsOpen() bool              { return n.isOpen && n.Container() }
-func (n *Node[T]) SetOpen(open bool)         { n.isOpen = open && n.Container() }
-func (n *Node[T]) Parent() *Node[T]          { return n.parent }
-func (n *Node[T]) SetParent(parent *Node[T]) { n.parent = parent }
-func (n *Node[T]) clearUnusedFields() {
-	if !n.Container() {
-		n.Children = nil
-		n.isOpen = false
-	}
-}
-func (n *Node[T]) ResetChildren()                 { n.Children = nil }
-func (n *Node[T]) CanHaveChildren() bool          { return n.HasChildren() }
-func (n *Node[T]) HasChildren() bool              { return n.Container() && len(n.Children) > 0 }
-func (n *Node[T]) CellDataForSort(col int) string { return n.MarshalRow(n)[col].Text }
-func (n *Node[T]) AddChild(child *Node[T]) {
-	child.parent = n
-	n.Children = append(n.Children, child)
-}
-
-func (n *Node[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions {
-	// 固定单元格宽度为计算好的每列最大宽度
-	gtx.Constraints.Min.X = int(data.Minimum)
-	gtx.Constraints.Max.X = int(data.Minimum)
-	DrawColumnDivider(gtx, data.ColumID) // 为每列绘制列分隔条
-	if data.FgColor == (color.NRGBA{}) {
-		data.FgColor = White
-	}
-	//richText := NewRichText()
-	//richText.AddSpan(richtext.SpanStyle{
-	//	// Font:        font.Font{},
-	//	Size:        unit.Sp(12),
-	//	Color:       data.FgColor,
-	//	Content:     data.Text,
-	//	Interactive: false,
-	//})
-	inset := layout.Inset{
-		Top:    0,
-		Bottom: 0,
-		Left:   8 / 2,
-		Right:  8 / 2,
-	}
-	if data.IsHeader { // 加高表头高度
-		inset.Top = 2
-		inset.Bottom = 2
-	}
-	return inset.Layout(gtx, material.Body2(th.Theme, data.Text).Layout)
-	// return inset.Layout(gtx, richText.Layout)
-}
-
-func (n *Node[T]) CopyRow(gtx layout.Context) string {
-	b := stream.NewBuffer("var rowData = []string{")
-	cells := n.RowCells
-	for i, cell := range cells {
-		b.WriteString(strconv.Quote(cell.Text))
-		if i < len(cells)-1 {
-			b.WriteString(",")
-		}
-	}
-	b.WriteStringLn("}")
-	gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(b.String()))})
-	return b.String()
 }
