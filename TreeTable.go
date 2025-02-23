@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ddkwork/golibrary/stream/deepcopy"
@@ -153,8 +154,12 @@ func NewTreeTable[T any](data T, ctx TableContext[T]) *TreeTable[T] {
 	}
 }
 
+var once sync.Once
+
 func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
-	t.SizeColumnsToFit(gtx, false)
+	once.Do(func() {
+		t.SizeColumnsToFit(gtx, false)
+	})
 	list := material.List(th.Theme, &t.List)
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
