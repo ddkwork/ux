@@ -382,11 +382,10 @@ func main() {
 	m.Set(SplitViewType, sp.Layout)
 
 	vtab := ux.NewTabView(layout.Vertical)
-	m.Range(func(key DemoType, value ux.Widget) bool {
-		tab := ux.NewTabItem(key.String(), value)
+	for k, v := range m.Range() {
+		tab := ux.NewTabItem(k.String(), v)
 		vtab.AddTab(tab)
-		return true
-	})
+	}
 	// mylog.Success("test append log")
 	// mylog.Warning("test append log")
 	// mylog.Trace("test append log")

@@ -832,9 +832,9 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 		e, ok := evt.(pointer.Event)
 		if ok {
 			switch {
-			case e.Kind == pointer.Press: //左键，右键，双击
+			case e.Kind == pointer.Press: // 左键，右键，双击
 				t.selectedNode = node
-			case e.Source == pointer.Touch: //todo检查是否长按并测试apk
+			case e.Source == pointer.Touch: // todo检查是否长按并测试apk
 				t.selectedNode = node
 			}
 		}
@@ -1018,7 +1018,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 												t.selectedNode.ID = newID()
 												for _, child := range t.selectedNode.Children {
 													child.parent = t.selectedNode.parent
-													child.ID = newID() //todo test
+													child.ID = newID() // todo test
 												}
 												t.selectedNode.ResetChildren()
 											},
@@ -1090,7 +1090,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 									case OpenAllType:
 										item = ContextMenuItem{
 											Title:     "",
-											Icon:      IconFileFolderOpen, //todo 这里的图标不太好看
+											Icon:      IconFileFolderOpen, // todo 这里的图标不太好看
 											Can:       func() bool { return true },
 											Do:        func() { t.OpenAll() },
 											Clickable: widget.Clickable{},
@@ -1098,7 +1098,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, node *Node[T], rowIndex int)
 									case CloseAllType:
 										item = ContextMenuItem{
 											Title:     "",
-											Icon:      IconClose, //todo 这里的图标不太好看
+											Icon:      IconClose, // todo 这里的图标不太好看
 											Can:       func() bool { return true },
 											Do:        func() { t.CloseAll() },
 											Clickable: widget.Clickable{},
@@ -1271,6 +1271,7 @@ func (n *Node[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions
 	return inset.Layout(gtx, material.Body2(th.Theme, data.Text).Layout)
 	// return inset.Layout(gtx, richText.Layout)
 }
+
 func (n *Node[T]) CopyRow(gtx layout.Context) string {
 	b := stream.NewBuffer("var rowData = []string{")
 	cells := n.RowCells
@@ -1284,6 +1285,7 @@ func (n *Node[T]) CopyRow(gtx layout.Context) string {
 	gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(b.String()))})
 	return b.String()
 }
+
 func (t *TreeTable[T]) CopyColumn(gtx layout.Context) string {
 	if t.header.clickedColumnIndex < 0 {
 		gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader("t.header.clickedColumnIndex < 0 "))})
@@ -1353,6 +1355,7 @@ func (n *Node[T]) OpenAll() {
 		node.SetOpen(true)
 	}
 }
+
 func (n *Node[T]) CloseAll() {
 	for node := range n.WalkContainer() {
 		node.SetOpen(false)
@@ -1379,7 +1382,7 @@ func (t *TreeTable[T]) Filter(text string) {
 		return
 	}
 	t.filteredRows = make([]*Node[T], 0)
-	for node := range t.Root.WalkContainer() { //todo bug 需要改回之前的回调模式？需要调试，编辑节点模态窗口bug
+	for node := range t.Root.WalkContainer() { // todo bug 需要改回之前的回调模式？需要调试，编辑节点模态窗口bug
 		if node.Container() {
 			if node.MarshalRow == nil {
 				node.MarshalRow = t.Root.MarshalRow
@@ -1394,7 +1397,7 @@ func (t *TreeTable[T]) Filter(text string) {
 	}
 	for i, row := range t.filteredRows {
 		children := make([]*Node[T], 0)
-		for node := range row.Walk() { //todo bug
+		for node := range row.Walk() { // todo bug
 			cells := row.MarshalRow(node)
 			for _, cell := range cells {
 				if strings.EqualFold(cell.Text, text) {
@@ -1404,9 +1407,9 @@ func (t *TreeTable[T]) Filter(text string) {
 		}
 		t.filteredRows[i].Children = children
 	}
-	//todo 检查layou部分是否调用filteredRows以及filteredRows的大小是否是0，清空过滤后恢复原始的rootRows
+	// todo 检查layou部分是否调用filteredRows以及filteredRows的大小是否是0，清空过滤后恢复原始的rootRows
 	t.Root.Children = t.filteredRows
-	//t.rootRows = t.filteredRows
+	// t.rootRows = t.filteredRows
 	t.OpenAll()
 }
 
@@ -1471,8 +1474,8 @@ func (n *Node[T]) Walk() iter.Seq[*Node[T]] {
 				break
 			}
 			if child.CanHaveChildren() {
-				//函数式编程,Walk 方法返回的是一个函数。这个返回的函数接受一个参数（也是一个函数），这个参数就是 yield
-				child.Walk()(yield) //迭代子节点的子节点
+				// 函数式编程,Walk 方法返回的是一个函数。这个返回的函数接受一个参数（也是一个函数），这个参数就是 yield
+				child.Walk()(yield) // 迭代子节点的子节点
 			}
 		}
 	}
@@ -1481,7 +1484,7 @@ func (n *Node[T]) Walk() iter.Seq[*Node[T]] {
 func (n *Node[T]) Containers() iter.Seq[*Node[T]] {
 	return func(yield func(*Node[T]) bool) {
 		for _, child := range n.Children {
-			if child.Container() { //迭代当前节点下的所有容器节点
+			if child.Container() { // 迭代当前节点下的所有容器节点
 				if !yield(child) {
 					break
 				}
@@ -1510,7 +1513,7 @@ func (n *Node[T]) WalkContainer() iter.Seq[*Node[T]] {
 	}
 }
 
-func (n *Node[T]) WalkQueue() iter.Seq[*Node[T]] { //todo 删除，性能应该不行，和Walk结果一样的，理论上
+func (n *Node[T]) WalkQueue() iter.Seq[*Node[T]] { // todo 删除，性能应该不行，和Walk结果一样的，理论上
 	return func(yield func(*Node[T]) bool) {
 		queue := []*Node[T]{n}
 		for len(queue) > 0 {
