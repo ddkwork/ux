@@ -7,7 +7,7 @@ require (
 	gioui.org/cmd v0.8.0
 	gioui.org/example v0.8.1
 	gioui.org/x v0.8.1
-	github.com/ddkwork/golibrary v0.0.91-0.20250222134107-b787fdf70afa
+	github.com/ddkwork/golibrary v0.0.91-0.20250223131750-a8104c43bca2
 	github.com/ddkwork/ux v0.0.0-20250222102536-7dab3598d7e5
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	golang.org/x/crypto v0.34.0
