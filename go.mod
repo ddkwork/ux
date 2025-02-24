@@ -6,7 +6,7 @@ require (
 	gioui.org v0.8.0
 	gioui.org/x v0.8.1
 	github.com/alecthomas/chroma/v2 v2.15.0
-	github.com/ddkwork/golibrary v0.0.91-0.20250223131750-a8104c43bca2
+	github.com/ddkwork/golibrary v0.0.91-0.20250224160512-cae108870eee
 	github.com/inkeliz/giosvg v0.0.0-20240821232107-3208d4350d55
 	github.com/oligo/gioview v0.8.2
 	golang.org/x/exp/shiny v0.0.0-20250218142911-aa4b98e5adaa

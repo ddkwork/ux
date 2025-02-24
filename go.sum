@@ -15,6 +15,8 @@ github.com/alecthomas/repr v0.4.0 h1:GhI2A8MACjfegCPVq9f1FLvIBS+DrQ2KQBFZP1iFzXc
 github.com/alecthomas/repr v0.4.0/go.mod h1:Fr0507jx4eOXV7AlPV6AVZLYrLIuIeSOWtW57eE/O/4=
 github.com/ddkwork/golibrary v0.0.91-0.20250223131750-a8104c43bca2 h1:AfDriquwTn1xkfXsFcSJTlC062Nc5Gl2G+B4XYXO0ys=
 github.com/ddkwork/golibrary v0.0.91-0.20250223131750-a8104c43bca2/go.mod h1:6yNujFwybY0YmjNj7uDegka5mnO2Xg6XMNNtQ9TZ/gI=
+github.com/ddkwork/golibrary v0.0.91-0.20250224160512-cae108870eee h1:Tap/rswOBRGT3jbuxeTSDZU2oT/LCE3ulAVbenQHNec=
+github.com/ddkwork/golibrary v0.0.91-0.20250224160512-cae108870eee/go.mod h1:6yNujFwybY0YmjNj7uDegka5mnO2Xg6XMNNtQ9TZ/gI=
 github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
 github.com/dlclark/regexp2 v1.11.5/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
 github.com/go-text/typesetting v0.3.0 h1:OWCgYpp8njoxSRpwrdd1bQOxdjOXDj9Rqart9ML4iF4=
