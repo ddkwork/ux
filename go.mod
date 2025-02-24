@@ -7,11 +7,8 @@ require (
 	gioui.org/x v0.8.1
 	github.com/alecthomas/chroma/v2 v2.15.0
 	github.com/ddkwork/golibrary v0.0.91-0.20250223131750-a8104c43bca2
-	github.com/gen2brain/dlgs v0.0.0-20220603100644-40c77870fa8d
 	github.com/inkeliz/giosvg v0.0.0-20240821232107-3208d4350d55
-	github.com/lmittmann/tint v1.0.7
 	github.com/oligo/gioview v0.8.2
-	github.com/tanema/gween v0.0.0-20221212145351-621cc8a459d1
 	golang.org/x/exp/shiny v0.0.0-20250218142911-aa4b98e5adaa
 	golang.org/x/image v0.24.0
 	golang.org/x/sync v0.11.0
@@ -22,10 +19,13 @@ require (
 require (
 	gioui.org/shader v1.0.8 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
+	github.com/gen2brain/dlgs v0.0.0-20220603100644-40c77870fa8d // indirect
 	github.com/go-text/typesetting v0.3.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
+	github.com/lmittmann/tint v1.0.7 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
+	github.com/tanema/gween v0.0.0-20221212145351-621cc8a459d1 // indirect
 	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa // indirect
 	golang.org/x/mod v0.23.0 // indirect
 	golang.org/x/net v0.35.0 // indirect

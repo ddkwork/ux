@@ -2,12 +2,12 @@ package ux
 
 import (
 	"fmt"
+	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/ux/dlgs"
 
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"github.com/ddkwork/golibrary/mylog"
-	"github.com/gen2brain/dlgs"
 )
 
 type DirSelector struct {
@@ -54,7 +54,6 @@ func (b *DirSelector) action(gtx layout.Context) {
 			return
 		} else {
 			dir, _ := mylog.Check3(dlgs.File(b.windowTitle, "", true))
-
 			fmt.Println("Selected Directory:", dir)
 			if dir == "" {
 				return

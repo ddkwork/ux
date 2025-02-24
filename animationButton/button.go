@@ -1,6 +1,8 @@
 package animationButton
 
 import (
+	"github.com/ddkwork/ux/animation/gween"
+	"github.com/ddkwork/ux/animation/gween/ease"
 	"image"
 	"image/color"
 
@@ -16,8 +18,6 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
-	"github.com/tanema/gween"
-	"github.com/tanema/gween/ease"
 )
 
 type ButtonAnimation struct {

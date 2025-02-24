@@ -1,8 +1,8 @@
 package animation
 
 import (
-	"github.com/tanema/gween"
-	"github.com/tanema/gween/ease"
+	"github.com/ddkwork/ux/animation/gween"
+	"github.com/ddkwork/ux/animation/gween/ease"
 )
 
 func ButtonClick() *Animation {

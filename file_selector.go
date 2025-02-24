@@ -5,7 +5,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"github.com/ddkwork/golibrary/mylog"
-	"github.com/gen2brain/dlgs"
+	"github.com/ddkwork/ux/dlgs"
 )
 
 type FileSelector struct {

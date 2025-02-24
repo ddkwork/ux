@@ -1,11 +1,11 @@
 package animation
 
 import (
+	"github.com/ddkwork/ux/animation/gween"
 	"time"
 
 	"gioui.org/layout"
 	"gioui.org/op"
-	"github.com/tanema/gween"
 )
 
 type AnimState struct {

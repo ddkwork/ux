@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/ddkwork/ux/terminal/tint"
 	"io"
 	"log/slog"
 	"math/rand"
@@ -15,7 +16,6 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"github.com/ddkwork/golibrary/mylog"
-	"github.com/lmittmann/tint"
 )
 
 type TerminalWindow struct {
