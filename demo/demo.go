@@ -124,7 +124,7 @@ func main() {
 						{Text: fmt.Sprintf("%s", n.Data.PadTime)},
 					}
 				},
-				UnmarshalRowCells: func(n *ux.Node[packet], values []string) {
+				UnmarshalRowCells: func(n *ux.Node[packet], values []ux.CellData) {
 					mylog.Todo("unmarshal row cells for edit node")
 				},
 				RowSelectedCallback: func() {
