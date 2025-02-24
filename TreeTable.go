@@ -163,22 +163,10 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		if t.JsonName == "" {
 			mylog.Check("JsonName is empty")
 		}
-
-		//todo 节点更新之后刷新保存的数据
-		t.JsonName = strings.TrimSuffix(t.JsonName, ".json")
 		mylog.CheckNil(t.UnmarshalRowCells)
 		// mylog.CheckNil(ctx.SetRootRowsCallBack)//mitmproxy
 		mylog.CheckNil(t.RowSelectedCallback)
-		stream.MarshalJsonToFile(t.Root, filepath.Join("cache", t.JsonName+".json"))
-		stream.WriteTruncate(filepath.Join("cache", t.JsonName+".txt"), t.Document())
-		if t.IsDocument {
-			b := stream.NewBuffer("")
-			b.WriteStringLn("# " + t.JsonName + " document table")
-			b.WriteStringLn("```text")
-			b.WriteStringLn(t.Document())
-			b.WriteStringLn("```")
-			stream.WriteTruncate("README2.md", b.String())
-		}
+
 		//if t.FileDropCallback == nil {
 		//	t.FileDropCallback = func(files []string) {
 		//		if filepath.Ext(files[0]) == ".json" {
@@ -186,7 +174,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		//			table.ResetChildren()
 		//			b := stream.NewBuffer(files[0])
 		//			mylog.Check(json.Unmarshal(b.Bytes(), table)) // todo test need a zero table?
-		//			fnUpdate()
+		//			fnUpdate() t.SizeColumnsToFit(gtx, false)
 		//		}
 		//		mylog.Struct("todo", files)
 		//	}
@@ -524,7 +512,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 										n.contextMenu.AddItem(item)
 									}
 								}
-								if items := t.ContextMenuItems(gtx, n); items != nil { //gtx用于调整列宽，触发增删改之后，n是正在渲染的节点，用于取出元数据控制菜单是否渲染
+								if items := t.ContextMenuItems(gtx, n); items != nil { // gtx用于调整列宽，触发增删改之后，n是正在渲染的节点，用于取出元数据控制菜单是否渲染
 									for _, item := range items {
 										if item.Can() {
 											n.contextMenu.AddItem(item)
@@ -546,7 +534,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 	rows := []layout.FlexChild{ // 合成层级列和其他列的单元格为一行,并设置该行的背景和行高
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return Background{bgColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(14)) //主题的字体大小也会影响行高，这里设置最小行高为14dp
+				gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(14)) // 主题的字体大小也会影响行高，这里设置最小行高为14dp
 				gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(14)) // 限制行高以避免列分割线呈现虚线视觉
 				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, rowCells...)
 			})
@@ -690,6 +678,18 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 	}
 	gtx.Constraints = originalConstraints
 	t.rootRows = t.Root.Children
+
+	t.JsonName = strings.TrimSuffix(t.JsonName, ".json")
+	stream.MarshalJsonToFile(t.Root, filepath.Join("cache", t.JsonName+".json"))
+	stream.WriteTruncate(filepath.Join("cache", t.JsonName+".txt"), t.Document())
+	if t.IsDocument {
+		b := stream.NewBuffer("")
+		b.WriteStringLn("# " + t.JsonName + " document table")
+		b.WriteStringLn("```text")
+		b.WriteStringLn(t.Document())
+		b.WriteStringLn("```")
+		stream.WriteTruncate("README2.md", b.String())
+	}
 	return
 }
 
@@ -1481,6 +1481,7 @@ func (n *Node[T]) AddChild(child *Node[T]) {
 	child.parent = n
 	n.Children = append(n.Children, child)
 }
+
 func (n *Node[T]) InsertAfter(after *Node[T]) {
 	after.parent = n.parent
 	n.parent.Children = slices.Insert(n.parent.Children, n.Index()+1, after)
@@ -1495,6 +1496,7 @@ func (n *Node[T]) Index() int {
 	//}
 	//panic("not found index") // 永远不可能选中root，所以可以放心panic，root不显示，只显示它的children作为rootRows
 }
+
 func (n *Node[T]) Remove() {
 	for i, child := range n.parent.Walk() {
 		if child.ID == n.ID {
@@ -1504,22 +1506,23 @@ func (n *Node[T]) Remove() {
 	}
 }
 
-//通知单元格节点列宽更新事件:
-//增 AddChild(实例化阶段，once内那一次就够了), InsertAfter (DuplicateType) SetChildren
-//删 Remove,需要gtx来重新调整列宽
-//改 EditType,双击或者右键触发
-//查 Find,filter 无需调整列宽
-//过滤,无需调整列宽
-//排序,无需调整列宽
-
+// 通知单元格节点列宽更新事件:
+// 增 AddChild(实例化阶段，once内那一次就够了), InsertAfter (DuplicateType) SetChildren
+// 删 Remove,需要gtx来重新调整列宽
+// 改 EditType,双击或者右键触发
+// 查 Find,filter 无需调整列宽
+// 过滤,无需调整列宽
+// 排序,无需调整列宽
 func (t *TreeTable[T]) InsertAfter(gtx layout.Context, after *Node[T]) {
 	t.SelectedNode.InsertAfter(after)
 	t.SizeColumnsToFit(gtx, false)
 }
+
 func (t *TreeTable[T]) Remove(gtx layout.Context) {
 	t.SelectedNode.Remove()
 	t.SizeColumnsToFit(gtx, false)
 }
+
 func (t *TreeTable[T]) Edit(gtx layout.Context) {
 	modal.SetTitle("edit row")
 	modal.SetContent(func(gtx layout.Context) layout.Dimensions {
@@ -1531,8 +1534,8 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) {
 	if modal.Visible() {
 		modal.Layout(gtx)
 	}
-	//todo test
-	t.UnmarshalRowCells(t.SelectedNode, t.MarshalRowCells(t.SelectedNode)) //此时节点元数据被刷新
+	// todo test
+	t.UnmarshalRowCells(t.SelectedNode, t.MarshalRowCells(t.SelectedNode)) // 此时节点元数据被刷新
 	t.SizeColumnsToFit(gtx, false)
 }
 
