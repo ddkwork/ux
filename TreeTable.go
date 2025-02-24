@@ -165,6 +165,8 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		if t.JsonName == "" {
 			mylog.Check("JsonName is empty")
 		}
+
+		//todo 节点更新之后刷新保存的数据
 		t.JsonName = strings.TrimSuffix(t.JsonName, ".json")
 		mylog.CheckNil(t.UnmarshalRowCells)
 		// mylog.CheckNil(ctx.SetRootRowsCallBack)//mitmproxy
@@ -1504,6 +1506,46 @@ func (n *Node[T]) AddChild(child *Node[T]) {
 	child.parent = n
 	n.Children = append(n.Children, child)
 }
+func (n *Node[T]) InsertAfter(after *Node[T]) {
+	after.parent = n.parent
+	n.parent.Children = slices.Insert(n.parent.Children, n.Index()+1, after)
+}
+
+func (n *Node[T]) Index() int {
+	return slices.Index(n.parent.Children, n)
+	//for i, child := range n.parent.Children {
+	//	if n.ID == child.ID {
+	//		return i
+	//	}
+	//}
+	//panic("not found index") // 永远不可能选中root，所以可以放心panic，root不显示，只显示它的children作为rootRows
+}
+func (n *Node[T]) Remove() {
+	for i, child := range n.parent.Walk() {
+		if child.ID == n.ID {
+			n.parent.Children = slices.Delete(n.parent.Children, i, i+1)
+			break
+		}
+	}
+}
+
+//通知单元格节点列宽更新事件
+//增 AddChild InsertAfter (DuplicateType)
+//删 Remove
+//改 EditType todo 增加 应用修改方法 或者edit 方法
+//查 Find
+//过滤
+//排序
+
+func (n *Node[T]) Find() (found *Node[T]) {
+	for _, child := range n.parent.Walk() {
+		if child.ID == n.ID {
+			found = child
+			break
+		}
+	}
+	return
+}
 
 func (n *Node[T]) CopyRow(gtx layout.Context) string {
 	b := stream.NewBuffer("var rowData = []string{")
@@ -1527,25 +1569,6 @@ func CountTableRows[T any](rows []*Node[T]) int { // 计算整个表的总行数
 		}
 	}
 	return count
-}
-
-func (n *Node[T]) Remove() {
-	for i, child := range n.parent.Walk() {
-		if child.ID == n.ID {
-			n.parent.Children = slices.Delete(n.parent.Children, i, i+1)
-			break
-		}
-	}
-}
-
-func (n *Node[T]) Find() (found *Node[T]) {
-	for _, child := range n.parent.Walk() {
-		if child.ID == n.ID {
-			found = child
-			break
-		}
-	}
-	return
 }
 
 func (n *Node[T]) Walk() iter.Seq2[int, *Node[T]] {
@@ -1617,21 +1640,6 @@ func (n *Node[T]) WalkContainer() iter.Seq2[int, *Node[T]] {
 //		}
 //	}
 //}
-
-func (n *Node[T]) InsertAfter(after *Node[T]) {
-	after.parent = n.parent
-	n.parent.Children = slices.Insert(n.parent.Children, n.Index()+1, after)
-}
-
-func (n *Node[T]) Index() int {
-	return slices.Index(n.parent.Children, n)
-	//for i, child := range n.parent.Children {
-	//	if n.ID == child.ID {
-	//		return i
-	//	}
-	//}
-	//panic("not found index") // 永远不可能选中root，所以可以放心panic，root不显示，只显示它的children作为rootRows
-}
 
 func (n *Node[T]) MaxDepth() unit.Dp {
 	maxDepth := unit.Dp(1)
