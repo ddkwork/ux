@@ -109,7 +109,7 @@ type (
 // 原理:通过flex+适当的上下文控制既可以完美绘制一个树形表格
 // 包括表头，父结点，子节点，右键菜单，通通flex
 func NewTreeTable[T any](data T) *TreeTable[T] {
-	rowCells := initHeader(data)
+	rowCells := InitHeader(data)
 	columnCount := len(rowCells)
 	return &TreeTable[T]{
 		// TableContext: TableContext[T]{},
@@ -246,7 +246,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 
 	bgColor := RowColor(rowIndex)
 	switch {
-	case t.SelectedNode == n: // 设置选中背景色,这个需要在第一的位置
+	case t.SelectedNode == n: // 设置选中背景色,这个需要在第一的位置,在选中另外的节点时间段内这个条件成立，能保持背景色不变
 		bgColor = color.NRGBA{R: 255, G: 186, B: 44, A: 91}
 	case rowClick.Hovered(): // 设置悬停背景色
 		// https://rgbacolorpicker.com/
@@ -577,7 +577,7 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimen
 	// return inset.Layout(gtx, richText.Layout)
 }
 
-func initHeader(data any) (rowCells []CellData) {
+func InitHeader(data any) (rowCells []CellData) {
 	fields := stream.ReflectVisibleFields(data)
 	rowCells = make([]CellData, 0)
 	for i, field := range fields {
@@ -607,14 +607,22 @@ func initHeader(data any) (rowCells []CellData) {
 	return
 }
 
+var once2 sync.Once
+
 func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 	originalConstraints := gtx.Constraints         // 保存原始约束
-	rows := make([][]CellData, 0, len(t.rootRows)) // 用于存储所有行
+	rows := make([][]CellData, 0, len(t.rootRows)) // 用于存储所有行,如果不这么做的话，节点增删改查就不会实时刷新
 	for _, node := range t.Root.Walk() {
 		rows = append(rows, t.MarshalRowCells(node))
 	}
-	rows = slices.Insert(rows, 0, t.header.rowCells) // 插入表头行
-	t.columns = TransposeMatrix(rows)
+	rows = slices.Insert(rows, 0, t.header.rowCells) // 插入表头行,todo 这是不会变化的，可以不使用slices.Insert来优化性能
+	//once2.Do(func() {
+	t.columns = TransposeMatrix(rows) //如果不这么做的话，节点增删改查就不会实时刷新
+	//})
+	//if t.columns == nil {
+	//	mylog.Success("11111111111111111")
+	//	t.columns = TransposeMatrix(rows)
+	//}
 	t.maxColumnTextWidths = make([]unit.Dp, t.columnCount)
 	maxColumnTexts := make([]string, t.columnCount)
 	for i, column := range t.columns {
@@ -650,7 +658,8 @@ func TransposeMatrix[T any](rows [][]T) (columns [][]T) {
 	if len(rows) == 0 {
 		return [][]T{}
 	}
-	columns = make([][]T, len(rows[0]))
+	numColumns := len(rows[0])
+	columns = make([][]T, numColumns)
 	for i := range columns {
 		columns[i] = make([]T, len(rows))
 	}
@@ -1548,12 +1557,13 @@ func (n *Node[T]) InsertAfter(after *Node[T]) {
 }
 
 func (n *Node[T]) Index() int {
-	for i, child := range n.parent.Children {
-		if n.ID == child.ID {
-			return i
-		}
-	}
-	panic("not found index") // 永远不可能选中root，所以可以放心panic，root不显示，只显示它的children作为rootRows
+	return slices.Index(n.parent.Children, n)
+	//for i, child := range n.parent.Children {
+	//	if n.ID == child.ID {
+	//		return i
+	//	}
+	//}
+	//panic("not found index") // 永远不可能选中root，所以可以放心panic，root不显示，只显示它的children作为rootRows
 }
 
 func (n *Node[T]) MaxDepth() unit.Dp {
