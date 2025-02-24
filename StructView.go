@@ -49,7 +49,7 @@ func (s *StructView) maxLabelWidth(gtx layout.Context) unit.Dp {
 	originalConstraints := gtx.Constraints
 	maxWidth := unit.Dp(0)
 	for _, data := range s.keys {
-		currentWidth := CalculateTextWidth(gtx, data)
+		currentWidth := LabelWidth(gtx, data)
 		if currentWidth > maxWidth {
 			maxWidth = currentWidth
 		}

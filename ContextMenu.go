@@ -6,12 +6,12 @@ import (
 )
 
 type ContextMenuItem struct {
-	Title         string
-	Icon          *widget.Icon
-	Can           func() bool
-	Do            func()
-	AppendDivider bool
-	widget.Clickable
+	Title            string       // 菜单项标题
+	Icon             *widget.Icon // 可选的图标
+	Can              func() bool  // 是否绘制取决于当前渲染的行，回调内需要传递当前渲染的节点给回调，说白了这里是绘制条件，下面的do是业务逻辑，回调内传入的形参节点不一样
+	Do               func()       // 调用被选中节点来操作业务逻辑
+	AppendDivider    bool         // 是否添加分割线
+	widget.Clickable              // 可点击的控件
 }
 
 type ContextMenu struct {

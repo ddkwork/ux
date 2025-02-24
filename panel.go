@@ -249,9 +249,7 @@ func WithAlpha(c color.NRGBA, a uint8) color.NRGBA {
 	}
 }
 
-// CalculateTextWidth originalConstraints := gtx.Constraints // 保存原始约束
-// gtx.Constraints = originalConstraints
-func CalculateTextWidth(gtx layout.Context, text string) unit.Dp {
+func LabelWidth(gtx layout.Context, text string) unit.Dp {
 	// fmt.Printf("Calculating text width for: %s\n", text)
 	// fmt.Printf("Current Min.X: %v\n", gtx.Constraints.Min.X)
 	//richText := NewRichText()

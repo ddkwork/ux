@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"image/color"
 	"net/http"
+	"os"
 	"time"
+
+	"github.com/ddkwork/golibrary/stream"
 
 	"gioui.org/layout"
 	"gioui.org/unit"
@@ -420,11 +423,35 @@ func treeTable() ux.Widget {
 		Process       string        // 进程
 		PadTime       time.Duration // 请求到返回耗时
 	}
-	t := ux.NewTreeTable(packet{}, ux.TableContext[packet]{
-		ContextMenuItems: func(node *ux.Node[packet], gtx layout.Context) (items []ux.ContextMenuItem) {
-			return
+	t := ux.NewTreeTable(packet{})
+	t.TableContext = ux.TableContext[packet]{
+		ContextMenuItems: func(n *ux.Node[packet]) (items []ux.ContextMenuItem) {
+			return []ux.ContextMenuItem{
+				{
+					Title: "delete file",
+					Icon:  nil,
+					Can:   func() bool { return stream.IsFilePath(n.Data.Path) }, // n是当前渲染的行,它的元数据是路径才显示
+					Do: func() {
+						mylog.Check(os.Remove(t.SelectedNode.Data.Path))
+						t.SelectedNode.Remove()
+					},
+					AppendDivider: false,
+					Clickable:     widget.Clickable{},
+				},
+				{
+					Title: "delete directory",
+					Icon:  nil,
+					Can:   func() bool { return stream.IsDir(n.Data.Path) }, // n是当前渲染的行,它的元数据是目录才显示
+					Do: func() {
+						mylog.Check(os.RemoveAll(t.SelectedNode.Data.Path))
+						t.SelectedNode.Remove()
+					},
+					AppendDivider: false,
+					Clickable:     widget.Clickable{},
+				},
+			}
 		},
-		MarshalRow: func(n *ux.Node[packet]) (cells []ux.CellData) {
+		MarshalRowCells: func(n *ux.Node[packet]) (cells []ux.CellData) {
 			if n.Container() {
 				n.Data.Scheme = n.Sum()
 				sumBytes := 0
@@ -451,84 +478,86 @@ func treeTable() ux.Widget {
 				{Text: fmt.Sprintf("%s", n.Data.PadTime)},
 			}
 		},
-		UnmarshalRow: nil,
-		RowSelectedCallback: func(node *ux.Node[packet]) {
-			mylog.Struct("todo", node.Data)
+		UnmarshalRowCells: nil,
+		RowSelectedCallback: func() {
+			mylog.Struct("selected node", t.SelectedNode.Data)
 		},
-		RowDoubleClickCallback: func(node *ux.Node[packet]) {
-			mylog.Info("node:", node.Data.Path, " double clicked")
+		RowDoubleClickCallback: func() {
+			mylog.Info("node:", t.SelectedNode.Data.Path, " double clicked")
 		},
-		LongPressCallback:   nil,
-		SetRootRowsCallBack: nil,
-		JsonName:            "",
-		IsDocument:          false,
-	})
+		LongPressCallback: nil,
+		SetRootRowsCallBack: func() {
+			for i := 0; i < 100; i++ {
+				data := packet{
+					Scheme:        "Row" + fmt.Sprint(i+1),
+					Method:        http.MethodGet,
+					Host:          "example.com",
+					Path:          fmt.Sprintf("/api/v%d/resource", i+1),
+					ContentType:   "application/json",
+					ContentLength: i + 100,
+					Status:        http.StatusText(http.StatusOK),
+					Note:          fmt.Sprintf("获取资源%d", i+1),
+					Process:       fmt.Sprintf("process%d.exe", i+1),
+					PadTime:       time.Duration(i+1) * time.Second,
+				}
+				var node *ux.Node[packet]
+				if i%10 == 3 {
+					node = ux.NewContainerNode(fmt.Sprintf("Row %d", i+1), data)
+					t.Root.AddChild(node)
+					for j := 0; j < 5; j++ {
+						subData := packet{
+							Scheme:        "Row" + fmt.Sprint(j+1),
+							Method:        http.MethodGet,
+							Host:          "example.com",
+							Path:          fmt.Sprintf("/api/v%d/resource%d", i+1, j+1),
+							ContentType:   "application/json",
+							ContentLength: i + 100 + j + 1,
+							Status:        http.StatusText(http.StatusOK),
+							Note:          fmt.Sprintf("获取资源%d-%d", i+1, j+1),
+							Process:       fmt.Sprintf("process%d-%d.exe", i+1, j+1),
+							PadTime:       time.Duration(i+1+j+1) * time.Second,
+						}
+						if j < 2 {
+							subNode := ux.NewContainerNode("Sub Row "+fmt.Sprint(j+1), subData)
+							node.AddChild(subNode)
+							for k := 0; k < 2; k++ {
+								subSubData := packet{
+									Scheme:        "Sub Sub Row" + fmt.Sprint(k+1),
+									Method:        http.MethodGet,
+									Host:          "example.com",
+									Path:          fmt.Sprintf("/api/v%d/resource%d-%d", i+1, j+1, k+1),
+									ContentType:   "application/json",
+									ContentLength: i + 100 + j + 1 + k + 1,
+									Status:        http.StatusText(http.StatusOK),
+									Note:          fmt.Sprintf("获取资源%d-%d-%d", i+1, j+1, k+1),
+									Process:       fmt.Sprintf("process%d-%d-%d.exe", i+1, j+1, k+1),
+									PadTime:       time.Duration(i+1+j+1+k+1) * time.Second,
+								}
+								subSubNode := ux.NewNode(subSubData)
+								subNode.AddChild(subSubNode)
+							}
+						} else {
+							subData.Scheme = "Sub Row" + fmt.Sprint(j+1)
+							subNode := ux.NewNode(subData)
+							node.AddChild(subNode)
+						}
+					}
+				} else {
+					t.Root.AddChild(ux.NewNode(data))
+				}
+			}
+			t.Root.OpenAll()
+			t.Format()
+			t.AwaitingSizeColumnsToFit = true
+		},
+		JsonName:   "demo",
+		IsDocument: true,
+	}
+	// t.SetRootRowsCallBack()//已经在layout内once一次，避免每个实例都要写一遍
 	appBar.Search.SetOnChanged(func(text string) {
 		// todo 这里可以设计一个类似aggrid的高级搜索功能：把n叉树的元数据结构体取出来，然后通过反射结构体布局一个所有字段值的过滤综合条件，最后设置过滤结果填充到表格的过滤rows中
 		t.Filter(text)
 	})
-	for i := 0; i < 100; i++ {
-		data := packet{
-			Scheme:        "Row" + fmt.Sprint(i+1),
-			Method:        http.MethodGet,
-			Host:          "example.com",
-			Path:          fmt.Sprintf("/api/v%d/resource", i+1),
-			ContentType:   "application/json",
-			ContentLength: i + 100,
-			Status:        http.StatusText(http.StatusOK),
-			Note:          fmt.Sprintf("获取资源%d", i+1),
-			Process:       fmt.Sprintf("process%d.exe", i+1),
-			PadTime:       time.Duration(i+1) * time.Second,
-		}
-		var node *ux.Node[packet]
-		if i%10 == 3 {
-			node = ux.NewContainerNode(fmt.Sprintf("Row %d", i+1), data)
-			t.Root.AddChild(node)
-			for j := 0; j < 5; j++ {
-				subData := packet{
-					Scheme:        "Row" + fmt.Sprint(j+1),
-					Method:        http.MethodGet,
-					Host:          "example.com",
-					Path:          fmt.Sprintf("/api/v%d/resource%d", i+1, j+1),
-					ContentType:   "application/json",
-					ContentLength: i + 100 + j + 1,
-					Status:        http.StatusText(http.StatusOK),
-					Note:          fmt.Sprintf("获取资源%d-%d", i+1, j+1),
-					Process:       fmt.Sprintf("process%d-%d.exe", i+1, j+1),
-					PadTime:       time.Duration(i+1+j+1) * time.Second,
-				}
-				if j < 2 {
-					subNode := ux.NewContainerNode("Sub Row "+fmt.Sprint(j+1), subData)
-					node.AddChild(subNode)
-					for k := 0; k < 2; k++ {
-						subSubData := packet{
-							Scheme:        "Sub Sub Row" + fmt.Sprint(k+1),
-							Method:        http.MethodGet,
-							Host:          "example.com",
-							Path:          fmt.Sprintf("/api/v%d/resource%d-%d", i+1, j+1, k+1),
-							ContentType:   "application/json",
-							ContentLength: i + 100 + j + 1 + k + 1,
-							Status:        http.StatusText(http.StatusOK),
-							Note:          fmt.Sprintf("获取资源%d-%d-%d", i+1, j+1, k+1),
-							Process:       fmt.Sprintf("process%d-%d-%d.exe", i+1, j+1, k+1),
-							PadTime:       time.Duration(i+1+j+1+k+1) * time.Second,
-						}
-						subSubNode := ux.NewNode(subSubData)
-						subNode.AddChild(subSubNode)
-					}
-				} else {
-					subData.Scheme = "Sub Row" + fmt.Sprint(j+1)
-					subNode := ux.NewNode(subData)
-					node.AddChild(subNode)
-				}
-			}
-		} else {
-			t.Root.AddChild(ux.NewNode(data))
-		}
-	}
-	t.Root.OpenAll()
-	t.Format()
-	t.AwaitingSizeColumnsToFit = true
 	return t.Layout
 }
 

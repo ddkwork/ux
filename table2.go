@@ -110,14 +110,14 @@ func (t *Table2) SetColumns(gtx layout.Context, cols []Column2, cellData [][]str
 		maxWidth := unit.Dp(0) // 当前最大宽度初始化为0
 		for _, data := range cellData {
 			if i < len(data) {
-				currentWidth := CalculateTextWidth(gtx, data[i])
+				currentWidth := LabelWidth(gtx, data[i])
 				// currentWidth += float32(gtx.Dp(material.Scrollbar(th, nil).Width())) + float32(len(cols)*gtx.Dp(defaultDividerWidth))
 				if currentWidth > maxWidth {
 					maxWidth = currentWidth // 更新最大宽度
 				}
 			}
 		}
-		cols[i].Width = max(maxWidth, CalculateTextWidth(gtx, cols[i].Name+" ⇧"))
+		cols[i].Width = max(maxWidth, LabelWidth(gtx, cols[i].Name+" ⇧"))
 	}
 	gtx.Constraints = originalConstraints
 	t.Columns = cols
