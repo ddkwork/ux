@@ -1504,13 +1504,13 @@ func (n *Node[T]) Remove() {
 	}
 }
 
-//通知单元格节点列宽更新事件
-//增 AddChild(实例化阶段，once内那一次就够了)， InsertAfter (DuplicateType) SetChildren
-//删 Remove 需要gtx来重新调整列宽
-//改 EditType todo 增加 应用修改方法 或者edit 方法，双击或者右键触发
-//查 Find
-//过滤
-//排序
+//通知单元格节点列宽更新事件:
+//增 AddChild(实例化阶段，once内那一次就够了), InsertAfter (DuplicateType) SetChildren
+//删 Remove,需要gtx来重新调整列宽
+//改 EditType,双击或者右键触发
+//查 Find,filter 无需调整列宽
+//过滤,无需调整列宽
+//排序,无需调整列宽
 
 func (t *TreeTable[T]) InsertAfter(gtx layout.Context, after *Node[T]) {
 	t.SelectedNode.InsertAfter(after)
