@@ -255,45 +255,12 @@ func main() {
 			}
 			m.Set(CardType, f.Layout)
 		case MobileType:
-			//CircledChevronDownButton := ux.NewSVGButton("", ux.Svg2Icon([]byte(ux.CircledChevronDown)), func() {
-			//	mylog.Info("svg button clicked")
-			//})
+		case SvgButtonType:
 			m.Set(MobileType, ux.NewButton("Hex Editor", nil).SetRectIcon(true).SetSVGIcon(ux.CircledChevronRight).Layout)
-
-		//case SvgButtonType:
-		//
-		//	panel.AddChildCallback(func(gtx layout.Context) layout.Dimensions {
-		//		list := layout.List{
-		//			Axis:        layout.Vertical,
-		//			ScrollToEnd: false,
-		//			Alignment:   0,
-		//			Position:    layout.Position{},
-		//		}
-		//		return list.Layout(gtx, 2, func(gtx layout.Context, index int) layout.Dimensions {
-		//			switch index {
-		//			case 0:
-		//				return ux.NewButton("", nil).SetRectIcon(true).SetSVGIcon(ux.CircledChevronDown).Layout(gtx)
-		//				//return CircledChevronRightButton.Layout(gtx)
-		//			}
-		//			return ux.NewButton("", nil).SetRectIcon(true).SetSVGIcon(ux.CircledChevronRight).Layout(gtx)
-		//			//return CircledChevronDownButton.Layout(gtx)
-		//		})
-		//	})
-
-		// continue
-		// icon := mylog.Check2(widget.NewIcon(mylog.Check2(ivgconv.FromContent(data))))
-		// tooltip := ux.NewTooltipButton(icon, "Load preset xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", nil)
-		// m.Set(TooltipType, tooltip.Layout)
-
-		//svgButton := ux.NewSVGButton("", ux.Svg2Icon(CircledChevronRight), func() {
-		//	mylog.Info("svg button clicked")
-		//})
-		//m.Set(SvgButtonType, svgButton.Layout)
 		case CodeEditorType:
 			m.Set(CodeEditorType, ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout)
 		case AsmViewType:
 		case LogViewType:
-
 		case ComBoxType:
 		case SplitViewType:
 		case ListViewType:

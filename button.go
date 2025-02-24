@@ -1,6 +1,7 @@
 package ux
 
 import (
+	"github.com/ddkwork/golibrary/mylog"
 	"image"
 	"image/color"
 
@@ -108,8 +109,12 @@ func (m *Button) SetIcon(icon *widget.Icon) *Button {
 }
 
 func (m *Button) SetSVGIcon(content string) *Button {
-	m.svgIcon = Svg2Icon([]byte(content))
+	m.svgIcon = Svg2Icon(content)
 	return m
+}
+
+func Svg2Icon(b string) *giosvg.Icon {
+	return giosvg.NewIcon(mylog.Check2(giosvg.NewVector([]byte(b))))
 }
 
 func (m *Button) Layout(gtx layout.Context) layout.Dimensions {

@@ -184,6 +184,7 @@ func NewTheme(isDark ...bool) *Theme {
 	if len(isDark) == 0 || !isDark[0] {
 		t = t.dark()
 	}
+	t.TextSize = t.Size.DefaultTextSize
 	return t
 }
 
@@ -374,6 +375,7 @@ func (t *Theme) dark() *Theme {
 
 	t.Color.TreeBgColor = color.NRGBA{R: 28, G: 29, B: 32, A: 255}
 	t.Color.TreeIconColor = color.NRGBA{R: 255, G: 255, B: 255, A: 255}
+	t.Color.TreeHoveredBgColor = color.NRGBA{R: 59, G: 60, B: 61, A: 255}
 	t.Color.TreeHoveredBgColor = color.NRGBA{R: 84, G: 84, B: 84, A: 255}
 	t.Color.TreeClickedBgColor = color.NRGBA{R: 87, G: 87, B: 87, A: 255}
 
