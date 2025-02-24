@@ -1,9 +1,10 @@
 package ux
 
 import (
-	"github.com/ddkwork/golibrary/mylog"
 	"image"
 	"image/color"
+
+	"github.com/ddkwork/golibrary/mylog"
 
 	"gioui.org/io/input"
 	"gioui.org/io/semantic"

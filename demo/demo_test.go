@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/ddkwork/golibrary/mylog"
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/ddkwork/golibrary/mylog"
 
 	"github.com/ddkwork/golibrary/safemap"
 	"github.com/ddkwork/golibrary/stream"

@@ -1,10 +1,11 @@
 package animationButton
 
 import (
-	"github.com/ddkwork/ux/animation/gween"
-	"github.com/ddkwork/ux/animation/gween/ease"
 	"image"
 	"image/color"
+
+	"github.com/ddkwork/ux/animation/gween"
+	"github.com/ddkwork/ux/animation/gween/ease"
 
 	"github.com/ddkwork/ux/animation"
 

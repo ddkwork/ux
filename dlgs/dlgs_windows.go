@@ -1,3 +1,4 @@
+//go:build windows && !linux && !darwin && !js
 // +build windows,!linux,!darwin,!js
 
 package dlgs
@@ -301,7 +302,8 @@ func getModuleHandle() (syscall.Handle, error) {
 }
 
 func createWindow(exStyle uint64, className, windowName string, style uint64, x, y, width, height int64,
-	parent, menu, instance syscall.Handle) (syscall.Handle, error) {
+	parent, menu, instance syscall.Handle,
+) (syscall.Handle, error) {
 	ret, _, err := createWindowExW.Call(uintptr(exStyle), uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(className))),
 		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(windowName))), uintptr(style), uintptr(x), uintptr(y),
 		uintptr(width), uintptr(height), uintptr(parent), uintptr(menu), uintptr(instance), uintptr(0))

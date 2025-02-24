@@ -1,10 +1,11 @@
 package main
 
 import (
-	"demo/test/dirTree/p/gitignore"
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"demo/test/dirTree/p/gitignore"
 
 	"github.com/ddkwork/golibrary/mylog"
 )

@@ -1,9 +1,10 @@
 package gween
 
 import (
+	"testing"
+
 	"github.com/ddkwork/golibrary/assert"
 	"github.com/ddkwork/ux/animation/gween/ease"
-	"testing"
 )
 
 func TestSequenceNew(t *testing.T) {
@@ -361,7 +362,6 @@ func TestSequence_SetIndex(t *testing.T) {
 }
 
 func TestSequence_RealWorld(t *testing.T) {
-
 	seq := NewSequence(
 		New(0, 5, 1, ease.Linear),
 		New(5, 0, 1, ease.Linear),

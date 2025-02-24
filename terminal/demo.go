@@ -2,11 +2,12 @@ package terminal
 
 import (
 	"fmt"
-	"github.com/ddkwork/ux/terminal/tint"
 	"io"
 	"log/slog"
 	"math/rand"
 	"os"
+
+	"github.com/ddkwork/ux/terminal/tint"
 
 	"github.com/ddkwork/golibrary/mylog"
 )

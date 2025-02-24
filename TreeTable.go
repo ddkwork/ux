@@ -616,8 +616,8 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 		rows = append(rows, t.MarshalRowCells(node))
 	}
 	rows = slices.Insert(rows, 0, t.header.rowCells) // 插入表头行,todo 这是不会变化的，可以不使用slices.Insert来优化性能
-	//once2.Do(func() {
-	t.columns = TransposeMatrix(rows) //如果不这么做的话，节点增删改查就不会实时刷新
+	// once2.Do(func() {
+	t.columns = TransposeMatrix(rows) // 如果不这么做的话，节点增删改查就不会实时刷新
 	//})
 	//if t.columns == nil {
 	//	mylog.Success("11111111111111111")
@@ -1176,8 +1176,8 @@ func (t *TreeTable[T]) Filter(text string) {
 	for _, node := range t.Root.WalkContainer() { // todo bug 需要改回之前的回调模式？需要调试，编辑节点模态窗口bug
 		cells := t.MarshalRowCells(node)
 		for _, cell := range cells {
-			//mylog.Info(cell.Text, text)
-			if strings.EqualFold(cell.Text, text) { //忽略大小写的情况下相等,支持unicode
+			// mylog.Info(cell.Text, text)
+			if strings.EqualFold(cell.Text, text) { // 忽略大小写的情况下相等,支持unicode
 				t.filteredRows = append(t.filteredRows, node) // 先过滤所有容器节点
 			}
 		}
@@ -1201,7 +1201,7 @@ func (t *TreeTable[T]) Filter(text string) {
 	}
 	// todo 检查layou部分是否调用filteredRows以及filteredRows的大小是否是0，清空过滤后恢复原始的rootRows
 	t.Root.Children = t.filteredRows
-	//t.rootRows = t.filteredRows
+	// t.rootRows = t.filteredRows
 	t.Root.OpenAll()
 }
 
