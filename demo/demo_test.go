@@ -1,12 +1,26 @@
 package main
 
 import (
+	"github.com/ddkwork/golibrary/mylog"
+	"os"
+	"strconv"
 	"testing"
 
 	"github.com/ddkwork/golibrary/safemap"
-
 	"github.com/ddkwork/golibrary/stream"
 )
+
+func TestUpdateAppModule(t *testing.T) {
+	if !stream.IsDir("../") {
+		return
+	}
+	mylog.Check(os.Chdir("../"))
+	session := stream.RunCommand("git log -1 --format=\"%H\"")
+	mylog.Check(os.Chdir("demo"))
+	id := mylog.Check2(strconv.Unquote(session.Output.String()))
+	mylog.Info("id", id)
+	stream.RunCommand("go get github.com/ddkwork/ux@" + id)
+}
 
 func TestName(t *testing.T) {
 	m := new(safemap.M[string, string])

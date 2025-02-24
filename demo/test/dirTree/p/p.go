@@ -1,12 +1,12 @@
 package main
 
 import (
+	"demo/test/dirTree/p/gitignore"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/ddkwork/golibrary/mylog"
-	gitignore "github.com/sabhiram/go-gitignore"
 )
 
 // https://github.com/datumbrain/dirtree
