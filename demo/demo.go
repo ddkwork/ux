@@ -506,7 +506,7 @@ func main() {
 			m.Set(AnimationButtonType, newButtonAnimation.Layout) // todo bug
 		case TerminalType: // todo 控制台被接管了
 			if mylog.IsWindows() {
-				continue
+				continue //todo bug
 			}
 			screen, settings := terminal.Demo()
 			m.Set(TerminalType, ux.NewTabItem("Tab 5", func(gtx layout.Context) layout.Dimensions {
@@ -516,8 +516,8 @@ func main() {
 		case DockViewType:
 		case Gif123Type:
 		case HexEditorType:
-			obj := NewMenuObj()
-			m.Set(HexEditorType, obj.Layout)
+		case ContextMenuType:
+			m.Set(ContextMenuType, NewMenuObj().Layout)
 		case ImageEditorType:
 		case MediaPlayerType:
 		case MindType:
