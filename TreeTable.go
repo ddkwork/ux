@@ -63,15 +63,15 @@ type (
 		widget.List                                 // 为rootRows渲染列表和滚动条
 	}
 	TableContext[T any] struct {
-		ContextMenuItems       func(n *Node[T]) (items []ContextMenuItem) // 通过SelectedNode传递给菜单的do取出元数据，比如删除文件,但是菜单是否绘制取决于当前渲染的行，所以要传递n给can
-		MarshalRowCells        func(n *Node[T]) (cells []CellData)        // 序列化节点元数据
-		UnmarshalRowCells      func(n *Node[T], values []string)          // 节点编辑后反序列化回节点
-		RowSelectedCallback    func()                                     // 行选中回调,通过SelectedNode传递给菜单
-		RowDoubleClickCallback func()                                     // double click callback,通过SelectedNode传递给菜单
-		LongPressCallback      func()                                     // mobile long press callback,通过SelectedNode传递给菜单
-		SetRootRowsCallBack    func()                                     // 实例化所有节点回调,必要时调用root节点辅助操作
-		JsonName               string                                     // 保存序列化树形表格到文件的文件名
-		IsDocument             bool                                       // 是否生成markdown文档
+		ContextMenuItems       func(gtx layout.Context, n *Node[T]) (items []ContextMenuItem) // 通过SelectedNode传递给菜单的do取出元数据，比如删除文件,但是菜单是否绘制取决于当前渲染的行，所以要传递n给can
+		MarshalRowCells        func(n *Node[T]) (cells []CellData)                            // 序列化节点元数据
+		UnmarshalRowCells      func(n *Node[T], values []string)                              // 节点编辑后反序列化回节点
+		RowSelectedCallback    func()                                                         // 行选中回调,通过SelectedNode传递给菜单
+		RowDoubleClickCallback func()                                                         // double click callback,通过SelectedNode传递给菜单
+		LongPressCallback      func()                                                         // mobile long press callback,通过SelectedNode传递给菜单
+		SetRootRowsCallBack    func()                                                         // 实例化所有节点回调,必要时调用root节点辅助操作
+		JsonName               string                                                         // 保存序列化树形表格到文件的文件名
+		IsDocument             bool                                                           // 是否生成markdown文档
 	}
 	tableHeader[T any] struct {
 		sortOrder          sortOrder                // 排序方式
@@ -484,12 +484,10 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 										}
 									case DeleteType:
 										item = ContextMenuItem{
-											Title: "",
-											Icon:  IconDelete,
-											Can:   func() bool { return true },
-											Do: func() {
-												t.SelectedNode.Remove()
-											},
+											Title:     "",
+											Icon:      IconDelete,
+											Can:       func() bool { return true },
+											Do:        func() { t.Remove(gtx) },
 											Clickable: widget.Clickable{},
 										}
 									case DuplicateType:
@@ -544,7 +542,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 										n.contextMenu.AddItem(item)
 									}
 								}
-								if items := t.ContextMenuItems(n); items != nil {
+								if items := t.ContextMenuItems(gtx, n); items != nil { //gtx用于调整列宽，触发增删改之后，n是正在渲染的节点，用于取出元数据控制菜单是否渲染
 									for _, item := range items {
 										if item.Can() {
 											n.contextMenu.AddItem(item)
@@ -1525,8 +1523,8 @@ func (n *Node[T]) Remove() {
 }
 
 //通知单元格节点列宽更新事件
-//增 AddChild InsertAfter (DuplicateType) SetChildren
-//删 Remove
+//增 AddChild(实例化阶段，once内那一次就够了)， InsertAfter (DuplicateType) SetChildren
+//删 Remove 需要gtx来重新调整列宽
 //改 EditType todo 增加 应用修改方法 或者edit 方法，双击或者右键触发
 //查 Find
 //过滤
@@ -1534,6 +1532,10 @@ func (n *Node[T]) Remove() {
 
 func (t *TreeTable[T]) InsertAfter(gtx layout.Context, after *Node[T]) {
 	t.SelectedNode.InsertAfter(after)
+	t.SizeColumnsToFit(gtx, false)
+}
+func (t *TreeTable[T]) Remove(gtx layout.Context) {
+	t.SelectedNode.Remove()
 	t.SizeColumnsToFit(gtx, false)
 }
 

@@ -149,7 +149,7 @@ type packet struct {
 func treeTable() *ux.TreeTable[packet] {
 	t := ux.NewTreeTable(packet{})
 	t.TableContext = ux.TableContext[packet]{
-		ContextMenuItems: func(n *ux.Node[packet]) (items []ux.ContextMenuItem) {
+		ContextMenuItems: func(gtx layout.Context, n *ux.Node[packet]) (items []ux.ContextMenuItem) {
 			return []ux.ContextMenuItem{
 				{
 					Title: "delete file",
@@ -157,7 +157,7 @@ func treeTable() *ux.TreeTable[packet] {
 					Can:   func() bool { return stream.IsFilePath(n.Data.Path) }, // n是当前渲染的行,它的元数据是路径才显示
 					Do: func() {
 						mylog.Check(os.Remove(t.SelectedNode.Data.Path))
-						t.SelectedNode.Remove()
+						t.Remove(gtx)
 					},
 					AppendDivider: false,
 					Clickable:     widget.Clickable{},
@@ -168,7 +168,7 @@ func treeTable() *ux.TreeTable[packet] {
 					Can:   func() bool { return stream.IsDir(n.Data.Path) }, // n是当前渲染的行,它的元数据是目录才显示
 					Do: func() {
 						mylog.Check(os.RemoveAll(t.SelectedNode.Data.Path))
-						t.SelectedNode.Remove()
+						t.Remove(gtx)
 					},
 					AppendDivider: false,
 					Clickable:     widget.Clickable{},
@@ -272,7 +272,6 @@ func treeTable() *ux.TreeTable[packet] {
 			}
 			t.Root.OpenAll()
 			t.Format()
-			t.awaitingSizeColumnsToFit = true
 		},
 		JsonName:   "demo",
 		IsDocument: true,
