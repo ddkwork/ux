@@ -325,6 +325,7 @@ func BenchmarkInsertWithResize(b *testing.B) {
 
 func TestTreeTable_Filter(t1 *testing.T) {
 	t := treeTable()
+	t.SetRootRowsCallBack()
 	t.Filter("ok")
 	return
 	assert.True(t1, strings.EqualFold("row96", "Row96"))
