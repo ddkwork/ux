@@ -507,70 +507,70 @@ func main() {
 			m.Set(AnimationButtonType, newButtonAnimation.Layout) // todo bug
 		case TerminalType: // todo 控制台被接管了
 			if mylog.IsWindows() {
-				continue //todo bug
+				continue // todo bug
 			}
 			screen, settings := terminal.Demo()
 			m.Set(TerminalType, ux.NewTabItem("Tab 5", func(gtx layout.Context) layout.Dimensions {
 				return terminal.Console(screen, settings)(gtx)
 			}).LayoutContent)
-		case StackViewType: //todo stackview
-		case DockViewType: //todo dockview
-		case Gif123Type: //todo gif123
-		case HexEditorType: //todo hex editor
-		case ContextMenuType: //todo contextmenu
+		case StackViewType: // todo stackview
+		case DockViewType: // todo dockview
+		case Gif123Type: // todo gif123
+		case HexEditorType: // todo hex editor
+		case ContextMenuType: // todo contextmenu
 			m.Set(ContextMenuType, NewMenuObj().Layout)
-		case ImageEditorType: //todo 图片编辑器
-		case MediaPlayerType: //todo 媒体播放器
-		case MindType: //todo 思维导图
-		case PdfViewType: //todo pdf
-		case MapViewType: //todo 地图
-		case ThemeViewType: //todo 主题编辑器
+		case ImageEditorType: // todo 图片编辑器
+		case MediaPlayerType: // todo 媒体播放器
+		case MindType: // todo 思维导图
+		case PdfViewType: // todo pdf
+		case MapViewType: // todo 地图
+		case ThemeViewType: // todo 主题编辑器
 		case SettingsviewType:
-		case SliceviewType: //todo 切片器
+		case SliceviewType: // todo 切片器
 		case XyzViewType:
-		case WebViewType: //todo webview
-		case SvgViewType: //todo svg
+		case WebViewType: // todo webview
+		case SvgViewType: // todo svg
 		case CanvasViewType:
 		case PopMenuType:
-		case TooltipType: //todo tooltip
-		case TextfieldType: //todo textfield
-		case MarkdownViewType: //todo markdown
-		case GomitmproxyType: //todo gomitmproxy
-		case HyperDbgType: //todo hyperdbg
-		case VstartType: //todo vstart
-		case ExplorerType: //todo 文件管理器
+		case TooltipType: // todo tooltip
+		case TextfieldType: // todo textfield
+		case MarkdownViewType: // todo markdown
+		case GomitmproxyType: // todo gomitmproxy
+		case HyperDbgType: // todo hyperdbg
+		case VstartType: // todo vstart
+		case ExplorerType: // todo 文件管理器
 		case DesignerType:
-		case AiChatType: //todo 机器人聊天
-		case EncodingTestType: //todo 编码测试
-		case GameControlFaceType: //todo 游戏控制器面板
-		case GithubType: //todo github
-		case GhipsType: //todo ghips
-		case TaskManagerType: //todo 任务管理器
+		case AiChatType: // todo 机器人聊天
+		case EncodingTestType: // todo 编码测试
+		case GameControlFaceType: // todo 游戏控制器面板
+		case GithubType: // todo github
+		case GhipsType: // todo ghips
+		case TaskManagerType: // todo 任务管理器
 		case GitlabType:
-		case SteamType: //todo steam
-		case BuyTomatoesType: //todo 番茄
+		case SteamType: // todo steam
+		case BuyTomatoesType: // todo 番茄
 		case CcType:
-		case CryptType: //todo 加密解密
-		case DatabaseType: //todo 数据库
-		case DatarecoveryType: //todo 数据恢复
-		case HardInfoHookType: //todo 硬件信息
-		case HardwareIndoType: //todo 硬件信息
-		case DriverToolType: //todo 驱动工具
-		case EnvironmentType: //todo 环境变量
-		case ErpType: //todo 电子商务
-		case FleetType: //todo 代码编辑器
+		case CryptType: // todo 加密解密
+		case DatabaseType: // todo 数据库
+		case DatarecoveryType: // todo 数据恢复
+		case HardInfoHookType: // todo 硬件信息
+		case HardwareIndoType: // todo 硬件信息
+		case DriverToolType: // todo 驱动工具
+		case EnvironmentType: // todo 环境变量
+		case ErpType: // todo 电子商务
+		case FleetType: // todo 代码编辑器
 		case ImageConvertType:
-		case JetbraType: //todo jb crack
+		case JetbraType: // todo jb crack
 		case JiakaobaodianType:
 		case ManPieceworkType:
-		case MypanType: //todo 网盘上传下载
-		case NetAdapterType: //todo 网络适配器
-		case NetScanType: //todo 网络扫描
-		case VisualStudiokitType: //todo visual studio kit,cmake generator
-		case C2goType: //todo c2go
+		case MypanType: // todo 网盘上传下载
+		case NetAdapterType: // todo 网络适配器
+		case NetScanType: // todo 网络扫描
+		case VisualStudiokitType: // todo visual studio kit,cmake generator
+		case C2goType: // todo c2go
 		case VncType:
-		case TodoListType: //todo 待办事项
-		case DropFileType: //todo 拖拽文件
+		case TodoListType: // todo 待办事项
+		case DropFileType: // todo 拖拽文件
 		case DarkThemeType:
 		}
 	}
