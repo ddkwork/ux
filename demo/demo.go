@@ -195,7 +195,6 @@ func main() {
 						}
 					}
 					t.Root.OpenAll()
-					t.Format()
 				},
 				JsonName:   "demo",
 				IsDocument: true,

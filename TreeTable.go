@@ -37,30 +37,31 @@ import (
 
 type (
 	TreeTable[T any] struct {
-		TableContext[T]                             // 实例化时传入的上下文
-		Root                    *Node[T]            // 根节点,保存数据到json只需要调用它即可
-		header                  tableHeader[T]      // 表头
-		rootRows                []*Node[T]          // from root.children
-		filteredRows            []*Node[T]          // 过滤后的行
-		SelectedNode            *Node[T]            // 选中的节点,文件管理器外部自定义右键菜单增删改查文件需要通过它取出节点元数据结构体的文件路径字段，所以需要导出
-		columnCount             int                 // 列数
-		maxColumnTextWidths     []unit.Dp           // 最宽的列文本宽度
-		rows                    [][]CellData        // 矩阵置换参数，行转为列，增删改节点后重新生成它
-		columns                 [][]CellData        // CopyColumn
-		DragRemovedRowsCallback func(n *Node[T])    // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
-		DropOccurredCallback    func(n *Node[T])    // Called whenever a drop occurs that modifies the model.
-		inLayoutHeader          bool                // for drag
-		columnResizeStart       unit.Dp             //
-		columnResizeBase        unit.Dp             //
-		columnResizeOverhead    unit.Dp             //
-		preventUserColumnResize bool                //
-		awaitingSyncToModel     bool                //
-		wasDragged              bool                //
-		dividerDrag             bool                //
-		LongPressCallback       func(node *Node[T]) `json:"-"` // 长按回调
-		pressStarted            time.Time           // 按压开始时间
-		longPressed             bool                // 是否已经触发长按事件
-		widget.List                                 // 为rootRows渲染列表和滚动条
+		TableContext[T]                              // 实例化时传入的上下文
+		Root                     *Node[T]            // 根节点,保存数据到json只需要调用它即可
+		header                   tableHeader[T]      // 表头
+		rootRows                 []*Node[T]          // from root.children
+		filteredRows             []*Node[T]          // 过滤后的行
+		SelectedNode             *Node[T]            // 选中的节点,文件管理器外部自定义右键菜单增删改查文件需要通过它取出节点元数据结构体的文件路径字段，所以需要导出
+		columnCount              int                 // 列数
+		maxColumnLabelTextWidths []unit.Dp           // 最宽的列label文本宽度for单元格
+		maxColumnTextWidths      []unit.Dp           // 最宽的列文本宽度for tui
+		rows                     [][]CellData        // 矩阵置换参数，行转为列，增删改节点后重新生成它
+		columns                  [][]CellData        // CopyColumn
+		DragRemovedRowsCallback  func(n *Node[T])    // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
+		DropOccurredCallback     func(n *Node[T])    // Called whenever a drop occurs that modifies the model.
+		inLayoutHeader           bool                // for drag
+		columnResizeStart        unit.Dp             //
+		columnResizeBase         unit.Dp             //
+		columnResizeOverhead     unit.Dp             //
+		preventUserColumnResize  bool                //
+		awaitingSyncToModel      bool                //
+		wasDragged               bool                //
+		dividerDrag              bool                //
+		LongPressCallback        func(node *Node[T]) `json:"-"` // 长按回调
+		pressStarted             time.Time           // 按压开始时间
+		longPressed              bool                // 是否已经触发长按事件
+		widget.List                                  // 为rootRows渲染列表和滚动条
 	}
 	TableContext[T any] struct {
 		ContextMenuItems       func(gtx layout.Context, n *Node[T]) (items []ContextMenuItem) // 通过SelectedNode传递给菜单的do取出元数据，比如删除文件,但是菜单是否绘制取决于当前渲染的行，所以要传递n给can
@@ -125,9 +126,9 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 			clickedColumnIndex: -1,
 			manualWidthSet:     make([]bool, columnCount),
 		},
-		columnCount:         columnCount,
-		maxColumnTextWidths: nil,
-		inLayoutHeader:      false,
+		columnCount:              columnCount,
+		maxColumnLabelTextWidths: nil,
+		inLayoutHeader:           false,
 		List: widget.List{
 			Scrollbar: widget.Scrollbar{},
 			List: layout.List{
@@ -210,8 +211,9 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		//			})
 		//		}
 		//	}
-		t.SizeColumnsToFit(gtx, false)
+		t.SizeColumnsToFit(gtx)
 	})
+
 	list := material.List(th.Theme, &t.List)
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -239,7 +241,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) layout.Dimensions {
 	n.rowCells = t.MarshalRowCells(n)
 	for i := range n.rowCells { // 对齐表头和数据列
-		n.rowCells[i].maxColumnTextWidth = t.maxColumnTextWidths[i]
+		n.rowCells[i].maxColumnTextWidth = t.maxColumnLabelTextWidths[i]
 		n.rowCells[i].leftIndent = n.Depth() * HierarchyIndent
 		n.rowCells[i].rowID = rowIndex
 		n.rowCells[i].autoMaximum = t.header.rowCells[i].autoMaximum
@@ -635,53 +637,49 @@ func InitHeader(data any) (rowCells []CellData) {
 	return
 }
 
-var once2 sync.Once
-
-func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
+func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) {
 	originalConstraints := gtx.Constraints         // 保存原始约束
 	rows := make([][]CellData, 0, len(t.rootRows)) // 用于存储所有行,如果不这么做的话，节点增删改查就不会实时刷新
 	for _, node := range t.Root.Walk() {
 		rows = append(rows, t.MarshalRowCells(node))
 	}
 	rows = slices.Insert(rows, 0, t.header.rowCells) // 插入表头行,todo 这是不会变化的，可以不使用slices.Insert来优化性能
-	// once2.Do(func() {
-	t.columns = TransposeMatrix(rows) // 如果不这么做的话，节点增删改查就不会实时刷新
-	//})
-	//if t.columns == nil {
-	//	mylog.Success("11111111111111111")
-	//	t.columns = TransposeMatrix(rows)
-	//}
+	t.columns = TransposeMatrix(rows)                // 如果不这么做的话，节点增删改查就不会实时刷新
+	t.maxColumnLabelTextWidths = make([]unit.Dp, t.columnCount)
 	t.maxColumnTextWidths = make([]unit.Dp, t.columnCount)
 	maxColumnTexts := make([]string, t.columnCount)
 	for i, column := range t.columns {
 		if t.header.manualWidthSet[i] { // 如果该列已手动调整
 			continue // 跳过，保留用户手动调整的宽度
 		}
-		t.maxColumnTextWidths[i] = 0
+		t.maxColumnLabelTextWidths[i] = 0
 		maxColumnTexts[i] = ""
 		for _, data := range column {
 			if len(data.Text) > len(maxColumnTexts[i]) {
 				maxColumnTexts[i] = data.Text
 			}
-			if isTui {
-				t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Text))
-			} else {
-				t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], LabelWidth(gtx, data.Text))
+			t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Text))
+			if gtx != (layout.Context{}) {
+				t.maxColumnLabelTextWidths[i] = max(t.maxColumnLabelTextWidths[i], LabelWidth(gtx, data.Text))
 			}
 		}
 	}
 	maxDepth := t.Root.MaxDepth() // todo 右键菜单增删改，重复节点触发是否被修改状态，准确的说是新建和重复容器节点才触发MaxDepth执行递归，不过可以压力测试
-	for i, maxWidth := range t.maxColumnTextWidths {
+	for i, maxWidth := range t.maxColumnLabelTextWidths {
 		t.header.rowCells[i].autoMaximum = maxWidth
 		// t.header.rowCells[i].maximum = maxWidth // 拖放后变宽或者变窄，是否拖动就是判断是否等于AutoMaximum，如果Maximum不是0就行
 		t.header.rowCells[i].maxDepth = maxDepth
 	}
 	gtx.Constraints = originalConstraints
 	t.rootRows = t.Root.Children
+	t.SaveDate()
+	return
+}
 
+func (t *TreeTable[T]) SaveDate() {
 	t.JsonName = strings.TrimSuffix(t.JsonName, ".json")
 	stream.MarshalJsonToFile(t.Root, filepath.Join("cache", t.JsonName+".json"))
-	stream.WriteTruncate(filepath.Join("cache", t.JsonName+".txt"), t.Document())
+	stream.WriteTruncate(filepath.Join("cache", t.JsonName+".txt"), t.Document()) //调用t.Format()
 	if t.IsDocument {
 		b := stream.NewBuffer("")
 		b.WriteStringLn("# " + t.JsonName + " document table")
@@ -690,7 +688,6 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context, isTui bool) {
 		b.WriteStringLn("```")
 		stream.WriteTruncate("README2.md", b.String())
 	}
-	return
 }
 
 // TransposeMatrix 把行切片矩阵置换为列切片,用于计算最大列宽的参数
@@ -1277,10 +1274,9 @@ func (t *TreeTable[T]) MaxColumnCellWidth() unit.Dp {
 }
 
 func (t *TreeTable[T]) Format() *stream.Buffer {
-	t.SizeColumnsToFit(layout.Context{}, true)
 	buf := t.FormatHeader(t.maxColumnTextWidths)
 	t.FormatChildren(buf, t.rootRows) // 传入子节点打印函数
-	mylog.Json("RootRows", buf.String())
+	//mylog.Json("RootRows", buf.String())
 	return buf
 }
 
@@ -1350,8 +1346,8 @@ func (t *TreeTable[T]) FormatChildren(out *stream.Buffer, children []*Node[T]) {
 				continue
 			}
 			out.WriteString(cell.Text)
-			if align.StringWidth[unit.Dp](cell.Text) < t.maxColumnTextWidths[j] {
-				out.WriteString(strings.Repeat(" ", int(t.maxColumnTextWidths[j]-align.StringWidth[unit.Dp](cell.Text))))
+			if align.StringWidth[unit.Dp](cell.Text) < t.maxColumnLabelTextWidths[j] {
+				out.WriteString(strings.Repeat(" ", int(t.maxColumnLabelTextWidths[j]-align.StringWidth[unit.Dp](cell.Text))))
 			}
 			out.WriteString(" │ ")
 		}
@@ -1515,12 +1511,12 @@ func (n *Node[T]) Remove() {
 // 排序,无需调整列宽
 func (t *TreeTable[T]) InsertAfter(gtx layout.Context, after *Node[T]) {
 	t.SelectedNode.InsertAfter(after)
-	t.SizeColumnsToFit(gtx, false)
+	t.SizeColumnsToFit(gtx)
 }
 
 func (t *TreeTable[T]) Remove(gtx layout.Context) {
 	t.SelectedNode.Remove()
-	t.SizeColumnsToFit(gtx, false)
+	t.SizeColumnsToFit(gtx)
 }
 
 func (t *TreeTable[T]) Edit(gtx layout.Context) {
@@ -1536,7 +1532,7 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) {
 	}
 	// todo test
 	t.UnmarshalRowCells(t.SelectedNode, t.MarshalRowCells(t.SelectedNode)) // 此时节点元数据被刷新
-	t.SizeColumnsToFit(gtx, false)
+	t.SizeColumnsToFit(gtx)
 }
 
 func (n *Node[T]) Find() (found *Node[T]) {

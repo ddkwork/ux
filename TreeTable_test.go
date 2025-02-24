@@ -93,7 +93,7 @@ func Benchmark_SizeColumnsToFit(b *testing.B) {
 		// Benchmark_SizeColumnsToFit-8   	   18141	     55213 ns/op
 		// Benchmark_SizeColumnsToFit-8   	   24626	     42476 ns/op
 		// Benchmark_SizeColumnsToFit-8   	   24418	     44423 ns/op
-		t.SizeColumnsToFit(gtx, false)
+		t.SizeColumnsToFit(gtx)
 	}
 }
 
