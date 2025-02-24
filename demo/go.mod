@@ -8,7 +8,7 @@ require (
 	gioui.org/example v0.8.1
 	gioui.org/x v0.8.1
 	github.com/ddkwork/golibrary v0.0.91-0.20250224160512-cae108870eee
-	github.com/ddkwork/ux v0.0.0-20250224155030-141bcd428a82
+	github.com/ddkwork/ux v0.0.0-20250224160621-090c8658b379
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/crypto v0.33.0
 	golang.org/x/exp/shiny v0.0.0-20250218142911-aa4b98e5adaa
