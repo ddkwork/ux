@@ -453,7 +453,7 @@ func treeTable() ux.Widget {
 		},
 		MarshalRowCells: func(n *ux.Node[packet]) (cells []ux.CellData) {
 			if n.Container() {
-				n.Data.Scheme = n.Sum()
+				n.Data.Scheme = n.SumChildren()
 				sumBytes := 0
 				sumTime := time.Duration(0)
 				n.Data.ContentLength = sumBytes
