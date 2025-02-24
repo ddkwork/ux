@@ -37,31 +37,30 @@ import (
 
 type (
 	TreeTable[T any] struct {
-		TableContext[T]                              // 实例化时传入的上下文
-		Root                     *Node[T]            // 根节点,保存数据到json只需要调用它即可
-		header                   tableHeader[T]      // 表头
-		rootRows                 []*Node[T]          // from root.children
-		filteredRows             []*Node[T]          // 过滤后的行
-		SelectedNode             *Node[T]            // 选中的节点,文件管理器外部自定义右键菜单增删改查文件需要通过它取出节点元数据结构体的文件路径字段，所以需要导出
-		columnCount              int                 // 列数
-		maxColumnTextWidths      []unit.Dp           // 最宽的列文本宽度
-		rows                     [][]CellData        // 矩阵置换参数，行转为列，增删改节点后重新生成它
-		columns                  [][]CellData        // CopyColumn
-		DragRemovedRowsCallback  func(n *Node[T])    // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
-		DropOccurredCallback     func(n *Node[T])    // Called whenever a drop occurs that modifies the model.
-		inLayoutHeader           bool                // for drag
-		columnResizeStart        unit.Dp             //
-		columnResizeBase         unit.Dp             //
-		columnResizeOverhead     unit.Dp             //
-		preventUserColumnResize  bool                //
-		AwaitingSizeColumnsToFit bool                //
-		awaitingSyncToModel      bool                //
-		wasDragged               bool                //
-		dividerDrag              bool                //
-		LongPressCallback        func(node *Node[T]) `json:"-"` // 长按回调
-		pressStarted             time.Time           // 按压开始时间
-		longPressed              bool                // 是否已经触发长按事件
-		widget.List                                  // 为rootRows渲染列表和滚动条
+		TableContext[T]                             // 实例化时传入的上下文
+		Root                    *Node[T]            // 根节点,保存数据到json只需要调用它即可
+		header                  tableHeader[T]      // 表头
+		rootRows                []*Node[T]          // from root.children
+		filteredRows            []*Node[T]          // 过滤后的行
+		SelectedNode            *Node[T]            // 选中的节点,文件管理器外部自定义右键菜单增删改查文件需要通过它取出节点元数据结构体的文件路径字段，所以需要导出
+		columnCount             int                 // 列数
+		maxColumnTextWidths     []unit.Dp           // 最宽的列文本宽度
+		rows                    [][]CellData        // 矩阵置换参数，行转为列，增删改节点后重新生成它
+		columns                 [][]CellData        // CopyColumn
+		DragRemovedRowsCallback func(n *Node[T])    // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
+		DropOccurredCallback    func(n *Node[T])    // Called whenever a drop occurs that modifies the model.
+		inLayoutHeader          bool                // for drag
+		columnResizeStart       unit.Dp             //
+		columnResizeBase        unit.Dp             //
+		columnResizeOverhead    unit.Dp             //
+		preventUserColumnResize bool                //
+		awaitingSyncToModel     bool                //
+		wasDragged              bool                //
+		dividerDrag             bool                //
+		LongPressCallback       func(node *Node[T]) `json:"-"` // 长按回调
+		pressStarted            time.Time           // 按压开始时间
+		longPressed             bool                // 是否已经触发长按事件
+		widget.List                                 // 为rootRows渲染列表和滚动条
 	}
 	TableContext[T any] struct {
 		ContextMenuItems       func(n *Node[T]) (items []ContextMenuItem) // 通过SelectedNode传递给菜单的do取出元数据，比如删除文件,但是菜单是否绘制取决于当前渲染的行，所以要传递n给can
@@ -138,20 +137,19 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 				Position:    layout.Position{},
 			},
 		},
-		columns:                  nil,
-		DragRemovedRowsCallback:  nil,
-		DropOccurredCallback:     nil,
-		columnResizeStart:        0,
-		columnResizeBase:         0,
-		columnResizeOverhead:     0,
-		preventUserColumnResize:  false,
-		AwaitingSizeColumnsToFit: false,
-		awaitingSyncToModel:      false,
-		wasDragged:               false,
-		dividerDrag:              false,
-		LongPressCallback:        nil,
-		pressStarted:             time.Time{},
-		longPressed:              false,
+		columns:                 nil,
+		DragRemovedRowsCallback: nil,
+		DropOccurredCallback:    nil,
+		columnResizeStart:       0,
+		columnResizeBase:        0,
+		columnResizeOverhead:    0,
+		preventUserColumnResize: false,
+		awaitingSyncToModel:     false,
+		wasDragged:              false,
+		dividerDrag:             false,
+		LongPressCallback:       nil,
+		pressStarted:            time.Time{},
+		longPressed:             false,
 	}
 }
 
@@ -224,11 +222,8 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		//			})
 		//		}
 		//	}
+		t.SizeColumnsToFit(gtx, false)
 	})
-	// if t.AwaitingSizeColumnsToFit {
-	t.SizeColumnsToFit(gtx, false)
-	//	t.AwaitingSizeColumnsToFit = false
-	//}
 	list := material.List(th.Theme, &t.List)
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -472,7 +467,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 											Can:   func() bool { return true },
 											Do: func() {
 												var zero T
-												t.SelectedNode.InsertAfter(NewNode(zero))
+												t.InsertAfter(gtx, NewNode(zero))
 											},
 											Clickable: widget.Clickable{},
 										}
@@ -483,7 +478,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 											Can:   func() bool { return true },
 											Do: func() {
 												var zero T // todo edit type?
-												t.SelectedNode.InsertAfter(NewContainerNode("NewContainerNode", zero))
+												t.InsertAfter(gtx, NewContainerNode("NewContainerNode", zero))
 											},
 											Clickable: widget.Clickable{},
 										}
@@ -503,7 +498,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 											Icon:  IconActionUpdate,
 											Can:   func() bool { return true },
 											Do: func() {
-												t.SelectedNode.InsertAfter(t.SelectedNode.Clone())
+												t.InsertAfter(gtx, t.SelectedNode.Clone())
 											},
 											Clickable: widget.Clickable{},
 										}
@@ -1530,12 +1525,17 @@ func (n *Node[T]) Remove() {
 }
 
 //通知单元格节点列宽更新事件
-//增 AddChild InsertAfter (DuplicateType)
+//增 AddChild InsertAfter (DuplicateType) SetChildren
 //删 Remove
-//改 EditType todo 增加 应用修改方法 或者edit 方法
+//改 EditType todo 增加 应用修改方法 或者edit 方法，双击或者右键触发
 //查 Find
 //过滤
 //排序
+
+func (t *TreeTable[T]) InsertAfter(gtx layout.Context, after *Node[T]) {
+	t.SelectedNode.InsertAfter(after)
+	t.SizeColumnsToFit(gtx, false)
+}
 
 func (n *Node[T]) Find() (found *Node[T]) {
 	for _, child := range n.parent.Walk() {

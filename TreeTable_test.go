@@ -272,7 +272,7 @@ func treeTable() *ux.TreeTable[packet] {
 			}
 			t.Root.OpenAll()
 			t.Format()
-			t.AwaitingSizeColumnsToFit = true
+			t.awaitingSizeColumnsToFit = true
 		},
 		JsonName:   "demo",
 		IsDocument: true,

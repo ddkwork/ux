@@ -196,7 +196,6 @@ func main() {
 					}
 					t.Root.OpenAll()
 					t.Format()
-					t.AwaitingSizeColumnsToFit = true
 				},
 				JsonName:   "demo",
 				IsDocument: true,
