@@ -65,7 +65,7 @@ type (
 	TableContext[T any] struct {
 		ContextMenuItems       func(gtx layout.Context, n *Node[T]) (items []ContextMenuItem) // 通过SelectedNode传递给菜单的do取出元数据，比如删除文件,但是菜单是否绘制取决于当前渲染的行，所以要传递n给can
 		MarshalRowCells        func(n *Node[T]) (cells []CellData)                            // 序列化节点元数据
-		UnmarshalRowCells      func(n *Node[T], values []string)                              // 节点编辑后反序列化回节点
+		UnmarshalRowCells      func(n *Node[T], values []CellData)                            // 节点编辑后反序列化回节点
 		RowSelectedCallback    func()                                                         // 行选中回调,通过SelectedNode传递给菜单
 		RowDoubleClickCallback func()                                                         // double click callback,通过SelectedNode传递给菜单
 		LongPressCallback      func()                                                         // mobile long press callback,通过SelectedNode传递给菜单
@@ -289,14 +289,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 			}
 
 		case 2:
-			modal.SetTitle("edit row")
-			modal.SetContent(func(gtx layout.Context) layout.Dimensions {
-				editNode := NewStructView(n.Data, func() (elems []CellData) {
-					return t.MarshalRowCells(t.SelectedNode)
-				})
-				return editNode.Layout(gtx)
-			})
-
+			t.Edit(gtx)
 			//if t.RowDoubleClickCallback != nil { // 行双击回调
 			//	go t.RowDoubleClickCallback(n)
 			//	//gtx.Execute(op.InvalidateCmd{})
@@ -502,21 +495,10 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 										}
 									case EditType:
 										item = ContextMenuItem{
-											Title: "",
-											Icon:  IconEdit,
-											Can:   func() bool { return true },
-											Do: func() {
-												modal.SetTitle("edit row")
-												modal.SetContent(func(gtx layout.Context) layout.Dimensions {
-													editNode := NewStructView(t.SelectedNode.Data, func() (elems []CellData) {
-														return t.MarshalRowCells(t.SelectedNode)
-													})
-													return editNode.Layout(gtx)
-												})
-												if modal.Visible() {
-													modal.Layout(gtx)
-												}
-											},
+											Title:         "",
+											Icon:          IconEdit,
+											Can:           func() bool { return true },
+											Do:            func() { t.Edit(gtx) },
 											AppendDivider: true,
 											Clickable:     widget.Clickable{},
 										}
@@ -1536,6 +1518,21 @@ func (t *TreeTable[T]) InsertAfter(gtx layout.Context, after *Node[T]) {
 }
 func (t *TreeTable[T]) Remove(gtx layout.Context) {
 	t.SelectedNode.Remove()
+	t.SizeColumnsToFit(gtx, false)
+}
+func (t *TreeTable[T]) Edit(gtx layout.Context) {
+	modal.SetTitle("edit row")
+	modal.SetContent(func(gtx layout.Context) layout.Dimensions {
+		editNode := NewStructView(t.SelectedNode.Data, func() (elems []CellData) {
+			return t.MarshalRowCells(t.SelectedNode)
+		})
+		return editNode.Layout(gtx)
+	})
+	if modal.Visible() {
+		modal.Layout(gtx)
+	}
+	//todo test
+	t.UnmarshalRowCells(t.SelectedNode, t.MarshalRowCells(t.SelectedNode)) //此时节点元数据被刷新
 	t.SizeColumnsToFit(gtx, false)
 }
 
