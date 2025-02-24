@@ -14,6 +14,7 @@ const (
 	TreeType
 	Table2Type
 	TableType
+	AnimationButtonType
 	ColorPickerType
 	CardType
 	SearchDropDownType
@@ -116,6 +117,8 @@ func (t DemoType) String() string {
 		return "Table2"
 	case TableType:
 		return "Table"
+	case AnimationButtonType:
+		return "AnimationButton"
 	case ColorPickerType:
 		return "ColorPicker"
 	case CardType:
@@ -275,6 +278,8 @@ func (t DemoType) Tooltip() string {
 		return "table2"
 	case TableType:
 		return "table"
+	case AnimationButtonType:
+		return "AnimationButton"
 	case ColorPickerType:
 		return "colorPicker"
 	case CardType:
@@ -430,6 +435,7 @@ func (t DemoType) Names() []string {
 		"Tree",
 		"Table2",
 		"Table",
+		"AnimationButton",
 		"ColorPicker",
 		"Card",
 		"SearchDropDown",
@@ -511,6 +517,7 @@ func (t DemoType) EnumTypes() []DemoType {
 		TreeType,
 		Table2Type,
 		TableType,
+		AnimationButtonType,
 		ColorPickerType,
 		CardType,
 		SearchDropDownType,

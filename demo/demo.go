@@ -367,7 +367,6 @@ func main() {
 					IconColor:  color.NRGBA{},
 				},
 			})
-
 			m.Set(SearchDropDownType, dropDown.Layout)
 		case IconvgViewType:
 			m.Set(IconvgViewType, ux.NewIconView().Layout)
@@ -458,9 +457,7 @@ func main() {
 			form.Add("email", email.Layout)
 			dropDown := ux.NewDropDown(SuperRecovery2Type.Names()...)
 			form.InsertAt(0, "choose a app", dropDown.Layout)
-
 			// form.Add("", ux.BlueButton(&clickable, "submit", unit.Dp(100)).Layout)
-
 			m.Set(StructViewType, form.Layout)
 		case ColorPickerType:
 			m.Set(ColorPickerType, ux.NewColorPicker().Layout)
@@ -502,10 +499,11 @@ func main() {
 			m.Set(SplitViewType, sp.Layout)
 		case ListViewType:
 		case JsonTreeType:
+		case AnimationButtonType:
 			newButtonAnimation := ux.NewButtonAnimation("animation button", ux.IconBack, func() {
 				mylog.Info("animation button clicked")
 			})
-			m.Set(JsonTreeType, newButtonAnimation.Layout) // todo bug
+			m.Set(AnimationButtonType, newButtonAnimation.Layout) // todo bug
 		case TerminalType: // todo 控制台被接管了
 			if mylog.IsWindows() {
 				continue

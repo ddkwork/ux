@@ -29,6 +29,7 @@ func TestName(t *testing.T) {
 		yield("tree", "tree")
 		yield("table2", "table2")
 		yield("table", "table")
+		yield("AnimationButton", "AnimationButton")
 		yield("colorPicker", "colorPicker")
 		yield("card", "card")
 		yield("SearchDropDown", "SearchDropDown")
