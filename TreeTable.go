@@ -506,8 +506,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 	rows := []layout.FlexChild{ // 合成层级列和其他列的单元格为一行,并设置该行的背景和行高
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return Background{bgColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(19)) //
-				gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(19)) // 限制行高以避免列分割线呈现虚线视觉
+				gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(14)) //主题的字体大小也会影响行高，这里设置最小行高为14dp
+				gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(14)) // 限制行高以避免列分割线呈现虚线视觉
 				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, rowCells...)
 			})
 		}),
