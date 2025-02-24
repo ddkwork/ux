@@ -57,7 +57,154 @@ func main() {
 	for _, Type := range TreeTableType.EnumTypes() {
 		switch Type {
 		case TreeTableType:
-			m.Set(TreeTableType, treeTable())
+			type packet struct {
+				Scheme        string        // 请求协议
+				Method        string        // 请求方式
+				Host          string        // 请求主机
+				Path          string        // 请求路径
+				ContentType   string        // 收发都有
+				ContentLength int           // 收发都有
+				Status        string        // 返回的状态码文本
+				Note          string        // 注释
+				Process       string        // 进程
+				PadTime       time.Duration // 请求到返回耗时
+			}
+			t := ux.NewTreeTable(packet{})
+			t.TableContext = ux.TableContext[packet]{
+				ContextMenuItems: func(n *ux.Node[packet]) (items []ux.ContextMenuItem) {
+					return []ux.ContextMenuItem{
+						{
+							Title: "delete file",
+							Icon:  nil,
+							Can:   func() bool { return stream.IsFilePath(n.Data.Path) }, // n是当前渲染的行,它的元数据是路径才显示
+							Do: func() {
+								mylog.Check(os.Remove(t.SelectedNode.Data.Path))
+								t.SelectedNode.Remove()
+							},
+							AppendDivider: false,
+							Clickable:     widget.Clickable{},
+						},
+						{
+							Title: "delete directory",
+							Icon:  nil,
+							Can:   func() bool { return stream.IsDir(n.Data.Path) }, // n是当前渲染的行,它的元数据是目录才显示
+							Do: func() {
+								mylog.Check(os.RemoveAll(t.SelectedNode.Data.Path))
+								t.SelectedNode.Remove()
+							},
+							AppendDivider: false,
+							Clickable:     widget.Clickable{},
+						},
+					}
+				},
+				MarshalRowCells: func(n *ux.Node[packet]) (cells []ux.CellData) {
+					if n.Container() {
+						n.Data.Scheme = n.SumChildren()
+						sumBytes := 0
+						sumTime := time.Duration(0)
+						n.Data.ContentLength = sumBytes
+						n.Data.PadTime = sumTime
+						for _, node := range n.Walk() {
+							sumBytes += node.Data.ContentLength
+							sumTime += node.Data.PadTime
+						}
+						n.Data.ContentLength = sumBytes
+						n.Data.PadTime = sumTime
+					}
+					return []ux.CellData{
+						{Text: n.Data.Scheme, FgColor: ux.Orange100},
+						{Text: n.Data.Method, FgColor: ux.ColorPink},
+						{Text: n.Data.Host},
+						{Text: n.Data.Path},
+						{Text: n.Data.ContentType},
+						{Text: fmt.Sprintf("%d", n.Data.ContentLength)},
+						{Text: n.Data.Status},
+						{Text: n.Data.Note},
+						{Text: n.Data.Process},
+						{Text: fmt.Sprintf("%s", n.Data.PadTime)},
+					}
+				},
+				UnmarshalRowCells: nil,
+				RowSelectedCallback: func() {
+					mylog.Struct("selected node", t.SelectedNode.Data)
+				},
+				RowDoubleClickCallback: func() {
+					mylog.Info("node:", t.SelectedNode.Data.Path, " double clicked")
+				},
+				LongPressCallback: nil,
+				SetRootRowsCallBack: func() {
+					for i := 0; i < 100; i++ {
+						data := packet{
+							Scheme:        "Row" + fmt.Sprint(i+1),
+							Method:        http.MethodGet,
+							Host:          "example.com",
+							Path:          fmt.Sprintf("/api/v%d/resource", i+1),
+							ContentType:   "application/json",
+							ContentLength: i + 100,
+							Status:        http.StatusText(http.StatusOK),
+							Note:          fmt.Sprintf("获取资源%d", i+1),
+							Process:       fmt.Sprintf("process%d.exe", i+1),
+							PadTime:       time.Duration(i+1) * time.Second,
+						}
+						var node *ux.Node[packet]
+						if i%10 == 3 {
+							node = ux.NewContainerNode(fmt.Sprintf("Row %d", i+1), data)
+							t.Root.AddChild(node)
+							for j := 0; j < 5; j++ {
+								subData := packet{
+									Scheme:        "Row" + fmt.Sprint(j+1),
+									Method:        http.MethodGet,
+									Host:          "example.com",
+									Path:          fmt.Sprintf("/api/v%d/resource%d", i+1, j+1),
+									ContentType:   "application/json",
+									ContentLength: i + 100 + j + 1,
+									Status:        http.StatusText(http.StatusOK),
+									Note:          fmt.Sprintf("获取资源%d-%d", i+1, j+1),
+									Process:       fmt.Sprintf("process%d-%d.exe", i+1, j+1),
+									PadTime:       time.Duration(i+1+j+1) * time.Second,
+								}
+								if j < 2 {
+									subNode := ux.NewContainerNode("Sub Row "+fmt.Sprint(j+1), subData)
+									node.AddChild(subNode)
+									for k := 0; k < 2; k++ {
+										subSubData := packet{
+											Scheme:        "Sub Sub Row" + fmt.Sprint(k+1),
+											Method:        http.MethodGet,
+											Host:          "example.com",
+											Path:          fmt.Sprintf("/api/v%d/resource%d-%d", i+1, j+1, k+1),
+											ContentType:   "application/json",
+											ContentLength: i + 100 + j + 1 + k + 1,
+											Status:        http.StatusText(http.StatusOK),
+											Note:          fmt.Sprintf("获取资源%d-%d-%d", i+1, j+1, k+1),
+											Process:       fmt.Sprintf("process%d-%d-%d.exe", i+1, j+1, k+1),
+											PadTime:       time.Duration(i+1+j+1+k+1) * time.Second,
+										}
+										subSubNode := ux.NewNode(subSubData)
+										subNode.AddChild(subSubNode)
+									}
+								} else {
+									subData.Scheme = "Sub Row" + fmt.Sprint(j+1)
+									subNode := ux.NewNode(subData)
+									node.AddChild(subNode)
+								}
+							}
+						} else {
+							t.Root.AddChild(ux.NewNode(data))
+						}
+					}
+					t.Root.OpenAll()
+					t.Format()
+					t.AwaitingSizeColumnsToFit = true
+				},
+				JsonName:   "demo",
+				IsDocument: true,
+			}
+			// t.SetRootRowsCallBack()//已经在layout内once一次，避免每个实例都要写一遍
+			appBar.Search.SetOnChanged(func(text string) {
+				// todo 这里可以设计一个类似aggrid的高级搜索功能：把n叉树的元数据结构体取出来，然后通过反射结构体布局一个所有字段值的过滤综合条件，最后设置过滤结果填充到表格的过滤rows中
+				t.Filter(text)
+			})
+			m.Set(TreeTableType, t.Layout)
 		case TreeType:
 			rootNodes := []*ux.TreeNode{
 				{
@@ -110,7 +257,87 @@ func main() {
 			t := table2(Packets)
 			m.Set(Table2Type, t.Layout)
 		case TableType:
-			m.Set(TableType, table())
+			type BasicFan struct {
+				ID          int     `json:"id"`          // id
+				CompanyID   int     `json:"companyId"`   // 公司id
+				CompanyName string  `json:"companyName"` // 公司名称
+				PlantID     int     `json:"plantId"`     // 场站id
+				PlantName   string  `json:"plantName"`   // 场站名称
+				StagingID   int     `json:"stagingId"`   // 工期id
+				StagingName string  `json:"stagingName"` // 工期名称
+				CircuitID   int     `json:"circuitId"`   // 集电线id
+				CircuitName string  `json:"circuitName"` // 集电线名称
+				FanName     string  `json:"fanName"`     // 风机名称
+				PowerField  string  `json:"powerField"`  // 电量计算的原始点
+				FanCode     string  `json:"fanCode"`     // 风机编码
+				InnerCode   string  `json:"innerCode"`   // 内部编码
+				ModelID     int     `json:"modelId"`     // 型号id
+				ModelName   string  `json:"modelName"`   // 型号名称
+				Status      int     `json:"status"`      // 1 运行 2 调试 3 未接入
+				StartSpeed  float64 `json:"startSpeed"`  // 切入风速(m/s)
+				StopSpeed   float64 `json:"stopSpeed"`   // 切出风速(m/s)
+				FanCap      float64 `json:"fanCap"`      // 装机容量
+				// Host        string  `json:"host"`
+
+				IsParadigm   int    `json:"isParadigm"`   // 是否是标杆
+				FanLocalType string `json:"fanLocalType"` // fan_local_type 海风陆风
+			}
+			var fans []*BasicFan
+			for i := 0; i < 100*10000; i++ {
+				fans = append(fans, &BasicFan{ID: i + 1, CompanyID: 1, CompanyName: "company1", PlantName: "plant1", StagingName: "staging1", CircuitName: "circuit1", FanName: "#1风机"})
+			}
+			datatable := ux.NewDataTable(fans, nil, nil)
+			table := ux.NewTable(datatable)
+			table.SelectionChangedCallback = func(gtx layout.Context, row, col int) {
+				data := table.GetRow(row)
+				mylog.Struct("todo", data) // todo check data
+			}
+
+			table.DoubleClickCallback = func(gtx layout.Context, row, col int) {
+				// data := table.GetRow(row)
+				// mylog.Struct("todo",data)
+				mylog.Info("double click for edit row data")
+			}
+
+			contextMenu := ux.NewContextMenu()
+			contextMenu.AddItem(ux.ContextMenuItem{
+				Title: "addRow",
+				Icon:  ux.IconAdd,
+				Can: func() bool {
+					return true
+				},
+				Do: func() {
+					mylog.Info("add row")
+				},
+				AppendDivider: false,
+				Clickable:     widget.Clickable{},
+			})
+			contextMenu.AddItem(ux.ContextMenuItem{
+				Title: "deleteRow",
+				Icon:  ux.IconDelete,
+				Can: func() bool {
+					return true
+				},
+				Do: func() {
+					mylog.Info("delete row")
+				},
+				AppendDivider: true,
+				Clickable:     widget.Clickable{},
+			})
+
+			table.SetMenu(contextMenu)
+
+			//header := ux.NewContainer(w)
+			//button2 := ux.NewButton(w, "滚动到第100行", func() {
+			//	//table.GridState.Vertical.Last
+			//	log.Println(table.Vertical.First, table.VScrollbar.ScrollDistance(), table.Vertical.OffsetAbs, table.Vertical.Length)
+			//	table.Vertical.First = 0
+			//	table.Vertical.Offset = (table.Vertical.Length / (table.Size())) * (100 - 1)
+			//})
+			//header.Add(layout.Rigid(button2.Layout))
+			//header.Add(layout.Rigid(button2.Layout))
+			//header.Add(layout.Rigid(button2.Layout))
+			m.Set(TableType, table.Layout)
 		case SearchDropDownType:
 			dropDown := ux.NewSearchDropDown()
 			dropDown.SetOnChanged(func(value string) {
@@ -256,13 +483,23 @@ func main() {
 			m.Set(CardType, f.Layout)
 		case MobileType:
 		case SvgButtonType:
-			m.Set(MobileType, ux.NewButton("Hex Editor", nil).SetRectIcon(true).SetSVGIcon(ux.CircledChevronRight).Layout)
+			m.Set(SvgButtonType, ux.NewButton("Hex Editor", nil).SetRectIcon(true).SetSVGIcon(ux.CircledChevronRight).Layout)
 		case CodeEditorType:
 			m.Set(CodeEditorType, ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout)
 		case AsmViewType:
 		case LogViewType:
+			m.Set(LogViewType, ux.LogView()) // todo 日志没有对齐，控制台是对齐的，增加滚动条
 		case ComBoxType:
+			// m.Set(ComBoxType, combox(w))//newselect
 		case SplitViewType:
+			sp := ux.NewSplit(ux.Split{
+				Ratio:  0, // 布局比例，0 表示居中，-1 表示完全靠左，1 表示完全靠右
+				Bar:    10,
+				Axis:   layout.Horizontal,
+				First:  ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout,
+				Second: ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout,
+			})
+			m.Set(SplitViewType, sp.Layout)
 		case ListViewType:
 		case JsonTreeType:
 			newButtonAnimation := ux.NewButtonAnimation("animation button", ux.IconBack, func() {
@@ -339,18 +576,6 @@ func main() {
 		}
 	}
 
-	m.Set(LogViewType, ux.LogView()) // todo 日志没有对齐，控制台是对齐的，增加滚动条
-	// m.Set(ComBoxType, combox(w))//newselect
-
-	sp := ux.NewSplit(ux.Split{
-		Ratio:  0, // 布局比例，0 表示居中，-1 表示完全靠左，1 表示完全靠右
-		Bar:    10,
-		Axis:   layout.Horizontal,
-		First:  ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout,
-		Second: ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout,
-	})
-	m.Set(SplitViewType, sp.Layout)
-
 	vtab := ux.NewTabView(layout.Vertical)
 	for k, v := range m.Range() {
 		tab := ux.NewTabItem(k.String(), v)
@@ -375,243 +600,6 @@ func main() {
 	//})
 
 	ux.Run(panel)
-}
-
-func treeTable() ux.Widget {
-	type packet struct {
-		Scheme        string        // 请求协议
-		Method        string        // 请求方式
-		Host          string        // 请求主机
-		Path          string        // 请求路径
-		ContentType   string        // 收发都有
-		ContentLength int           // 收发都有
-		Status        string        // 返回的状态码文本
-		Note          string        // 注释
-		Process       string        // 进程
-		PadTime       time.Duration // 请求到返回耗时
-	}
-	t := ux.NewTreeTable(packet{})
-	t.TableContext = ux.TableContext[packet]{
-		ContextMenuItems: func(n *ux.Node[packet]) (items []ux.ContextMenuItem) {
-			return []ux.ContextMenuItem{
-				{
-					Title: "delete file",
-					Icon:  nil,
-					Can:   func() bool { return stream.IsFilePath(n.Data.Path) }, // n是当前渲染的行,它的元数据是路径才显示
-					Do: func() {
-						mylog.Check(os.Remove(t.SelectedNode.Data.Path))
-						t.SelectedNode.Remove()
-					},
-					AppendDivider: false,
-					Clickable:     widget.Clickable{},
-				},
-				{
-					Title: "delete directory",
-					Icon:  nil,
-					Can:   func() bool { return stream.IsDir(n.Data.Path) }, // n是当前渲染的行,它的元数据是目录才显示
-					Do: func() {
-						mylog.Check(os.RemoveAll(t.SelectedNode.Data.Path))
-						t.SelectedNode.Remove()
-					},
-					AppendDivider: false,
-					Clickable:     widget.Clickable{},
-				},
-			}
-		},
-		MarshalRowCells: func(n *ux.Node[packet]) (cells []ux.CellData) {
-			if n.Container() {
-				n.Data.Scheme = n.SumChildren()
-				sumBytes := 0
-				sumTime := time.Duration(0)
-				n.Data.ContentLength = sumBytes
-				n.Data.PadTime = sumTime
-				for _, node := range n.Walk() {
-					sumBytes += node.Data.ContentLength
-					sumTime += node.Data.PadTime
-				}
-				n.Data.ContentLength = sumBytes
-				n.Data.PadTime = sumTime
-			}
-			return []ux.CellData{
-				{Text: n.Data.Scheme, FgColor: ux.Orange100},
-				{Text: n.Data.Method, FgColor: ux.ColorPink},
-				{Text: n.Data.Host},
-				{Text: n.Data.Path},
-				{Text: n.Data.ContentType},
-				{Text: fmt.Sprintf("%d", n.Data.ContentLength)},
-				{Text: n.Data.Status},
-				{Text: n.Data.Note},
-				{Text: n.Data.Process},
-				{Text: fmt.Sprintf("%s", n.Data.PadTime)},
-			}
-		},
-		UnmarshalRowCells: nil,
-		RowSelectedCallback: func() {
-			mylog.Struct("selected node", t.SelectedNode.Data)
-		},
-		RowDoubleClickCallback: func() {
-			mylog.Info("node:", t.SelectedNode.Data.Path, " double clicked")
-		},
-		LongPressCallback: nil,
-		SetRootRowsCallBack: func() {
-			for i := 0; i < 100; i++ {
-				data := packet{
-					Scheme:        "Row" + fmt.Sprint(i+1),
-					Method:        http.MethodGet,
-					Host:          "example.com",
-					Path:          fmt.Sprintf("/api/v%d/resource", i+1),
-					ContentType:   "application/json",
-					ContentLength: i + 100,
-					Status:        http.StatusText(http.StatusOK),
-					Note:          fmt.Sprintf("获取资源%d", i+1),
-					Process:       fmt.Sprintf("process%d.exe", i+1),
-					PadTime:       time.Duration(i+1) * time.Second,
-				}
-				var node *ux.Node[packet]
-				if i%10 == 3 {
-					node = ux.NewContainerNode(fmt.Sprintf("Row %d", i+1), data)
-					t.Root.AddChild(node)
-					for j := 0; j < 5; j++ {
-						subData := packet{
-							Scheme:        "Row" + fmt.Sprint(j+1),
-							Method:        http.MethodGet,
-							Host:          "example.com",
-							Path:          fmt.Sprintf("/api/v%d/resource%d", i+1, j+1),
-							ContentType:   "application/json",
-							ContentLength: i + 100 + j + 1,
-							Status:        http.StatusText(http.StatusOK),
-							Note:          fmt.Sprintf("获取资源%d-%d", i+1, j+1),
-							Process:       fmt.Sprintf("process%d-%d.exe", i+1, j+1),
-							PadTime:       time.Duration(i+1+j+1) * time.Second,
-						}
-						if j < 2 {
-							subNode := ux.NewContainerNode("Sub Row "+fmt.Sprint(j+1), subData)
-							node.AddChild(subNode)
-							for k := 0; k < 2; k++ {
-								subSubData := packet{
-									Scheme:        "Sub Sub Row" + fmt.Sprint(k+1),
-									Method:        http.MethodGet,
-									Host:          "example.com",
-									Path:          fmt.Sprintf("/api/v%d/resource%d-%d", i+1, j+1, k+1),
-									ContentType:   "application/json",
-									ContentLength: i + 100 + j + 1 + k + 1,
-									Status:        http.StatusText(http.StatusOK),
-									Note:          fmt.Sprintf("获取资源%d-%d-%d", i+1, j+1, k+1),
-									Process:       fmt.Sprintf("process%d-%d-%d.exe", i+1, j+1, k+1),
-									PadTime:       time.Duration(i+1+j+1+k+1) * time.Second,
-								}
-								subSubNode := ux.NewNode(subSubData)
-								subNode.AddChild(subSubNode)
-							}
-						} else {
-							subData.Scheme = "Sub Row" + fmt.Sprint(j+1)
-							subNode := ux.NewNode(subData)
-							node.AddChild(subNode)
-						}
-					}
-				} else {
-					t.Root.AddChild(ux.NewNode(data))
-				}
-			}
-			t.Root.OpenAll()
-			t.Format()
-			t.AwaitingSizeColumnsToFit = true
-		},
-		JsonName:   "demo",
-		IsDocument: true,
-	}
-	// t.SetRootRowsCallBack()//已经在layout内once一次，避免每个实例都要写一遍
-	appBar.Search.SetOnChanged(func(text string) {
-		// todo 这里可以设计一个类似aggrid的高级搜索功能：把n叉树的元数据结构体取出来，然后通过反射结构体布局一个所有字段值的过滤综合条件，最后设置过滤结果填充到表格的过滤rows中
-		t.Filter(text)
-	})
-	return t.Layout
-}
-
-func table() ux.Widget {
-	var fans []*BasicFan
-	for i := 0; i < 100*10000; i++ {
-		fans = append(fans, &BasicFan{ID: i + 1, CompanyID: 1, CompanyName: "company1", PlantName: "plant1", StagingName: "staging1", CircuitName: "circuit1", FanName: "#1风机"})
-	}
-	datatable := ux.NewDataTable(fans, nil, nil)
-	table := ux.NewTable(datatable)
-	table.SelectionChangedCallback = func(gtx layout.Context, row, col int) {
-		data := table.GetRow(row)
-		mylog.Struct("todo", data) // todo check data
-	}
-
-	table.DoubleClickCallback = func(gtx layout.Context, row, col int) {
-		// data := table.GetRow(row)
-		// mylog.Struct("todo",data)
-		mylog.Info("double click for edit row data")
-	}
-
-	contextMenu := ux.NewContextMenu()
-	contextMenu.AddItem(ux.ContextMenuItem{
-		Title: "addRow",
-		Icon:  ux.IconAdd,
-		Can: func() bool {
-			return true
-		},
-		Do: func() {
-			mylog.Info("add row")
-		},
-		AppendDivider: false,
-		Clickable:     widget.Clickable{},
-	})
-	contextMenu.AddItem(ux.ContextMenuItem{
-		Title: "deleteRow",
-		Icon:  ux.IconDelete,
-		Can: func() bool {
-			return true
-		},
-		Do: func() {
-			mylog.Info("delete row")
-		},
-		AppendDivider: true,
-		Clickable:     widget.Clickable{},
-	})
-
-	table.SetMenu(contextMenu)
-
-	//header := ux.NewContainer(w)
-	//button2 := ux.NewButton(w, "滚动到第100行", func() {
-	//	//table.GridState.Vertical.Last
-	//	log.Println(table.Vertical.First, table.VScrollbar.ScrollDistance(), table.Vertical.OffsetAbs, table.Vertical.Length)
-	//	table.Vertical.First = 0
-	//	table.Vertical.Offset = (table.Vertical.Length / (table.Size())) * (100 - 1)
-	//})
-	//header.Add(layout.Rigid(button2.Layout))
-	//header.Add(layout.Rigid(button2.Layout))
-	//header.Add(layout.Rigid(button2.Layout))
-
-	return table.Layout
-}
-
-type BasicFan struct {
-	ID          int     `json:"id"`          // id
-	CompanyID   int     `json:"companyId"`   // 公司id
-	CompanyName string  `json:"companyName"` // 公司名称
-	PlantID     int     `json:"plantId"`     // 场站id
-	PlantName   string  `json:"plantName"`   // 场站名称
-	StagingID   int     `json:"stagingId"`   // 工期id
-	StagingName string  `json:"stagingName"` // 工期名称
-	CircuitID   int     `json:"circuitId"`   // 集电线id
-	CircuitName string  `json:"circuitName"` // 集电线名称
-	FanName     string  `json:"fanName"`     // 风机名称
-	PowerField  string  `json:"powerField"`  // 电量计算的原始点
-	FanCode     string  `json:"fanCode"`     // 风机编码
-	InnerCode   string  `json:"innerCode"`   // 内部编码
-	ModelID     int     `json:"modelId"`     // 型号id
-	ModelName   string  `json:"modelName"`   // 型号名称
-	Status      int     `json:"status"`      // 1 运行 2 调试 3 未接入
-	StartSpeed  float64 `json:"startSpeed"`  // 切入风速(m/s)
-	StopSpeed   float64 `json:"stopSpeed"`   // 切出风速(m/s)
-	FanCap      float64 `json:"fanCap"`      // 装机容量
-	// Host        string  `json:"host"`
-
-	IsParadigm   int    `json:"isParadigm"`   // 是否是标杆
-	FanLocalType string `json:"fanLocalType"` // fan_local_type 海风陆风
 }
 
 //go:embed demo.go
