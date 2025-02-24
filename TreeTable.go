@@ -7,6 +7,7 @@ import (
 	"image/color"
 	"io"
 	"iter"
+	"path/filepath"
 	"slices"
 	"sort"
 	"strconv"
@@ -158,7 +159,69 @@ var once sync.Once
 
 func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 	once.Do(func() {
-		t.SetRootRowsCallBack()
+		if t.SetRootRowsCallBack != nil { // mitmproxy
+			t.SetRootRowsCallBack()
+		}
+		if t.JsonName == "" {
+			mylog.Check("JsonName is empty")
+		}
+		t.JsonName = strings.TrimSuffix(t.JsonName, ".json")
+		mylog.CheckNil(t.UnmarshalRowCells)
+		// mylog.CheckNil(ctx.SetRootRowsCallBack)//mitmproxy
+		mylog.CheckNil(t.RowSelectedCallback)
+		stream.MarshalJsonToFile(t.Root, filepath.Join("cache", t.JsonName+".json"))
+		stream.WriteTruncate(filepath.Join("cache", t.JsonName+".txt"), t.Document())
+		if t.IsDocument {
+			b := stream.NewBuffer("")
+			b.WriteStringLn("# " + t.JsonName + " document table")
+			b.WriteStringLn("```text")
+			b.WriteStringLn(t.Document())
+			b.WriteStringLn("```")
+			stream.WriteTruncate("README2.md", b.String())
+		}
+		//if t.FileDropCallback == nil {
+		//	t.FileDropCallback = func(files []string) {
+		//		if filepath.Ext(files[0]) == ".json" {
+		//			mylog.Info("dropped file", files[0])
+		//			table.ResetChildren()
+		//			b := stream.NewBuffer(files[0])
+		//			mylog.Check(json.Unmarshal(b.Bytes(), table)) // todo test need a zero table?
+		//			fnUpdate()
+		//		}
+		//		mylog.Struct("todo", files)
+		//	}
+		//}
+		//	table.DoubleClickCallback = func() {
+		//		rows := table.SelectedRows(false)
+		//		for i, row := range rows {
+		//			// todo icon edit
+		//			app.RunWithIco("edit row #"+fmt.Sprint(i), rowPngBuffer, func(w *unison.Window) {
+		//				content := w.Content()
+		//				nodeEditor, RowPanel := NewStructView(row.Data, func(data T) (values []CellData) {
+		//					return table.MarshalRow(row)
+		//				})
+		//				content.AddChild(nodeEditor)
+		//				content.AddChild(RowPanel)
+		//				panel := NewButtonsPanel(
+		//					[]string{
+		//						"apply", "cancel",
+		//					},
+		//					func() {
+		//						ctx.UnmarshalRow(row, nodeEditor.getFieldValues())
+		//						nodeEditor.Update(row.Data)
+		//						table.SyncToModel()
+		//						stream.MarshalJsonToFile(table.Children, ctx.JsonName+".json")
+		//						// w.Dispose()
+		//					},
+		//					func() {
+		//						w.Dispose()
+		//					},
+		//				)
+		//				RowPanel.AddChild(panel)
+		//				RowPanel.AddChild(NewVSpacer())
+		//			})
+		//		}
+		//	}
 	})
 	// if t.AwaitingSizeColumnsToFit {
 	t.SizeColumnsToFit(gtx, false)

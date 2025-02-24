@@ -124,7 +124,9 @@ func main() {
 						{Text: fmt.Sprintf("%s", n.Data.PadTime)},
 					}
 				},
-				UnmarshalRowCells: nil,
+				UnmarshalRowCells: func(n *ux.Node[packet], values []string) {
+					mylog.Todo("unmarshal row cells for edit node")
+				},
 				RowSelectedCallback: func() {
 					mylog.Struct("selected node", t.SelectedNode.Data)
 				},
@@ -512,64 +514,64 @@ func main() {
 			m.Set(TerminalType, ux.NewTabItem("Tab 5", func(gtx layout.Context) layout.Dimensions {
 				return terminal.Console(screen, settings)(gtx)
 			}).LayoutContent)
-		case StackViewType:
-		case DockViewType:
-		case Gif123Type:
-		case HexEditorType:
-		case ContextMenuType:
+		case StackViewType: //todo stackview
+		case DockViewType: //todo dockview
+		case Gif123Type: //todo gif123
+		case HexEditorType: //todo hex editor
+		case ContextMenuType: //todo contextmenu
 			m.Set(ContextMenuType, NewMenuObj().Layout)
-		case ImageEditorType:
-		case MediaPlayerType:
-		case MindType:
-		case PdfViewType:
-		case MapViewType:
-		case ThemeViewType:
+		case ImageEditorType: //todo 图片编辑器
+		case MediaPlayerType: //todo 媒体播放器
+		case MindType: //todo 思维导图
+		case PdfViewType: //todo pdf
+		case MapViewType: //todo 地图
+		case ThemeViewType: //todo 主题编辑器
 		case SettingsviewType:
-		case SliceviewType:
+		case SliceviewType: //todo 切片器
 		case XyzViewType:
-		case WebViewType:
-		case SvgViewType:
+		case WebViewType: //todo webview
+		case SvgViewType: //todo svg
 		case CanvasViewType:
 		case PopMenuType:
-		case TooltipType:
-		case TextfieldType:
-		case MarkdownViewType:
-		case GomitmproxyType:
-		case HyperDbgType:
-		case VstartType:
-		case ExplorerType:
+		case TooltipType: //todo tooltip
+		case TextfieldType: //todo textfield
+		case MarkdownViewType: //todo markdown
+		case GomitmproxyType: //todo gomitmproxy
+		case HyperDbgType: //todo hyperdbg
+		case VstartType: //todo vstart
+		case ExplorerType: //todo 文件管理器
 		case DesignerType:
-		case AiChatType:
-		case EncodingTestType:
-		case GameControlFaceType:
-		case GithubType:
-		case GhipsType:
-		case TaskManagerType:
+		case AiChatType: //todo 机器人聊天
+		case EncodingTestType: //todo 编码测试
+		case GameControlFaceType: //todo 游戏控制器面板
+		case GithubType: //todo github
+		case GhipsType: //todo ghips
+		case TaskManagerType: //todo 任务管理器
 		case GitlabType:
-		case SteamType:
-		case BuyTomatoesType:
+		case SteamType: //todo steam
+		case BuyTomatoesType: //todo 番茄
 		case CcType:
-		case CryptType:
-		case DatabaseType:
-		case DatarecoveryType:
-		case HardInfoHookType:
-		case HardwareIndoType:
-		case DriverToolType:
-		case EnvironmentType:
-		case ErpType:
-		case FleetType:
+		case CryptType: //todo 加密解密
+		case DatabaseType: //todo 数据库
+		case DatarecoveryType: //todo 数据恢复
+		case HardInfoHookType: //todo 硬件信息
+		case HardwareIndoType: //todo 硬件信息
+		case DriverToolType: //todo 驱动工具
+		case EnvironmentType: //todo 环境变量
+		case ErpType: //todo 电子商务
+		case FleetType: //todo 代码编辑器
 		case ImageConvertType:
-		case JetbraType:
+		case JetbraType: //todo jb crack
 		case JiakaobaodianType:
 		case ManPieceworkType:
-		case MypanType:
-		case NetAdapterType:
-		case NetScanType:
-		case VisualStudiokitType:
-		case C2goType:
+		case MypanType: //todo 网盘上传下载
+		case NetAdapterType: //todo 网络适配器
+		case NetScanType: //todo 网络扫描
+		case VisualStudiokitType: //todo visual studio kit,cmake generator
+		case C2goType: //todo c2go
 		case VncType:
-		case TodoListType:
-		case DropFileType:
+		case TodoListType: //todo 待办事项
+		case DropFileType: //todo 拖拽文件
 		case DarkThemeType:
 		}
 	}
