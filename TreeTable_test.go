@@ -2,10 +2,12 @@ package ux_test
 
 import (
 	"fmt"
+	"github.com/ddkwork/golibrary/assert"
 	"image"
 	"net/http"
 	"os"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -319,4 +321,13 @@ func BenchmarkInsertWithResize(b *testing.B) {
 		copy(sCopy, s)
 		slices.Insert(sCopy, i, v...) // BenchmarkInsertWithResize-8   	11250734	       105.6 ns/op
 	}
+}
+
+func TestTreeTable_Filter(t1 *testing.T) {
+	t := treeTable()
+	t.Filter("ok")
+	return
+	assert.True(t1, strings.EqualFold("row96", "Row96"))
+	fmt.Println(strings.EqualFold("GoLang", "golang"))
+	fmt.Println(strings.EqualFold("golang", "GoLang"))
 }

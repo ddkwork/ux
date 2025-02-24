@@ -1168,18 +1168,17 @@ func newID() uuid.ID { return uuid.New('n') }
 func (t *TreeTable[T]) IsFiltered() bool { return t.filteredRows != nil }
 func (t *TreeTable[T]) Filter(text string) {
 	if text == "" {
-		t.Root.Children = t.rootRows
+		t.rootRows = t.Root.Children
 		t.Root.OpenAll()
 		return
 	}
 	t.filteredRows = make([]*Node[T], 0)
 	for _, node := range t.Root.WalkContainer() { // todo bug 需要改回之前的回调模式？需要调试，编辑节点模态窗口bug
-		if node.Container() {
-			cells := t.MarshalRowCells(node)
-			for _, cell := range cells {
-				if strings.EqualFold(cell.Text, text) {
-					t.filteredRows = append(t.filteredRows, node) // 先过滤所有容器节点
-				}
+		cells := t.MarshalRowCells(node)
+		for _, cell := range cells {
+			if strings.EqualFold(cell.Text, text) { //忽略大小写的情况下相等,支持unicode
+				panic(111)
+				t.filteredRows = append(t.filteredRows, node) // 先过滤所有容器节点
 			}
 		}
 	}
@@ -1189,6 +1188,7 @@ func (t *TreeTable[T]) Filter(text string) {
 			cells := t.MarshalRowCells(node)
 			for _, cell := range cells {
 				if strings.EqualFold(cell.Text, text) {
+					panic(111)
 					children = append(children, node) // 过滤子节点
 				}
 			}
@@ -1196,8 +1196,8 @@ func (t *TreeTable[T]) Filter(text string) {
 		t.filteredRows[i].Children = children
 	}
 	// todo 检查layou部分是否调用filteredRows以及filteredRows的大小是否是0，清空过滤后恢复原始的rootRows
-	t.Root.Children = t.filteredRows
-	// t.rootRows = t.filteredRows
+	//t.Root.Children = t.filteredRows
+	t.rootRows = t.filteredRows
 	t.Root.OpenAll()
 }
 
