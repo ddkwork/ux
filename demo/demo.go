@@ -302,7 +302,7 @@ func main() {
 			contextMenu := ux.NewContextMenu()
 			contextMenu.AddItem(ux.ContextMenuItem{
 				Title: "addRow",
-				//Icon:  ux.IconAdd,//todo
+				// Icon:  ux.IconAdd,//todo
 				Can: func() bool {
 					return true
 				},
@@ -314,7 +314,7 @@ func main() {
 			})
 			contextMenu.AddItem(ux.ContextMenuItem{
 				Title: "deleteRow",
-				//Icon:  ux.IconDelete,//todo
+				// Icon:  ux.IconDelete,//todo
 				Can: func() bool {
 					return true
 				},

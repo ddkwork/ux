@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"github.com/ddkwork/ux/giosvg/internal/svgparser"
 	"go/format"
 	"io"
 	"math"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/ddkwork/ux/giosvg/internal/svgparser"
 )
 
 var (
@@ -102,7 +103,6 @@ var _, _, _, _, _, _, _, _ = (*f32.Point)(nil), (*op.Ops)(nil), (*clip.Op)(nil),
 			} else {
 				w, h = constraints.Max.Y*d, constraints.Max.Y
 			}`, svg.ViewBox.W/svg.ViewBox.H)
-
 		} else {
 			fmt.Fprintf(out, `
 			d := float32(%f)

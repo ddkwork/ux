@@ -2,8 +2,9 @@ package svgparser
 
 import (
 	"fmt"
-	"gioui.org/f32"
 	"strings"
+
+	"gioui.org/f32"
 )
 
 // This file defines the basic path structure

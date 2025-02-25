@@ -1,8 +1,9 @@
 package svgparser
 
 import (
-	"github.com/ddkwork/ux/giosvg/internal/svgparser/simplexml"
 	"io"
+
+	"github.com/ddkwork/ux/giosvg/internal/svgparser/simplexml"
 )
 
 // PathStyle holds the state of the SVG style

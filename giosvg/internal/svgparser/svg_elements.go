@@ -2,9 +2,10 @@ package svgparser
 
 import (
 	"errors"
+	"strings"
+
 	"gioui.org/f32"
 	"github.com/ddkwork/ux/giosvg/internal/svgparser/simplexml"
-	"strings"
 )
 
 func init() {
@@ -22,7 +23,7 @@ var drawFuncs = map[string]svgFunc{
 	"stop":           stopF,
 	"rect":           rectF,
 	"circle":         circleF,
-	"ellipse":        circleF, //circleF handles ellipse also
+	"ellipse":        circleF, // circleF handles ellipse also
 	"polyline":       polylineF,
 	"polygon":        polygonF,
 	"path":           pathF,
@@ -97,6 +98,7 @@ func rectF(c *iconCursor, attrs []simplexml.Attr) error {
 	c.path.addRoundRect(x+c.curX, y+c.curY, w+x+c.curX, h+y+c.curY, rx, ry, 0)
 	return nil
 }
+
 func circleF(c *iconCursor, attrs []simplexml.Attr) error {
 	var cx, cy, rx, ry float64
 	var err error
@@ -124,6 +126,7 @@ func circleF(c *iconCursor, attrs []simplexml.Attr) error {
 	c.ellipseAt(cx+c.curX, cy+c.curY, rx, ry)
 	return nil
 }
+
 func lineF(c *iconCursor, attrs []simplexml.Attr) error {
 	var x1, x2, y1, y2 float64
 	var err error
@@ -152,6 +155,7 @@ func lineF(c *iconCursor, attrs []simplexml.Attr) error {
 	})
 	return nil
 }
+
 func polylineF(c *iconCursor, attrs []simplexml.Attr) error {
 	var err error
 	for _, attr := range attrs {
@@ -180,6 +184,7 @@ func polylineF(c *iconCursor, attrs []simplexml.Attr) error {
 	}
 	return nil
 }
+
 func polygonF(c *iconCursor, attrs []simplexml.Attr) error {
 	err := polylineF(c, attrs)
 	if len(c.points) > 4 {
@@ -187,6 +192,7 @@ func polygonF(c *iconCursor, attrs []simplexml.Attr) error {
 	}
 	return err
 }
+
 func pathF(c *iconCursor, attrs []simplexml.Attr) error {
 	var err error
 	for _, attr := range attrs {
@@ -200,20 +206,24 @@ func pathF(c *iconCursor, attrs []simplexml.Attr) error {
 	}
 	return nil
 }
+
 func descF(c *iconCursor, attrs []simplexml.Attr) error {
 	c.inDescText = true
 	c.icon.Descriptions = append(c.icon.Descriptions, "")
 	return nil
 }
+
 func titleF(c *iconCursor, attrs []simplexml.Attr) error {
 	c.inTitleText = true
 	c.icon.Titles = append(c.icon.Titles, "")
 	return nil
 }
+
 func defsF(c *iconCursor, attrs []simplexml.Attr) error {
 	c.inDefs = true
 	return nil
 }
+
 func linearGradientF(c *iconCursor, attrs []simplexml.Attr) error {
 	var err error
 	c.inGrad = true
@@ -349,6 +359,7 @@ func radialGradientF(c *iconCursor, attrs []simplexml.Attr) error {
 	c.grad.Direction = direction
 	return nil
 }
+
 func stopF(c *iconCursor, attrs []simplexml.Attr) error {
 	var err error
 	if c.inGrad {
@@ -358,7 +369,7 @@ func stopF(c *iconCursor, attrs []simplexml.Attr) error {
 			case "offset":
 				stop.Offset, err = readFraction(attr.Value)
 			case "stop-color":
-				//todo: add current color inherit
+				// todo: add current color inherit
 				var optColor optionnalColor
 				optColor, err = parseSVGColor(attr.Value)
 				stop.StopColor = optColor.asColor()
@@ -373,6 +384,7 @@ func stopF(c *iconCursor, attrs []simplexml.Attr) error {
 	}
 	return nil
 }
+
 func useF(c *iconCursor, attrs []simplexml.Attr) error {
 	var (
 		href string

@@ -1,10 +1,11 @@
 package svgparser
 
 import (
-	"github.com/ddkwork/ux/giosvg/internal/svgparser/simplexml"
 	"image/color"
 	"strconv"
 	"strings"
+
+	"github.com/ddkwork/ux/giosvg/internal/svgparser/simplexml"
 
 	"golang.org/x/image/colornames"
 	"golang.org/x/image/math/fixed"
@@ -18,8 +19,7 @@ type Pattern interface {
 	isPattern()
 }
 
-type CurrentColor struct {
-}
+type CurrentColor struct{}
 
 type PlainColor struct {
 	color.NRGBA
@@ -125,8 +125,10 @@ func parseSVGColorNum(colorStr string) (r, g, b uint8, err error) {
 	var t uint64
 	if len(colorStr) != 6 {
 		// SVG specs say duplicate characters in case of 3 digit hex number
-		colorStr = string([]byte{colorStr[0], colorStr[0],
-			colorStr[1], colorStr[1], colorStr[2], colorStr[2]})
+		colorStr = string([]byte{
+			colorStr[0], colorStr[0],
+			colorStr[1], colorStr[1], colorStr[2], colorStr[2],
+		})
 	}
 	for _, v := range []struct {
 		c *uint8
@@ -134,7 +136,8 @@ func parseSVGColorNum(colorStr string) (r, g, b uint8, err error) {
 	}{
 		{&r, colorStr[0:2]},
 		{&g, colorStr[2:4]},
-		{&b, colorStr[4:6]}} {
+		{&b, colorStr[4:6]},
+	} {
 		t, err = strconv.ParseUint(v.s, 16, 8)
 		if err != nil {
 			return

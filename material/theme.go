@@ -3,8 +3,9 @@
 package material
 
 import (
-	"github.com/ddkwork/ux/giosvg"
 	"image/color"
+
+	"github.com/ddkwork/ux/giosvg"
 
 	"gioui.org/font"
 	"gioui.org/text"
@@ -61,11 +62,11 @@ func NewTheme() *Theme {
 	}
 	t.TextSize = 16
 
-	//todo
-	//t.Icon.CheckBoxChecked = mustIcon(widget.NewIcon(icons.ToggleCheckBox))
-	//t.Icon.CheckBoxUnchecked = mustIcon(widget.NewIcon(icons.ToggleCheckBoxOutlineBlank))
-	//t.Icon.RadioChecked = mustIcon(widget.NewIcon(icons.ToggleRadioButtonChecked))
-	//t.Icon.RadioUnchecked = mustIcon(widget.NewIcon(icons.ToggleRadioButtonUnchecked))
+	// todo
+	// t.Icon.CheckBoxChecked = mustIcon(widget.NewIcon(icons.ToggleCheckBox))
+	// t.Icon.CheckBoxUnchecked = mustIcon(widget.NewIcon(icons.ToggleCheckBoxOutlineBlank))
+	// t.Icon.RadioChecked = mustIcon(widget.NewIcon(icons.ToggleRadioButtonChecked))
+	// t.Icon.RadioUnchecked = mustIcon(widget.NewIcon(icons.ToggleRadioButtonUnchecked))
 
 	// 38dp is on the lower end of possible finger size.
 	t.FingerSize = 38

@@ -1,8 +1,9 @@
 package svgparser
 
 import (
-	"gioui.org/f32"
 	"math"
+
+	"gioui.org/f32"
 )
 
 // This file implements the transformation from
@@ -49,7 +50,8 @@ func length(v f32.Point) float32 {
 
 // addArc strokes a circular arc by approximation with bezier curves
 func addArc(p *matrixAdder, a, s1, s2 f32.Point, clockwise bool, trimStart,
-	trimEnd float32, firstPoint func(p f32.Point)) (ps1, ds1, ps2, ds2 f32.Point) {
+	trimEnd float32, firstPoint func(p f32.Point),
+) (ps1, ds1, ps2, ds2 f32.Point) {
 	// Approximate the circular arc using a set of cubic bezier curves by the method of
 	// L. Maisonobe, "Drawing an elliptical arc using polylines, quadratic
 	// or cubic Bezier curves", 2003
@@ -266,6 +268,6 @@ func findEllipseCenter(ra, rb *float64, rotX, startX, startY, endX, endY float64
 
 	// reverse scale
 	cx *= *ra / *rb
-	//Reverse rotate and translate back to original coordinates
+	// Reverse rotate and translate back to original coordinates
 	return cx*cos - cy*sin + startX, cx*sin + cy*cos + startY
 }

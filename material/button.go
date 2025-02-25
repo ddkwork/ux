@@ -3,11 +3,12 @@
 package material
 
 import (
-	"github.com/ddkwork/ux/f32color"
-	"github.com/ddkwork/ux/giosvg"
 	"image"
 	"image/color"
 	"math"
+
+	"github.com/ddkwork/ux/f32color"
+	"github.com/ddkwork/ux/giosvg"
 
 	"gioui.org/font"
 
@@ -184,7 +185,7 @@ func (b IconButtonStyle) Layout(gtx layout.Context) layout.Dimensions {
 					if b.Icon != nil {
 						gtx.Constraints.Min = image.Point{X: size}
 						b.Icon.Layout(gtx)
-						//b.Icon.Layout(gtx, b.Color)
+						// b.Icon.Layout(gtx, b.Color)
 					}
 					return layout.Dimensions{
 						Size: image.Point{X: size, Y: size},

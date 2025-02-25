@@ -3,9 +3,10 @@
 package component
 
 import (
-	"github.com/ddkwork/ux/giosvg"
 	"image"
 	"image/color"
+
+	"github.com/ddkwork/ux/giosvg"
 
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -192,7 +193,7 @@ func (m MenuItemStyle) Layout(gtx C) D {
 							iconSize := gtx.Dp(m.IconSize)
 							gtx.Constraints = layout.Exact(image.Point{X: iconSize, Y: iconSize})
 							return m.Icon.Layout(gtx)
-							//return m.Icon.Layout(gtx, m.IconColor)
+							// return m.Icon.Layout(gtx, m.IconColor)
 						})
 					}),
 					outlay.Rigid(func(gtx C) D {

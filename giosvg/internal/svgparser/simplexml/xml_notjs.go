@@ -5,9 +5,10 @@ package simplexml
 
 import (
 	"encoding/xml"
-	"golang.org/x/net/html/charset"
 	"io"
 	"unsafe"
+
+	"golang.org/x/net/html/charset"
 )
 
 type decoder struct {

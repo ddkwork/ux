@@ -2,9 +2,10 @@
 package main
 
 import (
-	"github.com/ddkwork/ux/giosvg"
 	"image"
 	"image/color"
+
+	"github.com/ddkwork/ux/giosvg"
 
 	"gioui.org/f32"
 	"gioui.org/layout"

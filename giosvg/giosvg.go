@@ -2,10 +2,11 @@ package giosvg
 
 import (
 	"bytes"
-	"github.com/ddkwork/ux/giosvg/internal/svgdraw"
-	"github.com/ddkwork/ux/giosvg/internal/svgparser"
 	"image"
 	"io"
+
+	"github.com/ddkwork/ux/giosvg/internal/svgdraw"
+	"github.com/ddkwork/ux/giosvg/internal/svgparser"
 
 	"gioui.org/f32"
 	"gioui.org/layout"

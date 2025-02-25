@@ -2,6 +2,9 @@ package main
 
 import (
 	_ "embed"
+	"image"
+	"os"
+
 	"gioui.org/app"
 	"gioui.org/font/gofont"
 	"gioui.org/io/system"
@@ -10,8 +13,6 @@ import (
 	"gioui.org/text"
 	"github.com/ddkwork/ux/giosvg"
 	"github.com/ddkwork/ux/material"
-	"image"
-	"os"
 )
 
 //go:generate go run github.com/ddkwork/ux/giosvg/cmd/svggen -i "." -o "./school-bus.go" -pkg "main"

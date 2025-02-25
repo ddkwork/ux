@@ -1,13 +1,13 @@
 package svgparser
 
 import (
-	"fmt"
-	"github.com/ddkwork/ux/giosvg/internal/svgparser/simplexml"
-	"strings"
-
 	"errors"
+	"fmt"
 	"log"
 	"math"
+	"strings"
+
+	"github.com/ddkwork/ux/giosvg/internal/svgparser/simplexml"
 )
 
 type (
@@ -92,7 +92,8 @@ func (c *iconCursor) readTransformAttr(m1 Matrix2D, k string) (Matrix2D, error) 
 				C: c.points[2],
 				D: c.points[3],
 				E: c.points[4],
-				F: c.points[5]})
+				F: c.points[5],
+			})
 		} else {
 			return m1, errParamMismatch
 		}
@@ -344,7 +345,7 @@ func (c *iconCursor) readStartElement(se simplexml.StartElement) (err error) {
 	err = df(c, se.Attr)
 
 	if len(c.path) > 0 {
-		//The cursor parsed a path from the xml element
+		// The cursor parsed a path from the xml element
 		pathCopy := append(Path{}, c.path...)
 		c.icon.SVGPaths = append(c.icon.SVGPaths,
 			SvgPath{Path: pathCopy, Style: c.styleStack[len(c.styleStack)-1]})

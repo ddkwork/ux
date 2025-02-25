@@ -4,10 +4,11 @@ package svgparser
 
 import (
 	"errors"
-	"gioui.org/f32"
 	"log"
 	"math"
 	"unicode"
+
+	"gioui.org/f32"
 )
 
 // ErrorMode is the for setting how the parser reacts to unparsed elements

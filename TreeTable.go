@@ -3,7 +3,6 @@ package ux
 import (
 	_ "embed"
 	"fmt"
-	"github.com/ddkwork/ux/component"
 	"image"
 	"image/color"
 	"io"
@@ -15,6 +14,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/ddkwork/ux/component"
 
 	"github.com/ddkwork/golibrary/stream/deepcopy"
 	"github.com/ddkwork/golibrary/stream/uuid"
@@ -413,7 +414,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case CopyRowType:
 										item = ContextMenuItem{
 											Title: "",
-											//Icon:      IconCopy,
+											// Icon:      IconCopy,
 											Can:       func() bool { return true },
 											Do:        func() { t.SelectedNode.CopyRow(gtx) },
 											Clickable: widget.Clickable{},
@@ -421,7 +422,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case ConvertToContainerType:
 										item = ContextMenuItem{
 											Title: "",
-											//Icon:  IconClean,
+											// Icon:  IconClean,
 											Can: func() bool { return !n.Container() }, // n是当前渲染的行
 											Do: func() {
 												t.SelectedNode.SetType("ConvertToContainer" + ContainerKeyPostfix) //? todo bug：这里是失败的，导致再次点击这里转换的节点后ConvertToNonContainer没有弹出来
@@ -434,7 +435,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case ConvertToNonContainerType:
 										item = ContextMenuItem{
 											Title: "",
-											//Icon:  IconActionCode,
+											// Icon:  IconActionCode,
 											Can: func() bool { return n.Container() }, // n是当前渲染的行
 											Do: func() {
 												t.SelectedNode.SetType("")
@@ -451,7 +452,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case NewType:
 										item = ContextMenuItem{
 											Title: "",
-											//Icon:  IconArrowDropDown,
+											// Icon:  IconArrowDropDown,
 											Can: func() bool { return true },
 											Do: func() {
 												var zero T
@@ -462,7 +463,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case NewContainerType:
 										item = ContextMenuItem{
 											Title: "",
-											//Icon:  IconAdd,
+											// Icon:  IconAdd,
 											Can: func() bool { return true },
 											Do: func() {
 												var zero T // todo edit type?
@@ -473,7 +474,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case DeleteType:
 										item = ContextMenuItem{
 											Title: "",
-											//Icon:      IconDelete,
+											// Icon:      IconDelete,
 											Can:       func() bool { return true },
 											Do:        func() { t.Remove(gtx) },
 											Clickable: widget.Clickable{},
@@ -481,7 +482,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case DuplicateType:
 										item = ContextMenuItem{
 											Title: "",
-											//Icon:  IconActionUpdate,
+											// Icon:  IconActionUpdate,
 											Can: func() bool { return true },
 											Do: func() {
 												t.InsertAfter(gtx, t.SelectedNode.Clone())
@@ -491,7 +492,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case EditType:
 										item = ContextMenuItem{
 											Title: "",
-											//Icon:          IconEdit,
+											// Icon:          IconEdit,
 											Can:           func() bool { return true },
 											Do:            func() { t.Edit(gtx) },
 											AppendDivider: true,
@@ -500,7 +501,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case OpenAllType:
 										item = ContextMenuItem{
 											Title: "",
-											//Icon:      IconFileFolderOpen, // todo 这里的图标不太好看
+											// Icon:      IconFileFolderOpen, // todo 这里的图标不太好看
 											Icon:      Svg2Icon(hierarchyIcon),
 											Can:       func() bool { return true },
 											Do:        func() { t.Root.OpenAll() },
@@ -509,7 +510,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case CloseAllType:
 										item = ContextMenuItem{
 											Title: "",
-											//Icon:      IconClose, // todo 这里的图标不太好看，调用svg绘制
+											// Icon:      IconClose, // todo 这里的图标不太好看，调用svg绘制
 											Can:       func() bool { return true },
 											Do:        func() { t.Root.CloseAll() },
 											Clickable: widget.Clickable{},
@@ -517,7 +518,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case SaveDataType:
 										item = ContextMenuItem{
 											Title: "",
-											//Icon:      IconSave,
+											// Icon:      IconSave,
 											Can:       func() bool { return true },
 											Do:        func() { t.SaveDate() },
 											Clickable: widget.Clickable{},
@@ -686,7 +687,7 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) {
 	}
 	gtx.Constraints = originalConstraints
 	t.rootRows = t.Root.Children
-	//t.SaveDate()//增加卡顿程度，所以放在右键菜单算了
+	// t.SaveDate()//增加卡顿程度，所以放在右键菜单算了
 	return
 }
 
@@ -751,7 +752,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 			}
 
 			mylog.Info("clickedColumnIndex", t.header.clickedColumnIndex)
-			//mylog.Info(t.header.rowCells[i].Text, LabelWidth(gtx, t.header.rowCells[i].Text))
+			// mylog.Info(t.header.rowCells[i].Text, LabelWidth(gtx, t.header.rowCells[i].Text))
 			if t.header.clickedColumnIndex > -1 && t.header.sortedBy > -1 {
 				for i := range t.header.rowCells {
 					t.header.rowCells[i].Text = strings.TrimSuffix(t.header.rowCells[i].Text, " ⇩")
@@ -811,8 +812,8 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 						return material.Clickable(gtx, clickable, func(gtx layout.Context) layout.Dimensions {
 							t.header.rowCells[i].isHeader = true
-							once2.Do(func() { //一个树形实例只需要一次，但是当增删改节点导致层级列变宽的时候，需要重新计算宽度？现在逻辑有点混乱，层级缩进算法始终不是100%可控
-								t.ResizeHierarchyColumnCellWidth() //todo bug，会累加
+							once2.Do(func() { // 一个树形实例只需要一次，但是当增删改节点导致层级列变宽的时候，需要重新计算宽度？现在逻辑有点混乱，层级缩进算法始终不是100%可控
+								t.ResizeHierarchyColumnCellWidth() // todo bug，会累加
 							})
 							cellFrame := t.CellFrame(gtx, t.header.rowCells[i])
 							elems = append(elems, &Resizable{Widget: func(gtx layout.Context) layout.Dimensions {
@@ -851,7 +852,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 							t.header.contextMenu = NewContextMenu()
 							t.header.contextMenu.AddItem(ContextMenuItem{
 								Title: "CopyColumn",
-								//Icon:          IconCopy,
+								// Icon:          IconCopy,
 								Can:           func() bool { return true },
 								Do:            func() { t.CopyColumn(gtx) },
 								AppendDivider: true,
@@ -1532,9 +1533,10 @@ func (n *Node[T]) Remove() {
 // 查 Find,filter 无需调整列宽
 // 过滤,无需调整列宽
 // 排序,无需调整列宽
-func (t *TreeTable[T]) ResizeHierarchyColumnCellWidth() { //todo 没想通是什么原因
+func (t *TreeTable[T]) ResizeHierarchyColumnCellWidth() { // todo 没想通是什么原因
 	t.header.rowCells[0].autoMaxColumnCellWidth += maxHierarchyColumnCellWidth(t.header.rowCells[0])
 }
+
 func (t *TreeTable[T]) InsertAfter(gtx layout.Context, after *Node[T]) {
 	t.SelectedNode.InsertAfter(after)
 	t.SizeColumnsToFit(gtx)

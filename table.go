@@ -1,8 +1,9 @@
 package ux
 
 import (
-	"github.com/ddkwork/ux/component"
 	"image/color"
+
+	"github.com/ddkwork/ux/component"
 
 	"gioui.org/io/pointer"
 	"gioui.org/layout"

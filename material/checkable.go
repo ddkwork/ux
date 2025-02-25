@@ -3,9 +3,10 @@
 package material
 
 import (
-	"github.com/ddkwork/ux/giosvg"
 	"image"
 	"image/color"
+
+	"github.com/ddkwork/ux/giosvg"
 
 	"gioui.org/font"
 	"gioui.org/layout"
@@ -65,7 +66,7 @@ func (c *checkable) layout(gtx layout.Context, checked, hovered bool) layout.Dim
 							col = f32color.Disabled(col)
 						}
 						gtx.Constraints.Min = image.Point{X: size}
-						//icon.Layout(gtx, col)
+						// icon.Layout(gtx, col)
 						icon.Layout(gtx)
 						return layout.Dimensions{
 							Size: image.Point{X: size, Y: size},
