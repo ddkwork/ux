@@ -1,6 +1,7 @@
 package ux
 
 import (
+	"github.com/ddkwork/ux/component"
 	"image/color"
 
 	"gioui.org/io/pointer"
@@ -11,7 +12,6 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
-	"gioui.org/x/component"
 	"github.com/ddkwork/golibrary/mylog"
 	"golang.org/x/exp/shiny/materialdesign/colornames"
 )

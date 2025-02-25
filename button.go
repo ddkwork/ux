@@ -1,6 +1,7 @@
 package ux
 
 import (
+	"github.com/ddkwork/ux/giosvg"
 	"image"
 	"image/color"
 
@@ -15,7 +16,6 @@ import (
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/ddkwork/ux/animationButton"
-	"github.com/inkeliz/giosvg"
 )
 
 func NewButtonAnimation(text string, icon *widget.Icon, callBack func()) *animationButton.Button {

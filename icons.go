@@ -79,6 +79,9 @@ var CircledChevronDown string
 //go:embed resources/images/CircledChevronRight.svg
 var CircledChevronRight string
 
+//go:embed resources/images/hierarchy.svg
+var hierarchyIcon string
+
 type Icon struct {
 	*widget.Icon
 	Color color.NRGBA
