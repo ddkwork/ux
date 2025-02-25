@@ -3,16 +3,15 @@ module demo
 go 1.24.0
 
 require (
-	gioui.org v0.8.0
+	gioui.org v0.8.1-0.20250223181602-72a72a2bc21a
 	gioui.org/cmd v0.8.0
 	gioui.org/example v0.8.1
-	gioui.org/x v0.8.1
+	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
 	github.com/ddkwork/golibrary v0.0.91-0.20250224160512-cae108870eee
-	github.com/ddkwork/ux v0.0.0-20250224160621-090c8658b379
-	github.com/stretchr/testify v1.7.0
+	github.com/ddkwork/ux v0.0.0-20250225112617-16249a53862e
+	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.33.0
-	golang.org/x/exp/shiny v0.0.0-20250218142911-aa4b98e5adaa
-	golang.org/x/image v0.24.0
+
 )
 
 require (
@@ -22,7 +21,7 @@ require (
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0 // indirect
 	github.com/akavel/rsrc v0.10.1 // indirect
 	github.com/alecthomas/chroma/v2 v2.15.0 // indirect
-	github.com/davecgh/go-spew v1.1.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/esiqveland/notify v0.11.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
@@ -33,11 +32,12 @@ require (
 	github.com/google/go-github/v24 v24.0.1 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/inkeliz/giohyperlink v0.0.0-20220903215451-2ac5d54abdce // indirect
-	github.com/inkeliz/giosvg v0.0.0-20240821232107-3208d4350d55 // indirect
 	github.com/oligo/gioview v0.8.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect
 	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa // indirect
+	golang.org/x/exp/shiny v0.0.0-20250218142911-aa4b98e5adaa // indirect
+	golang.org/x/image v0.24.0 // indirect
 	golang.org/x/mod v0.23.0 // indirect
 	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be // indirect
