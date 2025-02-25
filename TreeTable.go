@@ -3,6 +3,7 @@ package ux
 import (
 	_ "embed"
 	"fmt"
+	"github.com/ddkwork/ux/component"
 	"image"
 	"image/color"
 	"io"
@@ -29,7 +30,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
-	"gioui.org/x/component"
+	//"gioui.org/x/component"
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/golibrary/stream/align"
@@ -363,7 +364,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 		rowCells = append(rowCells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return material.Clickable(gtx, &n.rowCells[i].Clickable, func(gtx layout.Context) layout.Dimensions {
-					DrawColumnDivider(gtx, cell.columID) // 这里绘制的列分割线才没有虚线，gtx被破坏了？ 永远不要移动这个位置
+					DrawColumnDivider(gtx, cell.columID)                      // 这里绘制的列分割线才没有虚线，gtx被破坏了？ 永远不要移动这个位置
 					return layout.Stack{Alignment: layout.Center}.Layout(gtx, // 层级列就懒得弹了，copy这个逻辑就行了，要弹的话，长按不支持有点纠结移动平台
 						layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 							if len(cell.Text) > 80 {
@@ -411,8 +412,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									switch kind {
 									case CopyRowType:
 										item = ContextMenuItem{
-											Title:     "",
-											Icon:      IconCopy,
+											Title: "",
+											//Icon:      IconCopy,
 											Can:       func() bool { return true },
 											Do:        func() { t.SelectedNode.CopyRow(gtx) },
 											Clickable: widget.Clickable{},
@@ -420,8 +421,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case ConvertToContainerType:
 										item = ContextMenuItem{
 											Title: "",
-											Icon:  IconClean,
-											Can:   func() bool { return !n.Container() }, // n是当前渲染的行
+											//Icon:  IconClean,
+											Can: func() bool { return !n.Container() }, // n是当前渲染的行
 											Do: func() {
 												t.SelectedNode.SetType("ConvertToContainer" + ContainerKeyPostfix) //? todo bug：这里是失败的，导致再次点击这里转换的节点后ConvertToNonContainer没有弹出来
 												t.SelectedNode.ID = newID()
@@ -433,8 +434,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case ConvertToNonContainerType:
 										item = ContextMenuItem{
 											Title: "",
-											Icon:  IconActionCode,
-											Can:   func() bool { return n.Container() }, // n是当前渲染的行
+											//Icon:  IconActionCode,
+											Can: func() bool { return n.Container() }, // n是当前渲染的行
 											Do: func() {
 												t.SelectedNode.SetType("")
 												t.SelectedNode.ID = newID()
@@ -450,8 +451,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case NewType:
 										item = ContextMenuItem{
 											Title: "",
-											Icon:  IconArrowDropDown,
-											Can:   func() bool { return true },
+											//Icon:  IconArrowDropDown,
+											Can: func() bool { return true },
 											Do: func() {
 												var zero T
 												t.InsertAfter(gtx, NewNode(zero))
@@ -461,8 +462,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case NewContainerType:
 										item = ContextMenuItem{
 											Title: "",
-											Icon:  IconAdd,
-											Can:   func() bool { return true },
+											//Icon:  IconAdd,
+											Can: func() bool { return true },
 											Do: func() {
 												var zero T // todo edit type?
 												t.InsertAfter(gtx, NewContainerNode("NewContainerNode", zero))
@@ -471,8 +472,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 										}
 									case DeleteType:
 										item = ContextMenuItem{
-											Title:     "",
-											Icon:      IconDelete,
+											Title: "",
+											//Icon:      IconDelete,
 											Can:       func() bool { return true },
 											Do:        func() { t.Remove(gtx) },
 											Clickable: widget.Clickable{},
@@ -480,8 +481,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case DuplicateType:
 										item = ContextMenuItem{
 											Title: "",
-											Icon:  IconActionUpdate,
-											Can:   func() bool { return true },
+											//Icon:  IconActionUpdate,
+											Can: func() bool { return true },
 											Do: func() {
 												t.InsertAfter(gtx, t.SelectedNode.Clone())
 											},
@@ -489,8 +490,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 										}
 									case EditType:
 										item = ContextMenuItem{
-											Title:         "",
-											Icon:          IconEdit,
+											Title: "",
+											//Icon:          IconEdit,
 											Can:           func() bool { return true },
 											Do:            func() { t.Edit(gtx) },
 											AppendDivider: true,
@@ -498,24 +499,25 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 										}
 									case OpenAllType:
 										item = ContextMenuItem{
-											Title:     "",
-											Icon:      IconFileFolderOpen, // todo 这里的图标不太好看
+											Title: "",
+											//Icon:      IconFileFolderOpen, // todo 这里的图标不太好看
+											Icon:      Svg2Icon(hierarchyIcon),
 											Can:       func() bool { return true },
 											Do:        func() { t.Root.OpenAll() },
 											Clickable: widget.Clickable{},
 										}
 									case CloseAllType:
 										item = ContextMenuItem{
-											Title:     "",
-											Icon:      IconClose, // todo 这里的图标不太好看，调用svg绘制
+											Title: "",
+											//Icon:      IconClose, // todo 这里的图标不太好看，调用svg绘制
 											Can:       func() bool { return true },
 											Do:        func() { t.Root.CloseAll() },
 											Clickable: widget.Clickable{},
 										}
 									case SaveDataType:
 										item = ContextMenuItem{
-											Title:     "",
-											Icon:      IconSave,
+											Title: "",
+											//Icon:      IconSave,
 											Can:       func() bool { return true },
 											Do:        func() { t.SaveDate() },
 											Clickable: widget.Clickable{},
@@ -848,8 +850,8 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 						if t.header.contextMenu == nil {
 							t.header.contextMenu = NewContextMenu()
 							t.header.contextMenu.AddItem(ContextMenuItem{
-								Title:         "CopyColumn",
-								Icon:          IconCopy,
+								Title: "CopyColumn",
+								//Icon:          IconCopy,
 								Can:           func() bool { return true },
 								Do:            func() { t.CopyColumn(gtx) },
 								AppendDivider: true,
