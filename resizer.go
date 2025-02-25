@@ -51,7 +51,7 @@ func NewResizeWidget(axis layout.Axis, resizables ...*Resizable) *Resize {
 
 // Layout displays w1 and w2 with handle in between.
 //
-// The widgets w1 and w2 must be able to gracefully resize their minimum and maximum dimensions
+// The widgets w1 and w2 must be able to gracefully resize their minimum and maxColumnCellWidth dimensions
 // in order for the resize to be smooth.
 func (r *Resize) Layout(gtx layout.Context) layout.Dimensions {
 	// Compute the first widget's max width/height.

@@ -37,31 +37,31 @@ import (
 
 type (
 	TreeTable[T any] struct {
-		TableContext[T]                              // 实例化时传入的上下文
-		Root                     *Node[T]            // 根节点,保存数据到json只需要调用它即可
-		header                   tableHeader[T]      // 表头
-		rootRows                 []*Node[T]          // from root.children
-		filteredRows             []*Node[T]          // 过滤后的行
-		SelectedNode             *Node[T]            // 选中的节点,文件管理器外部自定义右键菜单增删改查文件需要通过它取出节点元数据结构体的文件路径字段，所以需要导出
-		columnCount              int                 // 列数
-		maxColumnLabelTextWidths []unit.Dp           // 最宽的列label文本宽度for单元格
-		maxColumnTextWidths      []unit.Dp           // 最宽的列文本宽度for tui
-		rows                     [][]CellData        // 矩阵置换参数，行转为列，增删改节点后重新生成它
-		columns                  [][]CellData        // CopyColumn
-		DragRemovedRowsCallback  func(n *Node[T])    // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
-		DropOccurredCallback     func(n *Node[T])    // Called whenever a drop occurs that modifies the model.
-		inLayoutHeader           bool                // for drag
-		columnResizeStart        unit.Dp             //
-		columnResizeBase         unit.Dp             //
-		columnResizeOverhead     unit.Dp             //
-		preventUserColumnResize  bool                //
-		awaitingSyncToModel      bool                //
-		wasDragged               bool                //
-		dividerDrag              bool                //
-		LongPressCallback        func(node *Node[T]) `json:"-"` // 长按回调
-		pressStarted             time.Time           // 按压开始时间
-		longPressed              bool                // 是否已经触发长按事件
-		widget.List                                  // 为rootRows渲染列表和滚动条
+		TableContext[T]                             // 实例化时传入的上下文
+		Root                    *Node[T]            // 根节点,保存数据到json只需要调用它即可
+		header                  tableHeader[T]      // 表头
+		rootRows                []*Node[T]          // from root.children
+		filteredRows            []*Node[T]          // 过滤后的行
+		SelectedNode            *Node[T]            // 选中的节点,文件管理器外部自定义右键菜单增删改查文件需要通过它取出节点元数据结构体的文件路径字段，所以需要导出
+		columnCount             int                 // 列数
+		maxColumnCellWidths     []unit.Dp           // 最宽的列label文本宽度for单元格
+		maxColumnTextWidths     []unit.Dp           // 最宽的列文本宽度for tui
+		rows                    [][]CellData        // 矩阵置换参数，行转为列，增删改节点后重新生成它
+		columns                 [][]CellData        // CopyColumn
+		DragRemovedRowsCallback func(n *Node[T])    // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
+		DropOccurredCallback    func(n *Node[T])    // Called whenever a drop occurs that modifies the model.
+		inLayoutHeader          bool                // for drag
+		columnResizeStart       unit.Dp             //
+		columnResizeBase        unit.Dp             //
+		columnResizeOverhead    unit.Dp             //
+		preventUserColumnResize bool                //
+		awaitingSyncToModel     bool                //
+		wasDragged              bool                //
+		dividerDrag             bool                //
+		LongPressCallback       func(node *Node[T]) `json:"-"` // 长按回调
+		pressStarted            time.Time           // 按压开始时间
+		longPressed             bool                // 是否已经触发长按事件
+		widget.List                                 // 为rootRows渲染列表和滚动条
 	}
 	TableContext[T any] struct {
 		ContextMenuItems       func(gtx layout.Context, n *Node[T]) (items []ContextMenuItem) // 通过SelectedNode传递给菜单的do取出元数据，比如删除文件,但是菜单是否绘制取决于当前渲染的行，所以要传递n给can
@@ -86,24 +86,23 @@ type (
 		contextMenu        *ContextMenu             // 右键菜单，实现复制列数据到剪贴板
 	}
 	CellData struct {
-		Text               string      // 单元格文本
-		Tooltip            string      // 单元格提示信息
-		SvgBuffer          string      // 单元格svg图片
-		ImageBuffer        []byte      // 单元格图片数据
-		FgColor            color.NRGBA // 单元格前景色
-		IsNasm             bool        // 是否是nasm汇编代码,为表头提供不同的着色渲染样式
-		Disabled           bool        // 是否显示表头或者body单元格，或者禁止编辑节点时候使用
-		maxDepth           unit.Dp     // 最大层级深度
-		leftIndent         unit.Dp     // 左缩进宽度
-		maxColumnTextWidth unit.Dp     // 最宽的单元格文本宽度
+		Text        string      // 单元格文本
+		Tooltip     string      // 单元格提示信息
+		SvgBuffer   string      // 单元格svg图片
+		ImageBuffer []byte      // 单元格图片数据
+		FgColor     color.NRGBA // 单元格前景色
+		IsNasm      bool        // 是否是nasm汇编代码,为表头提供不同的着色渲染样式
+		Disabled    bool        // 是否显示表头或者body单元格，或者禁止编辑节点时候使用
+		maxDepth    unit.Dp     // 最大层级深度
+		leftIndent  unit.Dp     // 左缩进宽度
 		// maxColumnText      string      // 最宽的单元格文本
-		maximum          unit.Dp // 拖放表头列分隔条得到的最大宽度
-		autoMaximum      unit.Dp // 根据单元格内容预渲染自动计算最大宽度,如果AutoMaximum小于Maximum则说明已经拖动过位置，取Maximum作为宽度
-		isHeader         bool    // 是否是表头单元格
-		columID          int     // 列id,预计后期用于区域选中
-		rowID            int     // 行id,预计后期用于区域选中
-		widget.Clickable         // 单元格点击事件
-		RichText                 // 单元格富文本
+		maxColumnCellWidth     unit.Dp // 拖放表头列分隔条得到的最大宽度
+		autoMaxColumnCellWidth unit.Dp // 根据单元格内容预渲染自动计算最大宽度,如果AutoMaximum小于Maximum则说明已经拖动过位置，取Maximum作为宽度
+		isHeader               bool    // 是否是表头单元格
+		columID                int     // 列id,预计后期用于区域选中
+		rowID                  int     // 行id,预计后期用于区域选中
+		widget.Clickable               // 单元格点击事件
+		RichText                       // 单元格富文本
 	}
 )
 
@@ -126,9 +125,9 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 			clickedColumnIndex: -1,
 			manualWidthSet:     make([]bool, columnCount),
 		},
-		columnCount:              columnCount,
-		maxColumnLabelTextWidths: nil,
-		inLayoutHeader:           false,
+		columnCount:         columnCount,
+		maxColumnCellWidths: nil,
+		inLayoutHeader:      false,
 		List: widget.List{
 			Scrollbar: widget.Scrollbar{},
 			List: layout.List{
@@ -240,13 +239,13 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 
 func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) layout.Dimensions {
 	n.rowCells = t.MarshalRowCells(n)
-	for i := range n.rowCells { // 对齐表头和数据列
-		n.rowCells[i].maxColumnTextWidth = t.maxColumnLabelTextWidths[i]
-		n.rowCells[i].leftIndent = n.Depth() * HierarchyIndent
-		n.rowCells[i].rowID = rowIndex
-		n.rowCells[i].autoMaximum = t.header.rowCells[i].autoMaximum
-		n.rowCells[i].maxDepth = t.header.rowCells[i].maxDepth
-		n.rowCells[i].columID = t.header.rowCells[i].columID
+	for i := range n.rowCells {
+		n.rowCells[i].maxColumnCellWidth = t.maxColumnCellWidths[i]                        //每列最宽的label宽度,用于计算每列的最大单元格宽度，包括层级列
+		n.rowCells[i].rowID = rowIndex                                                     //斑马线
+		n.rowCells[i].columID = t.header.rowCells[i].columID                               //列分隔符
+		n.rowCells[i].autoMaxColumnCellWidth = t.header.rowCells[i].autoMaxColumnCellWidth //计算每列的最大单元格宽度,在所有列的单元格渲染的gtx内固定min和max对齐表头行和body行
+		n.rowCells[i].maxDepth = t.header.rowCells[i].maxDepth                             //计算层级列宽度
+		n.rowCells[i].leftIndent = n.Depth() * HierarchyIndent                             //计算层级列宽度
 	}
 	rowClick := &n.rowClick
 	evt, ok := gtx.Source.Event(pointer.Filter{
@@ -577,20 +576,20 @@ var modal = NewModal()
 
 func (t *TreeTable[T]) IsRowSelected() bool { return t.SelectedNode != nil }
 
-func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions {
-	// 固定单元格宽度为计算好的每列最大宽度,因为表头和body都调用这个函数渲染单元格，只有限制min和max才能每列保证表头单元格和body单元格具有相等的宽度，从而实现表头和body对齐
-	gtx.Constraints.Min.X = int(data.autoMaximum)
-	gtx.Constraints.Max.X = int(data.autoMaximum)
-	DrawColumnDivider(gtx, data.columID) // 为每列绘制列分隔条
-	if data.FgColor == (color.NRGBA{}) {
-		data.FgColor = White
+func (t *TreeTable[T]) CellFrame(gtx layout.Context, cellData CellData) layout.Dimensions {
+	// 固定单元格宽度为计算好的每列最大label宽度实现表头和body对齐,因为表头和body都调用这个函数渲染单元格，只有限制min和max才能每列保证表头单元格和body单元格具有相等的宽度，从而实现表头和body对齐
+	gtx.Constraints.Min.X = int(cellData.autoMaxColumnCellWidth)
+	gtx.Constraints.Max.X = int(cellData.autoMaxColumnCellWidth)
+	DrawColumnDivider(gtx, cellData.columID) // 为每列绘制列分隔条
+	if cellData.FgColor == (color.NRGBA{}) {
+		cellData.FgColor = White
 	}
 	//richText := NewRichText()
 	//richText.AddSpan(richtext.SpanStyle{
 	//	// Font:        font.Font{},
 	//	Size:        unit.Sp(12),
-	//	Color:       data.FgColor,
-	//	Content:     data.Text,
+	//	Color:       cellData.FgColor,
+	//	Content:     cellData.Text,
 	//	Interactive: false,
 	//})
 	inset := layout.Inset{
@@ -599,11 +598,11 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimen
 		Left:   8 / 2,
 		Right:  8 / 2,
 	}
-	if data.isHeader { // 加高表头高度
+	if cellData.isHeader { // 加高表头高度
 		inset.Top = 2
 		inset.Bottom = 2
 	}
-	return inset.Layout(gtx, material.Body2(th.Theme, data.Text).Layout)
+	return inset.Layout(gtx, material.Body2(th.Theme, cellData.Text).Layout)
 	// return inset.Layout(gtx, richText.Layout)
 }
 
@@ -615,23 +614,22 @@ func InitHeader(data any) (rowCells []CellData) {
 			field.Name = field.Tag.Get("table")
 		}
 		rowCells = append(rowCells, CellData{
-			columID:            i,
-			rowID:              0,
-			Text:               field.Name,
-			maxDepth:           0,
-			leftIndent:         0,
-			maxColumnTextWidth: 0,
-			maximum:            0,
-			autoMaximum:        0,
-			Disabled:           false,
-			Tooltip:            "",
-			SvgBuffer:          "",
-			ImageBuffer:        nil,
-			FgColor:            color.NRGBA{},
-			IsNasm:             false,
-			isHeader:           false,
-			Clickable:          widget.Clickable{},
-			RichText:           RichText{},
+			columID:                i,
+			rowID:                  0,
+			Text:                   field.Name,
+			maxDepth:               0,
+			leftIndent:             0,
+			maxColumnCellWidth:     0,
+			autoMaxColumnCellWidth: 0,
+			Disabled:               false,
+			Tooltip:                "",
+			SvgBuffer:              "",
+			ImageBuffer:            nil,
+			FgColor:                color.NRGBA{},
+			IsNasm:                 false,
+			isHeader:               false,
+			Clickable:              widget.Clickable{},
+			RichText:               RichText{},
 		})
 	}
 	return
@@ -645,14 +643,14 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) {
 	}
 	rows = slices.Insert(rows, 0, t.header.rowCells) // 插入表头行,todo 这是不会变化的，可以不使用slices.Insert来优化性能
 	t.columns = TransposeMatrix(rows)                // 如果不这么做的话，节点增删改查就不会实时刷新
-	t.maxColumnLabelTextWidths = make([]unit.Dp, t.columnCount)
+	t.maxColumnCellWidths = make([]unit.Dp, t.columnCount)
 	t.maxColumnTextWidths = make([]unit.Dp, t.columnCount)
 	maxColumnTexts := make([]string, t.columnCount)
 	for i, column := range t.columns {
 		if t.header.manualWidthSet[i] { // 如果该列已手动调整
 			continue // 跳过，保留用户手动调整的宽度
 		}
-		t.maxColumnLabelTextWidths[i] = 0
+		t.maxColumnCellWidths[i] = 0
 		maxColumnTexts[i] = ""
 		for _, data := range column {
 			if len(data.Text) > len(maxColumnTexts[i]) {
@@ -660,14 +658,14 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) {
 			}
 			t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Text))
 			if gtx != (layout.Context{}) {
-				t.maxColumnLabelTextWidths[i] = max(t.maxColumnLabelTextWidths[i], LabelWidth(gtx, data.Text))
+				t.maxColumnCellWidths[i] = max(t.maxColumnCellWidths[i], LabelWidth(gtx, data.Text))
 			}
 		}
 	}
 	maxDepth := t.Root.MaxDepth() // todo 右键菜单增删改，重复节点触发是否被修改状态，准确的说是新建和重复容器节点才触发MaxDepth执行递归，不过可以压力测试
-	for i, maxWidth := range t.maxColumnLabelTextWidths {
-		t.header.rowCells[i].autoMaximum = maxWidth
-		// t.header.rowCells[i].maximum = maxWidth // 拖放后变宽或者变窄，是否拖动就是判断是否等于AutoMaximum，如果Maximum不是0就行
+	for i, maxWidth := range t.maxColumnCellWidths {
+		t.header.rowCells[i].autoMaxColumnCellWidth = maxWidth
+		// t.header.rowCells[i].maxColumnCellWidth = maxWidth // 拖放后变宽或者变窄，是否拖动就是判断是否等于AutoMaximum，如果Maximum不是0就行
 		t.header.rowCells[i].maxDepth = maxDepth
 	}
 	gtx.Constraints = originalConstraints
@@ -792,7 +790,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 						return material.Clickable(gtx, clickable, func(gtx layout.Context) layout.Dimensions {
 							t.header.rowCells[i].isHeader = true
-							t.header.rowCells[0].autoMaximum += maxHierarchyColumnCellWidth(t.header.rowCells[0])
+							t.header.rowCells[0].autoMaxColumnCellWidth += maxHierarchyColumnCellWidth(t.header.rowCells[0])
 							cellFrame := t.CellFrame(gtx, t.header.rowCells[i])
 							elems = append(elems, &Resizable{Widget: func(gtx layout.Context) layout.Dimensions {
 								return cellFrame
@@ -867,7 +865,7 @@ const (
 func maxHierarchyColumnCellWidth(c CellData) unit.Dp { // 计算层级列最大列单元格宽度
 	return c.maxDepth*HierarchyIndent + // 最大深度的左缩进
 		defaultIconSize + // 图标宽度
-		c.maxColumnTextWidth + // 左右padding+最长的单元格文本宽度
+		c.maxColumnCellWidth + // 左右padding+最长的单元格文本宽度
 		DividerWidth // 列分隔条宽度
 }
 
@@ -1027,38 +1025,38 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w rowFn) layout.Dimensions
 			}
 		}
 		if delta != 0 { // 如果存在拖动偏移量
-			col.maximum += delta                            // 更新列的宽度
+			col.maxColumnCellWidth += delta                 // 更新列的宽度
 			if drag.shrinkNeighbor && i != len(columns)-1 { // 如果需要收缩相邻列且不是最后一列
-				nextCol := &columns[i+1][0] // 获取下一个列
-				nextCol.maximum -= delta    // 更新下一个列的宽度
-				if col.maximum < minWidth { // 如果当前列宽度小于最小宽度
-					d := minWidth - col.maximum // 计算需要增加的宽度
-					col.maximum = minWidth      // 将当前列宽度设为最小宽度
-					nextCol.maximum -= d        // 更新下一个列的宽度
+				nextCol := &columns[i+1][0]            // 获取下一个列
+				nextCol.maxColumnCellWidth -= delta    // 更新下一个列的宽度
+				if col.maxColumnCellWidth < minWidth { // 如果当前列宽度小于最小宽度
+					d := minWidth - col.maxColumnCellWidth // 计算需要增加的宽度
+					col.maxColumnCellWidth = minWidth      // 将当前列宽度设为最小宽度
+					nextCol.maxColumnCellWidth -= d        // 更新下一个列的宽度
 				}
-				if nextCol.maximum < minWidth { // 如果下一个列宽度小于最小宽度
-					d := minWidth - nextCol.maximum // 计算需要增加的宽度
-					nextCol.maximum = minWidth      // 将下一个列宽度设为最小宽度
-					col.maximum -= d                // 更新当前列宽度
+				if nextCol.maxColumnCellWidth < minWidth { // 如果下一个列宽度小于最小宽度
+					d := minWidth - nextCol.maxColumnCellWidth // 计算需要增加的宽度
+					nextCol.maxColumnCellWidth = minWidth      // 将下一个列宽度设为最小宽度
+					col.maxColumnCellWidth -= d                // 更新当前列宽度
 				}
 			} else {
 				// 如果不需要收缩
-				if col.maximum < minWidth { // 如果当前列宽度小于最小宽度
-					col.maximum = minWidth // 将当前列宽度设为最小宽度
+				if col.maxColumnCellWidth < minWidth { // 如果当前列宽度小于最小宽度
+					col.maxColumnCellWidth = minWidth // 将当前列宽度设为最小宽度
 				}
 			}
 
-			if col.maximum < col.autoMaximum { // 如果当前列宽度小于其最小宽度
-				col.maximum = col.autoMaximum // 更新列的最小宽度为当前宽度
+			if col.maxColumnCellWidth < col.autoMaxColumnCellWidth { // 如果当前列宽度小于其最小宽度
+				col.maxColumnCellWidth = col.autoMaxColumnCellWidth // 更新列的最小宽度为当前宽度
 			}
 
 			var total unit.Dp             // 初始化总宽度
 			for _, col := range columns { // 遍历所有列计算总宽度
-				total += col[0].maximum // 累加当前列的宽度
+				total += col[0].maxColumnCellWidth // 累加当前列的宽度
 			}
 			total += unit.Dp(len(columns) * gtx.Dp(defaultDividerWidth)) // 加上所有分隔符的总宽度
 			if total < unit.Dp(gtx.Constraints.Min.X) {                  // 如果总宽度小于最小约束宽度
-				columns[len(columns)-1][0].maximum += unit.Dp(gtx.Constraints.Min.X) - total // 调整最后一列的宽度以适应
+				columns[len(columns)-1][0].maxColumnCellWidth += unit.Dp(gtx.Constraints.Min.X) - total // 调整最后一列的宽度以适应
 			}
 		}
 	}
@@ -1072,15 +1070,15 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w rowFn) layout.Dimensions
 		r := op.Record(gtx.Ops)  // 记录当前操作集合
 		totalWidth := 0          // 初始化总宽度
 		for i := range columns { // 遍历所有列
-			colWidth := int(columns[i][0].maximum) // 获取当前列的宽度
-			totalWidth += colWidth                 // 更新总宽度
+			colWidth := int(columns[i][0].maxColumnCellWidth) // 获取当前列的宽度
+			totalWidth += colWidth                            // 更新总宽度
 		}
 		extra := gtx.Constraints.Min.X - len(columns)*gtx.Dp(defaultDividerWidth) - totalWidth // 计算多余宽度
 		colExtra := extra                                                                      // 将多余宽度赋值给列额外宽度
 
 		for i := range columns { // 绘制所有列
-			colWidth := int(columns[i][0].maximum) // 获取当前列宽度
-			if colExtra > 0 {                      // 如果有多余宽度
+			colWidth := int(columns[i][0].maxColumnCellWidth) // 获取当前列宽度
+			if colExtra > 0 {                                 // 如果有多余宽度
 				colWidth++ // 当前列宽度加一
 				colExtra-- // 多余宽度减一
 			}
@@ -1119,8 +1117,8 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w rowFn) layout.Dimensions
 		)
 		for i := range t.header.drags { // 遍历每个拖动对象
 			var (
-				drag     = &t.header.drags[i]         // 获取当前拖动对象
-				colWidth = int(columns[i][0].maximum) // 获取当前列宽度
+				drag     = &t.header.drags[i]                    // 获取当前拖动对象
+				colWidth = int(columns[i][0].maxColumnCellWidth) // 获取当前列宽度
 			)
 			dividerStart += colWidth // 更新分隔符的起始位置
 			if dividerExtra > 0 {    // 如果还有多余的宽度
@@ -1346,8 +1344,8 @@ func (t *TreeTable[T]) FormatChildren(out *stream.Buffer, children []*Node[T]) {
 				continue
 			}
 			out.WriteString(cell.Text)
-			if align.StringWidth[unit.Dp](cell.Text) < t.maxColumnLabelTextWidths[j] {
-				out.WriteString(strings.Repeat(" ", int(t.maxColumnLabelTextWidths[j]-align.StringWidth[unit.Dp](cell.Text))))
+			if align.StringWidth[unit.Dp](cell.Text) < t.maxColumnCellWidths[j] {
+				out.WriteString(strings.Repeat(" ", int(t.maxColumnCellWidths[j]-align.StringWidth[unit.Dp](cell.Text))))
 			}
 			out.WriteString(" │ ")
 		}
