@@ -859,7 +859,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 
 const (
 	HierarchyIndent = unit.Dp(8 * 2)
-	defaultIconSize = unit.Dp(12)
+	defaultIconSize = unit.Dp(14)
 )
 
 func maxHierarchyColumnCellWidth(c CellData) unit.Dp { // 计算层级列最大列单元格宽度

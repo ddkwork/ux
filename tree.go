@@ -171,7 +171,7 @@ func (t *Tree) renderTree(gtx layout.Context, nodes []*TreeNode) []layout.FlexCh
 	return dims
 }
 
-func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, loop int, isParent bool) layout.Dimensions {
+func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParent bool) layout.Dimensions {
 	// 渲节点标题
 	bgColor := th.Color.TreeBgColor
 
@@ -232,7 +232,7 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, loop int, isParent
 			}, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(25))
 				return layout.Inset{Left: unit.Dp(10)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return layout.Inset{Left: unit.Dp(loop * 20)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					return layout.Inset{Left: unit.Dp(depth * 20)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, sonItems...)
 					})
 				})
@@ -247,8 +247,7 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, loop int, isParent
 				continue
 			}
 			dims = append(dims, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				level := loop + 1
-				return t.renderNode(gtx, child, level, false)
+				return t.renderNode(gtx, child, depth+1, false)
 			}))
 		}
 		items = append(items, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
