@@ -77,9 +77,11 @@ var (
 
 //go:embed resources/images/*.svg
 var images embed.FS
-var svgEmbedFileMap = stream.ReadEmbedFileMap(images, "resources/images")
-var CircledChevronDown = svgEmbedFileMap.GetMust("CircledChevronDown.svg")
-var CircledChevronRight = svgEmbedFileMap.GetMust("CircledChevronRight.svg")
+var (
+	svgEmbedFileMap     = stream.ReadEmbedFileMap(images, "resources/images")
+	CircledChevronDown  = svgEmbedFileMap.GetMust("CircledChevronDown.svg")
+	CircledChevronRight = svgEmbedFileMap.GetMust("CircledChevronRight.svg")
+)
 
 type Icon struct {
 	*widget.Icon
