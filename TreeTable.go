@@ -240,12 +240,12 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) layout.Dimensions {
 	n.rowCells = t.MarshalRowCells(n)
 	for i := range n.rowCells {
-		n.rowCells[i].maxColumnCellWidth = t.maxColumnCellWidths[i]                        //每列最宽的label宽度,用于计算每列的最大单元格宽度，包括层级列
-		n.rowCells[i].rowID = rowIndex                                                     //斑马线
-		n.rowCells[i].columID = t.header.rowCells[i].columID                               //列分隔符
-		n.rowCells[i].autoMaxColumnCellWidth = t.header.rowCells[i].autoMaxColumnCellWidth //计算每列的最大单元格宽度,在所有列的单元格渲染的gtx内固定min和max对齐表头行和body行
-		n.rowCells[i].maxDepth = t.header.rowCells[i].maxDepth                             //计算层级列宽度
-		n.rowCells[i].leftIndent = n.Depth() * HierarchyIndent                             //计算层级列宽度
+		n.rowCells[i].maxColumnCellWidth = t.maxColumnCellWidths[i]                        // 每列最宽的label宽度,用于计算每列的最大单元格宽度，包括层级列
+		n.rowCells[i].rowID = rowIndex                                                     // 斑马线
+		n.rowCells[i].columID = t.header.rowCells[i].columID                               // 列分隔符
+		n.rowCells[i].autoMaxColumnCellWidth = t.header.rowCells[i].autoMaxColumnCellWidth // 计算每列的最大单元格宽度,在所有列的单元格渲染的gtx内固定min和max对齐表头行和body行
+		n.rowCells[i].maxDepth = t.header.rowCells[i].maxDepth                             // 计算层级列宽度
+		n.rowCells[i].leftIndent = n.Depth() * HierarchyIndent                             // 计算层级列宽度
 	}
 	rowClick := &n.rowClick
 	evt, ok := gtx.Source.Event(pointer.Filter{
@@ -344,7 +344,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				// 绘制层级列文本,和层级图标聚拢在一起-----------------------------------------------------------------------------------------------------------------
 				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					//层级列文本不知道什么原因往上飘了，top: 0的样子，所以往下挪一下让它居中
+					// 层级列文本不知道什么原因往上飘了，top: 0的样子，所以往下挪一下让它居中
 					return layout.Inset{Top: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return t.CellFrame(gtx, c)
 					})
@@ -363,7 +363,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 		rowCells = append(rowCells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return material.Clickable(gtx, &n.rowCells[i].Clickable, func(gtx layout.Context) layout.Dimensions {
-					DrawColumnDivider(gtx, cell.columID) //这里绘制的列分割线才没有虚线，gtx被破坏了？ 永远不要移动这个位置
+					DrawColumnDivider(gtx, cell.columID) // 这里绘制的列分割线才没有虚线，gtx被破坏了？ 永远不要移动这个位置
 					return layout.Stack{Alignment: layout.Center}.Layout(gtx, // 层级列就懒得弹了，copy这个逻辑就行了，要弹的话，长按不支持有点纠结移动平台
 						layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 							if len(cell.Text) > 80 {
@@ -683,7 +683,7 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) {
 func (t *TreeTable[T]) SaveDate() {
 	t.JsonName = strings.TrimSuffix(t.JsonName, ".json")
 	stream.MarshalJsonToFile(t.Root, filepath.Join("cache", t.JsonName+".json"))
-	stream.WriteTruncate(filepath.Join("cache", t.JsonName+".txt"), t.Document()) //调用t.Format()
+	stream.WriteTruncate(filepath.Join("cache", t.JsonName+".txt"), t.Document()) // 调用t.Format()
 	if t.IsDocument {
 		b := stream.NewBuffer("")
 		b.WriteStringLn("# " + t.JsonName + " document table")
@@ -1280,7 +1280,7 @@ func (t *TreeTable[T]) MaxColumnCellWidth() unit.Dp {
 func (t *TreeTable[T]) Format() *stream.Buffer {
 	buf := t.FormatHeader(t.maxColumnTextWidths)
 	t.FormatChildren(buf, t.rootRows) // 传入子节点打印函数
-	//mylog.Json("RootRows", buf.String())
+	// mylog.Json("RootRows", buf.String())
 	return buf
 }
 
