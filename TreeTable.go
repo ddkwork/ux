@@ -512,6 +512,14 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 											Do:        func() { t.Root.CloseAll() },
 											Clickable: widget.Clickable{},
 										}
+									case SaveDataType:
+										item = ContextMenuItem{
+											Title:     "",
+											Icon:      IconSave,
+											Can:       func() bool { return true },
+											Do:        func() { t.SaveDate() },
+											Clickable: widget.Clickable{},
+										}
 									}
 									item.Title = kind.String()
 									if item.Can() {
