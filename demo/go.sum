@@ -32,6 +32,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/ddkwork/golibrary v0.0.91-0.20250224160512-cae108870eee h1:Tap/rswOBRGT3jbuxeTSDZU2oT/LCE3ulAVbenQHNec=
 github.com/ddkwork/golibrary v0.0.91-0.20250224160512-cae108870eee/go.mod h1:6yNujFwybY0YmjNj7uDegka5mnO2Xg6XMNNtQ9TZ/gI=
+github.com/ddkwork/golibrary v0.0.91-0.20250225120832-ed50dea89457 h1:02fo2Yu3e8JKwoeM3R8/MTv598U04ksEXsX3lOcFSnY=
+github.com/ddkwork/golibrary v0.0.91-0.20250225120832-ed50dea89457/go.mod h1:FqbWGIsbVqSsVjeNcdUdlHsn/JNA82xFlwbJKsdily0=
 github.com/ddkwork/ux v0.0.0-20250225112617-16249a53862e h1:AvgkWTpbaILbLLYoAblnt+wjfSK+NZBUbd0X3jTnZkQ=
 github.com/ddkwork/ux v0.0.0-20250225112617-16249a53862e/go.mod h1:O+8oBmXN9EuY1b9A4r2M83jACVCAYIrd8t8VKAzuLD8=
 github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
