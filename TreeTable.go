@@ -605,8 +605,8 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimen
 		Right:  8 / 2,
 	}
 	if data.isHeader { // 加高表头高度
-		inset.Top = 2
-		inset.Bottom = 2
+		inset.Top = 8
+		inset.Bottom = 8
 	}
 	return inset.Layout(gtx, material.Body2(th.Theme, data.Text).Layout)
 	// return inset.Layout(gtx, richText.Layout)
@@ -741,6 +741,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 			}
 
 			mylog.Info("clickedColumnIndex", t.header.clickedColumnIndex)
+			mylog.Info(t.header.rowCells[i].Text, LabelWidth(gtx, t.header.rowCells[i].Text))
 			if t.header.clickedColumnIndex > -1 && t.header.sortedBy > -1 {
 				for i := range t.header.rowCells {
 					t.header.rowCells[i].Text = strings.TrimSuffix(t.header.rowCells[i].Text, " ⇩")
