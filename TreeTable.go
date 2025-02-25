@@ -344,6 +344,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				// 绘制层级列文本,和层级图标聚拢在一起-----------------------------------------------------------------------------------------------------------------
 				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					//层级列文本不知道什么原因往上飘了，top: 0的样子，所以往下挪一下让它居中
 					return layout.Inset{Top: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return t.CellFrame(gtx, c)
 					})
