@@ -110,13 +110,13 @@ func (m *Button) SetIcon(icon *widget.Icon) *Button {
 	return m
 }
 
-func (m *Button) SetSVGIcon(content string) *Button {
+func (m *Button) SetSVGIcon(content []byte) *Button {
 	m.svgIcon = Svg2Icon(content)
 	return m
 }
 
-func Svg2Icon(b string) *giosvg.Icon {
-	return giosvg.NewIcon(mylog.Check2(giosvg.NewVector([]byte(b))))
+func Svg2Icon(b []byte) *giosvg.Icon {
+	return giosvg.NewIcon(mylog.Check2(giosvg.NewVector(b)))
 }
 
 func (m *Button) Layout(gtx layout.Context) layout.Dimensions {

@@ -365,7 +365,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 		rowCells = append(rowCells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return material.Clickable(gtx, &n.rowCells[i].Clickable, func(gtx layout.Context) layout.Dimensions {
-					DrawColumnDivider(gtx, cell.columID)                      // 这里绘制的列分割线才没有虚线，gtx被破坏了？ 永远不要移动这个位置
+					DrawColumnDivider(gtx, cell.columID) // 这里绘制的列分割线才没有虚线，gtx被破坏了？ 永远不要移动这个位置
 					return layout.Stack{Alignment: layout.Center}.Layout(gtx, // 层级列就懒得弹了，copy这个逻辑就行了，要弹的话，长按不支持有点纠结移动平台
 						layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 							if len(cell.Text) > 80 {
@@ -502,7 +502,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 										item = ContextMenuItem{
 											Title: "",
 											// Icon:      IconFileFolderOpen, // todo 这里的图标不太好看
-											Icon:      Svg2Icon(hierarchyIcon),
+											Icon:      Svg2Icon(svgEmbedFileMap.GetMust("hierarchy.svg")),
 											Can:       func() bool { return true },
 											Do:        func() { t.Root.OpenAll() },
 											Clickable: widget.Clickable{},
