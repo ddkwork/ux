@@ -741,7 +741,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 			}
 
 			mylog.Info("clickedColumnIndex", t.header.clickedColumnIndex)
-			mylog.Info(t.header.rowCells[i].Text, LabelWidth(gtx, t.header.rowCells[i].Text))
+			//mylog.Info(t.header.rowCells[i].Text, LabelWidth(gtx, t.header.rowCells[i].Text))
 			if t.header.clickedColumnIndex > -1 && t.header.sortedBy > -1 {
 				for i := range t.header.rowCells {
 					t.header.rowCells[i].Text = strings.TrimSuffix(t.header.rowCells[i].Text, " ⇩")
