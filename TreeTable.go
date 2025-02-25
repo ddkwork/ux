@@ -765,6 +765,10 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 		if ok {
 			e, ok := evt.(pointer.Event)
 			if ok {
+				if e.Kind == pointer.Press || e.Source == pointer.Touch {
+					t.header.clickedColumnIndex = i
+				}
+
 				switch e.Buttons {
 				case pointer.ButtonPrimary:
 					/*
