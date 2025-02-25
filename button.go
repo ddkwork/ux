@@ -180,6 +180,9 @@ func (m *Button) Layout(gtx layout.Context) layout.Dimensions {
 						return m.icon.Layout(gtx, th.Theme.Bg)
 					})
 				}
+				return layout.UniformInset(1).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					return m.svgIcon.Layout(gtx)
+				})
 				return layout.Background{}.Layout(gtx, background, func(gtx layout.Context) layout.Dimensions {
 					return m.svgIcon.Layout(gtx)
 				})

@@ -191,25 +191,19 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, loop int, isParent
 	var sonItems []layout.FlexChild
 	// 绘制展开/折叠图标
 	if len(node.Children) > 0 {
-		if node.Expanded {
-			sonItems = append(sonItems, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return node.clickable.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return layout.Inset{Top: unit.Dp(5)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						gtx.Constraints.Max.X = gtx.Dp(th.Size.DefaultIconSize)
-						return ArrowDownIcon.Layout(gtx, th.Color.TreeIconColor)
-					})
+		sonItems = append(sonItems, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return node.clickable.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return layout.Inset{Top: unit.Dp(1)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					gtx.Constraints.Max.X = gtx.Dp(th.Size.DefaultIconSize)
+					svg := CircledChevronRight
+					if node.Expanded {
+						svg = CircledChevronDown
+					}
+					return NewButton("", nil).SetRectIcon(true).SetSVGIcon(svg).Layout(gtx)
+					return ArrowDownIcon.Layout(gtx, th.Color.TreeIconColor)
 				})
-			}))
-		} else {
-			sonItems = append(sonItems, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return node.clickable.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return layout.Inset{Top: unit.Dp(5)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						gtx.Constraints.Max.X = gtx.Dp(th.Size.DefaultIconSize)
-						return ArrowRightIcon.Layout(gtx, th.Color.TreeIconColor)
-					})
-				})
-			}))
-		}
+			})
+		}))
 	}
 	sonItems = append(sonItems, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 		gtx.Constraints.Min.X = gtx.Dp(t.width)
