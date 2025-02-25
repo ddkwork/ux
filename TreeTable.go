@@ -676,7 +676,7 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) {
 	}
 	gtx.Constraints = originalConstraints
 	t.rootRows = t.Root.Children
-	t.SaveDate()
+	//t.SaveDate()//增加卡顿程度，所以放在右键菜单算了
 	return
 }
 
@@ -800,7 +800,9 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 						return material.Clickable(gtx, clickable, func(gtx layout.Context) layout.Dimensions {
 							t.header.rowCells[i].isHeader = true
-							t.header.rowCells[0].autoMaxColumnCellWidth += maxHierarchyColumnCellWidth(t.header.rowCells[0])
+							once2.Do(func() { //一个树形实例只需要一次，但是当增删改节点导致层级列变宽的时候，需要重新计算宽度？现在逻辑有点混乱，层级缩进算法始终不是100%可控
+								t.ResizeHierarchyColumnCellWidth() //todo bug，会累加
+							})
 							cellFrame := t.CellFrame(gtx, t.header.rowCells[i])
 							elems = append(elems, &Resizable{Widget: func(gtx layout.Context) layout.Dimensions {
 								return cellFrame
@@ -866,6 +868,8 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 		}),
 	)
 }
+
+var once2 sync.Once
 
 const (
 	HierarchyIndent = unit.Dp(8 * 2)
@@ -1517,14 +1521,19 @@ func (n *Node[T]) Remove() {
 // 查 Find,filter 无需调整列宽
 // 过滤,无需调整列宽
 // 排序,无需调整列宽
+func (t *TreeTable[T]) ResizeHierarchyColumnCellWidth() { //todo 没想通是什么原因
+	t.header.rowCells[0].autoMaxColumnCellWidth += maxHierarchyColumnCellWidth(t.header.rowCells[0])
+}
 func (t *TreeTable[T]) InsertAfter(gtx layout.Context, after *Node[T]) {
 	t.SelectedNode.InsertAfter(after)
 	t.SizeColumnsToFit(gtx)
+	t.ResizeHierarchyColumnCellWidth()
 }
 
 func (t *TreeTable[T]) Remove(gtx layout.Context) {
 	t.SelectedNode.Remove()
 	t.SizeColumnsToFit(gtx)
+	t.ResizeHierarchyColumnCellWidth()
 }
 
 func (t *TreeTable[T]) Edit(gtx layout.Context) {
@@ -1541,6 +1550,7 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) {
 	// todo test
 	t.UnmarshalRowCells(t.SelectedNode, t.MarshalRowCells(t.SelectedNode)) // 此时节点元数据被刷新
 	t.SizeColumnsToFit(gtx)
+	t.ResizeHierarchyColumnCellWidth()
 }
 
 func (n *Node[T]) Find() (found *Node[T]) {
