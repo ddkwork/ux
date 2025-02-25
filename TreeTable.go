@@ -576,20 +576,20 @@ var modal = NewModal()
 
 func (t *TreeTable[T]) IsRowSelected() bool { return t.SelectedNode != nil }
 
-func (t *TreeTable[T]) CellFrame(gtx layout.Context, cellData CellData) layout.Dimensions {
+func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions {
 	// 固定单元格宽度为计算好的每列最大label宽度实现表头和body对齐,因为表头和body都调用这个函数渲染单元格，只有限制min和max才能每列保证表头单元格和body单元格具有相等的宽度，从而实现表头和body对齐
-	gtx.Constraints.Min.X = int(cellData.autoMaxColumnCellWidth)
-	gtx.Constraints.Max.X = int(cellData.autoMaxColumnCellWidth)
-	DrawColumnDivider(gtx, cellData.columID) // 为每列绘制列分隔条
-	if cellData.FgColor == (color.NRGBA{}) {
-		cellData.FgColor = White
+	gtx.Constraints.Min.X = int(data.autoMaxColumnCellWidth)
+	gtx.Constraints.Max.X = int(data.autoMaxColumnCellWidth)
+	DrawColumnDivider(gtx, data.columID) // 为每列绘制列分隔条
+	if data.FgColor == (color.NRGBA{}) {
+		data.FgColor = White
 	}
 	//richText := NewRichText()
 	//richText.AddSpan(richtext.SpanStyle{
 	//	// Font:        font.Font{},
 	//	Size:        unit.Sp(12),
-	//	Color:       cellData.FgColor,
-	//	Content:     cellData.Text,
+	//	Color:       data.FgColor,
+	//	Content:     data.Text,
 	//	Interactive: false,
 	//})
 	inset := layout.Inset{
@@ -598,11 +598,11 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, cellData CellData) layout.D
 		Left:   8 / 2,
 		Right:  8 / 2,
 	}
-	if cellData.isHeader { // 加高表头高度
+	if data.isHeader { // 加高表头高度
 		inset.Top = 2
 		inset.Bottom = 2
 	}
-	return inset.Layout(gtx, material.Body2(th.Theme, cellData.Text).Layout)
+	return inset.Layout(gtx, material.Body2(th.Theme, data.Text).Layout)
 	// return inset.Layout(gtx, richText.Layout)
 }
 
