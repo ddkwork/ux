@@ -344,6 +344,9 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				// 绘制层级列文本,和层级图标聚拢在一起-----------------------------------------------------------------------------------------------------------------
 				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					return layout.Inset{Top: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return t.CellFrame(gtx, c)
+					})
 					return t.CellFrame(gtx, c)
 				})
 			}),
@@ -359,6 +362,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 		rowCells = append(rowCells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return material.Clickable(gtx, &n.rowCells[i].Clickable, func(gtx layout.Context) layout.Dimensions {
+					DrawColumnDivider(gtx, cell.columID) //这里绘制的列分割线才没有虚线，gtx被破坏了？ 永远不要移动这个位置
 					return layout.Stack{Alignment: layout.Center}.Layout(gtx, // 层级列就懒得弹了，copy这个逻辑就行了，要弹的话，长按不支持有点纠结移动平台
 						layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 							if len(cell.Text) > 80 {
@@ -535,8 +539,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 	rows := []layout.FlexChild{ // 合成层级列和其他列的单元格为一行,并设置该行的背景和行高
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return Background{bgColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(14)) // 主题的字体大小也会影响行高，这里设置最小行高为14dp
-				gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(14)) // 限制行高以避免列分割线呈现虚线视觉
+				gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(22)) // 主题的字体大小也会影响行高，这里设置最小行高为14dp
+				gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(22)) // 限制行高以避免列分割线呈现虚线视觉
 				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, rowCells...)
 			})
 		}),
@@ -581,6 +585,7 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimen
 	gtx.Constraints.Min.X = int(data.autoMaxColumnCellWidth)
 	gtx.Constraints.Max.X = int(data.autoMaxColumnCellWidth)
 	DrawColumnDivider(gtx, data.columID) // 为每列绘制列分隔条
+
 	if data.FgColor == (color.NRGBA{}) {
 		data.FgColor = White
 	}
@@ -859,7 +864,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 
 const (
 	HierarchyIndent = unit.Dp(8 * 2)
-	defaultIconSize = unit.Dp(14)
+	defaultIconSize = unit.Dp(12)
 )
 
 func maxHierarchyColumnCellWidth(c CellData) unit.Dp { // 计算层级列最大列单元格宽度

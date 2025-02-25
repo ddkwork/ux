@@ -167,8 +167,8 @@ type Color struct {
 
 type Theme struct {
 	*material.Theme
-	Color Color
-	Size  Size
+	Color
+	Size
 }
 
 func NewTheme(isDark ...bool) *Theme {
