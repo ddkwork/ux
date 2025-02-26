@@ -6,8 +6,6 @@ import (
 
 	"github.com/ddkwork/ux/giosvg"
 
-	"github.com/ddkwork/golibrary/mylog"
-
 	"gioui.org/io/input"
 	"gioui.org/io/semantic"
 	"gioui.org/layout"
@@ -110,13 +108,9 @@ func (m *Button) SetIcon(icon *widget.Icon) *Button {
 	return m
 }
 
-func (m *Button) SetSVGIcon(content []byte) *Button {
-	m.svgIcon = Svg2Icon(content)
+func (m *Button) SetSVGIcon(icon *giosvg.Icon) *Button {
+	m.svgIcon = icon
 	return m
-}
-
-func Svg2Icon(b []byte) *giosvg.Icon {
-	return giosvg.NewIcon(mylog.Check2(giosvg.NewVector(b)))
 }
 
 func (m *Button) Layout(gtx layout.Context) layout.Dimensions {

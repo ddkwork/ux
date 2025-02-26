@@ -413,8 +413,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									switch kind {
 									case CopyRowType:
 										item = ContextMenuItem{
-											Title: "",
-											// Icon:      IconCopy,
+											Title:     "",
+											Icon:      SvgIconCopy,
 											Can:       func() bool { return true },
 											Do:        func() { t.SelectedNode.CopyRow(gtx) },
 											Clickable: widget.Clickable{},
@@ -463,8 +463,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case NewContainerType:
 										item = ContextMenuItem{
 											Title: "",
-											// Icon:  IconAdd,
-											Can: func() bool { return true },
+											Icon:  SvgIconAddComment,
+											Can:   func() bool { return true },
 											Do: func() {
 												var zero T // todo edit type?
 												t.InsertAfter(gtx, NewContainerNode("NewContainerNode", zero))
@@ -473,8 +473,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 										}
 									case DeleteType:
 										item = ContextMenuItem{
-											Title: "",
-											// Icon:      IconDelete,
+											Title:     "",
+											Icon:      SvgIconTrash,
 											Can:       func() bool { return true },
 											Do:        func() { t.Remove(gtx) },
 											Clickable: widget.Clickable{},
@@ -500,17 +500,16 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 										}
 									case OpenAllType:
 										item = ContextMenuItem{
-											Title: "",
-											// Icon:      IconFileFolderOpen, // todo 这里的图标不太好看
-											Icon:      Svg2Icon(svgEmbedFileMap.GetMust("hierarchy.svg")),
+											Title:     "",
+											Icon:      SvgIconHierarchy,
 											Can:       func() bool { return true },
 											Do:        func() { t.Root.OpenAll() },
 											Clickable: widget.Clickable{},
 										}
 									case CloseAllType:
 										item = ContextMenuItem{
-											Title: "",
-											// Icon:      IconClose, // todo 这里的图标不太好看，调用svg绘制
+											Title:     "",
+											Icon:      SvgIconHierarchy,
 											Can:       func() bool { return true },
 											Do:        func() { t.Root.CloseAll() },
 											Clickable: widget.Clickable{},

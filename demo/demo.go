@@ -79,7 +79,7 @@ func main() {
 					return []ux.ContextMenuItem{
 						{
 							Title: "delete file",
-							Icon:  nil,
+							Icon:  ux.SvgIconTrash,
 							Can:   func() bool { return stream.IsFilePath(n.Data.Path) }, // n是当前渲染的行,它的元数据是路径才显示
 							Do: func() {
 								mylog.Check(os.Remove(t.SelectedNode.Data.Path))
@@ -90,7 +90,7 @@ func main() {
 						},
 						{
 							Title: "delete directory",
-							Icon:  nil,
+							Icon:  ux.SvgIconTrash,
 							Can:   func() bool { return stream.IsDir(n.Data.Path) }, // n是当前渲染的行,它的元数据是目录才显示
 							Do: func() {
 								mylog.Check(os.RemoveAll(t.SelectedNode.Data.Path))
