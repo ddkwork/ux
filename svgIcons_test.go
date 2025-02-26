@@ -25,7 +25,10 @@ func Svg2Icon(b []byte) *giosvg.Icon {
 }
 
 func svgCallback(value []byte) []byte {
-	return []byte(strings.Replace(string(value), "<path ", "<path fill=\"white\"", 1))
+	if strings.Contains(string(value), "fill=\"none\"") {
+		//return []byte(strings.Replace(string(value), "fill=\"none\"", "fill=\"white\"", 1))
+	}
+	return []byte(strings.Replace(string(value), "<path", "<path fill=\"white\"", 1))
 }
 
 // 取色

@@ -13,7 +13,10 @@ func Svg2Icon(b []byte) *giosvg.Icon {
 }
 
 func svgCallback(value []byte) []byte {
-	return []byte(strings.Replace(string(value), "<path ", "<path fill=\"white\"", 1))
+	if strings.Contains(string(value), "fill=\"none\"") {
+		//return []byte(strings.Replace(string(value), "fill=\"none\"", "fill=\"white\"", 1))
+	}
+	return []byte(strings.Replace(string(value), "<path", "<path fill=\"white\"", 1))
 }
 
 // 取色
@@ -25,6 +28,8 @@ var (
 	svgEmbedFileMap                = stream.ReadEmbedFileMap(images, "resources/images")
 	SvgIconBookmark                = Svg2Icon(svgEmbedFileMap.GetMustCallback("Bookmark.svg", svgCallback))
 	SvgIconCircledChevronDown      = Svg2Icon(svgEmbedFileMap.GetMustCallback("CircledChevronDown.svg", svgCallback))
+	SvgIconConvertToNonContainer   = Svg2Icon(svgEmbedFileMap.GetMustCallback("ConvertToNonContainer.svg", svgCallback))
+	SvgIconConvertToContainer      = Svg2Icon(svgEmbedFileMap.GetMustCallback("ConvertTo_Container.svg", svgCallback))
 	SvgIconLightning               = Svg2Icon(svgEmbedFileMap.GetMustCallback("Lightning.svg", svgCallback))
 	SvgIconLogout                  = Svg2Icon(svgEmbedFileMap.GetMustCallback("Logout.svg", svgCallback))
 	SvgIconMoon                    = Svg2Icon(svgEmbedFileMap.GetMustCallback("Moon.svg", svgCallback))
@@ -53,6 +58,7 @@ var (
 	SvgIconDocument                = Svg2Icon(svgEmbedFileMap.GetMustCallback("document.svg", svgCallback))
 	SvgIconDownToBracket           = Svg2Icon(svgEmbedFileMap.GetMustCallback("down_to_bracket.svg", svgCallback))
 	SvgIconDownload                = Svg2Icon(svgEmbedFileMap.GetMustCallback("download.svg", svgCallback))
+	SvgIconDuplicate               = Svg2Icon(svgEmbedFileMap.GetMustCallback("duplicate.svg", svgCallback))
 	SvgIconEdit                    = Svg2Icon(svgEmbedFileMap.GetMustCallback("edit.svg", svgCallback))
 	SvgIconFirst                   = Svg2Icon(svgEmbedFileMap.GetMustCallback("first.svg", svgCallback))
 	SvgIconFirstAidKit             = Svg2Icon(svgEmbedFileMap.GetMustCallback("first_aid_kit.svg", svgCallback))
@@ -96,6 +102,7 @@ var (
 	SvgIconRangedWeapon            = Svg2Icon(svgEmbedFileMap.GetMustCallback("ranged_weapon.svg", svgCallback))
 	SvgIconReleaseNotes            = Svg2Icon(svgEmbedFileMap.GetMustCallback("release_notes.svg", svgCallback))
 	SvgIconReset                   = Svg2Icon(svgEmbedFileMap.GetMustCallback("reset.svg", svgCallback))
+	SvgIconSaveContent             = Svg2Icon(svgEmbedFileMap.GetMustCallback("save_content.svg", svgCallback))
 	SvgIconSettings                = Svg2Icon(svgEmbedFileMap.GetMustCallback("settings.svg", svgCallback))
 	SvgIconSideBar                 = Svg2Icon(svgEmbedFileMap.GetMustCallback("side_bar.svg", svgCallback))
 	SvgIconSignPost                = Svg2Icon(svgEmbedFileMap.GetMustCallback("sign_post.svg", svgCallback))

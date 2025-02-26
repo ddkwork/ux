@@ -365,7 +365,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 		rowCells = append(rowCells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return material.Clickable(gtx, &n.rowCells[i].Clickable, func(gtx layout.Context) layout.Dimensions {
-					DrawColumnDivider(gtx, cell.columID)                      // 这里绘制的列分割线才没有虚线，gtx被破坏了？ 永远不要移动这个位置
+					DrawColumnDivider(gtx, cell.columID) // 这里绘制的列分割线才没有虚线，gtx被破坏了？ 永远不要移动这个位置
 					return layout.Stack{Alignment: layout.Center}.Layout(gtx, // 层级列就懒得弹了，copy这个逻辑就行了，要弹的话，长按不支持有点纠结移动平台
 						layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 							if len(cell.Text) > 80 {
@@ -422,8 +422,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case ConvertToContainerType:
 										item = ContextMenuItem{
 											Title: "",
-											// Icon:  IconClean,
-											Can: func() bool { return !n.Container() }, // n是当前渲染的行
+											Icon:  SvgIconConvertToContainer,
+											Can:   func() bool { return !n.Container() }, // n是当前渲染的行
 											Do: func() {
 												t.SelectedNode.SetType("ConvertToContainer" + ContainerKeyPostfix) //? todo bug：这里是失败的，导致再次点击这里转换的节点后ConvertToNonContainer没有弹出来
 												t.SelectedNode.ID = newID()
@@ -435,8 +435,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case ConvertToNonContainerType:
 										item = ContextMenuItem{
 											Title: "",
-											// Icon:  IconActionCode,
-											Can: func() bool { return n.Container() }, // n是当前渲染的行
+											Icon:  SvgIconConvertToNonContainer,
+											Can:   func() bool { return n.Container() }, // n是当前渲染的行
 											Do: func() {
 												t.SelectedNode.SetType("")
 												t.SelectedNode.ID = newID()
@@ -452,8 +452,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case NewType:
 										item = ContextMenuItem{
 											Title: "",
-											// Icon:  IconArrowDropDown,
-											Can: func() bool { return true },
+											Icon:  SvgIconCircledAdd,
+											Can:   func() bool { return true },
 											Do: func() {
 												var zero T
 												t.InsertAfter(gtx, NewNode(zero))
@@ -463,7 +463,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case NewContainerType:
 										item = ContextMenuItem{
 											Title: "",
-											Icon:  SvgIconAddComment,
+											Icon:  SvgIconCircledVerticalEllipsis,
 											Can:   func() bool { return true },
 											Do: func() {
 												var zero T // todo edit type?
@@ -482,8 +482,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case DuplicateType:
 										item = ContextMenuItem{
 											Title: "",
-											// Icon:  IconActionUpdate,
-											Can: func() bool { return true },
+											Icon:  SvgIconDuplicate,
+											Can:   func() bool { return true },
 											Do: func() {
 												t.InsertAfter(gtx, t.SelectedNode.Clone())
 											},
@@ -491,8 +491,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 										}
 									case EditType:
 										item = ContextMenuItem{
-											Title: "",
-											// Icon:          IconEdit,
+											Title:         "",
+											Icon:          SvgIconEdit,
 											Can:           func() bool { return true },
 											Do:            func() { t.Edit(gtx) },
 											AppendDivider: true,
@@ -509,15 +509,15 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 									case CloseAllType:
 										item = ContextMenuItem{
 											Title:     "",
-											Icon:      SvgIconHierarchy,
+											Icon:      SvgIconCircledVerticalEllipsis,
 											Can:       func() bool { return true },
 											Do:        func() { t.Root.CloseAll() },
 											Clickable: widget.Clickable{},
 										}
 									case SaveDataType:
 										item = ContextMenuItem{
-											Title: "",
-											// Icon:      IconSave,
+											Title:     "",
+											Icon:      SvgIconSaveContent,
 											Can:       func() bool { return true },
 											Do:        func() { t.SaveDate() },
 											Clickable: widget.Clickable{},
