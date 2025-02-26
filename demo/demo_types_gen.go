@@ -18,6 +18,7 @@ const (
 	AnimationButtonType
 	ContextMenuType
 	ColorPickerType
+	ScreenshotType
 	CardType
 	SearchDropDownType
 	JsonTreeType
@@ -125,6 +126,8 @@ func (t DemoType) String() string {
 		return "ContextMenu"
 	case ColorPickerType:
 		return "ColorPicker"
+	case ScreenshotType:
+		return "Screenshot"
 	case CardType:
 		return "Card"
 	case SearchDropDownType:
@@ -288,6 +291,8 @@ func (t DemoType) Tooltip() string {
 		return "ContextMenu"
 	case ColorPickerType:
 		return "colorPicker"
+	case ScreenshotType:
+		return "screenshot"
 	case CardType:
 		return "card"
 	case SearchDropDownType:
@@ -444,6 +449,7 @@ func (t DemoType) Names() []string {
 		"AnimationButton",
 		"ContextMenu",
 		"ColorPicker",
+		"Screenshot",
 		"Card",
 		"SearchDropDown",
 		"JsonTree",
@@ -527,6 +533,7 @@ func (t DemoType) EnumTypes() []DemoType {
 		AnimationButtonType,
 		ContextMenuType,
 		ColorPickerType,
+		ScreenshotType,
 		CardType,
 		SearchDropDownType,
 		JsonTreeType,

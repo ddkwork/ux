@@ -195,9 +195,9 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParen
 			return node.clickable.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return layout.Inset{Top: unit.Dp(1)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Max.X = gtx.Dp(th.Size.DefaultIconSize)
-					svg := CircledChevronRight
+					svg := SvgIconCircledChevronRight
 					if node.Expanded {
-						svg = CircledChevronDown
+						svg = SvgIconCircledChevronDown
 					}
 					return NewButton("", nil).SetRectIcon(true).SetSVGIcon(svg).Layout(gtx)
 					return ArrowDownIcon.Layout(gtx, th.Color.TreeIconColor)

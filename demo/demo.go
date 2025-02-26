@@ -3,10 +3,14 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"image"
 	"image/color"
+	"image/png"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/kbinani/screenshot"
 
 	"github.com/ddkwork/golibrary/stream"
 
@@ -461,6 +465,52 @@ func main() {
 			m.Set(StructViewType, form.Layout)
 		case ColorPickerType:
 			m.Set(ColorPickerType, ux.NewColorPicker().Layout)
+		case ScreenshotType:
+
+			// save *image.RGBA to filePath with PNG format.
+			save := func(img *image.RGBA, filePath string) {
+				file, err := os.Create(filePath)
+				if err != nil {
+					panic(err)
+				}
+				defer file.Close()
+				err = png.Encode(file, img)
+				if err != nil {
+					panic(err)
+				}
+			}
+
+			//"github.com/kbinani/screenshot"
+			// Capture each displays.
+			n := screenshot.NumActiveDisplays()
+			if n <= 0 {
+				panic("Active display not found")
+			}
+
+			var all image.Rectangle = image.Rect(0, 0, 0, 0)
+
+			for i := 0; i < n; i++ {
+				bounds := screenshot.GetDisplayBounds(i)
+				all = bounds.Union(all)
+
+				img, err := screenshot.CaptureRect(bounds)
+				if err != nil {
+					panic(err)
+				}
+				fileName := fmt.Sprintf("%d_%dx%d.png", i, bounds.Dx(), bounds.Dy())
+				save(img, fileName)
+
+				fmt.Printf("#%d : %v \"%s\"\n", i, bounds, fileName)
+			}
+
+			// Capture all desktop region into an image.
+			fmt.Printf("%v\n", all)
+			img, err := screenshot.Capture(all.Min.X, all.Min.Y, all.Dx(), all.Dy())
+			if err != nil {
+				panic(err)
+			}
+			save(img, "all.png")
+
 		case CardType:
 			f := &ux.FlowWrap{
 				Cards: nil,
@@ -480,7 +530,7 @@ func main() {
 			m.Set(CardType, f.Layout)
 		case MobileType:
 		case SvgButtonType:
-			m.Set(SvgButtonType, ux.NewButton("Hex Editor", nil).SetRectIcon(true).SetSVGIcon(ux.CircledChevronRight).Layout)
+			m.Set(SvgButtonType, ux.NewButton("svg button", nil).SetRectIcon(true).SetSVGIcon(ux.SvgIconCircledChevronRight).Layout)
 		case CodeEditorType:
 			m.Set(CodeEditorType, ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout)
 		case AsmViewType:

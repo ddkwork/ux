@@ -1,9 +1,7 @@
 package ux
 
 import (
-	"embed"
 	_ "embed"
-	"github.com/ddkwork/golibrary/stream"
 	"image"
 	"image/color"
 	_ "image/jpeg"
@@ -73,14 +71,6 @@ var (
 	LogsIcon       = mylog.Check2(widget.NewIcon(icons.ActionSubject))
 	SettingsIcon   = mylog.Check2(widget.NewIcon(icons.ActionSettings))
 	DarkIcon       = mylog.Check2(widget.NewIcon(icons.ActionSubject))
-)
-
-//go:embed resources/images/*.svg
-var images embed.FS
-var (
-	svgEmbedFileMap     = stream.ReadEmbedFileMap(images, "resources/images")
-	CircledChevronDown  = svgEmbedFileMap.GetMust("CircledChevronDown.svg")
-	CircledChevronRight = svgEmbedFileMap.GetMust("CircledChevronRight.svg")
 )
 
 type Icon struct {

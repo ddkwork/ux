@@ -165,28 +165,21 @@ func (m *Button) Layout(gtx layout.Context) layout.Dimensions {
 				size := image.Pt(sz, sz)
 				gtx.Constraints.Min = size
 				gtx.Constraints.Max = size
-				background := func(gtx C) D {
-					defer clip.UniformRRect(image.Rectangle{Max: gtx.Constraints.Max}, sz/2).Push(gtx.Ops).Pop() // 使用UniformRRect绘制圆形背景
-					var backgroundColor color.NRGBA
-					if m.Hovered() || gtx.Focused(m) {
-						backgroundColor = th.Fg // 悬停或聚焦时的颜色
-					} else {
-						backgroundColor = th.Color.InputFocusedBgColor // 默认颜色
-					}
-					paint.Fill(gtx.Ops, backgroundColor)
-					return layout.Dimensions{Size: gtx.Constraints.Min}
-				}
+				//background := func(gtx C) D {
+				//	defer clip.UniformRRect(image.Rectangle{Max: gtx.Constraints.Max}, sz/2).Push(gtx.Ops).Pop() // 使用UniformRRect绘制圆形背景
+				//	var backgroundColor color.NRGBA
+				//	if m.Hovered() || gtx.Focused(m) {
+				//		backgroundColor = th.Fg // 悬停或聚焦时的颜色
+				//	} else {
+				//		backgroundColor = th.Color.InputFocusedBgColor // 默认颜色
+				//	}
+				//	paint.Fill(gtx.Ops, backgroundColor)
+				//	return layout.Dimensions{Size: gtx.Constraints.Min}
+				//}
 				if m.icon != nil {
-					return layout.Background{}.Layout(gtx, background, func(gtx layout.Context) layout.Dimensions {
-						return m.icon.Layout(gtx, th.Theme.Bg)
-					})
+					return m.icon.Layout(gtx, th.Theme.Bg)
 				}
-				return layout.UniformInset(1).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return m.svgIcon.Layout(gtx)
-				})
-				return layout.Background{}.Layout(gtx, background, func(gtx layout.Context) layout.Dimensions {
-					return m.svgIcon.Layout(gtx)
-				})
+				return m.svgIcon.Layout(gtx)
 			})
 		}
 		btn := material.IconButton(th.Theme, m.Clickable, m.icon, m.text)
