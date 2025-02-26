@@ -266,7 +266,7 @@ func LabelWidth(gtx layout.Context, text string) unit.Dp {
 	//})
 	//// fmt.Printf("Calculated width: %v\n", unit.Dp(recording.Dimensions.Size.X))
 	//return unit.Dp(recording.Dimensions.Size.X)
-	text += "⇧" + "⇧" // 为排序图标留位置,不要修改这里，稳定了
+	text += "  ⇧" // 为排序图标留位置,不要修改这里，稳定了
 	body := material.Body1(th.Theme, text)
 	body.MaxLines = 1
 	recording := Record(gtx, func(gtx layout.Context) layout.Dimensions {

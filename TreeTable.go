@@ -291,7 +291,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 	bgColor := RowColor(rowIndex)
 	switch {
 	case t.SelectedNode == n: // 设置选中背景色,这个需要在第一的位置,在选中另外的节点时间段内这个条件成立，能保持背景色不变
-		bgColor = color.NRGBA{R: 255, G: 186, B: 44, A: 91}
+		bgColor = color.NRGBA{R: 200, G: 145, B: 50, A: 255}
 	case rowClick.Hovered(): // 设置悬停背景色
 		// https://rgbacolorpicker.com/
 		bgColor = th.Color.TreeHoveredBgColor
@@ -895,8 +895,8 @@ func maxHierarchyColumnCellWidth(c CellData) unit.Dp { // 计算层级列最大�
 }
 
 var (
-	rowWhiteColor = color.NRGBA{R: 57, G: 57, B: 57, A: 255} // 白色
-	rowBlackColor = color.NRGBA{R: 45, G: 45, B: 45, A: 255} // 黑色
+	rowWhiteColor = color.NRGBA{R: 49, G: 49, B: 49, A: 255} // 白色
+	rowBlackColor = color.NRGBA{R: 43, G: 43, B: 43, A: 255} // 黑色
 )
 
 func RowColor(rowIndex int) color.NRGBA { // 奇偶行背景色

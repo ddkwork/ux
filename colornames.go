@@ -782,7 +782,7 @@ var (
 	Black           = color.NRGBA{A: 0xff}                            // rgb(0, 0, 0)
 	White           = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff} // rgb(255, 255, 255)
 	DividerFg       = color.NRGBA{R: 88, G: 88, B: 88, A: 255}
-	BackgroundColor = color.NRGBA{R: 43, G: 43, B: 43, A: 255}
+	BackgroundColor = color.NRGBA{R: 54, G: 54, B: 54, A: 255}
 	ColorPink       = color.NRGBA{R: 166, G: 96, B: 192, A: 255}
 	ColorHeaderFg   = color.NRGBA{R: 76, G: 76, B: 76, A: 255}
 )
