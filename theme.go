@@ -148,7 +148,6 @@ type Color struct {
 	MinIconColor   color.NRGBA
 	FullIconColor  color.NRGBA
 
-	TreeBgColor        color.NRGBA
 	TreeIconColor      color.NRGBA
 	TreeHoveredBgColor color.NRGBA
 	TreeClickedBgColor color.NRGBA
@@ -373,7 +372,6 @@ func (t *Theme) dark() *Theme {
 	t.Color.MinIconColor = color.NRGBA{R: 255, G: 188, B: 45, A: 255}
 	t.Color.FullIconColor = color.NRGBA{R: 43, G: 200, B: 64, A: 255}
 
-	t.Color.TreeBgColor = color.NRGBA{R: 28, G: 29, B: 32, A: 255}
 	t.Color.TreeIconColor = color.NRGBA{R: 255, G: 255, B: 255, A: 255}
 	t.Color.TreeHoveredBgColor = color.NRGBA{R: 59, G: 60, B: 61, A: 255}
 	t.Color.TreeHoveredBgColor = color.NRGBA{R: 84, G: 84, B: 84, A: 255}

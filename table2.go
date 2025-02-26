@@ -2,9 +2,6 @@ package ux
 
 import (
 	"fmt"
-	"image"
-	"image/color"
-
 	"gioui.org/gesture"
 	"gioui.org/io/key"
 	"gioui.org/io/pointer"
@@ -17,6 +14,7 @@ import (
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/ddkwork/golibrary/mylog"
+	"image"
 )
 
 type (
@@ -521,20 +519,7 @@ func TableSimpleRow(tbl *Table2) TableSimpleRowStyle {
 }
 
 func (row TableSimpleRowStyle) Layout(gtx layout.Context, rowIdx int, cellFn cellFn) layout.Dimensions {
-	c := color.NRGBA{
-		R: 42,
-		G: 42,
-		B: 42,
-		A: 255,
-	}
-	if rowIdx%2 == 1 {
-		c = color.NRGBA{
-			R: 32,
-			G: 32,
-			B: 32,
-			A: 255,
-		}
-	}
+	c := RowColor(rowIdx)
 
 	if row.Table.cells == nil {
 		row.Table.cells = make([]*widget.Clickable, len(row.Table.Columns))

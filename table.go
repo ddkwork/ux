@@ -226,11 +226,9 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 		/*表头绘制 headingFunc DefaultDraw.ListElement*/ func(gtx C, col int) D {
 			DrawColumnDivider(gtx, col)                                                       // 为表头绘制列分隔条
 			paint.FillShape(gtx.Ops, ColorHeaderFg, clip.Rect{Max: gtx.Constraints.Max}.Op()) // 表头背景色
-
 			//return component.Resize{}.Layout(gtx, func(gtx DefaultDraw.Context) DefaultDraw.Dimensions {
 			//
 			//})
-
 			return m.headerBorder.Layout(gtx, func(gtx C) D {
 				column := m.GetColumn(col)
 				click := m.headers[col]
@@ -383,19 +381,9 @@ func HighlightRow(gtx C) { // 高亮选中行为蓝色
 
 func DrawCrosswalk(gtx C, row int) { // 绘制斑马线
 	if row%2 == 0 {
-		paint.FillShape(gtx.Ops, color.NRGBA{
-			R: 42,
-			G: 42,
-			B: 42,
-			A: 255,
-		}, clip.Rect{Max: gtx.Constraints.Max}.Op())
+		paint.FillShape(gtx.Ops, rowWhiteColor, clip.Rect{Max: gtx.Constraints.Max}.Op())
 	} else {
-		paint.FillShape(gtx.Ops, color.NRGBA{
-			R: 32,
-			G: 32,
-			B: 32,
-			A: 255,
-		}, clip.Rect{Max: gtx.Constraints.Max}.Op())
+		paint.FillShape(gtx.Ops, rowBlackColor, clip.Rect{Max: gtx.Constraints.Max}.Op())
 	}
 }
 

@@ -173,7 +173,8 @@ func (t *Tree) renderTree(gtx layout.Context, nodes []*TreeNode) []layout.FlexCh
 
 func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParent bool) layout.Dimensions {
 	// 渲节点标题
-	bgColor := th.Color.TreeBgColor
+	bgColor := th.Bg
+	bgColor = RowColor(depth + 1)
 
 	if node.clickable.Clicked(gtx) {
 		node.Expanded = !node.Expanded
