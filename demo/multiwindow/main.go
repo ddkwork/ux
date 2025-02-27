@@ -21,7 +21,6 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/text"
-	"gioui.org/widget/material"
 )
 
 func main() {

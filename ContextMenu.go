@@ -2,9 +2,10 @@ package ux
 
 import (
 	"gioui.org/widget"
-	"github.com/ddkwork/ux/component"
+	"github.com/ddkwork/ux/x/component"
+
 	"github.com/ddkwork/ux/giosvg"
-	//"gioui.org/x/component"
+	//
 )
 
 type ContextMenuItem struct {

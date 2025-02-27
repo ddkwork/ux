@@ -5,6 +5,8 @@ import (
 	"image/color"
 	"slices"
 
+	"github.com/ddkwork/ux/widget/material"
+
 	"gioui.org/gesture"
 	"gioui.org/io/event"
 	"gioui.org/io/input"
@@ -16,7 +18,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 

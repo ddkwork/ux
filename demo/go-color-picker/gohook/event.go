@@ -33,8 +33,10 @@ import "strconv"
 func AddEvent(key string) bool {
 	var (
 		// cs   *C.char
-		mArr = []string{"mleft", "center", "mright", "wheelDown",
-			"wheelUp", "wheelLeft", "wheelRight"}
+		mArr = []string{
+			"mleft", "center", "mright", "wheelDown",
+			"wheelUp", "wheelLeft", "wheelRight",
+		}
 		mouseBool bool
 	)
 

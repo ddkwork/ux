@@ -154,7 +154,7 @@ func Process(evChan <-chan Event) (out chan bool) {
 				if allPressed(pressed, keys[v]...) {
 					cbs[v](ev)
 				} else if ev.Kind == KeyUp {
-					//uppressed[ev.Keycode] = true
+					// uppressed[ev.Keycode] = true
 					if allPressed(uppressed, upkeys[v]...) {
 						uppressed = make(map[uint16]bool, 256)
 						cbs[v](ev)
@@ -247,7 +247,7 @@ func Start() chan Event {
 
 			C.pollEv()
 			time.Sleep(time.Millisecond * 50)
-			//todo: find smallest time that does not destroy the cpu utilization
+			// todo: find smallest time that does not destroy the cpu utilization
 		}
 	}()
 

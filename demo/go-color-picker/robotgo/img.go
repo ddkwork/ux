@@ -163,7 +163,7 @@ func copyToVUint8A(dst []uint8, src *uint8) {
 //
 // robotgo.GetText(imgPath, lang string)
 func GetText(imgPath string, args ...string) (string, error) {
-	var lang = "eng"
+	lang := "eng"
 
 	if len(args) > 0 {
 		lang = args[0]

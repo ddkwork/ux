@@ -23,9 +23,9 @@ func main() {
 
 				fmt.Printf("%v key: %c:%v\n", i.Kind, i.Keychar, i.Rawcode)
 			} else if i.Kind >= hook.MouseDown && i.Kind < hook.MouseWheel {
-				//fmt.Printf("x: %v, y: %v, button: %v\n", i.X, i.Y, i.Button)
+				// fmt.Printf("x: %v, y: %v, button: %v\n", i.X, i.Y, i.Button)
 			} else if i.Kind == hook.MouseWheel {
-				//fmt.Printf("x: %v, y: %v, button: %v, wheel: %v, rotation: %v\n", i.X, i.Y, i.Button,i.Amount,i.Rotation)
+				// fmt.Printf("x: %v, y: %v, button: %v, wheel: %v, rotation: %v\n", i.X, i.Y, i.Button,i.Amount,i.Rotation)
 			} else {
 				fmt.Printf("%+v\n", i)
 			}
@@ -36,5 +36,4 @@ func main() {
 			break
 		}
 	}
-
 }

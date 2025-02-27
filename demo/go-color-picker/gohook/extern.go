@@ -7,10 +7,9 @@ package hook
 import "C"
 
 import (
+	"encoding/json"
 	"log"
 	"time"
-
-	"encoding/json"
 )
 
 //export go_send

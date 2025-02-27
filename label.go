@@ -3,10 +3,11 @@ package ux
 import (
 	"image/color"
 
+	"github.com/ddkwork/ux/widget/material"
+
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"gioui.org/widget/material"
 )
 
 func LayoutErrorLabel(gtx C, e error) D {

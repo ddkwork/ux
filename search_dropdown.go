@@ -5,6 +5,8 @@ import (
 	"image/color"
 	"strings"
 
+	"github.com/ddkwork/ux/x/component"
+
 	"gioui.org/font"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -12,7 +14,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/x/component"
 )
 
 type SearchDropDown struct {

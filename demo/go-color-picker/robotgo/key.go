@@ -542,7 +542,6 @@ func KeyTap(key string, args ...interface{}) error {
 //	robotgo.KeyToggle("a", "up", "alt", "cmd")
 //	robotgo.KeyToggle("k", pid int)
 func KeyToggle(key string, args ...interface{}) error {
-
 	if len(key) > 0 && unicode.IsUpper([]rune(key)[0]) {
 		args = append(args, "shift")
 	}
@@ -666,7 +665,7 @@ func inputUTF(str string) {
 //	robotgo.TypeStr("abc@123, Hi galaxy, こんにちは")
 //	robotgo.TypeStr("To be or not to be, this is questions.", pid int)
 func TypeStr(str string, args ...int) {
-	var tm, tm1 = 0, 7
+	tm, tm1 := 0, 7
 
 	if len(args) > 1 {
 		tm = args[1]

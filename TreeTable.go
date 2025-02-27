@@ -15,7 +15,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ddkwork/ux/component"
+	"github.com/ddkwork/ux/widget/material"
+	"github.com/ddkwork/ux/x/component"
 
 	"github.com/ddkwork/golibrary/stream/deepcopy"
 	"github.com/ddkwork/golibrary/stream/uuid"
@@ -30,8 +31,7 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
-	//"gioui.org/x/component"
+	//
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/golibrary/stream/align"
@@ -39,16 +39,16 @@ import (
 
 type (
 	TreeTable[T any] struct {
-		TableContext[T]                             // 实例化时传入的上下文
-		Root                    *Node[T]            // 根节点,保存数据到json只需要调用它即可
-		header                  tableHeader[T]      // 表头
-		rootRows                []*Node[T]          // from root.children
-		filteredRows            []*Node[T]          // 过滤后的行
-		SelectedNode            *Node[T]            // 选中的节点,文件管理器外部自定义右键菜单增删改查文件需要通过它取出节点元数据结构体的文件路径字段，所以需要导出
-		columnCount             int                 // 列数
-		maxColumnCellWidths     []unit.Dp           // 最宽的列label文本宽度for单元格
-		maxColumnTextWidths     []unit.Dp           // 最宽的列文本宽度for tui
-		rows                    [][]CellData        // 矩阵置换参数，行转为列，增删改节点后重新生成它
+		TableContext[T]                    // 实例化时传入的上下文
+		Root                *Node[T]       // 根节点,保存数据到json只需要调用它即可
+		header              tableHeader[T] // 表头
+		rootRows            []*Node[T]     // from root.children
+		filteredRows        []*Node[T]     // 过滤后的行
+		SelectedNode        *Node[T]       // 选中的节点,文件管理器外部自定义右键菜单增删改查文件需要通过它取出节点元数据结构体的文件路径字段，所以需要导出
+		columnCount         int            // 列数
+		maxColumnCellWidths []unit.Dp      // 最宽的列label文本宽度for单元格
+		maxColumnTextWidths []unit.Dp      // 最宽的列文本宽度for tui
+		// rows                    [][]CellData        // 矩阵置换参数，行转为列，增删改节点后重新生成它
 		columns                 [][]CellData        // CopyColumn
 		DragRemovedRowsCallback func(n *Node[T])    // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
 		DropOccurredCallback    func(n *Node[T])    // Called whenever a drop occurs that modifies the model.
@@ -587,8 +587,6 @@ func (t *TreeTable[T]) drawContextArea(gtx C, menuState *component.MenuState) D 
 	})
 }
 
-var modal = NewModal()
-
 func (t *TreeTable[T]) IsRowSelected() bool { return t.SelectedNode != nil }
 
 func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData) layout.Dimensions {
@@ -687,7 +685,6 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) {
 	gtx.Constraints = originalConstraints
 	t.rootRows = t.Root.Children
 	// t.SaveDate()//增加卡顿程度，所以放在右键菜单算了
-	return
 }
 
 func (t *TreeTable[T]) SaveDate() {
@@ -1242,20 +1239,20 @@ func (t *TreeTable[T]) Filter(text string) {
 			}
 		}
 	}
-	for i, row := range t.filteredRows {
-		break
-		children := make([]*Node[T], 0)
-		for _, node := range row.Walk() { // todo bug
-			cells := t.MarshalRowCells(node)
-			for _, cell := range cells {
-				mylog.Info(cell.Text, text)
-				if strings.EqualFold(cell.Text, text) {
-					children = append(children, node) // 过滤子节点
-				}
-			}
-		}
-		t.filteredRows[i].Children = children
-	}
+	//for i, row := range t.filteredRows {
+	//	break
+	//	children := make([]*Node[T], 0)
+	//	for _, node := range row.Walk() { // todo bug
+	//		cells := t.MarshalRowCells(node)
+	//		for _, cell := range cells {
+	//			mylog.Info(cell.Text, text)
+	//			if strings.EqualFold(cell.Text, text) {
+	//				children = append(children, node) // 过滤子节点
+	//			}
+	//		}
+	//	}
+	//	t.filteredRows[i].Children = children
+	//}
 	if len(t.filteredRows) == 0 {
 		return
 	}
@@ -1549,8 +1546,9 @@ func (t *TreeTable[T]) Remove(gtx layout.Context) {
 }
 
 func (t *TreeTable[T]) Edit(gtx layout.Context) {
+	modal := NewModal()
 	modal.SetTitle("edit row")
-	modal.SetContent(func(gtx layout.Context) layout.Dimensions {
+	modal.Display(func(gtx layout.Context) layout.Dimensions {
 		editNode := NewStructView(t.SelectedNode.Data, func() (elems []CellData) {
 			return t.MarshalRowCells(t.SelectedNode)
 		})

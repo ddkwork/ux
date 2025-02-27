@@ -10,18 +10,16 @@ import (
 	"os"
 	"time"
 
-	"github.com/kbinani/screenshot"
-
-	"github.com/ddkwork/golibrary/stream"
-
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/x/outlay"
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/golibrary/safemap"
+	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/terminal"
+	"github.com/kbinani/screenshot"
 )
 
 var appBar *ux.AppBar

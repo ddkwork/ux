@@ -2,7 +2,7 @@ package ux
 
 import (
 	"gioui.org/layout"
-	"gioui.org/widget/material"
+	"github.com/ddkwork/ux/widget/material"
 )
 
 type ProgressBar struct {

@@ -8,12 +8,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ddkwork/ux/widget/material"
+
 	"github.com/ddkwork/ux"
 
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/text"
-	"gioui.org/widget/material"
 )
 
 type packet struct {

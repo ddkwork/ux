@@ -42,7 +42,6 @@ func move() {
 }
 
 func click() {
-
 	// click the left mouse button
 	robotgo.Click()
 

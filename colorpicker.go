@@ -4,10 +4,11 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/ddkwork/ux/x/colorpicker"
+
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
-	"gioui.org/x/colorpicker"
 )
 
 type ColorPicker struct {

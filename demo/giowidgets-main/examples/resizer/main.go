@@ -8,7 +8,6 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/text"
-	"gioui.org/widget/material"
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/ux"
 )

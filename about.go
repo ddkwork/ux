@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ddkwork/ux/widget/material"
+
 	"gioui.org/app"
 	"gioui.org/io/event"
 	"gioui.org/io/key"
@@ -17,7 +19,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"gioui.org/widget/material"
 )
 
 // A []string to hold the speech as a list of paragraphs

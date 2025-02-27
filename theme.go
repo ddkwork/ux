@@ -3,9 +3,10 @@ package ux
 import (
 	"image/color"
 
+	"github.com/ddkwork/ux/widget/material"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"gioui.org/widget/material"
 )
 
 var th = NewTheme()

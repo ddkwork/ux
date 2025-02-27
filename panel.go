@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ddkwork/ux/widget/material"
+
 	"gioui.org/app"
 	_ "gioui.org/app/permission/networkstate"
 	_ "gioui.org/app/permission/storage"
@@ -19,7 +21,6 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"gioui.org/widget/material"
 	"github.com/ddkwork/golibrary/mylog"
 )
 

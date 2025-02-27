@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/ddkwork/ux/widget/material"
+
 	"github.com/ddkwork/ux/giosvg"
 
 	"gioui.org/io/input"
@@ -13,7 +15,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
 	"github.com/ddkwork/ux/animationButton"
 )
 

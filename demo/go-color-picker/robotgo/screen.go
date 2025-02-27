@@ -27,7 +27,8 @@ func GetDisplayRect(i int) Rect {
 	x, y, w, h := GetDisplayBounds(i)
 	return Rect{
 		Point{X: x, Y: y},
-		Size{W: w, H: h}}
+		Size{W: w, H: h},
+	}
 }
 
 // Capture capture the screenshot, use the CaptureImg default

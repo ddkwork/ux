@@ -6,7 +6,6 @@ import (
 	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
 )
 
 // Letters displays a clickable list of text items that open a new window.

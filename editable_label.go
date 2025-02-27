@@ -3,6 +3,8 @@ package ux
 import (
 	"image"
 
+	"github.com/ddkwork/ux/widget/material"
+
 	"gioui.org/io/key"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -10,7 +12,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
 )
 
 type EditableLabel struct {

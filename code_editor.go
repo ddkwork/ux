@@ -6,6 +6,8 @@ import (
 	"image/color"
 	"strings"
 
+	"github.com/ddkwork/ux/widget/material"
+
 	"gioui.org/font/opentype"
 	"github.com/ddkwork/golibrary/mylog"
 
@@ -16,7 +18,6 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
 
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"

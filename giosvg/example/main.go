@@ -12,7 +12,6 @@ import (
 	"gioui.org/op"
 	"gioui.org/text"
 	"github.com/ddkwork/ux/giosvg"
-	"github.com/ddkwork/ux/material"
 )
 
 //go:generate go run github.com/ddkwork/ux/giosvg/cmd/svggen -i "." -o "./school-bus.go" -pkg "main"

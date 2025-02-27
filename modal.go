@@ -8,13 +8,13 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"gioui.org/widget/material"
+	"github.com/ddkwork/ux/widget/material"
 )
 
 type Modal struct {
 	visible       bool
 	content       layout.Widget
-	closeButton   *Button
+	closeIcon     *Button
 	clickerWidget *Clickable
 	title         string
 	height        int
@@ -23,14 +23,15 @@ type Modal struct {
 
 func NewModal() *Modal {
 	m := &Modal{
+		visible:       false,
+		content:       nil,
+		closeIcon:     nil,
+		clickerWidget: NewClickable(),
+		title:         "modal",
 		height:        300,
 		width:         500,
-		title:         "modal",
-		clickerWidget: NewClickable(),
 	}
-	m.closeButton = NewButton("", func() {
-		m.visible = false
-	}).SetIcon(IconClose)
+	m.closeIcon = NewButton("", func() { m.visible = false })
 	return m
 }
 
@@ -53,7 +54,7 @@ func (m *Modal) SetTitle(title string) *Modal {
 	return m
 }
 
-func (m *Modal) SetContent(content layout.Widget) {
+func (m *Modal) Display(content layout.Widget) {
 	m.content = content
 	m.visible = true
 }
@@ -100,7 +101,7 @@ func (m *Modal) Layout(gtx layout.Context) layout.Dimensions {
 									}),
 									layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 										return layout.Inset{Left: unit.Dp(m.width - 30)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-											return m.closeButton.Layout(gtx)
+											return m.closeIcon.Layout(gtx)
 										})
 									}),
 								)

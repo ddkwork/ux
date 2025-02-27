@@ -5,11 +5,12 @@ import (
 	"io"
 	"strings"
 
+	"github.com/ddkwork/ux/widget/material"
+
 	"gioui.org/io/clipboard"
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
 	"github.com/ddkwork/ux/animationButton"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )

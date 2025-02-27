@@ -13,7 +13,6 @@ import (
 	"gioui.org/op"
 	"gioui.org/text"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
 )
 
 // Log shows a list of strings.
@@ -106,5 +105,4 @@ func (log *Log) Layout(w *Window, th *material.Theme, gtx layout.Context) {
 			})
 		}),
 	)
-
 }

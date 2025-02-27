@@ -1,3 +1,6 @@
 go install mvdan.cc/gofumpt@latest
 gofumpt -l -w .
+go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+go install honnef.co/go/tools/cmd/staticcheck@latest
+staticcheck ./...
 pause

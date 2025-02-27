@@ -7,7 +7,7 @@ require (
 	gioui.org/cmd v0.8.0
 	gioui.org/example v0.8.1
 	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
-	github.com/ddkwork/golibrary v0.0.91-0.20250225235538-56ec4e96f53e
+	github.com/ddkwork/golibrary v0.0.91-0.20250227072056-70ad84eececa
 	github.com/ddkwork/ux v0.0.0-20250225112617-16249a53862e
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.33.0
@@ -32,6 +32,7 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-github/v24 v24.0.1 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
+	github.com/gorpher/gowin32 v0.0.12 // indirect
 	github.com/inkeliz/giohyperlink v0.0.0-20220903215451-2ac5d54abdce // indirect
 	github.com/jezek/xgb v1.1.1 // indirect
 	github.com/kbinani/screenshot v0.0.0-20250118074034-a3924b7bbc8c // indirect

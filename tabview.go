@@ -5,6 +5,8 @@ import (
 	"image/color"
 	"unicode"
 
+	"github.com/ddkwork/ux/widget/material"
+
 	"gioui.org/font"
 	"gioui.org/gesture"
 	"gioui.org/io/event"
@@ -15,7 +17,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
 	"github.com/ddkwork/golibrary/safemap"
 )
 

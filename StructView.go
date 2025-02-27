@@ -3,10 +3,11 @@ package ux
 import (
 	"slices"
 
+	"github.com/ddkwork/ux/widget/material"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
 	"github.com/ddkwork/golibrary/stream"
 )
 

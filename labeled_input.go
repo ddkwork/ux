@@ -4,7 +4,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
+	"github.com/ddkwork/ux/widget/material"
 )
 
 type LabeledInput struct {

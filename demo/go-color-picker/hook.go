@@ -11,8 +11,9 @@
 package main
 
 import (
-	"github.com/go-vgo/robotgo"
 	"strconv"
+
+	"github.com/go-vgo/robotgo"
 
 	hook "github.com/robotn/gohook"
 )
@@ -79,8 +80,10 @@ func EventHook(when uint8, keysPressed []string, callback func(hook.Event)) {
 func AddEvent(key string) bool {
 	var (
 		// cs   *C.char
-		mArr = []string{"mleft", "center", "mright", "wheelDown",
-			"wheelUp", "wheelLeft", "wheelRight"}
+		mArr = []string{
+			"mleft", "center", "mright", "wheelDown",
+			"wheelUp", "wheelLeft", "wheelRight",
+		}
 		mouseBool bool
 	)
 

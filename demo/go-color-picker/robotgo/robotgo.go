@@ -741,7 +741,7 @@ func MouseUp(key ...interface{}) error {
 //
 //	robotgo.Scroll(10, 10)
 func Scroll(x, y int, args ...int) {
-	var msDelay = 10
+	msDelay := 10
 	if len(args) > 0 {
 		msDelay = args[0]
 	}
@@ -1018,7 +1018,7 @@ func GetBHandle() int {
 	tt.Drop("GetBHandle", "GetHandle")
 	hwnd := C.b_get_handle()
 	ghwnd := int(hwnd)
-	//fmt.Println("gethwnd---", ghwnd)
+	// fmt.Println("gethwnd---", ghwnd)
 	return ghwnd
 }
 

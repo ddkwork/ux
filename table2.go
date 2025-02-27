@@ -2,6 +2,8 @@ package ux
 
 import (
 	"fmt"
+	"image"
+
 	"gioui.org/gesture"
 	"gioui.org/io/key"
 	"gioui.org/io/pointer"
@@ -12,9 +14,8 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
 	"github.com/ddkwork/golibrary/mylog"
-	"image"
+	"github.com/ddkwork/ux/widget/material"
 )
 
 type (

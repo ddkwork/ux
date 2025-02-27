@@ -36,6 +36,10 @@ github.com/ddkwork/golibrary v0.0.91-0.20250225120832-ed50dea89457 h1:02fo2Yu3e8
 github.com/ddkwork/golibrary v0.0.91-0.20250225120832-ed50dea89457/go.mod h1:FqbWGIsbVqSsVjeNcdUdlHsn/JNA82xFlwbJKsdily0=
 github.com/ddkwork/golibrary v0.0.91-0.20250225235538-56ec4e96f53e h1:M0Q75i7HRwNRE54lEZegxvTsw8QI6J0X7n7EE/sO3m0=
 github.com/ddkwork/golibrary v0.0.91-0.20250225235538-56ec4e96f53e/go.mod h1:FqbWGIsbVqSsVjeNcdUdlHsn/JNA82xFlwbJKsdily0=
+github.com/ddkwork/golibrary v0.0.91-0.20250227042052-d984f0dc2c03 h1:NKwU4uJAe4a6sR0yUXZMALn3mmJksYjdOBfEqHCFO2E=
+github.com/ddkwork/golibrary v0.0.91-0.20250227042052-d984f0dc2c03/go.mod h1:FqbWGIsbVqSsVjeNcdUdlHsn/JNA82xFlwbJKsdily0=
+github.com/ddkwork/golibrary v0.0.91-0.20250227072056-70ad84eececa h1:wAJtRgImF1P8pPIYOcJL+bEuWMKddrWGXX/6mS5xg7k=
+github.com/ddkwork/golibrary v0.0.91-0.20250227072056-70ad84eececa/go.mod h1:FqbWGIsbVqSsVjeNcdUdlHsn/JNA82xFlwbJKsdily0=
 github.com/ddkwork/ux v0.0.0-20250225112617-16249a53862e h1:AvgkWTpbaILbLLYoAblnt+wjfSK+NZBUbd0X3jTnZkQ=
 github.com/ddkwork/ux v0.0.0-20250225112617-16249a53862e/go.mod h1:O+8oBmXN9EuY1b9A4r2M83jACVCAYIrd8t8VKAzuLD8=
 github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
@@ -82,6 +86,8 @@ github.com/google/go-github/v24 v24.0.1 h1:KCt1LjMJEey1qvPXxa9SjaWxwTsCWSq6p2Ju5
 github.com/google/go-github/v24 v24.0.1/go.mod h1:CRqaW1Uns1TCkP0wqTpxYyRxRjxwvKU/XSS44u6X74M=
 github.com/google/go-querystring v1.0.0 h1:Xkwi/a1rcvNg1PPYe5vI8GbeBY/jrVuDX5ASuANWTrk=
 github.com/google/go-querystring v1.0.0/go.mod h1:odCYkC5MyYFN7vkCjXpyrEuKhc/BUO6wN/zVPAxq5ck=
+github.com/gorpher/gowin32 v0.0.12 h1:UZsDF0QaQbJ+XZCB9B8lp0yjTWxlL5hh3e24KJgYtRw=
+github.com/gorpher/gowin32 v0.0.12/go.mod h1:NI6b6VhHPJqz2D/0lWCAGCNbm4T9dyXhAjagT+Hye8Y=
 github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
 github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
 github.com/inkeliz/giohyperlink v0.0.0-20220903215451-2ac5d54abdce h1:VY+88zGHu3up1GEdcSH9bFBrwF/0HJRLhaR7QGn+6II=

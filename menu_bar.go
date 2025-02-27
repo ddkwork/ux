@@ -5,6 +5,9 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/ddkwork/ux/widget/material"
+	"github.com/ddkwork/ux/x/component"
+
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -12,8 +15,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
-	"gioui.org/x/component"
 )
 
 type MenuBarAction func()

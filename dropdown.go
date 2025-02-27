@@ -4,6 +4,9 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/ddkwork/ux/widget/material"
+	"github.com/ddkwork/ux/x/component"
+
 	"gioui.org/font"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -11,8 +14,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
-	"gioui.org/x/component"
 )
 
 type DropDown struct {
@@ -44,7 +45,7 @@ type DropDownOption struct {
 	Identifier string
 	clickable  widget.Clickable
 
-	Icon      *widget.Icon
+	Icon      any
 	IconColor color.NRGBA
 
 	isDivider bool

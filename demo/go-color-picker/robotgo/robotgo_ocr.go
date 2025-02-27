@@ -19,7 +19,7 @@ import (
 
 // GetText get the image text by tesseract ocr
 func GetText(imgPath string, args ...string) (string, error) {
-	var lang = "eng"
+	lang := "eng"
 
 	if len(args) > 0 {
 		lang = args[0]
