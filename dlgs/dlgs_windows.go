@@ -4,6 +4,7 @@
 package dlgs
 
 import (
+	"github.com/ddkwork/golibrary/mylog"
 	"strings"
 	"syscall"
 	"unicode/utf16"
@@ -286,9 +287,16 @@ type systemtimeW struct {
 	wMilliseconds uint16
 }
 
+func UintPtrFromString(s string) uintptr {
+	return uintptr(unsafe.Pointer(mylog.Check2(syscall.UTF16PtrFromString(s))))
+}
+
+func UTF16PtrFromString(s string) *uint16 {
+	return mylog.Check2(syscall.UTF16PtrFromString(s))
+}
+
 func messageBox(title, text string, flags int) int {
-	ret, _, _ := messageBoxW.Call(0, uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(text))),
-		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(title))), uintptr(uint(flags)))
+	ret, _, _ := messageBoxW.Call(0, UintPtrFromString(text), UintPtrFromString(title), uintptr(uint(flags)))
 	return int(ret)
 }
 
@@ -304,8 +312,8 @@ func getModuleHandle() (syscall.Handle, error) {
 func createWindow(exStyle uint64, className, windowName string, style uint64, x, y, width, height int64,
 	parent, menu, instance syscall.Handle,
 ) (syscall.Handle, error) {
-	ret, _, err := createWindowExW.Call(uintptr(exStyle), uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(className))),
-		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(windowName))), uintptr(style), uintptr(x), uintptr(y),
+	ret, _, err := createWindowExW.Call(uintptr(exStyle), UintPtrFromString(className),
+		UintPtrFromString(windowName), uintptr(style), uintptr(x), uintptr(y),
 		uintptr(width), uintptr(height), uintptr(parent), uintptr(menu), uintptr(instance), uintptr(0))
 
 	if ret == 0 {
@@ -349,8 +357,7 @@ func registerClassEx(wcx *wndClassExW) (uint16, error) {
 }
 
 func unregisterClass(className string, instance syscall.Handle) bool {
-	ret, _, _ := unregisterClassW.Call(uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(className))), uintptr(instance))
-
+	ret, _, _ := unregisterClassW.Call(UintPtrFromString(className), uintptr(instance))
 	return ret != 0
 }
 
@@ -382,7 +389,7 @@ func translateMessage(msg *msgW) {
 }
 
 func setWindowText(hwnd syscall.Handle, text string) {
-	setWindowTextW.Call(uintptr(hwnd), uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(text))))
+	setWindowTextW.Call(uintptr(hwnd), UintPtrFromString(text))
 }
 
 func getWindowTextLength(hwnd syscall.Handle) int {
@@ -491,7 +498,7 @@ func registerClass(className string, instance syscall.Handle, fn interface{}) er
 	wcx.wndProc = syscall.NewCallback(fn)
 	wcx.instance = instance
 	wcx.background = colorWindow + 1
-	wcx.className = syscall.StringToUTF16Ptr(className)
+	wcx.className = UTF16PtrFromString(className)
 
 	_, err := registerClassEx(&wcx)
 	return err

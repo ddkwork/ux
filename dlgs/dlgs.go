@@ -6,7 +6,7 @@ import (
 	"runtime"
 )
 
-var verboseTests = false
+//var verboseTests = false
 
 var (
 	// ErrUnsupported is returned when operating system is not supported.

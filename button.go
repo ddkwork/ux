@@ -18,7 +18,7 @@ import (
 	"github.com/ddkwork/ux/animationButton"
 )
 
-func NewButtonAnimation(text string, icon *widget.Icon, callBack func()) *animationButton.Button {
+func NewButtonAnimation(text string, icon *widget.Icon, callBack func(gtx layout.Context)) *animationButton.Button {
 	style := animationButton.ButtonStyle{
 		Rounded:  animationButton.UniformRounded(unit.Dp(12)),
 		TextSize: unit.Sp(12),

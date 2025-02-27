@@ -1470,12 +1470,12 @@ func (n *Node[T]) SumChildren() string {
 func (n *Node[T]) UUID() uuid.ID   { return n.ID }
 func (n *Node[T]) Container() bool { return strings.HasSuffix(n.Type, ContainerKeyPostfix) }
 
-func (n *Node[T]) kind(base string) string {
-	if n.Container() {
-		return base + " Container"
-	}
-	return base
-}
+//func (n *Node[T]) kind(base string) string {
+//	if n.Container() {
+//		return base + " Container"
+//	}
+//	return base
+//}
 
 func (n *Node[T]) GetType() string           { return n.Type }
 func (n *Node[T]) SetType(typeKey string)    { n.Type = typeKey }
@@ -1483,12 +1483,13 @@ func (n *Node[T]) IsOpen() bool              { return n.isOpen && n.Container() 
 func (n *Node[T]) SetOpen(open bool)         { n.isOpen = open && n.Container() }
 func (n *Node[T]) Parent() *Node[T]          { return n.parent }
 func (n *Node[T]) SetParent(parent *Node[T]) { n.parent = parent }
-func (n *Node[T]) clearUnusedFields() {
-	if !n.Container() {
-		n.Children = nil
-		n.isOpen = false
-	}
-}
+
+//	func (n *Node[T]) clearUnusedFields() {
+//		if !n.Container() {
+//			n.Children = nil
+//			n.isOpen = false
+//		}
+//	}
 func (n *Node[T]) ResetChildren()                 { n.Children = nil }
 func (n *Node[T]) CanHaveChildren() bool          { return n.HasChildren() }
 func (n *Node[T]) HasChildren() bool              { return n.Container() && len(n.Children) > 0 }

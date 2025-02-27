@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"fmt"
 	"image/color"
-	"io/ioutil"
+	"io"
 	"math"
 	"regexp"
 	"strings"
@@ -436,7 +436,7 @@ func (r *Renderer) Render(src []byte) ([]richtext.SpanStyle, error) {
 	r.nr.UpdateCurrentColor(r.Config.DefaultColor)
 	r.nr.UpdateCurrentFont(r.Config.DefaultFont)
 	r.nr.UpdateCurrentSize(r.Config.DefaultSize)
-	if err := r.md.Convert(src, ioutil.Discard); err != nil {
+	if err := r.md.Convert(src, io.Discard); err != nil {
 		return nil, err
 	}
 	return r.nr.Result(), nil

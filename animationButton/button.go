@@ -80,7 +80,7 @@ type Button struct {
 	hoverSwitchState bool
 
 	th       *material.Theme
-	callback func()
+	callback func(gtx layout.Context)
 }
 
 func NewButtonAnimationDefault() ButtonAnimation {
@@ -126,7 +126,7 @@ func NewButtonAnimationScale(v float32) ButtonAnimation {
 	}
 }
 
-func NewButton(style ButtonStyle, th *material.Theme, text string, callback func()) *Button {
+func NewButton(style ButtonStyle, th *material.Theme, text string, callback func(gtx layout.Context)) *Button {
 	return &Button{
 		Text:             text,
 		Style:            style,
@@ -166,7 +166,7 @@ func (btn *Button) Clicked(gtx layout.Context) bool {
 func (btn *Button) Layout(gtx layout.Context) layout.Dimensions {
 	if btn.Clicked(gtx) {
 		if btn.callback != nil {
-			btn.callback()
+			btn.callback(gtx)
 		}
 	}
 

@@ -548,7 +548,7 @@ func main() {
 		case ListViewType:
 		case JsonTreeType:
 		case AnimationButtonType:
-			newButtonAnimation := ux.NewButtonAnimation("animation button", ux.IconBack, func() {
+			newButtonAnimation := ux.NewButtonAnimation("animation button", ux.IconBack, func(gtx layout.Context) {
 				mylog.Info("animation button clicked")
 			})
 			m.Set(AnimationButtonType, newButtonAnimation.Layout) // todo bug

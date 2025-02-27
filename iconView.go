@@ -44,18 +44,11 @@ func NewIconView() *IconView {
 		i.keyWords = i.filter.GetText()
 	})
 	for _, name := range iconList {
-		i.clickMap[name] = NewButtonAnimation(name, IconCopy, func() {
-			// copyResponse(gtx, name)
+		i.clickMap[name] = NewButtonAnimation(name, IconCopy, func(gtx layout.Context) {
+			gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(name))})
 		})
 	}
 	return i
-}
-
-func copyResponse(gtx layout.Context, name string) {
-	gtx.Execute(clipboard.WriteCmd{
-		Data: io.NopCloser(strings.NewReader(name)),
-	})
-	// notify.Send(fmt.Sprintf("Copied to clipboard success"), 2*time.Second)
 }
 
 func (i *IconView) Layout(gtx layout.Context) layout.Dimensions {

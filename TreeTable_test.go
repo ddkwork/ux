@@ -1,5 +1,10 @@
 package ux_test
 
+import (
+	"github.com/ddkwork/golibrary"
+	"testing"
+)
+
 //
 //import (
 //	"fmt"
@@ -24,11 +29,11 @@ package ux_test
 //	"github.com/ddkwork/golibrary/stream"
 //	"github.com/ddkwork/ux"
 //)
-//
-//func TestName(t *testing.T) {
-//	golibrary.StaticCheck()
-//}
-//
+
+func TestName(t *testing.T) {
+	golibrary.StaticCheck()
+}
+
 //func BenchmarkTransposeMatrix(b *testing.B) {
 //	rowCells := ux.InitHeader(packet{})
 //	rows := make([][]packet, 0, len(rowCells))

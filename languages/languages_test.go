@@ -16,6 +16,10 @@ func TestNewLanguagesObj(t *testing.T) {
 		assert.Equal(t, GoKind, CodeFile2Language(path))
 
 		assert.Equal(t, GoKind, Code2Language(goCode))
+		assert.Equal(t, PythonKind, Code2Language(pyCode))
+		assert.Equal(t, JavaScriptKind, Code2Language(javaScriptCode))
+		assert.Equal(t, JavaKind, Code2Language(javaCode))
+		assert.Equal(t, JavaScriptKind, Code2Language(jsCode))
 	})
 }
 

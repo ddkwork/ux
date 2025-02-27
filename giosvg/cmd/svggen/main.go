@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"golang.org/x/text/language"
+
 	"go/format"
+	"golang.org/x/text/cases"
 	"io"
 	"math"
 	"os"
@@ -88,7 +91,7 @@ var _, _, _, _, _, _, _, _ = (*f32.Point)(nil), (*op.Ops)(nil), (*clip.Op)(nil),
 		name := filepath.Base(path)
 		name = strings.Replace(name, "-", " ", -1)
 		name = strings.Replace(name, "_", " ", -1)
-		name = strings.Title(strings.Replace(name, filepath.Ext(name), "", -1))
+		name = cases.Title(language.English).String(strings.Replace(name, filepath.Ext(name), "", -1))
 		name = strings.Replace(name, " ", "", -1)
 
 		fmt.Fprintf(out, `var Vector%s giosvg.Vector = func(ops *op.Ops, constraints giosvg.Constraints) layout.Dimensions {`+"\r\n", name)
