@@ -1,0 +1,42 @@
+baseURL = "https://staticcheck.dev"
+languageCode = 'en-us'
+title = 'Staticcheck'
+theme = 'docsy'
+navbar_logo = false
+disableKinds = ['taxonomy', 'term']
+disableAliases = true
+enableInlineShortcodes = true
+
+[outputs]
+home = ["HTML", "REDIR"]
+section = ["HTML"]
+
+[mediaTypes]
+[mediaTypes."text/netlify"]
+delimiter = ""
+
+[outputFormats]
+[outputFormats.REDIR]
+mediaType = "text/netlify"
+baseName = "_redirects"
+isPlainText = true
+notAlternative = true
+
+[markup.goldmark.renderer]
+unsafe = true
+
+[menu]
+[[menu.main]]
+  name = 'GitHub'
+  pre = "<i class='fab fa-github'></i>"
+  url = 'https://github.com/dominikh/go-tools'
+  weight = 999
+
+[markup]
+  [markup.highlight]
+      style = "tango"
+
+[params]
+description = 'Staticcheck is a state of the art linter for the Go programming language'
+images = ['/img/logo.webp']
+title = 'Staticcheck'

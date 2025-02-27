@@ -13,3 +13,7 @@ tr
 /go.work
 /update go workspace.cmd
 /vendor/
+/demo/go-color-picker/gohook/
+/demo/go-color-picker/keycode/
+/demo/go-color-picker/robotgo/
+/demo/go-tools-master/
