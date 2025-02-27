@@ -106,7 +106,7 @@ func (t *Tree) setPath(nodes []*TreeNode, path []int) {
 		nodes = t.nodes
 	}
 	for key, node := range nodes {
-		sign := []int{}
+		var sign []int
 		if len(path) == 0 {
 			sign = []int{key}
 		} else {
