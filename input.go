@@ -322,8 +322,7 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 							widgets = append(widgets, layout.Rigid(i.after))
 						}
 					}
-					spacing := layout.SpaceBetween
-					return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle, Spacing: spacing}.Layout(gtx, widgets...)
+					return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle, Spacing: layout.SpaceBetween}.Layout(gtx, widgets...)
 				})
 			},
 		)

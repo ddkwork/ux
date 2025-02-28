@@ -3,6 +3,10 @@ package ux
 import (
 	_ "embed"
 	"fmt"
+	"gioui.org/app"
+	"gioui.org/font/gofont"
+	"gioui.org/text"
+	"golang.org/x/sync/errgroup"
 	"image"
 	"image/color"
 	"io"
@@ -1561,19 +1565,30 @@ func (t *TreeTable[T]) Remove(gtx layout.Context) {
 }
 
 func (t *TreeTable[T]) Edit(gtx layout.Context) {
-	modal := NewModal()
-	modal.SetTitle("edit row")
-	modal.Display(func(gtx layout.Context) layout.Dimensions {
-		editNode := NewStructView(t.SelectedNode.Data, func() (elems []CellData) {
-			return t.MarshalRowCells(t.SelectedNode)
-		})
-		return editNode.Layout(gtx)
+	g := new(errgroup.Group)
+	g.Go(func() error {
+		w := new(app.Window)
+		w.Option(app.Title("edit row"))
+		th := material.NewTheme()
+		th.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
+		var ops op.Ops
+		for {
+			switch e := w.Event().(type) {
+			case app.DestroyEvent:
+				return e.Err
+			case app.FrameEvent:
+				gtx := app.NewContext(&ops, e)
+				BackgroundDark(gtx)
+				editNode := NewStructView(t.SelectedNode.Data, func() (elems []CellData) {
+					return t.MarshalRowCells(t.SelectedNode)
+				})
+				editNode.Layout(gtx)
+				t.UnmarshalRowCells(t.SelectedNode, t.MarshalRowCells(t.SelectedNode)) // 此时节点元数据被刷新
+				e.Frame(gtx.Ops)
+			}
+		}
 	})
-	if modal.Visible() {
-		modal.Layout(gtx)
-	}
-	// todo test
-	t.UnmarshalRowCells(t.SelectedNode, t.MarshalRowCells(t.SelectedNode)) // 此时节点元数据被刷新
+	mylog.Check(g.Wait())
 	t.SizeColumnsToFit(gtx)
 	t.ResizeHierarchyColumnCellWidth()
 }

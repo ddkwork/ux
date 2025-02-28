@@ -3,6 +3,8 @@ package ux
 import (
 	"bytes"
 	_ "embed"
+	"gioui.org/io/event"
+	"gioui.org/io/key"
 	"image/color"
 
 	"gioui.org/font/opentype"
@@ -18,7 +20,6 @@ import (
 
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
-	"github.com/alecthomas/chroma/v2/styles"
 	"github.com/oligo/gvcode"
 )
 
@@ -64,16 +65,14 @@ type CodeEditor struct {
 	vScrollbarStyle material.ScrollbarStyle
 }
 
-//go:embed resources/dracula.xml
-var DraculaXML []byte
-var Dracula *chroma.Style
+var (
+	//go:embed resources/dracula.xml
+	DraculaXML []byte
+	Dracula    = mylog.Check2(chroma.NewXMLStyle(bytes.NewReader(DraculaXML)))
 
-//go:embed resources/fonts/consolas.ttf
-var consolas []byte
-
-func init() {
-	Dracula = mylog.Check2(chroma.NewXMLStyle(bytes.NewReader(DraculaXML)))
-}
+	//go:embed resources/fonts/consolas.ttf
+	consolas []byte
+)
 
 func MustGetCodeEditorFont() font.FontFace {
 	fontFaces := mylog.Check2(opentype.ParseCollection(consolas))
@@ -85,7 +84,6 @@ func MustGetCodeEditorFont() font.FontFace {
 
 func NewCodeEditor(code string, lang string) *CodeEditor {
 	// 	editorFont := fonts.MustGetCodeEditorFont()
-
 	c := &CodeEditor{
 		editor: &gvcode.Editor{
 			// Font:                  editorFont.Font,
@@ -111,9 +109,7 @@ func NewCodeEditor(code string, lang string) *CodeEditor {
 	// c.editor.WithOptions(gvcode.WithTabWidth(4))
 	// c.editor.WithOptions(gvcode.WithSoftTab(true))
 	c.editor.WithOptions(gvcode.WrapLine(true))
-
 	c.vScrollbarStyle = material.Scrollbar(th.Theme, &c.vScrollbar)
-
 	c.border = widget.Border{
 		Color:        rgb(0x6c6f76), // todo
 		Width:        unit.Dp(1),
@@ -121,17 +117,13 @@ func NewCodeEditor(code string, lang string) *CodeEditor {
 	}
 
 	c.lexer = getLexer(lang)
-
-	style := styles.Get("dracula")
-	if style == nil {
-		style = styles.Fallback
-	}
-
-	c.codeStyle = style
+	//style := styles.Get("dracula")
+	//if style == nil {
+	//	style = styles.Fallback
+	//}
+	//c.codeStyle = style
 	c.codeStyle = Dracula
-
 	c.editor.SetText(code)
-
 	return c
 }
 
@@ -140,7 +132,6 @@ func getLexer(lang string) chroma.Lexer {
 	if lexer == nil {
 		lexer = lexers.Fallback
 	}
-
 	return chroma.Coalesce(lexer)
 }
 
@@ -195,6 +186,42 @@ func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 				if c.onChange != nil {
 					c.onChange(c.editor.Text())
 					c.code = c.editor.Text()
+				}
+			}
+		}
+
+		filters := []event.Filter{
+			key.FocusFilter{Target: c.editor},
+			key.Filter{Focus: c.editor, Name: "D", Required: key.ModShortcut},
+		}
+		for {
+			ke, ok := gtx.Event(filters...)
+			if !ok {
+				break
+			}
+			switch e := ke.(type) {
+			case key.Event:
+				if !gtx.Focused(c.editor) || e.State != key.Press {
+					break
+				}
+				if e.Modifiers.Contain(key.ModShortcut) {
+					switch e.Name {
+					case "D":
+						c.editor.DuplicateLine()
+						//func (e *Editor) DuplicateLine() {
+						//	e.initBuffer()
+						//	if e.text.SelectionLen() == 0 {
+						//		e.scratch = e.text.SelectedLine(e.scratch)
+						//		if len(e.scratch) > 0 && e.scratch[len(e.scratch)-1] != '\n' {
+						//			e.scratch = append(e.scratch, '\n')
+						//		}
+						//	} else {
+						//		e.scratch = e.text.SelectedText(e.scratch)
+						//	}
+						//	e.Insert(string(e.scratch))
+						//}
+						c.editor.UpdateTextStyles(c.stylingText(c.editor.Text()))
+					}
 				}
 			}
 		}
