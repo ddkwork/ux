@@ -68,6 +68,7 @@ type (
 		pressStarted            time.Time           // 按压开始时间
 		longPressed             bool                // 是否已经触发长按事件
 		widget.List                                 // 为rootRows渲染列表和滚动条
+		editNode                *StructView
 	}
 	TableContext[T any] struct {
 		ContextMenuItems       func(gtx layout.Context, n *Node[T]) (items []ContextMenuItem) // 通过SelectedNode传递给菜单的do取出元数据，比如删除文件,但是菜单是否绘制取决于当前渲染的行，所以要传递n给can
@@ -1579,10 +1580,10 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) {
 			case app.FrameEvent:
 				gtx := app.NewContext(&ops, e)
 				BackgroundDark(gtx)
-				editNode := NewStructView(t.SelectedNode.Data, func() (elems []CellData) {
+				t.editNode = NewStructView(t.SelectedNode.Data, func() (elems []CellData) {
 					return t.MarshalRowCells(t.SelectedNode)
 				})
-				editNode.Layout(gtx)
+				t.editNode.Layout(gtx)
 				t.UnmarshalRowCells(t.SelectedNode, t.MarshalRowCells(t.SelectedNode)) // 此时节点元数据被刷新
 				e.Frame(gtx.Ops)
 			}

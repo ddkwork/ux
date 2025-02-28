@@ -76,7 +76,7 @@ func (s *StructView) Layout(gtx layout.Context) layout.Dimensions {
 								return layout.Spacer{}.Layout(gtx)
 							}),
 							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-								return layout.Inset{Top: unit.Dp(4), Right: unit.Dp(4)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+								return layout.Inset{Top: unit.Dp(8), Right: unit.Dp(4)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 									labelText := s.keys[i]
 									if labelText != "" {
 										labelText = labelText + "："
