@@ -28,6 +28,14 @@ jobs:
         with:
           go-version: '1.24.0'
 
+      # manjaro linux
+      # gioui提示vulkan构建约束被排除的原因是没有安装gcc，termux可以试试是不是这个原因
+      # sudo pacman -S pkg-config vulkan-headers gcc clang cmake
+      # yay -S android-sdk-build-tools  android-sdk-platform-tools
+      # yay -S android-platform
+      # go env -w GOPROXY=https://goproxy.cn,direct
+      # go run 需要sudo
+
       - name: Install C library dependencies on Ubuntu
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -45,7 +53,7 @@ jobs:
 
       - name: Run tests
         run: go install honnef.co/go/tools/cmd/staticcheck@latest && staticcheck ./... && go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
-#        go test ./...
+  #        go test ./...
 
 
   package-and-release:
