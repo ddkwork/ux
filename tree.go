@@ -86,19 +86,18 @@ func (t *Tree) getNode(nodes []*TreeNode, paths []int) (*TreeNode, error) {
 	if nodes == nil {
 		nodes = t.nodes
 	}
-	for _, path := range paths {
+	for i, path := range paths {
 		if len(nodes) <= path {
-			return nil, fmt.Errorf("err path")
+			return nil, fmt.Errorf("路径错误: 节点索引超出范围")
 		}
-		if len(paths) > 1 {
+		if i < len(paths)-1 { // 检查是否是最后一个路径值
 			if nodes[path].Children != nil {
-				return t.getNode(nodes[path].Children, paths[1:])
+				return t.getNode(nodes[path].Children, paths[i+1:])
 			}
-			return nil, fmt.Errorf("err path")
+			return nodes[path], nil // 返回最后一个路径值对应的节点
 		}
-		return nodes[path], nil
 	}
-	return nil, fmt.Errorf("err path")
+	return nil, fmt.Errorf("路径错误: 路径为空")
 }
 
 func (t *Tree) setPath(nodes []*TreeNode, path []int) {

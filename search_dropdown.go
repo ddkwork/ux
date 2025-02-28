@@ -57,12 +57,12 @@ func (c *SearchDropDown) SetWidth(width unit.Dp) {
 	c.width = width
 }
 
-func newSearchDropDownOption(text string) *SearchDropDownOption {
-	return &SearchDropDownOption{
-		Text:  text,
-		Value: text,
-	}
-}
+//func newSearchDropDownOption(text string) *SearchDropDownOption {
+//	return &SearchDropDownOption{
+//		Text:  text,
+//		Value: text,
+//	}
+//}
 
 func (o *SearchDropDownOption) WithIdentifier(identifier string) *SearchDropDownOption {
 	o.Identifier = identifier
@@ -213,10 +213,10 @@ func (c *SearchDropDown) box1(gtx layout.Context, text string, maxWidth unit.Dp)
 	})
 }
 
-func (c *SearchDropDown) box(gtx layout.Context, text string, maxWidth unit.Dp) layout.Dimensions {
-	c.SearchInput.SetWidth(c.width).SetHasBorder(false)
-	return c.SearchInput.Layout(gtx)
-}
+//func (c *SearchDropDown) box(gtx layout.Context, text string, maxWidth unit.Dp) layout.Dimensions {
+//	c.SearchInput.SetWidth(c.width).SetHasBorder(false)
+//	return c.SearchInput.Layout(gtx)
+//}
 
 func (c *SearchDropDown) SetSize(size image.Point) {
 	c.size = size
