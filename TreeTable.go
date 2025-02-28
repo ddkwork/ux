@@ -6,7 +6,6 @@ import (
 	"gioui.org/app"
 	"gioui.org/font/gofont"
 	"gioui.org/text"
-	"golang.org/x/sync/errgroup"
 	"image"
 	"image/color"
 	"io"
@@ -68,7 +67,6 @@ type (
 		pressStarted            time.Time           // 按压开始时间
 		longPressed             bool                // 是否已经触发长按事件
 		widget.List                                 // 为rootRows渲染列表和滚动条
-		editNode                *StructView
 	}
 	TableContext[T any] struct {
 		ContextMenuItems       func(gtx layout.Context, n *Node[T]) (items []ContextMenuItem) // 通过SelectedNode传递给菜单的do取出元数据，比如删除文件,但是菜单是否绘制取决于当前渲染的行，所以要传递n给can
@@ -219,7 +217,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		//	}
 		t.SizeColumnsToFit(gtx)
 	})
-
+	t.rootRows = t.Root.Children //增删改查不一定去计算列宽导致有些节点已经删除，是空指针导致panic，所有这里需要刷新一下rootRows，不知道这里是否会内存泄漏
 	list := material.List(th.Theme, &t.List)
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -385,7 +383,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 		rowCells = append(rowCells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return material.Clickable(gtx, &n.rowCells[i].Clickable, func(gtx layout.Context) layout.Dimensions {
-					DrawColumnDivider(gtx, cell.columID)                      // 这里绘制的列分割线才没有虚线,gtx被破坏了? 永远不要移动这个位置
+					DrawColumnDivider(gtx, cell.columID) // 这里绘制的列分割线才没有虚线,gtx被破坏了? 永远不要移动这个位置
 					return layout.Stack{Alignment: layout.Center}.Layout(gtx, // 层级列就懒得弹了,copy这个逻辑就行了,要弹的话,长按不支持有点纠结移动平台
 						layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 							if len(cell.Text) > 80 {
@@ -1560,14 +1558,19 @@ func (t *TreeTable[T]) InsertAfter(gtx layout.Context, after *Node[T]) {
 }
 
 func (t *TreeTable[T]) Remove(gtx layout.Context) {
-	t.SelectedNode.Remove()
-	t.SizeColumnsToFit(gtx)
-	t.ResizeHierarchyColumnCellWidth()
+	t.SelectedNode.Remove() //删除的话，删除短单元格不用刷新，如果删除了最宽的单元格也不用更新，只是视觉上感觉不太紧凑，有空隙了
+	//todo 为了使刷新更流畅，可能比较一下编辑后的节点row的每个单元格宽度和之前计算过的最大宽度，如果大于不用刷新，否则使用max更新一个每列的最大宽度，看起来需要缓存所有列宽
+	//t.SizeColumnsToFit(gtx)
+	//t.ResizeHierarchyColumnCellWidth()
+	//t.rootRows = t.Root.Children//rootRows似乎没刷新导致panic，已经在layou内统一刷新
 }
 
+var editNode *StructView
+
 func (t *TreeTable[T]) Edit(gtx layout.Context) {
-	g := new(errgroup.Group)
-	g.Go(func() error {
+	//g := new(errgroup.Group)
+	//g.Go(func() error {
+	loop := func(n *Node[T]) error {
 		w := new(app.Window)
 		w.Option(app.Title("edit row"))
 		th := material.NewTheme()
@@ -1580,16 +1583,18 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) {
 			case app.FrameEvent:
 				gtx := app.NewContext(&ops, e)
 				BackgroundDark(gtx)
-				t.editNode = NewStructView(t.SelectedNode.Data, func() (elems []CellData) {
-					return t.MarshalRowCells(t.SelectedNode)
+				editNode = NewStructView(n.Data, func() (elems []CellData) {
+					return t.MarshalRowCells(n)
 				})
-				t.editNode.Layout(gtx)
-				t.UnmarshalRowCells(t.SelectedNode, t.MarshalRowCells(t.SelectedNode)) // 此时节点元数据被刷新
+				editNode.Layout(gtx)
+				t.UnmarshalRowCells(n, t.MarshalRowCells(n)) // 此时节点元数据被刷新
 				e.Frame(gtx.Ops)
 			}
 		}
-	})
-	mylog.Check(g.Wait())
+	}
+	loop(t.SelectedNode.Clone())
+	//})
+	//mylog.Check(g.Wait())
 	t.SizeColumnsToFit(gtx)
 	t.ResizeHierarchyColumnCellWidth()
 }
