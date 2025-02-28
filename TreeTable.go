@@ -306,6 +306,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 
 	layoutHierarchyColumn := func(gtx layout.Context, cell CellData) layout.Dimensions {
 		c := n.rowCells[0]
+
 		c.leftIndent = n.Depth() * HierarchyIndent
 		if !n.Container() {
 			c.leftIndent += defaultIconSize
@@ -320,9 +321,23 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 				c.leftIndent -= HierarchyIndent/2 + defaultIconSize
 			}
 		}
-		maxColumnCellWidth := maxHierarchyColumnCellWidth(c)
+
+		//c.leftIndent = n.Depth()*HierarchyIndent + defaultIconSize
+		//switch {
+		//case n.Container():
+		//	//c.leftIndent = n.Depth()*HierarchyIndent + defaultIconSize
+		//case !n.Container():
+		//	c.leftIndent += defaultIconSize
+		//case n.parent.IsRoot():
+		//	c.leftIndent = 0
+		//}
+
+		maxColumnCellWidth := maxHierarchyColumnCellWidth(c) //固定层级列的每个单元格宽度的最大值和最小值一致，这样就对齐了层级列
 		gtx.Constraints.Min.X = int(maxColumnCellWidth)
 		gtx.Constraints.Max.X = int(maxColumnCellWidth)
+		if c.leftIndent > maxColumnCellWidth {
+			panic("leftIndent > maxColumnCellWidth")
+		}
 
 		return layout.Flex{Axis: layout.Horizontal, Spacing: layout.SpaceBetween}.Layout(gtx,
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -350,7 +365,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 					return layout.Inset{Top: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return t.CellFrame(gtx, c)
 					})
-					return t.CellFrame(gtx, c)
+					//return t.CellFrame(gtx, c)
 				})
 			}),
 		)
