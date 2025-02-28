@@ -528,7 +528,7 @@ func main() {
 			m.Set(CardType, f.Layout)
 		case MobileType:
 		case SvgButtonType:
-			m.Set(SvgButtonType, ux.NewButton("svg button", nil).SetRectIcon(true).SetSVGIcon(ux.SvgIconCircledChevronRight).Layout)
+			m.Set(SvgButtonType, ux.NewButton("", nil).SetRectIcon(true).SetIcon(ux.SvgIconCircledChevronRight).Layout)
 		case CodeEditorType:
 			m.Set(CodeEditorType, ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout)
 		case AsmViewType:

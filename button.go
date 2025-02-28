@@ -1,12 +1,11 @@
 package ux
 
 import (
+	"github.com/ddkwork/ux/icon"
 	"image"
 	"image/color"
 
 	"github.com/ddkwork/ux/widget/material"
-
-	"github.com/ddkwork/ux/giosvg"
 
 	"gioui.org/io/input"
 	"gioui.org/io/semantic"
@@ -53,8 +52,7 @@ func NewButtonAnimationScale(v float32) animationButton.ButtonAnimation {
 }
 
 type Button struct {
-	icon     *widget.Icon
-	svgIcon  *giosvg.Icon
+	icon     any
 	iconRect bool
 
 	Axis layout.Axis
@@ -104,13 +102,8 @@ func (m *Button) SetRectIcon(iconRect bool) *Button {
 	return m
 }
 
-func (m *Button) SetIcon(icon *widget.Icon) *Button {
+func (m *Button) SetIcon(icon any) *Button {
 	m.icon = icon
-	return m
-}
-
-func (m *Button) SetSVGIcon(icon *giosvg.Icon) *Button {
-	m.svgIcon = icon
 	return m
 }
 
@@ -127,7 +120,7 @@ func (m *Button) Layout(gtx layout.Context) layout.Dimensions {
 	// iconAndText := m.icon != nil || m.svgIcon != nil && m.text != ""
 	// svgAndText := m.svgIcon != nil && m.text != ""
 
-	if m.icon == nil && m.svgIcon == nil && m.text != "" { // 只有文字
+	if m.icon == nil && m.text != "" { // 只有文字
 		// btn := material.Button(th.Theme, m.Clickable, m.text)
 		// btn.Inset = layout.UniformInset(2) // todo test
 
@@ -153,7 +146,7 @@ func (m *Button) Layout(gtx layout.Context) layout.Dimensions {
 		})
 	}
 
-	if m.text == "" && m.icon != nil || m.svgIcon != nil { // 树形层级图标，没有文字
+	if m.text == "" && m.icon != nil { // 树形层级图标，没有文字
 		if m.iconRect { // 带图标的编辑框，图标背景色和按钮背景色一致
 			return material.Clickable(gtx, m.Clickable, func(gtx C) D {
 				sz := gtx.Dp(defaultIconSize)
@@ -171,10 +164,7 @@ func (m *Button) Layout(gtx layout.Context) layout.Dimensions {
 				//	paint.Fill(gtx.Ops, backgroundColor)
 				//	return layout.Dimensions{Size: gtx.Constraints.Min}
 				//}
-				if m.icon != nil {
-					return m.icon.Layout(gtx, th.Theme.Bg)
-				}
-				return m.svgIcon.Layout(gtx)
+				return icon.Layout(gtx, m.icon, color.NRGBA{}, defaultIconSize)
 			})
 		}
 		btn := material.IconButton(th.Theme, m.Clickable, m.icon, m.text)
@@ -194,13 +184,7 @@ func (m *Button) Layout(gtx layout.Context) layout.Dimensions {
 		return layout.Inset{Top: top, Bottom: bottom, Left: m.Inset.Left, Right: m.Inset.Right}.Layout(gtx, func(gtx C) D {
 			iconAndLabel := layout.Flex{Axis: m.Axis, Alignment: layout.Middle}
 			layIcon := layout.Rigid(func(gtx C) D {
-				var d layout.Dimensions
-				if m.icon != nil {
-					d = m.icon.Layout(gtx, th.Theme.Fg)
-				} else {
-					d = m.svgIcon.Layout(gtx) // todo theme check
-				}
-
+				d := icon.Layout(gtx, m.icon, color.NRGBA{}, defaultIconSize)
 				if m.Axis == layout.Horizontal {
 					return layout.Inset{Right: m.spacer}.Layout(gtx, func(gtx C) D {
 						return d
@@ -263,7 +247,7 @@ func IconButton(icon *widget.Icon, button *widget.Clickable, description string)
 		Background:  th.Palette.Bg,
 		Color:       WithAlpha(th.Palette.Fg, 0xb6),
 		Icon:        icon,
-		Size:        18,
+		Size:        24,
 		Inset:       layout.UniformInset(4),
 		Button:      button,
 		Description: description,

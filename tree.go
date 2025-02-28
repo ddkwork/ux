@@ -200,8 +200,8 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParen
 					if node.Expanded {
 						svg = SvgIconCircledChevronDown
 					}
-					return NewButton("", nil).SetRectIcon(true).SetSVGIcon(svg).Layout(gtx)
-					return ArrowDownIcon.Layout(gtx, th.Color.TreeIconColor)
+					return NewButton("", nil).SetRectIcon(true).SetIcon(svg).Layout(gtx)
+					//return ArrowDownIcon.Layout(gtx, th.Color.TreeIconColor)
 				})
 			})
 		}))

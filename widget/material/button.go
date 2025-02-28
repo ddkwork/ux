@@ -79,7 +79,7 @@ func ButtonLayout(th *Theme, button *widget.Clickable) ButtonLayoutStyle {
 	}
 }
 
-func IconButton(th *Theme, button *widget.Clickable, icon *widget.Icon, description string) IconButtonStyle {
+func IconButton(th *Theme, button *widget.Clickable, icon any, description string) IconButtonStyle {
 	return IconButtonStyle{
 		Background:  th.Palette.ContrastBg,
 		Color:       th.Palette.ContrastFg,
