@@ -365,7 +365,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 		rowCells = append(rowCells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return material.Clickable(gtx, &n.rowCells[i].Clickable, func(gtx layout.Context) layout.Dimensions {
-					DrawColumnDivider(gtx, cell.columID)                      // 这里绘制的列分割线才没有虚线，gtx被破坏了？ 永远不要移动这个位置
+					DrawColumnDivider(gtx, cell.columID) // 这里绘制的列分割线才没有虚线，gtx被破坏了？ 永远不要移动这个位置
 					return layout.Stack{Alignment: layout.Center}.Layout(gtx, // 层级列就懒得弹了，copy这个逻辑就行了，要弹的话，长按不支持有点纠结移动平台
 						layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 							if len(cell.Text) > 80 {
@@ -1718,7 +1718,7 @@ func (n *Node[T]) CloseAll() {
 
 func (n *Node[T]) Clone() (to *Node[T]) {
 	to = deepcopy.Copy(n)
-	to.parent = n
+	to.parent = n.parent
 	to.ID = newID()
 	if n.CanHaveChildren() {
 		n.setParents(to.Children, to, true)

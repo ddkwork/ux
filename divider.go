@@ -30,14 +30,19 @@ func (d *DividerStyle) Layout(gtx layout.Context) layout.Dimensions {
 	return d.Inset.Layout(gtx, func(gtx C) D {
 		weight := gtx.Dp(d.Thickness)
 
-		maxDim := image.Point{}
-		if d.Axis == layout.Horizontal {
-			maxDim = image.Pt(gtx.Constraints.Min.X, weight)
-		} else {
-			maxDim = image.Pt(weight, gtx.Constraints.Min.Y)
-		}
+		//maxDim := image.Point{}
+		//if d.Axis == layout.Horizontal {
+		//	maxDim = image.Pt(gtx.Constraints.Min.X, weight)
+		//} else {
+		//	maxDim = image.Pt(weight, gtx.Constraints.Min.Y)
+		//}
 
-		line := image.Rectangle{Max: maxDim}
+		line := image.Rectangle{}
+		if d.Axis == layout.Horizontal {
+			line = image.Rectangle{Max: image.Pt(gtx.Constraints.Min.X, weight)}
+		} else {
+			line = image.Rectangle{Max: image.Pt(weight, gtx.Constraints.Min.Y)}
+		}
 		paint.FillShape(gtx.Ops, d.Fill, clip.Rect(line).Op())
 		return D{Size: line.Max}
 	})

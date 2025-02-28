@@ -18,18 +18,18 @@ var (
 	shell32  = syscall.NewLazyDLL("shell32.dll")
 	kernel32 = syscall.NewLazyDLL("kernel32.dll")
 
-	messageBoxW           = user32.NewProc("MessageBoxW")
-	createWindowExW       = user32.NewProc("CreateWindowExW")
-	defWindowProcW        = user32.NewProc("DefWindowProcW")
-	destroyWindowW        = user32.NewProc("DestroyWindow")
-	dispatchMessageW      = user32.NewProc("DispatchMessageW")
-	getMessageW           = user32.NewProc("GetMessageW")
-	sendMessageW          = user32.NewProc("SendMessageW")
-	postQuitMessageW      = user32.NewProc("PostQuitMessage")
-	registerClassExW      = user32.NewProc("RegisterClassExW")
-	unregisterClassW      = user32.NewProc("UnregisterClassW")
-	translateMessageW     = user32.NewProc("TranslateMessage")
-	setWindowTextW        = user32.NewProc("SetWindowTextW")
+	messageBoxW       = user32.NewProc("MessageBoxW")
+	createWindowExW   = user32.NewProc("CreateWindowExW")
+	defWindowProcW    = user32.NewProc("DefWindowProcW")
+	destroyWindowW    = user32.NewProc("DestroyWindow")
+	dispatchMessageW  = user32.NewProc("DispatchMessageW")
+	getMessageW       = user32.NewProc("GetMessageW")
+	sendMessageW      = user32.NewProc("SendMessageW")
+	postQuitMessageW  = user32.NewProc("PostQuitMessage")
+	registerClassExW  = user32.NewProc("RegisterClassExW")
+	unregisterClassW  = user32.NewProc("UnregisterClassW")
+	translateMessageW = user32.NewProc("TranslateMessage")
+	//setWindowTextW        = user32.NewProc("SetWindowTextW")
 	setFocus              = user32.NewProc("SetFocus")
 	getWindowTextLengthW  = user32.NewProc("GetWindowTextLengthW")
 	getWindowTextW        = user32.NewProc("GetWindowTextW")
@@ -127,10 +127,10 @@ const (
 
 	lbsExtendedsel = 0x0800
 
-	dtsUpdown          = 0x0001
-	dtsShowNone        = 0x0002
-	dtsShortDateFormat = 0x0000
-	dtsLongDateFormat  = 0x0004
+	//dtsUpdown          = 0x0001
+	//dtsShowNone        = 0x0002
+	//dtsShortDateFormat = 0x0000
+	//dtsLongDateFormat  = 0x0004
 
 	dtmFirst         = 0x1000
 	dtmGetSystemTime = dtmFirst + 1
@@ -388,9 +388,9 @@ func translateMessage(msg *msgW) {
 	translateMessageW.Call(uintptr(unsafe.Pointer(msg)))
 }
 
-func setWindowText(hwnd syscall.Handle, text string) {
-	setWindowTextW.Call(uintptr(hwnd), UintPtrFromString(text))
-}
+//func setWindowText(hwnd syscall.Handle, text string) {
+//	setWindowTextW.Call(uintptr(hwnd), UintPtrFromString(text))
+//}
 
 func getWindowTextLength(hwnd syscall.Handle) int {
 	ret, _, _ := getWindowTextLengthW.Call(uintptr(hwnd))

@@ -21,10 +21,10 @@ func cursorPosition(line int, col int) {
 	fmt.Printf("\033[%d;%dH", line, col)
 }
 
-func cursorColumn(i int) {
-	fmt.Printf("\033[%dG", i)
-}
-
-func cursorLineUp(i int) {
-	fmt.Printf("\033[%dA", i)
-}
+//func cursorColumn(i int) {
+//	fmt.Printf("\033[%dG", i)
+//}
+//
+//func cursorLineUp(i int) {
+//	fmt.Printf("\033[%dA", i)
+//}

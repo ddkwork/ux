@@ -152,7 +152,7 @@ type State struct {
 	R, G, B, A widget.Float
 	widget.Editor
 
-	changed bool
+	//changed bool
 }
 
 // SetColor changes the color represented by the colorpicker.
@@ -208,9 +208,9 @@ func (s *State) Update(gtx layout.Context) bool {
 		}
 		out, err := hex.DecodeString(s.Editor.Text())
 		if err == nil && len(out) == 3 {
-			s.R.Value = (float32(out[0]) / 255.0)
-			s.G.Value = (float32(out[1]) / 255.0)
-			s.B.Value = (float32(out[2]) / 255.0)
+			s.R.Value = float32(out[0]) / 255.0
+			s.G.Value = float32(out[1]) / 255.0
+			s.B.Value = float32(out[2]) / 255.0
 			changed = true
 		}
 	}
@@ -326,13 +326,6 @@ func (p PickerStyle) layoutLeftPane(gtx C) D {
 		}),
 	)
 	return dims
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
 
 func (p PickerStyle) layoutSliders(gtx C) D {

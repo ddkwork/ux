@@ -11,7 +11,6 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"gioui.org/widget"
 )
 
 // Split thx to github.com/vsariola/sointu
@@ -32,7 +31,7 @@ type Split struct {
 
 	First, Second layout.Widget // 两个布局组件
 
-	firstScroll, secondScroll widget.Scrollbar // 滚动条
+	//firstScroll, secondScroll widget.Scrollbar // 滚动条
 }
 
 func NewSplit(split Split) *Split {

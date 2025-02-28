@@ -28,10 +28,10 @@ type Resize struct {
 type Resizable struct {
 	// ratio is only calculated during initialization, based on widget's natural size.
 	//  It acts like minimum threshold ratio value beyond which widget size cannot be further reduced.
-	ratio            float32
-	Widget           layout.Widget
-	DividerHandler   layout.Widget
-	dividerThickness int
+	ratio          float32
+	Widget         layout.Widget
+	DividerHandler layout.Widget
+	//dividerThickness int
 	float
 	resize *Resize
 	prev   *Resizable

@@ -131,13 +131,13 @@ func (t *Tree) setClick(nodes *TreeNode) {
 type CallbackFun1 func(gtx layout.Context)
 
 type TreeNode struct {
-	Id            int
-	Title         string
-	ParentId      int
-	Icon          *widget.Icon
-	Children      []*TreeNode
-	Expanded      bool
-	selected      bool
+	Id       int
+	Title    string
+	ParentId int
+	Icon     *widget.Icon
+	Children []*TreeNode
+	Expanded bool
+	//selected      bool
 	clickable     *widget.Clickable
 	ClickCallback CallbackFun1
 	Path          []int

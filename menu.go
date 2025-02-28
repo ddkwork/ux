@@ -17,10 +17,10 @@ import (
 )
 
 type Menu struct {
-	list         widget.List
-	menuItems    []MenuItem
-	textSize     unit.Sp
-	clickedIndex int
+	list      widget.List
+	menuItems []MenuItem
+	textSize  unit.Sp
+	//clickedIndex int
 }
 
 func NewMenu() *Menu {

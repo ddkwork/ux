@@ -115,10 +115,8 @@ func InitAppBar[T Widget](panel *Panel[T], toolBars []*TipIconButton, speechTxt 
 	search := NewInput("请输入搜索关键字...").SetIcon(IconSearch).SetRadius(16)
 	panel.AddChildFlexed(1, search.Layout) // todo 太多之后apk需要管理溢出
 
-	if toolBars != nil {
-		for _, toolbar := range toolBars {
-			panel.AddChild(toolbar.Layout)
-		}
+	for _, toolbar := range toolBars {
+		panel.AddChild(toolbar.Layout)
 	}
 
 	about := NewTooltipButton(IconError, "about", func() { // todo ico make

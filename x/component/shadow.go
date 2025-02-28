@@ -13,15 +13,13 @@ reproduced here under the same terms.
 */
 
 import (
-	"image"
-	"image/color"
-	"math"
-
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
+	"image"
+	"image/color"
 )
 
 // ShadowStyle defines a shadow cast by a rounded rectangle.
@@ -273,31 +271,31 @@ func gradientBox(ops *op.Ops, r image.Rectangle, rr, spread int, col color.NRGBA
 	}.Op(ops))
 }
 
-func imageRect(r image.Rectangle) image.Rectangle {
-	return image.Rectangle{
-		Min: image.Point{
-			X: int(math.Round(float64(r.Min.X))),
-			Y: int(math.Round(float64(r.Min.Y))),
-		},
-		Max: image.Point{
-			X: int(math.Round(float64(r.Max.X))),
-			Y: int(math.Round(float64(r.Max.Y))),
-		},
-	}
-}
+//func imageRect(r image.Rectangle) image.Rectangle {
+//	return image.Rectangle{
+//		Min: image.Point{
+//			X: int(math.Round(float64(r.Min.X))),
+//			Y: int(math.Round(float64(r.Min.Y))),
+//		},
+//		Max: image.Point{
+//			X: int(math.Round(float64(r.Max.X))),
+//			Y: int(math.Round(float64(r.Max.Y))),
+//		},
+//	}
+//}
 
-func round(r image.Rectangle) image.Rectangle {
-	return image.Rectangle{
-		Min: image.Point{
-			X: int(math.Round(float64(r.Min.X))),
-			Y: int(math.Round(float64(r.Min.Y))),
-		},
-		Max: image.Point{
-			X: int(math.Round(float64(r.Max.X))),
-			Y: int(math.Round(float64(r.Max.Y))),
-		},
-	}
-}
+//func round(r image.Rectangle) image.Rectangle {
+//	return image.Rectangle{
+//		Min: image.Point{
+//			X: int(math.Round(float64(r.Min.X))),
+//			Y: int(math.Round(float64(r.Min.Y))),
+//		},
+//		Max: image.Point{
+//			X: int(math.Round(float64(r.Max.X))),
+//			Y: int(math.Round(float64(r.Max.Y))),
+//		},
+//	}
+//}
 
 func outset(r image.Rectangle, rr int) image.Rectangle {
 	r.Min.X -= rr
@@ -307,7 +305,7 @@ func outset(r image.Rectangle, rr int) image.Rectangle {
 	return r
 }
 
-func topLeft(r image.Rectangle) image.Point     { return r.Min }
-func topRight(r image.Rectangle) image.Point    { return image.Point{X: r.Max.X, Y: r.Min.Y} }
-func bottomRight(r image.Rectangle) image.Point { return r.Max }
-func bottomLeft(r image.Rectangle) image.Point  { return image.Point{X: r.Min.X, Y: r.Max.Y} }
+//func topLeft(r image.Rectangle) image.Point     { return r.Min }
+//func topRight(r image.Rectangle) image.Point    { return image.Point{X: r.Max.X, Y: r.Min.Y} }
+//func bottomRight(r image.Rectangle) image.Point { return r.Max }
+//func bottomLeft(r image.Rectangle) image.Point  { return image.Point{X: r.Min.X, Y: r.Max.Y} }
