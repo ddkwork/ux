@@ -245,12 +245,15 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) layout.Dimensions {
 	n.rowCells = t.MarshalRowCells(n)
 	for i := range n.rowCells {
+
+		//todo 增改节点明确刷新哪个
 		n.rowCells[i].maxColumnCellWidth = t.maxColumnCellWidths[i]                        // 每列最宽的label宽度,用于计算每列的最大单元格宽度，包括层级列
-		n.rowCells[i].rowID = rowIndex                                                     // 斑马线
-		n.rowCells[i].columID = t.header.rowCells[i].columID                               // 列分隔符
 		n.rowCells[i].autoMaxColumnCellWidth = t.header.rowCells[i].autoMaxColumnCellWidth // 计算每列的最大单元格宽度,在所有列的单元格渲染的gtx内固定min和max对齐表头行和body行
-		n.rowCells[i].maxDepth = t.header.rowCells[i].maxDepth                             // 计算层级列宽度
-		n.rowCells[i].leftIndent = n.Depth() * HierarchyIndent                             // 计算层级列宽度
+
+		n.rowCells[i].rowID = rowIndex                         // 斑马线
+		n.rowCells[i].columID = t.header.rowCells[i].columID   // 列分隔符
+		n.rowCells[i].maxDepth = t.header.rowCells[i].maxDepth // 计算层级列宽度
+		n.rowCells[i].leftIndent = n.Depth() * HierarchyIndent // 计算层级列宽度
 	}
 	rowClick := &n.rowClick
 	evt, ok := gtx.Source.Event(pointer.Filter{
@@ -667,7 +670,7 @@ func InitHeader(data any) (rowCells []CellData) {
 	return
 }
 
-func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) {
+func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { //增删改查中，只有增改+实例化，共3次需要调用这个函数，增改需要更新缓存的每列最大列宽即可，所以这个函数理论上只需要执行一次，这样性能最好
 	originalConstraints := gtx.Constraints         // 保存原始约束
 	rows := make([][]CellData, 0, len(t.rootRows)) // 用于存储所有行,如果不这么做的话，节点增删改查就不会实时刷新
 	for _, node := range t.Root.Walk() {
