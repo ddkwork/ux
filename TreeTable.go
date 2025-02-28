@@ -318,6 +318,9 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 		} else {
 			if n.parent.Container() {
 				c.leftIndent -= HierarchyIndent + defaultIconSize
+				if n.Container() {
+					c.leftIndent += defaultIconSize / 3
+				}
 			}
 		}
 		maxColumnCellWidth := maxHierarchyColumnCellWidth(c)
