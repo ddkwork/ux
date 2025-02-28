@@ -4,15 +4,16 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"golang.org/x/text/language"
-
 	"go/format"
-	"golang.org/x/text/cases"
 	"io"
 	"math"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"golang.org/x/text/language"
+
+	"golang.org/x/text/cases"
 
 	"github.com/ddkwork/ux/giosvg/internal/svgparser"
 )

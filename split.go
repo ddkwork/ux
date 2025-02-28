@@ -31,7 +31,7 @@ type Split struct {
 
 	First, Second layout.Widget // 两个布局组件
 
-	//firstScroll, secondScroll widget.Scrollbar // 滚动条
+	// firstScroll, secondScroll widget.Scrollbar // 滚动条
 }
 
 func NewSplit(split Split) *Split {

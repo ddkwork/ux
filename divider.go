@@ -1,10 +1,11 @@
 package ux
 
 import (
-	"gioui.org/op/clip"
-	"gioui.org/op/paint"
 	"image"
 	"image/color"
+
+	"gioui.org/op/clip"
+	"gioui.org/op/paint"
 
 	"gioui.org/layout"
 	"gioui.org/unit"

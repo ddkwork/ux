@@ -136,7 +136,7 @@ type TreeNode struct {
 	Icon     *widget.Icon
 	Children []*TreeNode
 	Expanded bool
-	//selected      bool
+	// selected      bool
 	clickable     *widget.Clickable
 	ClickCallback CallbackFun1
 	Path          []int

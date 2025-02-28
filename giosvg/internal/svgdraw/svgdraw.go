@@ -13,7 +13,7 @@ import (
 type Driver struct {
 	Ops   *op.Ops
 	Scale float32
-	//index int
+	// index int
 }
 
 func (d *Driver) SetupDrawers(willFill, willStroke bool) (f svgparser.Filler, s svgparser.Stroker) {

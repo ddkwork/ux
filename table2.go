@@ -539,7 +539,7 @@ func (row TableSimpleRowStyle) Layout(gtx layout.Context, rowIdx int, cellFn cel
 	if b {
 		if update.NumClicks == 1 {
 			// c = th.ContrastBg
-			//c = ColorPink
+			// c = ColorPink
 			// HighlightRow(gtx)
 			c = Red400
 			// paint.FillShape(gtx.Ops, ColorPink, clip.Rect{Max: gtx.Constraints.Max}.Op())

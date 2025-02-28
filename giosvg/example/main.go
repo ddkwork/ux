@@ -2,9 +2,10 @@ package main
 
 import (
 	_ "embed"
-	"github.com/ddkwork/ux/widget/material"
 	"image"
 	"os"
+
+	"github.com/ddkwork/ux/widget/material"
 
 	"gioui.org/app"
 	"gioui.org/font/gofont"

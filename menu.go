@@ -20,7 +20,7 @@ type Menu struct {
 	list      widget.List
 	menuItems []MenuItem
 	textSize  unit.Sp
-	//clickedIndex int
+	// clickedIndex int
 }
 
 func NewMenu() *Menu {

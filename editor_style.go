@@ -28,7 +28,7 @@ type EditorStyle struct {
 	Color color.NRGBA
 	// SelectionColor is the color of the background for selected text.
 	SelectionColor color.NRGBA
-	//LineHighlightColor is the color used to highlight the clicked logical line.
+	// LineHighlightColor is the color used to highlight the clicked logical line.
 	// If not set, line will not be highlighted.
 	LineHighlightColor color.NRGBA
 	// TextHighlightColor use the color used to highlight the interested substring.

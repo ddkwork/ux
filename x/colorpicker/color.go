@@ -152,7 +152,7 @@ type State struct {
 	R, G, B, A widget.Float
 	widget.Editor
 
-	//changed bool
+	// changed bool
 }
 
 // SetColor changes the color represented by the colorpicker.

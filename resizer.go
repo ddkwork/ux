@@ -31,7 +31,7 @@ type Resizable struct {
 	ratio          float32
 	Widget         layout.Widget
 	DividerHandler layout.Widget
-	//dividerThickness int
+	// dividerThickness int
 	float
 	resize *Resize
 	prev   *Resizable

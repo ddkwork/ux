@@ -332,7 +332,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 		//	c.leftIndent = 0
 		//}
 
-		maxColumnCellWidth := maxHierarchyColumnCellWidth(c) //固定层级列的每个单元格宽度的最大值和最小值一致，这样就对齐了层级列
+		maxColumnCellWidth := maxHierarchyColumnCellWidth(c) // 固定层级列的每个单元格宽度的最大值和最小值一致，这样就对齐了层级列
 		gtx.Constraints.Min.X = int(maxColumnCellWidth)
 		gtx.Constraints.Max.X = int(maxColumnCellWidth)
 		if c.leftIndent > maxColumnCellWidth {
@@ -365,7 +365,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 					return layout.Inset{Top: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return t.CellFrame(gtx, c)
 					})
-					//return t.CellFrame(gtx, c)
+					// return t.CellFrame(gtx, c)
 				})
 			}),
 		)
@@ -380,7 +380,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 		rowCells = append(rowCells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return material.Clickable(gtx, &n.rowCells[i].Clickable, func(gtx layout.Context) layout.Dimensions {
-					DrawColumnDivider(gtx, cell.columID) // 这里绘制的列分割线才没有虚线,gtx被破坏了? 永远不要移动这个位置
+					DrawColumnDivider(gtx, cell.columID)                      // 这里绘制的列分割线才没有虚线,gtx被破坏了? 永远不要移动这个位置
 					return layout.Stack{Alignment: layout.Center}.Layout(gtx, // 层级列就懒得弹了,copy这个逻辑就行了,要弹的话,长按不支持有点纠结移动平台
 						layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 							if len(cell.Text) > 80 {

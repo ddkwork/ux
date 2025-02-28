@@ -13,13 +13,14 @@ reproduced here under the same terms.
 */
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"image"
-	"image/color"
 )
 
 // ShadowStyle defines a shadow cast by a rounded rectangle.
@@ -305,7 +306,7 @@ func outset(r image.Rectangle, rr int) image.Rectangle {
 	return r
 }
 
-//func topLeft(r image.Rectangle) image.Point     { return r.Min }
-//func topRight(r image.Rectangle) image.Point    { return image.Point{X: r.Max.X, Y: r.Min.Y} }
-//func bottomRight(r image.Rectangle) image.Point { return r.Max }
-//func bottomLeft(r image.Rectangle) image.Point  { return image.Point{X: r.Min.X, Y: r.Max.Y} }
+// func topLeft(r image.Rectangle) image.Point     { return r.Min }
+// func topRight(r image.Rectangle) image.Point    { return image.Point{X: r.Max.X, Y: r.Min.Y} }
+// func bottomRight(r image.Rectangle) image.Point { return r.Max }
+// func bottomLeft(r image.Rectangle) image.Point  { return image.Point{X: r.Min.X, Y: r.Max.Y} }

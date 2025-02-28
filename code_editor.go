@@ -3,10 +3,11 @@ package ux
 import (
 	"bytes"
 	_ "embed"
+	"image/color"
+
 	"gioui.org/font/opentype"
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/ux/widget/material"
-	"image/color"
 
 	"gioui.org/font"
 	"gioui.org/layout"
@@ -87,14 +88,14 @@ func NewCodeEditor(code string, lang string) *CodeEditor {
 
 	c := &CodeEditor{
 		editor: &gvcode.Editor{
-			//Font:                  editorFont.Font,
-			//TextSize:              unit.Sp(12),
-			//LineHeightScale:       1,
-			//WrapLine:              true,
-			//ReadOnly:              false,
-			//SoftTab:               true,
-			//TabWidth:              4,
-			//LineNumberGutter: 1,
+			// Font:                  editorFont.Font,
+			// TextSize:              unit.Sp(12),
+			// LineHeightScale:       1,
+			// WrapLine:              true,
+			// ReadOnly:              false,
+			// SoftTab:               true,
+			// TabWidth:              4,
+			// LineNumberGutter: 1,
 			// TextMaterial:     rgbToOp(theme.TextColor),
 			// SelectMaterial:        rgbToOp(theme.TextSelectionColor),
 			// TextHighlightMaterial: rgbToOp(theme.TextSelectionColor),
@@ -220,7 +221,7 @@ func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 						return layout.Dimensions{}
 					}
 
-					//btn := Button(theme.Material(), &c.loadExample, RefreshIcon, IconPositionStart, "Load Example")
+					// btn := Button(theme.Material(), &c.loadExample, RefreshIcon, IconPositionStart, "Load Example")
 					btn := NewNavButton("Load Example")
 					//btn.Color = theme.ButtonTextColor
 					//btn.Inset = layout.Inset{

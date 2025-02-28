@@ -4,11 +4,12 @@
 package dlgs
 
 import (
-	"github.com/ddkwork/golibrary/mylog"
 	"strings"
 	"syscall"
 	"unicode/utf16"
 	"unsafe"
+
+	"github.com/ddkwork/golibrary/mylog"
 )
 
 var (
@@ -29,7 +30,7 @@ var (
 	registerClassExW  = user32.NewProc("RegisterClassExW")
 	unregisterClassW  = user32.NewProc("UnregisterClassW")
 	translateMessageW = user32.NewProc("TranslateMessage")
-	//setWindowTextW        = user32.NewProc("SetWindowTextW")
+	// setWindowTextW        = user32.NewProc("SetWindowTextW")
 	setFocus              = user32.NewProc("SetFocus")
 	getWindowTextLengthW  = user32.NewProc("GetWindowTextLengthW")
 	getWindowTextW        = user32.NewProc("GetWindowTextW")
@@ -127,10 +128,10 @@ const (
 
 	lbsExtendedsel = 0x0800
 
-	//dtsUpdown          = 0x0001
-	//dtsShowNone        = 0x0002
-	//dtsShortDateFormat = 0x0000
-	//dtsLongDateFormat  = 0x0004
+	// dtsUpdown          = 0x0001
+	// dtsShowNone        = 0x0002
+	// dtsShortDateFormat = 0x0000
+	// dtsLongDateFormat  = 0x0004
 
 	dtmFirst         = 0x1000
 	dtmGetSystemTime = dtmFirst + 1
