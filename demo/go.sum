@@ -40,6 +40,8 @@ github.com/ddkwork/golibrary v0.0.91-0.20250227042052-d984f0dc2c03 h1:NKwU4uJAe4
 github.com/ddkwork/golibrary v0.0.91-0.20250227042052-d984f0dc2c03/go.mod h1:FqbWGIsbVqSsVjeNcdUdlHsn/JNA82xFlwbJKsdily0=
 github.com/ddkwork/golibrary v0.0.91-0.20250227072056-70ad84eececa h1:wAJtRgImF1P8pPIYOcJL+bEuWMKddrWGXX/6mS5xg7k=
 github.com/ddkwork/golibrary v0.0.91-0.20250227072056-70ad84eececa/go.mod h1:FqbWGIsbVqSsVjeNcdUdlHsn/JNA82xFlwbJKsdily0=
+github.com/ddkwork/golibrary v0.0.91-0.20250228035350-2c45360d571c h1:7U0sfjuFPNZb7XikY65U0PrjT/dwav6cuXr0Q8PvkK8=
+github.com/ddkwork/golibrary v0.0.91-0.20250228035350-2c45360d571c/go.mod h1:IYLYFeKPVFG48qHFntgbZxjL5d+WHNLn6IUuKx6Su64=
 github.com/ddkwork/ux v0.0.0-20250225112617-16249a53862e h1:AvgkWTpbaILbLLYoAblnt+wjfSK+NZBUbd0X3jTnZkQ=
 github.com/ddkwork/ux v0.0.0-20250225112617-16249a53862e/go.mod h1:O+8oBmXN9EuY1b9A4r2M83jACVCAYIrd8t8VKAzuLD8=
 github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
@@ -105,6 +107,8 @@ github.com/mailru/easyjson v0.7.0 h1:aizVhC/NAAcKWb+5QsU1iNOZb4Yws5UO2I+aIprQITM
 github.com/mailru/easyjson v0.7.0/go.mod h1:KAzv3t3aY1NaHWoQz1+4F1ccyAH66Jk7yos7ldAVICs=
 github.com/oligo/gioview v0.8.2 h1:j6niDZpYcLV6bdqFoxxRly9MamKrJyaumYe34xGcxQI=
 github.com/oligo/gioview v0.8.2/go.mod h1:QZ8MpLvy/oYZD4Rj6gP9iNfcP4VTS1lnTnPeByxOI1c=
+github.com/otiai10/gosseract v2.2.1+incompatible h1:Ry5ltVdpdp4LAa2bMjsSJH34XHVOV7XMi41HtzL8X2I=
+github.com/otiai10/gosseract v2.2.1+incompatible/go.mod h1:XrzWItCzCpFRZ35n3YtVTgq5bLAhFIkascoRo8G32QE=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.10.0 h1:Xv5erBjTwe/5IxqUQTdXv5kgmIvbHo3QQyRwhJsOfJA=

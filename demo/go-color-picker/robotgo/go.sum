@@ -13,6 +13,8 @@ github.com/ddkwork/golibrary v0.0.91-0.20250227042052-d984f0dc2c03 h1:NKwU4uJAe4
 github.com/ddkwork/golibrary v0.0.91-0.20250227042052-d984f0dc2c03/go.mod h1:FqbWGIsbVqSsVjeNcdUdlHsn/JNA82xFlwbJKsdily0=
 github.com/ddkwork/golibrary v0.0.91-0.20250227072056-70ad84eececa h1:wAJtRgImF1P8pPIYOcJL+bEuWMKddrWGXX/6mS5xg7k=
 github.com/ddkwork/golibrary v0.0.91-0.20250227072056-70ad84eececa/go.mod h1:FqbWGIsbVqSsVjeNcdUdlHsn/JNA82xFlwbJKsdily0=
+github.com/ddkwork/golibrary v0.0.91-0.20250228035350-2c45360d571c h1:7U0sfjuFPNZb7XikY65U0PrjT/dwav6cuXr0Q8PvkK8=
+github.com/ddkwork/golibrary v0.0.91-0.20250228035350-2c45360d571c/go.mod h1:IYLYFeKPVFG48qHFntgbZxjL5d+WHNLn6IUuKx6Su64=
 github.com/ebitengine/purego v0.8.2 h1:jPPGWs2sZ1UgOSgD2bClL0MJIqu58nOmIcBuXr62z1I=
 github.com/ebitengine/purego v0.8.2/go.mod h1:iIjxzd6CiRiOG0UyXP+V1+jWqUXVjPKLAI0mRfJZTmQ=
 github.com/gen2brain/shm v0.1.1 h1:1cTVA5qcsUFixnDHl14TmRoxgfWEEZlTezpUj1vm5uQ=
@@ -77,6 +79,8 @@ golang.org/x/exp v0.0.0-20250215185904-eff6e970281f h1:oFMYAjX0867ZD2jcNiLBrI9Bd
 golang.org/x/exp v0.0.0-20250215185904-eff6e970281f/go.mod h1:BHOTPb3L19zxehTsLoJXVaTktb06DFgmdW6Wb9s8jqk=
 golang.org/x/exp/shiny v0.0.0-20240707233637-46b078467d37 h1:SOSg7+sueresE4IbmmGM60GmlIys+zNX63d6/J4CMtU=
 golang.org/x/exp/shiny v0.0.0-20240707233637-46b078467d37/go.mod h1:3F+MieQB7dRYLTmnncoFbb1crS5lfQoTfDgQy6K4N0o=
+golang.org/x/exp/shiny v0.0.0-20250218142911-aa4b98e5adaa h1:PplMggaL0Bbc/LKcMhOVb5jtdRZoIqqTV9X8UPLC3Yk=
+golang.org/x/exp/shiny v0.0.0-20250218142911-aa4b98e5adaa/go.mod h1:ygj7T6vSGhhm/9yTpOQQNvuAUFziTH7RUiH74EoE2C8=
 golang.org/x/image v0.24.0 h1:AN7zRgVsbvmTfNyqIbbOraYL8mSwcKncEj8ofjgzcMQ=
 golang.org/x/image v0.24.0/go.mod h1:4b/ITuLfqYq1hqZcjofwctIhi7sZh2WaCjvsBNjjya8=
 golang.org/x/sync v0.11.0 h1:GGz8+XQP4FvTTrjZPzNKTMFtSXH80RAzG+5ghFPgK9w=

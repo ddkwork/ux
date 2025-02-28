@@ -7,7 +7,7 @@ require (
 	gioui.org/cmd v0.8.0
 	gioui.org/example v0.8.1
 	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
-	github.com/ddkwork/golibrary v0.0.91-0.20250227072056-70ad84eececa
+	github.com/ddkwork/golibrary v0.0.91-0.20250228035350-2c45360d571c
 	github.com/ddkwork/ux v0.0.0-20250225112617-16249a53862e
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.33.0
@@ -38,6 +38,7 @@ require (
 	github.com/kbinani/screenshot v0.0.0-20250118074034-a3924b7bbc8c // indirect
 	github.com/lxn/win v0.0.0-20210218163916-a377121e959e // indirect
 	github.com/oligo/gioview v0.8.2 // indirect
+	github.com/otiai10/gosseract v2.2.1+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect
 	golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa // indirect
