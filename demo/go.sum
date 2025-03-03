@@ -38,6 +38,8 @@ github.com/ddkwork/golibrary v0.0.91-0.20250301142411-1110965f054b h1:HNxL3jiel1
 github.com/ddkwork/golibrary v0.0.91-0.20250301142411-1110965f054b/go.mod h1:IYLYFeKPVFG48qHFntgbZxjL5d+WHNLn6IUuKx6Su64=
 github.com/ddkwork/ux v0.0.0-20250303072815-4b5e8e881f77 h1:c59bckmgSPzej5iXmKGpOlV5WgTY8lTsrnltz5UB4QA=
 github.com/ddkwork/ux v0.0.0-20250303072815-4b5e8e881f77/go.mod h1:1k3TN9Quwjmgg8tbMcEH0e3faVH2rwv3IGfIC2NSkK8=
+github.com/ddkwork/ux v0.0.0-20250303074720-0af68009c805 h1:ybXk9sRlEytz+0hYOpkJITVh8OG5K366Vvz1SefwH3g=
+github.com/ddkwork/ux v0.0.0-20250303074720-0af68009c805/go.mod h1:1k3TN9Quwjmgg8tbMcEH0e3faVH2rwv3IGfIC2NSkK8=
 github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
 github.com/dlclark/regexp2 v1.11.5/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
 github.com/ebitengine/purego v0.8.2 h1:jPPGWs2sZ1UgOSgD2bClL0MJIqu58nOmIcBuXr62z1I=

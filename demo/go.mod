@@ -8,7 +8,7 @@ require (
 	gioui.org/example v0.8.1
 	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
 	github.com/ddkwork/golibrary v0.0.91-0.20250301142411-1110965f054b
-	github.com/ddkwork/ux v0.0.0-20250303072815-4b5e8e881f77
+	github.com/ddkwork/ux v0.0.0-20250303074720-0af68009c805
 	github.com/go-vgo/robotgo v0.110.5
 	github.com/gorpher/gowin32 v0.0.12
 	github.com/kbinani/screenshot v0.0.0-20250118074034-a3924b7bbc8c
