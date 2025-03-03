@@ -612,26 +612,9 @@ func (t *TreeTable[T]) drawContextMenu(n *Node[T], i int) layout.StackChild {
 		contextArea := n.rowContextAreas[i]
 		if contextArea == nil {
 			contextArea = &component.ContextArea{
-				/*
-					var LongPressDuration time.Duration = 250 * time.Millisecond
-
-							case gesture.KindPress:
-						i.pressStarted = gtx.Now
-
-						if !i.longPressed && i.pressing && gtx.Now.Sub(i.pressStarted) > LongPressDuration {
-							i.longPressed = true
-							return Event{Type: LongPress}, true
-						}
-
-					所以合理的方案是patch官方的contextAreas和gtx的input source代码，支持长按事件
-				*/
-				Activation: pointer.ButtonSecondary,
-				// todo 根据gioview的作者提示，安卓上需要过滤长按手势事件实现如下:
-				// 计算pointer Press到Release的持续时长就可以了，Gio在处理触摸事件和鼠标事件是统一的，
-				// 安卓应该也是一致的处理方式，只是event Source变成了Touch。
-				// 需要制作一个过滤touch事件的apk测试
+				Activation:       pointer.ButtonSecondary,
 				AbsolutePosition: true,
-				PositionHint:     0,
+				PositionHint:     layout.S,
 			}
 			n.rowContextAreas[i] = contextArea
 		}
@@ -776,13 +759,14 @@ func (t *TreeTable[T]) drawContextMenu(n *Node[T], i int) layout.StackChild {
 
 func (t *TreeTable[T]) drawContextArea(gtx C, menuState *component.MenuState) D {
 	return layout.Center.Layout(gtx, func(gtx C) D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
-		gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(4000)) // 当行高限制后，这里需要取消限制，理想值是取表格高度或者屏幕高度，其次是增加滚动条或者树形右键菜单
+		gtx.Constraints.Min.X = 0
+		gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(400)) // 当行高限制后，这里需要取消限制，理想值是取表格高度或者屏幕高度，其次是增加滚动条或者树形右键菜单
 		menuStyle := component.Menu(th.Theme, menuState)
 		menuStyle.SurfaceStyle = component.SurfaceStyle{
 			Theme: th.Theme,
 			ShadowStyle: component.ShadowStyle{
 				CornerRadius: 18, // 弹出菜单的椭圆角度
-				Elevation:    0,
+				Elevation:    100,
 				// AmbientColor:  color.NRGBA(colornames.Blue400),
 				// PenumbraColor: color.NRGBA(colornames.Blue400),
 				// UmbraColor:    color.NRGBA(colornames.Blue400),
@@ -792,6 +776,25 @@ func (t *TreeTable[T]) drawContextArea(gtx C, menuState *component.MenuState) D 
 		return menuStyle.Layout(gtx)
 	})
 }
+
+/*
+	var LongPressDuration time.Duration = 250 * time.Millisecond
+
+			case gesture.KindPress:
+		i.pressStarted = gtx.Now
+
+		if !i.longPressed && i.pressing && gtx.Now.Sub(i.pressStarted) > LongPressDuration {
+			i.longPressed = true
+			return Event{Type: LongPress}, true
+		}
+
+	所以合理的方案是patch官方的contextAreas和gtx的input source代码，支持长按事件
+
+			// todo 根据gioview的作者提示，安卓上需要过滤长按手势事件实现如下:
+	// 计算pointer Press到Release的持续时长就可以了，Gio在处理触摸事件和鼠标事件是统一的，
+	// 安卓应该也是一致的处理方式，只是event Source变成了Touch。
+	// 需要制作一个过滤touch事件的apk测试
+*/
 
 func (t *TreeTable[T]) IsRowSelected() bool { return t.SelectedNode != nil }
 
