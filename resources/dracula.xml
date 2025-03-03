@@ -1,0 +1,73 @@
+<style name="dracula">
+  <entry type="Other" style="#ffffff"/> <!-- 其他类型 -->
+  <entry type="Error" style="#ffffff"/> <!-- 错误类型 -->
+  <entry type="Background" style="bg:#2b2b2b"/> <!-- 背景 -->
+  <entry type="Keyword" style="#c7773e"/> <!-- 关键字 -->
+  <entry type="KeywordConstant" style="#97727F"/> <!-- 关键字常量 -->
+  <entry type="KeywordDeclaration" style="italic #CB652E"/> <!-- 关键字声明 -->
+  <entry type="KeywordNamespace" style="#c7773e"/> <!-- 命名空间关键字 -->
+  <entry type="KeywordPseudo" style="#c7773e"/> <!-- 伪关键字 -->
+  <entry type="KeywordReserved" style="#c7773e"/> <!-- 保留关键字 -->
+  <entry type="KeywordType" style="#CB7730"/> <!-- 类型关键字 -->
+  <entry type="Name" style="#a9b7c6"/> <!-- 名称 -->
+  <entry type="NameAttribute" style="#4eade5"/> <!-- 名称属性 -->
+  <entry type="NameBuiltin" style="italic #6fafbd"/> <!-- 内置名称 -->
+  <entry type="NameBuiltinPseudo" style="#AEBE7B"/> <!-- 内置伪名称 -->
+  <entry type="NameClass" style="#4eade5"/> <!-- 类名称 -->
+  <entry type="NameConstant" style="#97727F"/> <!-- 常量名称 -->
+  <entry type="NameEntity" style="#a9b7c6"/> <!-- 实体名称 -->
+  <entry type="NameException" style="#a9b7c6"/> <!-- 异常名称 -->
+  <entry type="NameFunction" style="#B09D79"/> <!-- 函数名称 -->
+  <entry type="NameLabel" style="italic #6fafbd"/> <!-- 标签名称 -->
+  <entry type="NameNamespace" style="#a9b7c6"/> <!-- 命名空间名称 -->
+  <entry type="NameOther" style="#A8B6C4"/> <!-- 其他名称 包引用，case ok-->
+  <entry type="NameTag" style="#c7773e"/> <!-- 标签名称 -->
+  <entry type="NameVariable" style="italic #4eade5"/> <!-- 变量名称 -->
+  <entry type="NameVariableClass" style="italic #6fafbd"/> <!-- 类变量 -->
+  <entry type="NameVariableGlobal" style="italic #6fafbd"/> <!-- 全局变量 -->
+  <entry type="NameVariableInstance" style="italic #6fafbd"/> <!-- 实例变量 -->
+  <entry type="Literal" style="#a9b7c6"/> <!-- 字面量 -->
+  <entry type="LiteralDate" style="#a9b7c6"/> <!-- 字面量日期 -->
+  <entry type="LiteralString" style="#6a8759"/> <!-- 字面量字符串 -->
+  <entry type="LiteralStringBacktick" style="#6a8759"/> <!-- 反引号字符串 -->
+  <entry type="LiteralStringChar" style="#6a8759"/> <!-- 字符字面量 -->
+  <entry type="LiteralStringDoc" style="#6a8759"/> <!-- 文档字符串 -->
+  <entry type="LiteralStringDouble" style="#6a8759"/> <!-- 双引号字符串 -->
+  <entry type="LiteralStringEscape" style="#6a8759"/> <!-- 转义字符串 -->
+  <entry type="LiteralStringHeredoc" style="#6a8759"/> <!-- heredoc 字符串 -->
+  <entry type="LiteralStringInterpol" style="#6a8759"/> <!-- 插值字符串 -->
+  <entry type="LiteralStringOther" style="#6a8759"/> <!-- 其他字符串 -->
+  <entry type="LiteralStringRegex" style="#6a8759"/> <!-- 正则表达式字符串 -->
+  <entry type="LiteralStringSingle" style="#6a8759"/> <!-- 单引号字符串 -->
+  <entry type="LiteralStringSymbol" style="#6a8759"/> <!-- 符号字符串 -->
+  <entry type="LiteralNumber" style="#6897bb"/> <!-- 数字字面量 -->
+  <entry type="LiteralNumberBin" style="#6897bb"/> <!-- 二进制数字 -->
+  <entry type="LiteralNumberFloat" style="#6897bb"/> <!-- 浮点数 -->
+  <entry type="LiteralNumberHex" style="#6897bb"/> <!-- 十六进制数字 -->
+  <entry type="LiteralNumberInteger" style="#6897bb"/> <!-- 整数字面量 -->
+  <entry type="LiteralNumberIntegerLong" style="#6897bb"/> <!-- 长整型 -->
+  <entry type="LiteralNumberOct" style="#6897bb"/> <!-- 八进制数字 -->
+  <entry type="Operator" style="#c7773e"/> <!-- 操作符 -->
+  <entry type="OperatorWord" style="#c7773e"/> <!-- 操作符词 -->
+  <entry type="Punctuation" style="#a9b7c6"/> <!-- 标点符号 -->
+  <entry type="Comment" style="#606366"/> <!-- 注释 -->
+  <entry type="CommentHashbang" style="#606366"/> <!-- Hashbang 注释 -->
+  <entry type="CommentMultiline" style="#79756F"/> <!-- 多行注释 -->
+  <entry type="CommentSingle" style="#797979"/> <!-- 单行注释 -->
+  <entry type="CommentSpecial" style="#606366"/> <!-- 特殊注释 -->
+  <entry type="CommentPreproc" style="#c7773e"/> <!-- 预处理注释 -->
+  <entry type="Generic" style="#a9b7c6"/> <!-- 通用 -->
+  <entry type="GenericDeleted" style="#808080"/> <!-- 删除标记 -->
+  <entry type="GenericEmph" style="underline #a9b7c6"/> <!-- 强调 -->
+  <entry type="GenericError" style="#a9b7c6"/> <!-- 错误 -->
+  <entry type="GenericHeading" style="bold #a9b7c6"/> <!-- 标题 -->
+  <entry type="GenericInserted" style="bold #4eade5"/> <!-- 插入标记 -->
+  <entry type="GenericOutput" style="#44475a"/> <!-- 输出 -->
+  <entry type="GenericPrompt" style="#a9b7c6"/> <!-- 提示 -->
+  <entry type="GenericStrong" style="#a9b7c6"/> <!-- 强调文本 -->
+  <entry type="GenericSubheading" style="bold #a9b7c6"/> <!-- 子标题 -->
+  <entry type="GenericTraceback" style="#a9b7c6"/> <!-- 回溯 -->
+  <entry type="GenericUnderline" style="underline"/> <!-- 下划线 -->
+  <entry type="Text" style="#a9b7c6"/> <!-- 文本 -->
+  <entry type="TextWhitespace" style="#a9b7c6"/> <!-- 空白文本 -->
+</style>

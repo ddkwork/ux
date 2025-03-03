@@ -1,0 +1,42 @@
+go env -w GOPROXY=https://goproxy.cn
+go env -w GOOS=linux
+go env -w GOOS=android
+
+pkg install vulkan-headers
+pkg install gcc pkg-config libwayland-dev libx11-dev libx11-xcb-dev libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev libxcursor-dev libvulkan-dev
+
+GOOS=linux CGO_ENABLED=1 go run -tags=nowayland -x .
+GOOS=linux CGO_ENABLED=1 go run -tags=opengl -x .
+
+GIO_BACKEND=x11 go run -x gioui.org/example/hello@latest
+GIO_BACKEND=x11 go run -x .
+
+pkg install libx11 libxcursor libxrandr libxinerama
+
+ls /data/data/com.termux/files/usr/include/X11/
+
+export CPATH=/data/data/com.termux/files/usr/include:$CPATH
+
+go run -x --tags novk gioui.org/example/hello@latest
+GOOS=linux CGO_ENABLED=1 go run -tags=nowayland -x .
+apt install libglu1-mesa-dev freeglut3-dev
+
+pkg install openjdk-17
+goland
+tar -xzvf jdk-<version>-linux-x64.tar.gz
+tar -xvf file.tar
+
+
+export JAVA_HOME=/data/data/com.termux/files/usr/lib/jvm/openjdk-17
+export PATH=$JAVA_HOME/bin:$PATH
+source ~/.bashrc
+source ~/.profile
+echo $JAVA_HOME
+
+pkg install vulkan-headers mesa
+
+
+
+apt install featherpad
+
+featherpad goland.sh
