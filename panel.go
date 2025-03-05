@@ -112,14 +112,14 @@ type AppBar struct {
 }
 
 func InitAppBar[T Widget](panel *Panel[T], toolBars []*TipIconButton, speechTxt string) *AppBar {
-	search := NewInput("请输入搜索关键字...").SetIcon(IconSearch).SetRadius(16)
+	search := NewInput("请输入搜索关键字...").SetIcon(ActionSearchIcon).SetRadius(16)
 	panel.AddChildFlexed(1, search.Layout) // todo 太多之后apk需要管理溢出
 
 	for _, toolbar := range toolBars {
 		panel.AddChild(toolbar.Layout)
 	}
 
-	about := NewTooltipButton(IconError, "about", func() { // todo ico make
+	about := NewTooltipButton(AlertErrorIcon, "about", func() { // todo ico make
 		if mylog.IsAndroid() {
 			mylog.Info("android not support about window")
 			return
@@ -148,13 +148,15 @@ func drawImageBackground(gtx layout.Context) {
 	paint.PaintOp{}.Add(gtx.Ops)
 }
 
-////////////////////////////////////
+// //////////////////////////////////
+var PublicWindow *app.Window
 
 func NewWindow(title string) *app.Window {
 	w := new(app.Window)
 	w.Option(
 		app.Title(title),
 		app.Size(1200, 600),
+		// app.Decorated(false),
 	)
 	w.Perform(system.ActionCenter)
 	// mylog.Check(android_background_service.Start()) // todo fix xml
@@ -173,18 +175,38 @@ func Run(p *Panel[Widget]) {
 			m.Explorer.ListenEvents(et)
 		*/
 
+		//var (
+		//	deco  widget.Decorations
+		//	title string
+		//)
+
 		var ops op.Ops
-		w := p.w
 		go func() {
 			for {
-				e := w.Event()
+				e := p.w.Event()
 				switch e := e.(type) {
 				case app.DestroyEvent:
 					mylog.Check(e.Err)
 					os.Exit(0)
+				// case app.ConfigEvent:
+				//	deco.Maximized = e.Config.Mode == app.Maximized
+				//	title = e.Config.Title
 				case app.FrameEvent:
 					gtx := app.NewContext(&ops, e)
+
 					p.Layout(gtx)
+
+					//p.w.Perform(deco.Update(gtx))
+					//decorationsStyle := material.Decorations(th.Theme, &deco, ^system.Action(0), title)
+					//decorationsStyle.Background = color.NRGBA{
+					//	R: 44,
+					//	G: 44,
+					//	B: 44,
+					//	A: 255,
+					//}
+					//decorationsStyle.Foreground = th.Fg
+					//decorationsStyle.Layout(gtx)
+
 					e.Frame(gtx.Ops)
 				}
 			}

@@ -7,23 +7,19 @@ import (
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/component"
 
-	"gioui.org/font"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
-	"gioui.org/op/clip"
-	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
 )
 
 type DropDown struct {
-	dropDown        *widget.Bool
 	menuContextArea component.ContextArea
 	menu            component.MenuState
 	list            *widget.List
 
-	minWidth unit.Dp
-	width    unit.Dp
+	MinWidth unit.Dp
+	MaxWidth unit.Dp
 	menuInit bool
 
 	isOpen              bool
@@ -45,22 +41,17 @@ type DropDownOption struct {
 	Identifier string
 	clickable  widget.Clickable
 
-	Icon      any
+	Icon      *widget.Icon
 	IconColor color.NRGBA
+	IconSize  unit.Dp
 
 	isDivider bool
 	isDefault bool
 }
 
-// SetWidth 设置width
-func (c *DropDown) SetWidth(width unit.Dp) {
-	c.width = width
-}
-
 func NewDropDownOption(text string) *DropDownOption {
 	return &DropDownOption{
 		Text:      text,
-		Value:     text,
 		isDivider: false,
 	}
 }
@@ -81,9 +72,10 @@ func (o *DropDownOption) WithValue(value string) *DropDownOption {
 	return o
 }
 
-func (o *DropDownOption) WithIcon(icon *widget.Icon, color color.NRGBA) *DropDownOption {
+func (o *DropDownOption) WithIcon(icon *widget.Icon, color color.NRGBA, size unit.Dp) *DropDownOption {
 	o.Icon = icon
 	o.IconColor = color
+	o.IconSize = size
 	return o
 }
 
@@ -151,9 +143,8 @@ func (c *DropDown) SetSelectedByValue(value string) {
 	}
 }
 
-func NewDropDown(options ...string) *DropDown {
+func NewDropDown(options ...*DropDownOption) *DropDown {
 	c := &DropDown{
-		dropDown: &widget.Bool{Value: true},
 		menuContextArea: component.ContextArea{
 			Activation:       pointer.ButtonPrimary,
 			AbsolutePosition: true,
@@ -163,16 +154,13 @@ func NewDropDown(options ...string) *DropDown {
 				Axis: layout.Vertical,
 			},
 		},
+		options:      options,
 		borderWidth:  unit.Dp(1),
 		cornerRadius: unit.Dp(4),
-		menuInit:     true,
-		// maxIndentWidth:        th.Size.DefaultElementWidth,
+
+		menuInit: true,
 	}
-	if len(options) > 0 {
-		for _, opt := range options {
-			c.options = append(c.options, NewDropDownOption(opt))
-		}
-	}
+
 	return c
 }
 
@@ -187,7 +175,8 @@ func NewDropDownWithoutBorder(options ...*DropDownOption) *DropDown {
 				Axis: layout.Vertical,
 			},
 		},
-		options:  options,
+		options: options,
+
 		menuInit: true,
 	}
 
@@ -198,7 +187,7 @@ func (c *DropDown) SelectedIndex() int {
 	return c.selectedOptionIndex
 }
 
-func (c *DropDown) SetOptions(options []*DropDownOption) {
+func (c *DropDown) SetOptions(options ...*DropDownOption) {
 	c.selectedOptionIndex = 0
 	c.options = options
 	if len(c.options) > 0 {
@@ -215,9 +204,9 @@ func (c *DropDown) GetSelected() *DropDownOption {
 }
 
 func (c *DropDown) box(gtx layout.Context, text string, maxWidth unit.Dp) layout.Dimensions {
-	borderColor := th.Color.DropDownBorderColor
+	borderColor := th.BorderBlueColor // theme.BorderColor
 	if c.isOpen {
-		borderColor = th.Color.DropDownHoveredBorderColor
+		borderColor = th.InputActivatedBorderColor // theme.BorderColorFocused
 	}
 
 	border := widget.Border{
@@ -231,39 +220,26 @@ func (c *DropDown) box(gtx layout.Context, text string, maxWidth unit.Dp) layout
 	}
 
 	c.size.X = gtx.Dp(maxWidth)
-	return c.dropDown.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		if c.dropDown.Hovered() {
-			border.Color = th.Color.DropDownHoveredBorderColor
-		}
-		return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			// calculate the minimum maxIndentWidth of the box, considering icon and padding
-			return layout.Background{}.Layout(gtx,
-				func(gtx layout.Context) layout.Dimensions {
-					defer clip.UniformRRect(image.Rectangle{Max: gtx.Constraints.Min}, gtx.Dp(th.Size.DefaultElementRadiusSize)).Push(gtx.Ops).Pop()
-					paint.Fill(gtx.Ops, th.Color.DefaultBgGrayColor)
-					return layout.Dimensions{Size: gtx.Constraints.Min}
-				},
-				func(gtx layout.Context) layout.Dimensions {
-					gtx.Constraints.Min.X = gtx.Dp(maxWidth) - gtx.Dp(8)
-					return layout.Inset{
-						Top:    4,
-						Bottom: 4,
-						Left:   8,
-						Right:  4,
-					}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle, Spacing: layout.SpaceBetween}.Layout(gtx,
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-								return layout.Inset{Top: unit.Dp(3), Bottom: unit.Dp(3)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-									return material.Label(th.Theme, th.TextSize, text).Layout(gtx)
-								})
-							}),
-							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-								gtx.Constraints.Min.X = gtx.Dp(16)
-								return ExpandIcon.Layout(gtx, th.Color.DefaultTextWhiteColor)
-							}),
-						)
+
+	return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		// calculate the minimum width of the box, considering icon and padding
+		gtx.Constraints.Min.X = gtx.Dp(maxWidth) - gtx.Dp(8)
+		return layout.Inset{
+			Top:    4,
+			Bottom: 4,
+			Left:   8,
+			Right:  4,
+		}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle, Spacing: layout.SpaceBetween}.Layout(gtx,
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					return layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(4)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return material.Label(th.Theme, th.TextSize, text).Layout(gtx)
 					})
-				},
+				}),
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					gtx.Constraints.Min.X = gtx.Dp(16)
+					return NavigationExpandMoreIcon.Layout(gtx, th.Fg)
+				}),
 			)
 		})
 	})
@@ -295,14 +271,14 @@ func (c *DropDown) Layout(gtx layout.Context) layout.Dimensions {
 		c.lastSelectedIndex = c.selectedOptionIndex
 	}
 
-	// Update contextMenu items only if options change
+	// Update menu items only if options change
 	if c.menuInit {
 		c.menuInit = false
 		c.updateMenuItems()
 	}
 
-	if c.minWidth == 0 {
-		c.minWidth = unit.Dp(150)
+	if c.MinWidth == 0 {
+		c.MinWidth = unit.Dp(150)
 	}
 
 	text := ""
@@ -310,7 +286,7 @@ func (c *DropDown) Layout(gtx layout.Context) layout.Dimensions {
 		text = c.options[c.selectedOptionIndex].Text
 	}
 
-	box := c.box(gtx, text, c.width)
+	box := c.box(gtx, text, c.MaxWidth)
 	return layout.Stack{}.Layout(gtx,
 		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 			return box
@@ -322,12 +298,12 @@ func (c *DropDown) Layout(gtx layout.Context) layout.Dimensions {
 					Left: unit.Dp(4),
 				}
 				return offset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					gtx.Constraints.Min.X = gtx.Dp(c.minWidth)
-					if c.width != 0 {
-						gtx.Constraints.Max.X = gtx.Dp(c.width)
+					gtx.Constraints.Min.X = gtx.Dp(c.MinWidth)
+					if c.MaxWidth != 0 {
+						gtx.Constraints.Max.X = gtx.Dp(c.MaxWidth)
 					}
 					m := component.Menu(th.Theme, &c.menu)
-					m.SurfaceStyle.Fill = th.Color.DropDownBgGrayColor
+					m.SurfaceStyle.Fill = th.FocusedBgColor // theme.DropDownMenuBgColor
 					return m.Layout(gtx)
 				})
 			})
@@ -339,30 +315,22 @@ func (c *DropDown) Layout(gtx layout.Context) layout.Dimensions {
 func (c *DropDown) updateMenuItems() {
 	c.menu.Options = c.menu.Options[:0]
 	for _, opt := range c.options {
+		opt := opt
 		c.menu.Options = append(c.menu.Options, func(gtx layout.Context) layout.Dimensions {
 			if opt.isDivider {
 				dv := component.Divider(th.Theme)
-				dv.Fill = th.Color.DefaultBorderGrayColor
+				dv.Fill = th.FullIconColor // theme.BorderColor
 				return dv.Layout(gtx)
 			}
 
 			itm := component.MenuItem(th.Theme, &opt.clickable, opt.Text)
-			itm.HoverColor = th.Color.DropDownItemHoveredGrayColor
 			if opt.Icon != nil {
 				itm.Icon = opt.Icon
 				itm.IconColor = opt.IconColor
+				itm.IconSize = opt.IconSize
 			}
-			itm.Label.TextSize = th.Size.DropdownTextSize
-			if c.GetSelected().Text == opt.Text {
-				itm.Label.Color = th.Color.DropDownSelectedItemBgColor
-				itm.Label.Font.Weight = font.Bold
-				// itm.Icon = widgets.ActionStarRateIcon
-				// itm.IconSize = unit.Dp(16)
-				// itm.IconInset = outlay.Inset{}
-				// itm.IconColor = opt.IconColor
-			} else {
-				itm.Label.Color = th.Color.DefaultTextWhiteColor
-			}
+
+			itm.Label.Color = White
 			return itm.Layout(gtx)
 		})
 	}

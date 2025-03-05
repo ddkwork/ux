@@ -4,13 +4,6 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/ddkwork/ux/widget/material"
-
-	"github.com/ddkwork/ux/animation/gween"
-	"github.com/ddkwork/ux/animation/gween/ease"
-
-	"github.com/ddkwork/ux/animation"
-
 	"gioui.org/font"
 	"gioui.org/io/pointer"
 	"gioui.org/io/semantic"
@@ -20,6 +13,10 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
+	"github.com/ddkwork/ux/animation"
+	"github.com/ddkwork/ux/animation/gween"
+	"github.com/ddkwork/ux/animation/gween/ease"
+	"github.com/ddkwork/ux/widget/material"
 )
 
 type ButtonAnimation struct {

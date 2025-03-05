@@ -117,16 +117,16 @@ func (e *EditableLabel) Layout(gtx layout.Context) layout.Dimensions {
 		return layout.Background{}.Layout(gtx,
 			func(gtx layout.Context) layout.Dimensions {
 				defer clip.UniformRRect(image.Rectangle{Max: gtx.Constraints.Min}, gtx.Dp(4)).Push(gtx.Ops).Pop()
-				background := th.Theme.Bg
+				background := th.Bg
 				if e.clickable.Hovered() || gtx.Focused(e.clickable) {
-					background = Hovered(th.Theme.Bg)
+					background = Hovered(th.Bg)
 				}
 				paint.Fill(gtx.Ops, background)
 				return layout.Dimensions{Size: gtx.Constraints.Min}
 			},
 			func(gtx layout.Context) layout.Dimensions {
 				return layout.UniformInset(unit.Dp(5)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return material.Label(th.Theme, th.Theme.TextSize, e.Text).Layout(gtx)
+					return material.Label(th.Theme, th.TextSize, e.Text).Layout(gtx)
 				})
 			},
 		)

@@ -103,7 +103,7 @@ package ux
 //							layout.Rigid(layout.Spacer{Width: unit.Dp(10)}.Layout),
 //							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 //								return layout.Inset{Top: unit.Dp(3)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-//									bd := material.Body1(theme.Material(), n.Text)
+//									bd := material.Body1(th.Theme, n.Text)
 //									bd.Color = n.theme.Color.NotificationTextWhiteColor
 //									bd.TextSize = n.theme.Size.DefaultTextSize
 //									return bd.Layout(gtx)
@@ -127,7 +127,7 @@ package ux
 //	}
 //	return layout.NE.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 //		return layout.Inset{Top: unit.Dp(20), Right: unit.Dp(20)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-//			return material.List(theme.Material(), n.list).Layout(gtx, len(n.notice), func(gtx layout.Context, index int) layout.Dimensions {
+//			return material.List(th.Theme, n.list).Layout(gtx, len(n.notice), func(gtx layout.Context, index int) layout.Dimensions {
 //				return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 //					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 //						return n.notice[index].layout(gtx, theme)

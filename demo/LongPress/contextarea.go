@@ -1,10 +1,11 @@
 package main
 
 import (
-	"gioui.org/io/event"
 	"image"
 	"math"
 	"time"
+
+	"gioui.org/io/event"
 
 	"gioui.org/f32"
 	"gioui.org/io/pointer"

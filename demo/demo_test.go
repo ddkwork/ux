@@ -21,7 +21,7 @@ func TestUpdateAppModule(t *testing.T) {
 	id := mylog.Check2(strconv.Unquote(session.Output.String()))
 	mylog.Info("id", id)
 	stream.RunCommand("go get github.com/ddkwork/ux@" + id)
-	//go get -u -x all
+	// go get -u -x all
 }
 
 func TestName(t *testing.T) {

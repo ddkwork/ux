@@ -4,14 +4,11 @@ import (
 	_ "embed"
 	"fmt"
 	"image"
-	"image/color"
 	"image/png"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
-
-	"github.com/ddkwork/ux/widget/material"
 
 	"gioui.org/layout"
 	"gioui.org/unit"
@@ -22,6 +19,7 @@ import (
 	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/terminal"
+	"github.com/ddkwork/ux/widget/material"
 	"github.com/kbinani/screenshot"
 )
 
@@ -34,23 +32,24 @@ func main() {
 	// 这种本地起文件服务的方式对方下载很快
 
 	w := ux.NewWindow("gio demo")
+	ux.PublicWindow = w
 	panel := ux.NewPanel(w)
 
 	hPanel := ux.NewHPanel(w)
 	panel.AddChild(hPanel.Layout)
 
 	tipIconButtons := []*ux.TipIconButton{
-		ux.NewTooltipButton(ux.IconBack, "action code", nil),
-		ux.NewTooltipButton(ux.IconFavorite, "action code", nil),
-		ux.NewTooltipButton(ux.IconDone, "action bug report", nil),
-		ux.NewTooltipButton(ux.IconDelete, "action build", nil),
-		ux.NewTooltipButton(ux.IconClose, "action build", nil),
-		ux.NewTooltipButton(ux.IconArrowDropDown, "action build", nil),
-		ux.NewTooltipButton(ux.IconNaviLeft, "action build", nil),
-		ux.NewTooltipButton(ux.IconNaviRight, "action build", nil),
-		ux.NewTooltipButton(ux.IconFileFolder, "action build", nil),
-		ux.NewTooltipButton(ux.IconUpload, "action build", nil),
-		ux.NewTooltipButton(ux.IconDownload, "action build", nil),
+		ux.NewTooltipButton(ux.NavigationArrowBackIcon, "action code", nil),
+		ux.NewTooltipButton(ux.ActionFavoriteIcon, "action code", nil),
+		ux.NewTooltipButton(ux.ActionDoneIcon, "action bug report", nil),
+		ux.NewTooltipButton(ux.ActionDeleteIcon, "action build", nil),
+		ux.NewTooltipButton(ux.NavigationCloseIcon, "action build", nil),
+		ux.NewTooltipButton(ux.NavigationArrowDropDownIcon, "action build", nil),
+		ux.NewTooltipButton(ux.NavigationChevronLeftIcon, "action build", nil),
+		ux.NewTooltipButton(ux.NavigationChevronRightIcon, "action build", nil),
+		ux.NewTooltipButton(ux.FileFolderIcon, "action build", nil),
+		ux.NewTooltipButton(ux.FileFileUploadIcon, "action build", nil),
+		ux.NewTooltipButton(ux.FileFileDownloadIcon, "action build", nil),
 	}
 
 	appBar = ux.InitAppBar(hPanel, tipIconButtons, speechTxt)
@@ -350,33 +349,52 @@ func main() {
 			m.Set(TableType, table.Layout)
 		case SearchDropDownType:
 			dropDown := ux.NewSearchDropDown()
-			dropDown.SetOnChanged(func(value string) {
-				println(dropDown.GetSelected())
+			dropDown.SetLoader(func() []ux.Item {
+				return []ux.Item{
+					{
+						Identifier: "",
+						Title:      "aa",
+						Kind:       "", // todo add icon and callback
+					},
+					{
+						Identifier: "",
+						Title:      "bb",
+						Kind:       "", // todo add icon
+					},
+					{
+						Identifier: "",
+						Title:      "cc",
+						Kind:       "", // todo add icon
+					},
+				}
 			})
-			dropDown.SetWidth(unit.Dp(300))
-			dropDown.SetOptions([]*ux.SearchDropDownOption{
-				{
-					Text:       "aa",
-					Value:      "xx",
-					Identifier: "f",
-					Icon:       nil,
-					IconColor:  color.NRGBA{},
-				},
-				{
-					Text:       "bb",
-					Value:      "yy",
-					Identifier: "f",
-					Icon:       nil,
-					IconColor:  color.NRGBA{},
-				},
-				{
-					Text:       "cc",
-					Value:      "zz",
-					Identifier: "f",
-					Icon:       nil,
-					IconColor:  color.NRGBA{},
-				},
-			})
+			//dropDown.SetOnChanged(func(value string) {
+			//	println(dropDown.GetSelected())
+			//})
+			//dropDown.SetWidth(unit.Dp(300))
+			//dropDown.SetOptions([]*ux.SearchDropDownOption{
+			//	{
+			//		Text:       "aa",
+			//		Value:      "xx",
+			//		Identifier: "f",
+			//		Icon:       nil,
+			//		IconColor:  color.NRGBA{},
+			//	},
+			//	{
+			//		Text:       "bb",
+			//		Value:      "yy",
+			//		Identifier: "f",
+			//		Icon:       nil,
+			//		IconColor:  color.NRGBA{},
+			//	},
+			//	{
+			//		Text:       "cc",
+			//		Value:      "zz",
+			//		Identifier: "f",
+			//		Icon:       nil,
+			//		IconColor:  color.NRGBA{},
+			//	},
+			//})
 			m.Set(SearchDropDownType, dropDown.Layout)
 		case IconvgViewType:
 			m.Set(IconvgViewType, ux.NewIconView().Layout)
@@ -465,7 +483,12 @@ func main() {
 			form.Add("username", userName.Layout)
 			form.Add("password", password.Layout)
 			form.Add("email", email.Layout)
-			dropDown := ux.NewDropDown(SuperRecovery2Type.Names()...)
+			// dropDown := ux.NewDropDown(SuperRecovery2Type.Names()...)
+			dropDown := ux.NewDropDown()
+			for _, s := range SuperRecovery2Type.Names() {
+				dropDown.SetOptions(ux.NewDropDownOption(s))
+			}
+
 			form.InsertAt(0, "choose a app", dropDown.Layout)
 			// form.Add("", ux.BlueButton(&clickable, "submit", unit.Dp(100)).Layout)
 			m.Set(StructViewType, form.Layout)
@@ -549,7 +572,7 @@ func main() {
 
 		case MobileType:
 		case SvgButtonType:
-			m.Set(SvgButtonType, ux.NewButton("", nil).SetRectIcon(true).SetIcon(ux.SvgIconCircledChevronRight).Layout)
+			m.Set(SvgButtonType, ux.Button(new(widget.Clickable), ux.SvgIconCircledChevronRight, "").Layout)
 		case CodeEditorType:
 			m.Set(CodeEditorType, ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout)
 		case AsmViewType:
@@ -569,7 +592,7 @@ func main() {
 		case ListViewType:
 		case JsonTreeType:
 		case AnimationButtonType:
-			newButtonAnimation := ux.NewButtonAnimation("animation button", ux.IconBack, func(gtx layout.Context) {
+			newButtonAnimation := ux.NewButtonAnimation("animation button", ux.NavigationArrowBackIcon, func(gtx layout.Context) {
 				mylog.Info("animation button clicked")
 			})
 			m.Set(AnimationButtonType, newButtonAnimation.Layout) // todo bug

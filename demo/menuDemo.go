@@ -40,19 +40,19 @@ func (p *MenuObj) Layout(gtx layout.Context) layout.Dimensions {
 			Options: []func(gtx C) D{
 				func(gtx C) D {
 					item := component.MenuItem(ux.ThemeDefault().Theme, &p.balanceButton, "Balance")
-					item.Icon = ux.IconEdit
+					item.Icon = ux.ContentCreateIcon
 					item.Hint = component.MenuHintText(ux.ThemeDefault().Theme, "Hint")
 					return item.Layout(gtx)
 				},
 				func(gtx C) D {
 					item := component.MenuItem(ux.ThemeDefault().Theme, &p.accountButton, "Account")
-					item.Icon = ux.IconActionCode
+					item.Icon = ux.ActionCodeIcon
 					item.Hint = component.MenuHintText(ux.ThemeDefault().Theme, "Hint")
 					return item.Layout(gtx)
 				},
 				func(gtx C) D {
 					item := component.MenuItem(ux.ThemeDefault().Theme, &p.cartButton, "Cart")
-					item.Icon = ux.IconSearch
+					item.Icon = ux.ActionSearchIcon
 					item.Hint = component.MenuHintText(ux.ThemeDefault().Theme, "Hint")
 					return item.Layout(gtx)
 				},

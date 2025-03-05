@@ -250,29 +250,29 @@ func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 						return layout.Dimensions{}
 					}
 
-					// btn := Button(theme.Material(), &c.loadExample, RefreshIcon, IconPositionStart, "Load Example")
-					btn := NewNavButton("Load Example")
+					btn := Button(&c.loadExample, NavigationRefreshIcon, "Load Example")
+					//btn := NewNavButton("Load Example")
 					//btn.Color = theme.ButtonTextColor
 					//btn.Inset = layout.Inset{
 					//	Top: unit.Dp(4), Bottom: unit.Dp(4),
 					//	Left: unit.Dp(4), Right: unit.Dp(4),
 					//}
 
-					return btn.Layout(gtx, th.Theme)
+					return btn.Layout(gtx)
 				}),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					if c.onBeautify == nil {
 						return layout.Dimensions{}
 					}
 
-					//btn := Button(theme.Material(), &c.beatufier, CleanIcon, IconPositionStart, "Beautify")
-					//btn.Color = theme.ButtonTextColor
-					//btn.Inset = layout.Inset{
-					//	Top: 4, Bottom: 4,
-					//	Left: 4, Right: 4,
-					//}
-					btn := NewNavButton("Load Example")
-					return btn.Layout(gtx, th.Theme)
+					btn := Button(&c.beatufier, EditorFormatColorTextIcon, "Beautify")
+					// btn.Color = theme.ButtonTextColor//todo
+					btn.Inset = layout.Inset{
+						Top: 4, Bottom: 4,
+						Left: 4, Right: 4,
+					}
+					// btn := NewNavButton("Load Example")
+					return btn.Layout(gtx)
 				}),
 			)
 		}),

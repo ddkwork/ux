@@ -3,20 +3,22 @@ with added features such as treeGrid widget etc.
 
 thanks
 
-| index | rep                                       |    |    | 
-|-------|-------------------------------------------|----|----| 
-| 1     | https://github.com/oligo/gioview          |    |    | 
-| 2     | https://github.com/x-module/gioui-plugins |    |    |            
-| 3     | https://gitee.com/haodreams/gw            |    |    |            
-| 4     | https://github.com/chapar-rest/chapar     |    |    |            
-| 5     | https://github.com/dominikh/gotraceui     |    |    |            
-| 6     | https://github.com/vsariola/sointu        |    |    |            
-| 7     | https://github.com/g45t345rt/g45w         |    |    |            
-| 8     | https://github.com/richardwilkes/unison   |    |    |            
-| 9     | https://github.com/tonyhallett/TreeGrid   |    |    | 
-| 10    | https://github.com/oligo/gvcode           |    |    | 
-| 11    | https://github.com/mearaj/giowidgets      |    |    | 
-| 12    | https://github.com/hkontrol/hkapp         |    |    | 
+| index | repositories                                | feature                       |    | 
+|-------|---------------------------------------------|-------------------------------|----| 
+| 1     | https://github.com/oligo/gioview            |                               |    | 
+| 2     | https://github.com/x-module/gioui-plugins   | some widget                   |    |            
+| 3     | https://gitee.com/haodreams/gw              | some widget                   |    |            
+| 4     | https://github.com/chapar-rest/chapar       | some widget                   |    |            
+| 5     | https://github.com/dominikh/gotraceui       | table resize column from drag |    |            
+| 6     | https://github.com/vsariola/sointu          | split layout                  |    |            
+| 7     | https://github.com/g45t345rt/g45w           | animation button              |    |            
+| 8     | https://github.com/richardwilkes/unison     | naryTree                      |    |            
+| 9     | https://github.com/tonyhallett/TreeGrid     | treeTable layout logic        |    | 
+| 10    | https://github.com/oligo/gvcode             | code editor                   |    | 
+| 11    | https://github.com/mearaj/giowidgets        | resizer and datePicker        |    | 
+| 12    | https://github.com/hkontrol/hkapp           | longPress and touch menu      |    | 
+| 13    | https://github.com/hd-buddy/Date-Picker-gio |                               |    | 
+| 14    | https://github.com/go-gost/gost-plus        | button style                  |    | 
 
 ![demo](demo/tui.png)
 ![demo](demo/treeGrid.png)

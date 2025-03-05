@@ -13,7 +13,7 @@ func TestButton_Layout(t *testing.T) {
 
 func TestNewButtonAnimation(t *testing.T) {
 	ux.SaveScreenshot(func(gtx layout.Context) layout.Dimensions {
-		animation := ux.NewButtonAnimation("xxxxxxxxxxxxxxxxxxxxxxxxxx", ux.IconAdd, func(gtx layout.Context) {
+		animation := ux.NewButtonAnimation("xxxxxxxxxxxxxxxxxxxxxxxxxx", ux.ContentAddIcon, func(gtx layout.Context) {
 			print("xxxxx")
 		})
 		animation.SetLoading(true)

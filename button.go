@@ -3,33 +3,35 @@ package ux
 import (
 	"image"
 	"image/color"
+	"math"
 
+	"github.com/ddkwork/ux/animationButton"
 	"github.com/ddkwork/ux/icon"
-
 	"github.com/ddkwork/ux/widget/material"
 
-	"gioui.org/io/input"
+	"gioui.org/font"
 	"gioui.org/io/semantic"
 	"gioui.org/layout"
+	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
+	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"github.com/ddkwork/ux/animationButton"
 )
 
 func NewButtonAnimation(text string, icon *widget.Icon, callBack func(gtx layout.Context)) *animationButton.Button {
 	style := animationButton.ButtonStyle{
 		Rounded:  animationButton.UniformRounded(unit.Dp(12)),
 		TextSize: unit.Sp(12),
-		Inset:    layout.UniformInset(unit.Dp(4)),
+		Inset:    layout.UniformInset(unit.Dp(8)),
 		// Font:        font.Font{},
 		Icon:      icon,
 		IconGap:   unit.Dp(1),
 		Animation: animationButton.NewButtonAnimationDefault(),
 		Border: widget.Border{
-			Color:        White,
-			CornerRadius: 14,
+			Color:        Grey200,
+			CornerRadius: 16,
 			Width:        0.5,
 		},
 		LoadingIcon: nil,
@@ -40,6 +42,9 @@ func NewButtonAnimation(text string, icon *widget.Icon, callBack func(gtx layout
 			HoverTextColor:       &th.Color.HoveredBorderBlueColor,
 			BorderColor:          White,
 		},
+	}
+	if icon == nil {
+		style.Border.CornerRadius = 13
 	}
 	return animationButton.NewButton(style, th.Theme, text, callBack)
 }
@@ -52,299 +57,243 @@ func NewButtonAnimationScale(v float32) animationButton.ButtonAnimation {
 	return animationButton.NewButtonAnimationScale(v)
 }
 
-type Button struct {
-	icon     any
-	iconRect bool
+///////////////////////////////////////////////////////////////////////////////
 
-	Axis layout.Axis
-	*widget.Clickable
-	callBack func()
-	text     string
-	Inset    layout.Inset
-	spacer   unit.Dp // icon insets
-
-	radius unit.Dp // border radius
-	width  unit.Dp // border width
+type ButtonStyle struct {
+	Text            string
+	Icon            any
+	IconPositionEnd bool
+	// Color is the text color.
+	color        color.NRGBA
+	Font         font.Font
+	TextSize     unit.Sp
+	IconSize     unit.Dp
+	Background   color.NRGBA
+	CornerRadius unit.Dp
+	Inset        layout.Inset
+	Button       *widget.Clickable
+	shaper       *text.Shaper
+	border       widget.Border
 }
 
-func NewButton(text string, callBack func()) *Button {
-	m := &Button{
-		icon:      nil,
-		iconRect:  false,
-		Axis:      0,
-		Clickable: new(widget.Clickable),
-		callBack:  callBack,
-		text:      text,
-		Inset: layout.Inset{
-			Top:    5,
-			Bottom: 5,
-			Left:   17,
-			Right:  17,
+type ButtonLayoutStyle struct {
+	Background   color.NRGBA
+	CornerRadius unit.Dp
+	Button       *widget.Clickable
+}
+
+type IconButtonStyle struct {
+	Background color.NRGBA
+	// Color is the icon color.
+	Color color.NRGBA
+	Icon  *widget.Icon
+	// Size is the icon size.
+	Size        unit.Dp
+	Inset       layout.Inset
+	Button      *widget.Clickable
+	Description string
+}
+
+func iconButtonSmall(button *widget.Clickable, icon any, txt string) ButtonStyle {
+	style := Button(button, icon, txt)
+	style.Inset = layout.Inset{}
+	style.IconSize = defaultHierarchyIconSize
+	style.border = widget.Border{}
+	return style
+}
+
+func Button(button *widget.Clickable, icon any, text string) ButtonStyle {
+	b := ButtonStyle{
+		Text:            text,
+		Icon:            icon,
+		IconPositionEnd: false,
+		color:           th.Fg,
+		Font:            font.Font{},
+		TextSize:        th.TextSize * 14.0 / 16.0,
+		IconSize:        18,
+		Background:      th.Bg,
+		CornerRadius:    4,
+		Inset:           layout.UniformInset(8),
+		Button:          button,
+		shaper:          th.Shaper,
+		border: widget.Border{
+			Color:        Grey200,
+			CornerRadius: 16,
+			Width:        .5,
 		},
-		spacer: 1,
-		radius: 16,
-		width:  0.5,
 	}
-	return m
+	b.Font.Typeface = th.Face
+	return b
 }
 
-func (m *Button) SetHorizontal() *Button {
-	m.Axis = layout.Horizontal
-	return m
-}
-
-func (m *Button) SetVertical() *Button {
-	m.Axis = layout.Vertical
-	return m
-}
-
-func (m *Button) SetRectIcon(iconRect bool) *Button {
-	m.iconRect = iconRect
-	return m
-}
-
-func (m *Button) SetIcon(icon any) *Button {
-	m.icon = icon
-	return m
-}
-
-func (m *Button) Layout(gtx layout.Context) layout.Dimensions {
-	if m.callBack != nil {
-		if m.Clicked(gtx) {
-			m.callBack()
-		}
-	}
-
-	// textOnly := m.icon == nil && m.svgIcon == nil && m.text != ""
-	// iconOnly := m.icon != nil || m.svgIcon != nil && m.text == ""
-	// svgOnly := m.svgIcon != nil && m.text == ""
-	// iconAndText := m.icon != nil || m.svgIcon != nil && m.text != ""
-	// svgAndText := m.svgIcon != nil && m.text != ""
-
-	if m.icon == nil && m.text != "" { // 只有文字
-		// btn := material.Button(th.Theme, m.Clickable, m.text)
-		// btn.Inset = layout.UniformInset(2) // todo test
-
-		return material.ButtonLayoutStyle{
-			Background:   th.Color.InputFocusedBgColor,
-			CornerRadius: m.radius,
-			Button:       m.Clickable,
-		}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return widget.Border{
-				Color:        Grey200,
-				Width:        m.width,
-				CornerRadius: m.radius,
-			}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return m.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					label := material.Body1(th.Theme, m.text)
-					label.Color = th.Color.DefaultTextWhiteColor
-					if m.Hovered() {
-						label.TextSize++
-					}
-					return label.Layout(gtx)
+func (b ButtonStyle) Layout(gtx layout.Context) layout.Dimensions {
+	return ButtonLayoutStyle{
+		Background:   b.Background,
+		CornerRadius: b.CornerRadius,
+		Button:       b.Button,
+	}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		iconDims := layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			if b.Icon != nil {
+				return layout.Inset{Right: unit.Dp(0)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					gtx.Constraints.Min.X = gtx.Dp(b.IconSize)
+					gtx.Constraints.Max.X = gtx.Dp(b.IconSize)
+					return icon.Layout(gtx, b.Icon, b.color, b.IconSize)
 				})
-			})
+			}
+			return layout.Dimensions{}
 		})
-	}
+		labelDims := layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return material.Label(th.Theme, b.TextSize, b.Text).Layout(gtx)
+		})
 
-	if m.text == "" && m.icon != nil { // 树形层级图标，没有文字
-		if m.iconRect { // 带图标的编辑框，图标背景色和按钮背景色一致
-			return material.Clickable(gtx, m.Clickable, func(gtx C) D {
-				sz := gtx.Dp(defaultHierarchyIconSize)
-				size := image.Pt(sz, sz)
-				gtx.Constraints.Min = size
-				gtx.Constraints.Max = size
-				//background := func(gtx C) D {
-				//	defer clip.UniformRRect(image.Rectangle{Max: gtx.Constraints.Max}, sz/2).Push(gtx.Ops).Pop() // 使用UniformRRect绘制圆形背景
-				//	var backgroundColor color.NRGBA
-				//	if m.Hovered() || gtx.Focused(m) {
-				//		backgroundColor = th.Fg // 悬停或聚焦时的颜色
-				//	} else {
-				//		backgroundColor = th.Color.InputFocusedBgColor // 默认颜色
-				//	}
-				//	paint.Fill(gtx.Ops, backgroundColor)
-				//	return layout.Dimensions{Size: gtx.Constraints.Min}
-				//}
-				return icon.Layout(gtx, m.icon, color.NRGBA{}, defaultHierarchyIconSize)
-			})
+		items := []layout.FlexChild{iconDims, labelDims}
+		if b.Icon != nil && b.IconPositionEnd {
+			items = []layout.FlexChild{labelDims, iconDims}
+			b.Inset.Right = unit.Dp(5)
 		}
-		btn := material.IconButton(th.Theme, m.Clickable, m.icon, m.text)
-		return btn.Layout(gtx)
-	}
-
-	// 图标和文字都有,两个都画
-	return material.ButtonLayout(th.Theme, m.Clickable).Layout(gtx, func(gtx C) D {
-		top := m.Inset.Top - 2
-		bottom := m.Inset.Bottom - 2
-		if top < 0 {
-			top = 0
+		background := b.border.Color
+		switch {
+		case !gtx.Enabled():
+			background = Disabled(b.Background)
+		case b.Button.Hovered() || gtx.Focused(b.Button):
+			background = Grey400
 		}
-		if bottom < 0 {
-			bottom = 0
+		b.border.Color = background
+		if b.Icon == nil {
+			b.border.CornerRadius = 13
 		}
-		return layout.Inset{Top: top, Bottom: bottom, Left: m.Inset.Left, Right: m.Inset.Right}.Layout(gtx, func(gtx C) D {
-			iconAndLabel := layout.Flex{Axis: m.Axis, Alignment: layout.Middle}
-			layIcon := layout.Rigid(func(gtx C) D {
-				d := icon.Layout(gtx, m.icon, color.NRGBA{}, defaultHierarchyIconSize)
-				if m.Axis == layout.Horizontal {
-					return layout.Inset{Right: m.spacer}.Layout(gtx, func(gtx C) D {
-						return d
-					})
-				}
-				return layout.Inset{Bottom: m.spacer}.Layout(gtx, func(gtx C) D {
-					return d
-				})
+		return b.border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return b.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx, items...)
 			})
-
-			layLabel := layout.Rigid(func(gtx C) D {
-				l := material.Body1(th.Theme, m.text)
-				l.Color = th.Theme.Palette.ContrastFg
-				if m.Axis == layout.Horizontal {
-					return layout.Inset{Left: m.spacer}.Layout(gtx, func(gtx C) D {
-						return l.Layout(gtx)
-					})
-				}
-				return layout.Inset{Top: m.spacer}.Layout(gtx, func(gtx C) D {
-					return l.Layout(gtx)
-				})
-			})
-
-			return iconAndLabel.Layout(gtx, layIcon, layLabel)
 		})
 	})
 }
 
-//	func SaveButtonLayout(gtx DefaultDraw.Context, theme *material.Theme, rowClick *widget.Clickable) DefaultDraw.Dimensions {
-//		border := widget.Border{
-//			Color:        th.Bg, //todo: change color to th.Fg
-//			Width:        unit.Dp(1),
-//			CornerRadius: unit.Dp(4),
-//		}
-//
-//		return DefaultDraw.Inset{Left: unit.Dp(15)}.Layout(gtx, func(gtx DefaultDraw.Context) DefaultDraw.Dimensions {
-//			return border.Layout(gtx, func(gtx DefaultDraw.Context) DefaultDraw.Dimensions {
-//				return Clickable(gtx, rowClick, func(gtx DefaultDraw.Context) DefaultDraw.Dimensions {
-//					return DefaultDraw.Inset{Left: unit.Dp(4), Right: unit.Dp(4)}.Layout(gtx, func(gtx DefaultDraw.Context) DefaultDraw.Dimensions {
-//						return DefaultDraw.Flex{Axis: DefaultDraw.Vertical, Alignment: DefaultDraw.Middle}.Layout(gtx,
-//							DefaultDraw.Rigid(func(gtx DefaultDraw.Context) DefaultDraw.Dimensions {
-//								return DefaultDraw.Flex{Axis: DefaultDraw.Horizontal, Alignment: DefaultDraw.Middle}.Layout(gtx,
-//									DefaultDraw.Rigid(func(gtx DefaultDraw.Context) DefaultDraw.Dimensions {
-//										gtx.Constraints.Max.X = gtx.Dp(16)
-//										return IconSave.Layout(gtx, th.Palette.ContrastFg)
-//									}),
-//									DefaultDraw.Rigid(func(gtx DefaultDraw.Context) DefaultDraw.Dimensions {
-//										return material.Body1(theme, "Save").Layout(gtx)
-//									}),
-//								)
-//							}),
-//						)
-//					})
-//				})
-//			})
-//		})
-//	}
-func IconButton(icon *widget.Icon, button *widget.Clickable, description string) material.IconButtonStyle {
-	return material.IconButtonStyle{
-		Background:  th.Palette.Bg,
-		Color:       WithAlpha(th.Palette.Fg, 0xb6),
-		Icon:        icon,
-		Size:        24,
-		Inset:       layout.UniformInset(4),
-		Button:      button,
-		Description: description,
-	}
-}
-
-type IconButton2 struct {
-	Icon                 *widget.Icon
-	Size                 unit.Dp
-	Color                color.NRGBA
-	BackgroundColor      color.NRGBA
-	BackgroundColorHover color.NRGBA
-
-	SkipFocus bool
-	Clickable *widget.Clickable
-
-	OnClick func()
-}
-
-func (ib *IconButton2) Layout(gtx layout.Context) layout.Dimensions {
-	if ib.BackgroundColor == (color.NRGBA{}) {
-		ib.BackgroundColor = th.Color.DefaultIconColor
-	}
-
-	if ib.BackgroundColorHover == (color.NRGBA{}) {
-		ib.BackgroundColorHover = Hovered(ib.BackgroundColor)
-	}
-
-	for ib.Clickable.Clicked(gtx) {
-		if ib.OnClick != nil {
-			ib.OnClick()
-		}
-	}
-
-	return ib.Clickable.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+func (b ButtonLayoutStyle) Layout(gtx layout.Context, w layout.Widget) layout.Dimensions {
+	min := gtx.Constraints.Min
+	return b.Button.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		semantic.Button.Add(gtx.Ops)
 		return layout.Background{}.Layout(gtx,
 			func(gtx layout.Context) layout.Dimensions {
-				defer clip.UniformRRect(image.Rectangle{Max: gtx.Constraints.Min}, 4).Push(gtx.Ops).Pop()
-				background := ib.BackgroundColor
-				if gtx.Source == (input.Source{}) {
-					background = Disabled(ib.BackgroundColor)
-				} else if ib.Clickable.Hovered() || (gtx.Focused(ib.Clickable) && !ib.SkipFocus) {
-					background = ib.BackgroundColorHover
+				rr := gtx.Dp(b.CornerRadius)
+				defer clip.UniformRRect(image.Rectangle{Max: gtx.Constraints.Min}, rr).Push(gtx.Ops).Pop()
+				//background := b.Background
+				//switch {
+				//case !gtx.Enabled():
+				//	background = Disabled(b.Background)
+				//case b.Button.Hovered() || gtx.Focused(b.Button):
+				//	background = Hovered(b.Background)
+				//}
+				//paint.Fill(gtx.Ops, background)
+				for _, c := range b.Button.History() {
+					drawInk(gtx, c)
 				}
-				paint.Fill(gtx.Ops, background)
 				return layout.Dimensions{Size: gtx.Constraints.Min}
 			},
 			func(gtx layout.Context) layout.Dimensions {
-				gtx.Constraints.Min.X = gtx.Dp(ib.Size)
-				return ib.Icon.Layout(gtx, ib.Color)
+				gtx.Constraints.Min = min
+				return layout.Center.Layout(gtx, w)
 			},
 		)
 	})
 }
 
-type NavButton struct {
-	btn          widget.Clickable
-	cornerRadius unit.Dp
-	borderWidth  unit.Dp
-	borderColor  color.NRGBA
-	background   color.NRGBA
-	text         string
-}
+func drawInk(gtx layout.Context, c widget.Press) {
+	// duration is the number of seconds for the
+	// completed animation: expand while fading in, then
+	// out.
+	const (
+		expandDuration = float32(0.5)
+		fadeDuration   = float32(0.9)
+	)
 
-func NewNavButton(text string) *NavButton {
-	return &NavButton{
-		btn:          widget.Clickable{},
-		cornerRadius: 16,
-		borderWidth:  1,
-		borderColor:  Grey200,
-		background:   color.NRGBA{},
-		text:         text,
+	now := gtx.Now
+
+	t := float32(now.Sub(c.Start).Seconds())
+
+	end := c.End
+	if end.IsZero() {
+		// If the press hasn't ended, don't fade-out.
+		end = now
 	}
-}
 
-func (btn *NavButton) Layout(gtx layout.Context, th *material.Theme) layout.Dimensions {
-	return material.ButtonLayoutStyle{
-		Background:   btn.background,
-		CornerRadius: btn.cornerRadius,
-		Button:       &btn.btn,
-	}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		return widget.Border{
-			Color:        btn.borderColor,
-			Width:        btn.borderWidth,
-			CornerRadius: btn.cornerRadius,
-		}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return layout.Inset{
-				Top:    8,
-				Bottom: 8,
-				Left:   20,
-				Right:  20,
-			}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				label := material.Body1(th, btn.text)
-				return label.Layout(gtx)
-			})
-		})
-	})
+	endt := float32(end.Sub(c.Start).Seconds())
+
+	// Compute the fade-in/out position in [0;1].
+	var alphat float32
+	{
+		var haste float32
+		if c.Cancelled {
+			// If the press was cancelled before the inkwell
+			// was fully faded in, fast forward the animation
+			// to match the fade-out.
+			if h := 0.5 - endt/fadeDuration; h > 0 {
+				haste = h
+			}
+		}
+		// Fade in.
+		half1 := t/fadeDuration + haste
+		if half1 > 0.5 {
+			half1 = 0.5
+		}
+
+		// Fade out.
+		half2 := float32(now.Sub(end).Seconds())
+		half2 /= fadeDuration
+		half2 += haste
+		if half2 > 0.5 {
+			// Too old.
+			return
+		}
+
+		alphat = half1 + half2
+	}
+
+	// Compute the expand position in [0;1].
+	sizet := t
+	if c.Cancelled {
+		// Freeze expansion of cancelled presses.
+		sizet = endt
+	}
+	sizet /= expandDuration
+
+	// Animate only ended presses, and presses that are fading in.
+	if !c.End.IsZero() || sizet <= 1.0 {
+		gtx.Execute(op.InvalidateCmd{})
+	}
+
+	if sizet > 1.0 {
+		sizet = 1.0
+	}
+
+	if alphat > .5 {
+		// Start fadeout after half the animation.
+		alphat = 1.0 - alphat
+	}
+	// Twice the speed to attain fully faded in at 0.5.
+	t2 := alphat * 2
+	// Beziér ease-in curve.
+	alphaBezier := t2 * t2 * (3.0 - 2.0*t2)
+	sizeBezier := sizet * sizet * (3.0 - 2.0*sizet)
+	size := gtx.Constraints.Min.X
+	if h := gtx.Constraints.Min.Y; h > size {
+		size = h
+	}
+	// Cover the entire constraints min rectangle and
+	// apply curve values to size and color.
+	size = int(float32(size) * 2 * float32(math.Sqrt(2)) * sizeBezier)
+	alpha := 0.7 * alphaBezier
+	const col = 0.8
+	ba, bc := byte(alpha*0xff), byte(col*0xff)
+	rgba := MulAlpha(color.NRGBA{A: 0xff, R: bc, G: bc, B: bc}, ba)
+	ink := paint.ColorOp{Color: rgba}
+	ink.Add(gtx.Ops)
+	rr := size / 2
+	defer op.Offset(c.Position.Add(image.Point{
+		X: -rr,
+		Y: -rr,
+	})).Push(gtx.Ops).Pop()
+	defer clip.UniformRRect(image.Rectangle{Max: image.Pt(size, size)}, rr).Push(gtx.Ops).Pop()
+	paint.PaintOp{}.Add(gtx.Ops)
 }

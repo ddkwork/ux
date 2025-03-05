@@ -107,14 +107,14 @@ func (b *FileSelector) updateIcon() {
 		b.input.SetAfter(func(gtx layout.Context) layout.Dimensions {
 			return b.actionClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Max.X = gtx.Dp(th.Size.DefaultIconSize)
-				return DeleteIcon.Layout(gtx, th.Color.DefaultIconColor)
+				return ActionDeleteIcon.Layout(gtx, th.Color.DefaultIconColor)
 			})
 		})
 	} else {
 		b.input.SetAfter(func(gtx layout.Context) layout.Dimensions {
 			return b.actionClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Max.X = gtx.Dp(th.Size.DefaultIconSize)
-				return UploadIcon.Layout(gtx, th.Color.DefaultIconColor)
+				return FileFileUploadIcon.Layout(gtx, th.Color.DefaultIconColor)
 			})
 		})
 	}

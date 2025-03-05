@@ -19,15 +19,15 @@ func Nav(gtx layout.Context) layout.Dimensions {
 	nav := component.NewNav("Hello", "--subtitle")
 	nav.AddNavItem(component.NavItem{
 		Name: "aaaaaaaaa",
-		Icon: PlusIcon,
+		Icon: ContentAddIcon,
 	})
 	nav.AddNavItem(component.NavItem{
 		Name: "bbbb",
-		Icon: PlusIcon,
+		Icon: ContentAddIcon,
 	})
 	nav.AddNavItem(component.NavItem{
 		Name: "cccc",
-		Icon: PlusIcon,
+		Icon: ContentAddIcon,
 	})
 	resize := component.Resize{
 		Axis:  layout.Horizontal,

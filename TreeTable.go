@@ -7,6 +7,7 @@ import (
 	"image/color"
 	"io"
 	"iter"
+	"net/url"
 	"path/filepath"
 	"slices"
 	"sort"
@@ -14,6 +15,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"golang.org/x/exp/shiny/materialdesign/icons"
 
 	"gioui.org/gesture"
 	"gioui.org/io/key"
@@ -293,7 +296,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 		}.Layout(gtx, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				// 绘制层级图标-----------------------------------------------------------------------------------------------------------------
-				HierarchyInsert := layout.Inset{Left: leftIndent, Top: 0} // 层级图标居中,行高调整后这里需要下移使得图标居中
+				HierarchyInsert := layout.Inset{Left: leftIndent, Top: -1} // 层级图标居中,行高调整后这里需要下移使得图标居中
 				if !n.Container() {
 					return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return layout.Dimensions{}
@@ -304,7 +307,9 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 					if n.isOpen {
 						svg = SvgIconCircledChevronDown
 					}
-					return NewButton("", nil).SetRectIcon(true).SetIcon(svg).Layout(gtx)
+
+					return iconButtonSmall(new(widget.Clickable), svg, "").Layout(gtx)
+					// return NewButton("", nil).SetRectIcon(true).SetIcon(svg).Layout(gtx)
 				})
 			})
 		}),
@@ -501,7 +506,7 @@ func (t *TreeTable[T]) RowFrame2(gtx layout.Context, n *Node[T], rowIndex int) l
 		}.Layout(gtx, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				// 绘制层级图标-----------------------------------------------------------------------------------------------------------------
-				HierarchyInsert := layout.Inset{Left: leftIndent, Top: 0} // 层级图标居中,行高调整后这里需要下移使得图标居中
+				HierarchyInsert := layout.Inset{Left: leftIndent, Top: -1} // 层级图标居中,行高调整后这里需要下移使得图标居中
 				if !n.Container() {
 					return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return layout.Dimensions{}
@@ -512,7 +517,8 @@ func (t *TreeTable[T]) RowFrame2(gtx layout.Context, n *Node[T], rowIndex int) l
 					if n.isOpen {
 						svg = SvgIconCircledChevronDown
 					}
-					return NewButton("", nil).SetRectIcon(true).SetIcon(svg).Layout(gtx)
+					return iconButtonSmall(new(widget.Clickable), svg, "").Layout(gtx)
+					// return NewButton("", nil).SetRectIcon(true).SetIcon(svg).Layout(gtx)
 				})
 			})
 		}),
@@ -833,7 +839,7 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData, width unit.D
 			gtx.Constraints.Min = size
 			gtx.Constraints.Max = size
 			return layout.Inset{
-				Top:    topPadding,
+				Top:    topPadding + 1,
 				Bottom: 0,
 				Left:   leftPadding,
 				Right:  0,
@@ -1743,13 +1749,106 @@ func (t *TreeTable[T]) Remove(gtx layout.Context) {
 	}
 }
 
-var editNode *StructView
+// /////////////////////////////////////////////////////////
+type data[T any] struct {
+	finished bool
+	edit     *Input
+	closeBtn *widget.Clickable
+	node     *Node[T]
+	TableContext[T]
+	editNode *StructView
+}
+
+func (d *data[T]) Actions() []ViewAction {
+	icon1, _ := widget.NewIcon(icons.Action3DRotation)
+	return []ViewAction{
+		{
+			Name: "xxx",
+			Icon: icon1,
+			OnClicked: func(gtx C) {
+				fmt.Println("xxx")
+			},
+		},
+	}
+}
+
+func (d *data[T]) Layout(gtx layout.Context) layout.Dimensions {
+	for d.closeBtn.Clicked(gtx) {
+		d.finished = true
+	}
+	if d.finished {
+		return layout.Dimensions{}
+	}
+
+	return layout.Flex{
+		Axis: layout.Vertical,
+	}.Layout(gtx,
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return Button(d.closeBtn, NavigationCloseIcon, "Close").Layout(gtx)
+		}),
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			d.editNode = NewStructView(d.node.Data, func() (elems []CellData) {
+				return d.MarshalRowCells(d.node)
+			})
+			return d.editNode.Layout(gtx)
+			d.UnmarshalRowCells(d.node, d.MarshalRowCells(d.node)) // 此时节点元数据被刷新
+
+			return d.edit.Layout(gtx)
+		}),
+	)
+}
+
+func (d *data[T]) ID() ViewID {
+	return ExplorerViewID
+}
+
+func (d *data[T]) Location() url.URL {
+	return url.URL{}
+}
+
+func (d *data[T]) Title() string {
+	return "Explorer"
+}
+
+func (d *data[T]) OnFinish() {
+	d.finished = true
+}
+
+func (d *data[T]) Finished() bool {
+	return d.finished
+}
+
+var ExplorerViewID = NewViewID("FileExplorerView")
 
 func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大深度有影响
+	defer t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
+
+	//NewPrompt("Save", "Do you want to save the changes? (Tips: you can always save the changes using CMD/CTRL+s)", ModalTypeWarn,
+	//	[]Option{{Text: "Yes"}, {Text: "No"}, {Text: "Cancel"}}...,
+	//).Layout(gtx)
+
+	// return
+
+	v := ModalView{
+		View: &data[T]{
+			finished:     false,
+			edit:         NewInput("Hello, Gio"),
+			closeBtn:     new(widget.Clickable),
+			node:         t.SelectedNode.Clone(),
+			TableContext: t.TableContext,
+		},
+		Padding: layout.Inset{},
+		// Background: th.Bg,
+		MaxWidth:  unit.Dp(760),
+		MaxHeight: 0.7,
+		Radius:    unit.Dp(8),
+		Halted:    false,
+	}
+
 	// g := new(errgroup.Group)
 	// g.Go(func() error {
 	loop := func(n *Node[T]) error {
-		w := new(app.Window)
+		w := PublicWindow
 		w.Option(app.Title("edit row"))
 		th := material.NewTheme()
 		th.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
@@ -1761,11 +1860,17 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 			case app.FrameEvent:
 				gtx := app.NewContext(&ops, e)
 				BackgroundDark(gtx)
-				editNode = NewStructView(n.Data, func() (elems []CellData) {
-					return t.MarshalRowCells(n)
-				})
-				editNode.Layout(gtx)
-				t.UnmarshalRowCells(n, t.MarshalRowCells(n)) // 此时节点元数据被刷新
+
+				if v.Finished() {
+					// v.Anim().ToggleVisibility(gtx.Now)
+					// gtx.Execute(op.InvalidateCmd{})
+					// w.Perform(system.ActionClose)
+					// w.Invalidate()
+					return nil
+				}
+				v.ShowUp(gtx)
+				v.Layout(gtx)
+
 				e.Frame(gtx.Ops)
 			}
 		}
@@ -1776,7 +1881,6 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 	//todo 其实泽丽不用更新 t.updateMaxHierarchyColumnCellWidth()
 	//但如果编辑的时候把层级列的单元格文本变长就需要，递归一下maxDepth应该不会牺牲多大的性能
 	//如果编辑节点点击应用更新出现卡顿的话，判断下层级列是否被编辑来跳过执行updateMaxHierarchyColumnCellWidth提高性能
-	t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
 }
 
 func (n *Node[T]) Find() (found *Node[T]) {

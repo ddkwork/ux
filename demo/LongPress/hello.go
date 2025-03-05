@@ -1,6 +1,10 @@
 package main
 
 import (
+	"log"
+	"os"
+	"time"
+
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/text"
@@ -8,9 +12,6 @@ import (
 	"gioui.org/widget"
 	"gioui.org/x/component"
 	"gioui.org/x/outlay"
-	"log"
-	"os"
-	"time"
 
 	"gioui.org/app"
 	"gioui.org/font/gofont"
@@ -23,7 +24,7 @@ func main() {
 		w := new(app.Window)
 		app.Title("hkontroller")
 		app.Size(unit.Dp(400), unit.Dp(600))
-		//w := new(apWindow)
+		// w := new(apWindow)
 		if err := loop(w); err != nil {
 			log.Fatal(err)
 		}

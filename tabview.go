@@ -174,29 +174,29 @@ func (t *TabItem) layoutTitle(gtx C) D {
 									if t.btn.Hovered() {
 										bkColor = hoveredColor
 									}
-									iconColor := th.ContrastFg
-									closeIcon := IconClose
-									iconSize := unit.Dp(16)
+									// iconColor := th.ContrastFg
+									// closeIcon := NavigationCloseIcon
+									// iconSize := unit.Dp(16)
 									padding := unit.Dp(4)
 									if t.isDataChanged {
 										// yellow
-										iconColor = color.NRGBA{R: 0xff, G: 0xff, B: 0x00, A: 0xff}
-										closeIcon = IconCircle
-										iconSize = unit.Dp(10)
+										// iconColor = color.NRGBA{R: 0xff, G: 0xff, B: 0x00, A: 0xff}
+										NavigationCloseIcon = ImageLensIcon
+										// iconSize = unit.Dp(10)
 										padding = unit.Dp(8)
 									}
 
-									ib := &IconButton2{
-										Icon:                 closeIcon,
-										Color:                iconColor,
-										BackgroundColor:      bkColor,
-										BackgroundColorHover: hoveredColor,
-										Size:                 iconSize,
-										Clickable:            &t.CloseClickable,
-									}
+									//ib := &IconButton2{//todo
+									//	Icon:                 closeIcon,
+									//	Color:                iconColor,
+									//	BackgroundColor:      bkColor,
+									//	BackgroundColorHover: hoveredColor,
+									//	Size:                 iconSize,
+									//	Clickable:            &t.CloseClickable,
+									//}
 									return layout.UniformInset(padding).Layout(gtx,
 										func(gtx layout.Context) layout.Dimensions {
-											return ib.Layout(gtx)
+											return Button(&t.CloseClickable, NavigationCloseIcon, "").Layout(gtx)
 										},
 									)
 								}),

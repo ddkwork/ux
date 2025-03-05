@@ -119,7 +119,7 @@ func (i *Input) SetOnChanged(f func(text string)) *Input {
 func (i *Input) Password() *Input {
 	i.editor.Mask = '*'
 	i.icon, _ = widget.NewIcon(icons.ActionVisibilityOff)
-	// t.IconPosition = IconPositionEnd
+	// t.IconPositionEnd = IconPositionEnd
 	i.showPassword = false
 	return i
 }
