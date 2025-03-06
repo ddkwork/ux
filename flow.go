@@ -15,8 +15,8 @@ const inf = 1e6
 // FlowElement lays out the ith element of a Grid.
 type FlowElement func(gtx layout.Context, i int) layout.Dimensions
 
-// Flow lays out at most Num elements along the main axis.
-// The number of cross axis elements depend on the total number of elements.
+// Flow lays out at most Num filterMap along the main axis.
+// The number of cross axis filterMap depend on the total number of filterMap.
 type Flow struct {
 	Num       int
 	Axis      layout.Axis
@@ -43,7 +43,6 @@ func (g *Flow) Layout(gtx layout.Context, num int, el FlowElement) layout.Dimens
 	}
 	csMax := gtx.Constraints.Max
 	return material.List(th.Theme, g.list).Layout(gtx, (num+g.Num-1)/g.Num, func(gtx layout.Context, idx int) layout.Dimensions {
-		//return g.list.Layout(gtx, (num+g.Num-1)/g.Num, func(gtx layout.Context, idx int) layout.Dimensions {
 		if g.Axis == layout.Horizontal {
 			gtx.Constraints.Max.Y = inf
 		} else {
