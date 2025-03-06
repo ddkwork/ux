@@ -36,8 +36,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dblohm7/wingoes v0.0.0-20240820181039-f2b84150679e h1:L+XrFvD0vBIBm+Wf9sFN6aU395t7JROoai0qXZraA4U=
 github.com/dblohm7/wingoes v0.0.0-20240820181039-f2b84150679e/go.mod h1:SUxUaAK/0UG5lYyZR1L1nC4AaYYvSSYTWQSH3FPcxKU=
-github.com/ddkwork/golibrary v0.0.91-0.20250306062730-5f886ac6cff1 h1:5Hdlr9u+8jaA3wSDZLu3hGjmLxA40Ml4J+tt1dRJimg=
-github.com/ddkwork/golibrary v0.0.91-0.20250306062730-5f886ac6cff1/go.mod h1:K88fLHDlKcBxwoZNLYUFe61XSWgGM+zvJqba8xepN+E=
+github.com/ddkwork/golibrary v0.0.91-0.20250306083701-983ead031b04 h1:i5LqTlgB9Jv+y9htFwryR+WDy5xAN1NSSS2CnFEorCM=
+github.com/ddkwork/golibrary v0.0.91-0.20250306083701-983ead031b04/go.mod h1:asHnV6kPJrWJ5J2QeDZnQawJ1iroGQVifvC8+UoMaXA=
 github.com/ddkwork/ux v0.0.0-20250305200734-dcfff43b3e2b h1:P5uS95iNG7Ma4NTrntau9GqvrYcnfQ9LurSfzdupvGY=
 github.com/ddkwork/ux v0.0.0-20250305200734-dcfff43b3e2b/go.mod h1:Dp28G4Z6Py9plLuBWBbcHsM2h5axZ8hPm6Qv147PcqQ=
 github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
