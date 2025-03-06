@@ -499,7 +499,7 @@ func main() {
 			// save *image.RGBA to filePath with PNG format.
 			save := func(img *image.RGBA, path string) {
 				if stream.IsAndroid() {
-					path = filepath.Join(mylog.DataDir(), path)
+					path = filepath.Join(ux.DataDir(), path)
 				}
 				file := mylog.Check2(os.Create(path))
 				// defer mylog.Check(file.Close())//todo bug

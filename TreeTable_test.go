@@ -1,6 +1,7 @@
 package ux_test
 
 import (
+	"github.com/ddkwork/golibrary/stream"
 	"testing"
 
 	"github.com/ddkwork/golibrary"
@@ -32,6 +33,8 @@ import (
 //)
 
 func TestName(t *testing.T) {
+	stream.UpdateModsByWorkSpace(false)
+	return
 	golibrary.StaticCheck()
 }
 

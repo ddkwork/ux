@@ -933,7 +933,7 @@ const (
 	defaultRowFontSize             = unit.Sp(12)  // 行字体大小
 )
 
-func (t *TreeTable[T]) SaveDate() { // todo 支持apk数据目录 app.DataDir()
+func (t *TreeTable[T]) SaveDate() { // todo 支持apk数据目录 app.dataDir()
 	t.JsonName = strings.TrimSuffix(t.JsonName, ".json")
 	stream.MarshalJsonToFile(t.Root, filepath.Join("cache", t.JsonName+".json"))
 	stream.WriteTruncate(filepath.Join("cache", t.JsonName+".txt"), t.Document()) // 调用t.Format()

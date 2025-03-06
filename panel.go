@@ -234,7 +234,18 @@ func SaveScreenshot(callback Widget) {
 	mylog.Check(w.Screenshot(img))
 	var buf bytes.Buffer
 	mylog.Check(png.Encode(&buf, img))
-	mylog.Check(os.WriteFile(filepath.Join(mylog.DataDir(), "canvas.png"), buf.Bytes(), 0o666))
+	mylog.Check(os.WriteFile(filepath.Join(DataDir(), "canvas.png"), buf.Bytes(), 0o666))
+}
+
+func DataDir() string {
+	switch {
+	case mylog.IsAndroid():
+		return mylog.Check2(app.DataDir())
+	case mylog.IsTermux():
+		return "/data/data/com.termux/files/usr" // todo choose another dir
+	default: // windows,linux
+		return "."
+	}
 }
 
 type (
