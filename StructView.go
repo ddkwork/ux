@@ -47,7 +47,7 @@ func (s *StructView) Add(label string, widget layout.Widget) *StructView {
 }
 
 func (s *StructView) maxLabelWidth(gtx layout.Context) unit.Dp {
-	originalConstraints := gtx.Constraints
+	//originalConstraints := gtx.Constraints
 	maxWidth := unit.Dp(0)
 	for _, data := range s.keys {
 		currentWidth := LabelWidth(gtx, data)
@@ -55,7 +55,7 @@ func (s *StructView) maxLabelWidth(gtx layout.Context) unit.Dp {
 			maxWidth = currentWidth
 		}
 	}
-	gtx.Constraints = originalConstraints
+	//gtx.Constraints = originalConstraints
 	return maxWidth
 }
 

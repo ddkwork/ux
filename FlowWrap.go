@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	FlowWrap struct {
+	CardFlowWrap struct {
 		Cards []Card
 		widget.List
 		Wrap       outlay.FlowWrap
@@ -18,7 +18,7 @@ type (
 	}
 )
 
-func (gr *FlowWrap) Layout(gtx C) D {
+func (gr *CardFlowWrap) Layout(gtx C) D {
 	if !gr.Loaded {
 		gr.Wrap.Alignment = layout.Middle
 		gr.List.Axis = layout.Vertical

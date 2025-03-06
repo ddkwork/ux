@@ -528,7 +528,7 @@ func main() {
 			img := mylog.Check2(screenshot.Capture(all.Min.X, all.Min.Y, all.Dx(), all.Dy()))
 			save(img, "all.png")
 		case CardType:
-			f := &ux.FlowWrap{
+			f := &ux.CardFlowWrap{
 				Cards: nil,
 				List: widget.List{
 					Scrollbar: widget.Scrollbar{},
