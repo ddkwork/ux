@@ -21,7 +21,7 @@ type IconView struct {
 }
 
 func NewIconView() *IconView {
-	i := &IconView{
+	v := &IconView{
 		clickMap:    new(safemap.M[string, *animationButton.Button]),
 		filterInput: NewInput("请输入搜索关键字..."),
 		keyWords:    "Edi",
@@ -36,38 +36,38 @@ func NewIconView() *IconView {
 			},
 		},
 	}
-	i.filterInput.SetOnChanged(func(text string) {
-		fmt.Println("change:", i.filterInput.GetText())
-		i.keyWords = i.filterInput.GetText()
+	v.filterInput.SetOnChanged(func(text string) {
+		fmt.Println("change:", v.filterInput.GetText())
+		v.keyWords = v.filterInput.GetText()
 	})
 	for _, name := range IconMap.Keys() {
-		i.clickMap.Set(name, NewButtonAnimation(name, IconMap.GetMust(name), func(gtx layout.Context) { //todo 增加右键回调弹出菜单
+		v.clickMap.Set(name, NewButtonAnimation(name, IconMap.GetMust(name), func(gtx layout.Context) { //todo 增加右键回调弹出菜单
 			gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(name))})
 		}))
 	}
-	return i
+	return v
 }
 
-func (i *IconView) Layout(gtx layout.Context) layout.Dimensions {
-	return i.flow.Layout(gtx, i.clickMap.Len(), func(gtx layout.Context, index int) layout.Dimensions {
+func (v *IconView) Layout(gtx layout.Context) layout.Dimensions {
+	return v.flow.Layout(gtx, v.clickMap.Len(), func(gtx layout.Context, i int) layout.Dimensions {
 		gtx.Constraints.Min.X = 400
 		gtx.Constraints.Max.X = 400
-		i.filter()
-		if i.filterMap != nil {
+		v.filter()
+		if v.filterMap != nil {
 			return layout.UniformInset(4).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return i.filterMap[index](gtx)
+				return v.filterMap[i](gtx)
 			})
 		}
 		return layout.UniformInset(4).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return i.clickMap.Values()[index].Layout(gtx)
+			return v.clickMap.Values()[i].Layout(gtx)
 		})
 	})
 }
 
-func (i *IconView) filter() {
+func (v *IconView) filter() {
 	for name := range IconMap.Range() {
-		if i.keyWords == "" || strings.Contains(strings.ToLower(name), strings.ToLower(i.keyWords)) {
-			i.filterMap = append(i.filterMap, i.clickMap.GetMust(name).Layout)
+		if v.keyWords == "" || strings.Contains(strings.ToLower(name), strings.ToLower(v.keyWords)) {
+			v.filterMap = append(v.filterMap, v.clickMap.GetMust(name).Layout)
 		}
 	}
 }
