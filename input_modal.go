@@ -191,18 +191,15 @@ func (m *InputModal[T]) layout(gtx layout.Context) layout.Dimensions {
 	})
 	rows = append(rows, func(gtx layout.Context) layout.Dimensions {
 		return layout.E.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return layout.Flex{
-				Axis:      layout.Horizontal,
-				Spacing:   70,
-				Alignment: 0,
-				WeightSum: 0,
-			}.Layout(gtx,
+			return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					return Button(&m.closeBtn, NavigationCloseIcon, "Close").Layout(gtx)
 				}),
+				outlay.EmptyRigidHorizontal(10),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					return Button(&m.applyBtn, ActionAssignmentTurnedInIcon, "Apply").Layout(gtx)
 				}),
+				outlay.EmptyRigidHorizontal(10),
 			)
 		})
 	})
