@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"gioui.org/layout"
@@ -133,8 +134,20 @@ func main() {
 						{Text: fmt.Sprintf("%s", n.Data.PadTime)},
 					}
 				},
-				UnmarshalRowCells: func(n *ux.Node[packet], values []ux.CellData) {
+				UnmarshalRowCells: func(n *ux.Node[packet], values []string) {
 					mylog.Todo("unmarshal row cells for edit node")
+					n.Data = packet{
+						Scheme:        values[0],
+						Method:        values[1],
+						Host:          values[2],
+						Path:          values[3],
+						ContentType:   values[4],
+						ContentLength: mylog.Check2(strconv.Atoi(values[5])),
+						Status:        values[6],
+						Note:          values[7],
+						Process:       values[8],
+						PadTime:       mylog.Check2(time.ParseDuration(values[9])),
+					}
 				},
 				RowSelectedCallback: func() {
 					mylog.Struct("selected node", t.SelectedNode.Data)

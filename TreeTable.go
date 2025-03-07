@@ -3,11 +3,11 @@ package ux
 import (
 	_ "embed"
 	"fmt"
+	"gioui.org/app"
 	"image"
 	"image/color"
 	"io"
 	"iter"
-	"net/url"
 	"path/filepath"
 	"slices"
 	"sort"
@@ -16,20 +16,15 @@ import (
 	"sync"
 	"time"
 
-	"golang.org/x/exp/shiny/materialdesign/icons"
-
 	"gioui.org/gesture"
 	"gioui.org/io/key"
 
-	"gioui.org/app"
-	"gioui.org/font/gofont"
 	"gioui.org/io/clipboard"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
-	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"github.com/ddkwork/golibrary/mylog"
@@ -76,7 +71,7 @@ type (
 	TableContext[T any] struct {
 		ContextMenuItems       func(gtx layout.Context, n *Node[T]) (items []ContextMenuItem) // 通过SelectedNode传递给菜单的do取出元数据，比如删除文件,但是菜单是否绘制取决于当前渲染的行，所以要传递n给can
 		MarshalRowCells        func(n *Node[T]) (cells []CellData)                            // 序列化节点元数据
-		UnmarshalRowCells      func(n *Node[T], values []CellData)                            // 节点编辑后反序列化回节点
+		UnmarshalRowCells      func(n *Node[T], values []string)                              // 节点编辑后反序列化回节点
 		RowSelectedCallback    func()                                                         // 行选中回调,通过SelectedNode传递给菜单
 		RowDoubleClickCallback func()                                                         // double click callback,通过SelectedNode传递给菜单
 		LongPressCallback      func()                                                         // mobile long press callback,通过SelectedNode传递给菜单
@@ -208,37 +203,6 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		//		mylog.Struct("todo", files)
 		//	}
 		//}
-		//	table.DoubleClickCallback = func() {
-		//		rows := table.SelectedRows(false)
-		//		for i, row := range rows {
-		//			// todo icon edit
-		//			app.RunWithIco("edit row #"+fmt.Sprint(i), rowPngBuffer, func(w *unison.Window) {
-		//				content := w.Content()
-		//				nodeEditor, RowPanel := NewStructView(row.Data, func(data T) (values []CellData) {
-		//					return table.MarshalRow(row)
-		//				})
-		//				content.AddChild(nodeEditor)
-		//				content.AddChild(RowPanel)
-		//				panel := NewButtonsPanel(
-		//					[]string{
-		//						"apply", "cancel",
-		//					},
-		//					func() {
-		//						ctx.UnmarshalRow(row, nodeEditor.getFieldValues())
-		//						nodeEditor.Update(row.Data)
-		//						table.SyncToModel()
-		//						stream.MarshalJsonToFile(table.Children, ctx.JsonName+".json")
-		//						// w.Dispose()
-		//					},
-		//					func() {
-		//						w.Dispose()
-		//					},
-		//				)
-		//				RowPanel.AddChild(panel)
-		//				RowPanel.AddChild(NewVSpacer())
-		//			})
-		//		}
-		//	}
 		t.SizeColumnsToFit(gtx)
 	})
 	t.rootRows = t.Root.Children // 增删改查不一定去计算列宽导致有些节点已经删除，是空指针导致panic，所有这里需要刷新一下rootRows，不知道这里是否会内存泄漏
@@ -1750,108 +1714,38 @@ func (t *TreeTable[T]) Remove(gtx layout.Context) {
 }
 
 // /////////////////////////////////////////////////////////
-type data[T any] struct {
-	finished bool
-	edit     *Input
-	closeBtn *widget.Clickable
-	node     *Node[T]
-	TableContext[T]
-	editNode *StructView
-}
-
-func (d *data[T]) Actions() []ViewAction {
-	icon1, _ := widget.NewIcon(icons.Action3DRotation)
-	return []ViewAction{
-		{
-			Name: "xxx",
-			Icon: icon1,
-			OnClicked: func(gtx C) {
-				fmt.Println("xxx")
-			},
-		},
-	}
-}
-
-func (d *data[T]) Layout(gtx layout.Context) layout.Dimensions {
-	for d.closeBtn.Clicked(gtx) {
-		d.finished = true
-	}
-	if d.finished {
-		return layout.Dimensions{}
-	}
-
-	return layout.Flex{
-		Axis: layout.Vertical,
-	}.Layout(gtx,
-		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return Button(d.closeBtn, NavigationCloseIcon, "Close").Layout(gtx)
-		}),
-		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			d.editNode = NewStructView(d.node.Data, func() (elems []CellData) {
-				return d.MarshalRowCells(d.node)
-			})
-			return d.editNode.Layout(gtx)
-			d.UnmarshalRowCells(d.node, d.MarshalRowCells(d.node)) // 此时节点元数据被刷新
-
-			return d.edit.Layout(gtx)
-		}),
-	)
-}
-
-func (d *data[T]) ID() ViewID {
-	return ExplorerViewID
-}
-
-func (d *data[T]) Location() url.URL {
-	return url.URL{}
-}
-
-func (d *data[T]) Title() string {
-	return "Explorer"
-}
-
-func (d *data[T]) OnFinish() {
-	d.finished = true
-}
-
-func (d *data[T]) Finished() bool {
-	return d.finished
-}
-
-var ExplorerViewID = NewViewID("FileExplorerView")
 
 func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大深度有影响
 	defer t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
-
-	//NewPrompt("Save", "Do you want to save the changes? (Tips: you can always save the changes using CMD/CTRL+s)", ModalTypeWarn,
-	//	[]Option{{Text: "Yes"}, {Text: "No"}, {Text: "Cancel"}}...,
-	//).Layout(gtx)
-
-	// return
-
-	v := ModalView{
-		View: &data[T]{
-			finished:     false,
-			edit:         NewInput("Hello, Gio"),
-			closeBtn:     new(widget.Clickable),
-			node:         t.SelectedNode.Clone(),
-			TableContext: t.TableContext,
+	modal := NewInputModal("edit row", t.SelectedNode.Data, //todo merge StructView
+		func(a any) []string {
+			rowCells := t.MarshalRowCells(t.SelectedNode)
+			var rows []string
+			for _, cell := range rowCells {
+				rows = append(rows, cell.Text)
+			}
+			return rows
 		},
-		Padding: layout.Inset{},
-		// Background: th.Bg,
-		MaxWidth:  unit.Dp(760),
-		MaxHeight: 0.7,
-		Radius:    unit.Dp(8),
-		Halted:    false,
-	}
+		func(cells []string) any {
+			t.UnmarshalRowCells(t.SelectedNode, cells)
+			return t.SelectedNode.Data
+		},
+	)
+	modal.SetOnApply(func() { //todo bug ,debug it
+		t.rootRows = t.Root.Children
+		t.updateMaxHierarchyColumnCellWidth()
+		mylog.Todo("save json data ?")
+	})
 
 	// g := new(errgroup.Group)
 	// g.Go(func() error {
 	loop := func(n *Node[T]) error {
-		w := PublicWindow
-		w.Option(app.Title("edit row"))
-		th := material.NewTheme()
-		th.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
+		//w := PublicWindow
+		w := NewWindow("")
+		w.Option(
+			app.Title("edit row"),
+			app.Size(400, 600),
+		)
 		var ops op.Ops
 		for {
 			switch e := w.Event().(type) {
@@ -1860,24 +1754,14 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 			case app.FrameEvent:
 				gtx := app.NewContext(&ops, e)
 				BackgroundDark(gtx)
-
-				if v.Finished() {
-					// v.Anim().ToggleVisibility(gtx.Now)
-					// gtx.Execute(op.InvalidateCmd{})
-					// w.Perform(system.ActionClose)
-					// w.Invalidate()
-					return nil
+				if modal.Visit {
+					modal.layout(gtx)
 				}
-				v.ShowUp(gtx)
-				v.Layout(gtx)
-
 				e.Frame(gtx.Ops)
 			}
 		}
 	}
-	loop(t.SelectedNode.Clone())
-	//})
-	//mylog.Check(g.Wait())
+	loop(t.SelectedNode)
 	//todo 其实泽丽不用更新 t.updateMaxHierarchyColumnCellWidth()
 	//但如果编辑的时候把层级列的单元格文本变长就需要，递归一下maxDepth应该不会牺牲多大的性能
 	//如果编辑节点点击应用更新出现卡顿的话，判断下层级列是否被编辑来跳过执行updateMaxHierarchyColumnCellWidth提高性能

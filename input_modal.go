@@ -121,7 +121,7 @@ func RightAlignLabel(gtx layout.Context, width unit.Dp, text string) layout.Dime
 
 func (m *InputModal[T]) layout(gtx layout.Context) layout.Dimensions {
 	if m.closeBtn.Clicked(gtx) {
-		m.onClose()
+		//m.onClose()
 		m.Visit = false
 	}
 
