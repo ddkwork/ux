@@ -22,15 +22,15 @@ func NewStructView(data any, marshal func() (elems []CellData)) *StructView {
 	keys := make([]string, len(visibleFields))
 	values := make([]string, len(visibleFields))
 	elems := marshal()
-	element := make([]layout.Widget, len(visibleFields))
+	FieldRows := make([]layout.Widget, len(visibleFields))
 	for i, field := range visibleFields {
 		keys[i] = field.Name
 		values[i] = elems[i].Text
-		element[i] = NewInput(field.Name, elems[i].Text).Layout
+		FieldRows[i] = NewInput(field.Name, elems[i].Text).Layout
 	}
 	return &StructView{
 		keys:    keys,
-		element: element,
+		element: FieldRows,
 	}
 }
 

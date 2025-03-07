@@ -308,6 +308,19 @@ func LabelWidth(gtx layout.Context, text string) unit.Dp {
 	return unit.Dp(recording.Dimensions.Size.X)
 }
 
+func MaxLabelWidth(gtx layout.Context, keys []string) unit.Dp {
+	//originalConstraints := gtx.Constraints
+	maxWidth := unit.Dp(0)
+	for _, data := range keys {
+		currentWidth := LabelWidth(gtx, data) //可以使用max []unit.Dp，但是多了一层make []unit.Dp，浪费内存
+		if currentWidth > maxWidth {
+			maxWidth = currentWidth
+		}
+	}
+	//gtx.Constraints = originalConstraints
+	return maxWidth
+}
+
 type Recording struct {
 	Call       op.CallOp
 	Dimensions layout.Dimensions
