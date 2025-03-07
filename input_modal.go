@@ -190,25 +190,18 @@ func (m *InputModal[T]) layout(gtx layout.Context) layout.Dimensions {
 		return layout.Spacer{Height: unit.Dp(20)}.Layout(gtx)
 	})
 	rows = append(rows, func(gtx layout.Context) layout.Dimensions {
-		//gtx.Constraints.Min.X = 500
-		//gtx.Constraints.Max.X = 500
 		return layout.E.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return layout.Flex{
 				Axis:      layout.Horizontal,
-				Spacing:   10,
+				Spacing:   70,
 				Alignment: 0,
 				WeightSum: 0,
 			}.Layout(gtx,
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					closeBtn := Button(&m.closeBtn, NavigationCloseIcon, "Close")
-					// closeBtn.Color = theme.ButtonTextColor//todo
-					return closeBtn.Layout(gtx)
+					return Button(&m.closeBtn, NavigationCloseIcon, "Close").Layout(gtx)
 				}),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					applyBtn := Button(&m.applyBtn, ActionAssignmentTurnedInIcon, "Apply")
-					// applyBtn.Color = theme.ButtonTextColor
-					// applyBtn.Background = theme.SendButtonBgColor
-					return applyBtn.Layout(gtx)
+					return Button(&m.applyBtn, ActionAssignmentTurnedInIcon, "Apply").Layout(gtx)
 				}),
 			)
 		})
