@@ -1717,6 +1717,7 @@ func (t *TreeTable[T]) Remove(gtx layout.Context) {
 
 func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大深度有影响
 	defer t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
+	//m = nil
 	modal := NewInputModal("edit row", t.SelectedNode.Data, //todo merge StructView
 		func(a any) []string {
 			rowCells := t.MarshalRowCells(t.SelectedNode)
@@ -1736,6 +1737,8 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 		t.updateMaxHierarchyColumnCellWidth()
 		mylog.Todo("save json data ?")
 	})
+	//m = (*InputModal[any])(modal)
+	//return
 
 	// g := new(errgroup.Group)
 	// g.Go(func() error {
@@ -1744,7 +1747,7 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 		w := NewWindow("")
 		w.Option(
 			app.Title("edit row"),
-			app.Size(400, 600),
+			app.Size(600, 600),
 		)
 		var ops op.Ops
 		for {

@@ -194,7 +194,14 @@ func Run(p *Panel[Widget]) {
 				case app.FrameEvent:
 					gtx := app.NewContext(&ops, e)
 
-					p.Layout(gtx)
+					if m != nil {
+						if m.Visit {
+							m.layout(gtx)
+							gtx.Execute(op.InvalidateCmd{})
+						}
+					} else {
+						p.Layout(gtx)
+					}
 
 					//p.w.Perform(deco.Update(gtx))
 					//decorationsStyle := material.Decorations(th.Theme, &deco, ^system.Action(0), title)
@@ -214,6 +221,8 @@ func Run(p *Panel[Widget]) {
 		app.Main()
 	})
 }
+
+var m *InputModal[any]
 
 func SaveScreenshot(callback Widget) {
 	const scale = 1.5
