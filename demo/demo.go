@@ -444,65 +444,102 @@ func main() {
 				Version:     "1.1.1",
 				Website:     "https://www.baidu.com",
 				SimpleMid:   "2222-3333-4444-5555",
-				SimpleMid1:  "",
-				SimpleMid2:  "",
-				SimpleMid3:  "",
-				SimpleMid4:  "",
-				SimpleMid5:  "",
-				SimpleMid6:  "",
-				SimpleMid7:  "",
-				SimpleMid8:  "",
-				SimpleMid9:  "",
-				SimpleMid10: "",
-				SimpleMid11: "",
-				SimpleMid12: "",
-				SimpleMid13: "",
-				SimpleMid14: "",
-				SimpleMid15: "",
-				SimpleMid16: "",
-				SimpleMid17: "",
+				SimpleMid1:  "xxxx-simple-mid-1",
+				SimpleMid2:  "xxxx-simple-mid-2",
+				SimpleMid3:  "xxxx-simple-mid-3",
+				SimpleMid4:  "xxxx-simple-mid-4",
+				SimpleMid5:  "xxxx-simple-mid-5",
+				SimpleMid6:  "xxxx-simple-mid-6",
+				SimpleMid7:  "xxxx-simple-mid-7",
+				SimpleMid8:  "xxxx-simple-mid-8",
+				SimpleMid9:  "xxxx-simple-mid-9",
+				SimpleMid10: "xxxx-simple-mid-10",
+				SimpleMid11: "xxxx-simple-mid-11",
+				SimpleMid12: "xxxx-simple-mid-12",
+				SimpleMid13: "xxxx-simple-mid-13",
+				SimpleMid14: "xxxx-simple-mid-14",
+				SimpleMid15: "xxxx-simple-mid-15",
+				SimpleMid16: "xxxx-simple-mid-16",
+				SimpleMid17: "xxxx-simple-mid-17",
 			}
 
-			form := ux.NewStructView(Object{}, func() (elems []ux.CellData) {
-				return []ux.CellData{
-					{Text: object.MachineID},
-					{Text: object.RegCode},
-					{Text: object.Version},
-					{Text: object.Website},
-					{Text: object.SimpleMid},
-					{Text: object.SimpleMid1},
-					{Text: object.SimpleMid2},
-					{Text: object.SimpleMid3},
-					{Text: object.SimpleMid4},
-					{Text: object.SimpleMid5},
-					{Text: object.SimpleMid6},
-					{Text: object.SimpleMid7},
-					{Text: object.SimpleMid8},
-					{Text: object.SimpleMid9},
-					{Text: object.SimpleMid10},
-					{Text: object.SimpleMid11},
-					{Text: object.SimpleMid12},
-					{Text: object.SimpleMid13},
-					{Text: object.SimpleMid14},
-					{Text: object.SimpleMid15},
-					{Text: object.SimpleMid16},
-					{Text: object.SimpleMid17},
-				}
-			})
-			userName := ux.NewInput("please input username")
-			password := ux.NewInput("please input password")
-			email := ux.NewInput("please input email")
+			var form *ux.StructView[Object]
 
-			form.Add("username", userName.Layout)
-			form.Add("password", password.Layout)
-			form.Add("email", email.Layout)
+			form = ux.NewStructView(
+				"edit node meta data",
+				object,
+				func(a any) []string {
+					return []string{
+						object.MachineID,
+						object.RegCode,
+						object.Version,
+						object.Website,
+						object.SimpleMid,
+						object.SimpleMid1,
+						object.SimpleMid2,
+						object.SimpleMid3,
+						object.SimpleMid4,
+						object.SimpleMid5,
+						object.SimpleMid6,
+						object.SimpleMid7,
+						object.SimpleMid8,
+						object.SimpleMid9,
+						object.SimpleMid10,
+						object.SimpleMid11,
+						object.SimpleMid12,
+						object.SimpleMid13,
+						object.SimpleMid14,
+						object.SimpleMid15,
+						object.SimpleMid16,
+						object.SimpleMid17,
+					}
+				},
+				func(strings []string) any {
+					return Object{
+						MachineID:   strings[0],
+						RegCode:     strings[1],
+						Version:     strings[2],
+						Website:     strings[3],
+						SimpleMid:   strings[4],
+						SimpleMid1:  strings[5],
+						SimpleMid2:  strings[6],
+						SimpleMid3:  strings[7],
+						SimpleMid4:  strings[8],
+						SimpleMid5:  strings[9],
+						SimpleMid6:  strings[10],
+						SimpleMid7:  strings[11],
+						SimpleMid8:  strings[12],
+						SimpleMid9:  strings[13],
+						SimpleMid10: strings[14],
+						SimpleMid11: strings[15],
+						SimpleMid12: strings[16],
+						SimpleMid13: strings[17],
+						SimpleMid14: strings[18],
+						SimpleMid15: strings[19],
+						SimpleMid16: strings[20],
+						SimpleMid17: strings[21],
+					}
+				},
+			)
+			//modal.Show()
+			form.SetOnApply(func() {
+
+			})
+
+			//userName := ux.NewInput("please input username")
+			//password := ux.NewInput("please input password")
+			//email := ux.NewInput("please input email")
+
+			//form.Add("username", userName.Layout)
+			//form.Add("password", password.Layout)
+			//form.Add("email", email.Layout)
 			// dropDown := ux.NewDropDown(SuperRecovery2Type.Names()...)
 			dropDown := ux.NewDropDown()
 			for _, s := range SuperRecovery2Type.Names() {
 				dropDown.SetOptions(ux.NewDropDownOption(s))
 			}
 
-			form.InsertAt(0, "choose a app", dropDown.Layout)
+			//form.InsertAt(0, "choose a app", dropDown.Layout)
 			// form.Add("", ux.BlueButton(&clickable, "submit", unit.Dp(100)).Layout)
 			m.Set(StructViewType, form.Layout)
 		case ColorPickerType:

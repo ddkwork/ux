@@ -196,7 +196,6 @@ func Run(p *Panel[Widget]) {
 
 					if m != nil && m.Visible {
 						m.Layout(gtx)
-						//gtx.Execute(op.InvalidateCmd{})
 					}
 					p.Layout(gtx)
 
@@ -219,7 +218,7 @@ func Run(p *Panel[Widget]) {
 	})
 }
 
-var m *InputModal[any]
+var m *StructView[any]
 
 func SaveScreenshot(callback Widget) {
 	const scale = 1.5

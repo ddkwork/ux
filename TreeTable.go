@@ -67,7 +67,7 @@ type (
 		longPressed             bool                // 是否已经触发长按事件
 		widget.List                                 // 为rootRows渲染列表和滚动条
 		once                    sync.Once           // 自动计算列宽一次
-		modal                   *InputModal[T]
+		modal                   *StructView[T]
 	}
 	TableContext[T any] struct {
 		ContextMenuItems       func(gtx layout.Context, n *Node[T]) (items []ContextMenuItem) // 通过SelectedNode传递给菜单的do取出元数据，比如删除文件,但是菜单是否绘制取决于当前渲染的行，所以要传递n给can
@@ -1719,7 +1719,7 @@ func (t *TreeTable[T]) Remove(gtx layout.Context) {
 func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大深度有影响
 	defer t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
 	m = nil
-	t.modal = NewInputModal("edit row", t.SelectedNode.Data, //todo merge StructView
+	t.modal = NewStructView("edit row", t.SelectedNode.Data, //todo merge StructView
 		func(a any) []string {
 			rowCells := t.MarshalRowCells(t.SelectedNode)
 			var rows []string
@@ -1741,7 +1741,7 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 	if t.modal.Visible {
 		//t.modal.Layout(gtx)
 	}
-	m = (*InputModal[any])(t.modal)
+	m = (*StructView[any])(t.modal)
 	return
 
 	// g := new(errgroup.Group)
