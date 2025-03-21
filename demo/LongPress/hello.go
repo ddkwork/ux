@@ -119,3 +119,8 @@ func loop(w *app.Window) error {
 		}
 	}
 }
+
+type (
+	C = layout.Context
+	D = layout.Dimensions
+)
