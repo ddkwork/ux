@@ -7,6 +7,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/x/outlay"
+	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/component"
 	"log"
@@ -41,13 +42,13 @@ func loop(w *app.Window) error {
 		Options: []func(gtx C) D{
 			func(gtx C) D {
 				item := component.MenuItem(th, &tagSearchBtn, "Search")
-				item.Icon = VisibilityIcon
+				item.Icon = ux.ActionVisibilityIcon
 				item.Hint = component.MenuHintText(th, "")
 				return item.Layout(gtx)
 			},
 			func(gtx C) D {
 				item := component.MenuItem(th, &tagRemoveBtn, "Remove")
-				item.Icon = EditIcon
+				item.Icon = ux.ContentCreateIcon
 				item.Hint = component.MenuHintText(th, "")
 				return item.Layout(gtx)
 			},
