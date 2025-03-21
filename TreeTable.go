@@ -3,7 +3,6 @@ package ux
 import (
 	_ "embed"
 	"fmt"
-	"gioui.org/app"
 	"image"
 	"image/color"
 	"io"
@@ -67,7 +66,6 @@ type (
 		longPressed             bool                // 是否已经触发长按事件
 		widget.List                                 // 为rootRows渲染列表和滚动条
 		once                    sync.Once           // 自动计算列宽一次
-		modal                   *StructView[T]
 	}
 	TableContext[T any] struct {
 		ContextMenuItems       func(gtx layout.Context, n *Node[T]) (items []ContextMenuItem) // 通过SelectedNode传递给菜单的do取出元数据，比如删除文件,但是菜单是否绘制取决于当前渲染的行，所以要传递n给can
@@ -1719,7 +1717,7 @@ func (t *TreeTable[T]) Remove(gtx layout.Context) {
 func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大深度有影响
 	defer t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
 	m = nil
-	t.modal = NewStructView("edit row", t.SelectedNode.Data, //todo merge StructView
+	modal := NewStructView("edit row", t.SelectedNode.Data, //todo merge StructView
 		func(a any) []string {
 			rowCells := t.MarshalRowCells(t.SelectedNode)
 			var rows []string
@@ -1733,40 +1731,12 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 			return t.SelectedNode.Data
 		},
 	)
-	t.modal.SetOnApply(func() { //todo bug ,debug it
+	modal.SetOnApply(func() { //todo bug ,debug it
 		t.rootRows = t.Root.Children
 		t.updateMaxHierarchyColumnCellWidth()
 		mylog.Todo("save json data ?")
 	})
-	if t.modal.Visible {
-		//t.modal.Layout(gtx)
-	}
-	m = (*StructView[any])(t.modal)
-	return
-
-	// g := new(errgroup.Group)
-	// g.Go(func() error {
-	loop := func(n *Node[T]) error {
-		//w := PublicWindow
-		w := NewWindow("")
-		w.Option(
-			app.Title("edit row"),
-			app.Size(600, 600),
-		)
-		var ops op.Ops
-		for {
-			switch e := w.Event().(type) {
-			case app.DestroyEvent:
-				return e.Err
-			case app.FrameEvent:
-				gtx := app.NewContext(&ops, e)
-				BackgroundDark(gtx)
-				t.modal.Layout(gtx)
-				e.Frame(gtx.Ops)
-			}
-		}
-	}
-	loop(t.SelectedNode)
+	m = (*StructView[any])(modal)
 	//todo 其实泽丽不用更新 t.updateMaxHierarchyColumnCellWidth()
 	//但如果编辑的时候把层级列的单元格文本变长就需要，递归一下maxDepth应该不会牺牲多大的性能
 	//如果编辑节点点击应用更新出现卡顿的话，判断下层级列是否被编辑来跳过执行updateMaxHierarchyColumnCellWidth提高性能
