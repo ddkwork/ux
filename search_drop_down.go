@@ -14,7 +14,7 @@ import (
 )
 
 type SearchDropDown struct {
-	menuContextArea ContextArea
+	menuContextArea component.ContextArea
 	list            *widget.List
 
 	listStyle material.ListStyle
@@ -30,7 +30,7 @@ type SearchDropDown struct {
 func NewSearchDropDown() *SearchDropDown {
 	c := &SearchDropDown{
 		input: NewTextField("", "Search..."),
-		menuContextArea: ContextArea{
+		menuContextArea: component.ContextArea{
 			Activation:       pointer.ButtonPrimary,
 			AbsolutePosition: true,
 		},
