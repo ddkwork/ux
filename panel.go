@@ -151,7 +151,7 @@ func drawImageBackground(gtx layout.Context) {
 
 // //////////////////////////////////
 
-var ModalMapCallback = new(safemap.M[string, func()])
+var ModalCallbacks = new(safemap.M[string, func()])
 
 func NewWindow(title string) *app.Window {
 	w := new(app.Window)
@@ -195,7 +195,7 @@ func Run(p *Panel[Widget]) {
 				//	title = e.Config.Title
 				case app.FrameEvent:
 					gtx := app.NewContext(&ops, e)
-					for _, v := range ModalMapCallback.Range() {
+					for _, v := range ModalCallbacks.Range() {
 						v()
 					}
 					p.Layout(gtx)
