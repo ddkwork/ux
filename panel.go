@@ -197,9 +197,8 @@ func Run(p *Panel[Widget]) {
 					if m != nil && m.Visible {
 						m.Layout(gtx)
 						//gtx.Execute(op.InvalidateCmd{})
-					} else {
-						p.Layout(gtx)
 					}
+					p.Layout(gtx)
 
 					//p.w.Perform(deco.Update(gtx))
 					//decorationsStyle := material.Decorations(th.Theme, &deco, ^system.Action(0), title)
