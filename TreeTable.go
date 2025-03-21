@@ -746,25 +746,6 @@ func (t *TreeTable[T]) drawContextArea(gtx C, menuState *component.MenuState) D 
 	})
 }
 
-/*
-	var LongPressDuration time.Duration = 250 * time.Millisecond
-
-			case gesture.KindPress:
-		i.pressStarted = gtx.Now
-
-		if !i.longPressed && i.pressing && gtx.Now.Sub(i.pressStarted) > LongPressDuration {
-			i.longPressed = true
-			return Event{Type: LongPress}, true
-		}
-
-	所以合理的方案是patch官方的contextAreas和gtx的input source代码，支持长按事件
-
-			// todo 根据gioview的作者提示，安卓上需要过滤长按手势事件实现如下:
-	// 计算pointer Press到Release的持续时长就可以了，Gio在处理触摸事件和鼠标事件是统一的，
-	// 安卓应该也是一致的处理方式，只是event Source变成了Touch。
-	// 需要制作一个过滤touch事件的apk测试
-*/
-
 func (t *TreeTable[T]) IsRowSelected() bool { return t.SelectedNode != nil }
 
 func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData, width unit.Dp, isHeader bool, inset layout.Inset) layout.Dimensions {
