@@ -2,6 +2,7 @@ package ux
 
 import (
 	"bytes"
+	"github.com/ddkwork/golibrary/safemap"
 	"image"
 	"image/color"
 	"image/draw"
@@ -149,7 +150,8 @@ func drawImageBackground(gtx layout.Context) {
 }
 
 // //////////////////////////////////
-var PublicWindow *app.Window
+
+var ModalMapCallback = new(safemap.M[string, func()])
 
 func NewWindow(title string) *app.Window {
 	w := new(app.Window)
@@ -193,9 +195,8 @@ func Run(p *Panel[Widget]) {
 				//	title = e.Config.Title
 				case app.FrameEvent:
 					gtx := app.NewContext(&ops, e)
-
-					if m != nil && m.Visible {
-						m.Layout(gtx)
+					for _, v := range ModalMapCallback.Range() {
+						v()
 					}
 					p.Layout(gtx)
 
@@ -217,8 +218,6 @@ func Run(p *Panel[Widget]) {
 		app.Main()
 	})
 }
-
-var m *StructView[any]
 
 func SaveScreenshot(callback Widget) {
 	const scale = 1.5

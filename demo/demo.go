@@ -33,7 +33,6 @@ func main() {
 	// 这种本地起文件服务的方式对方下载很快
 
 	w := ux.NewWindow("gio demo")
-	ux.PublicWindow = w
 	panel := ux.NewPanel(w)
 
 	hPanel := ux.NewHPanel(w)
