@@ -2,7 +2,6 @@ package ux
 
 import (
 	"gioui.org/layout"
-	"gioui.org/op"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/x/outlay"
@@ -10,7 +9,9 @@ import (
 	"github.com/ddkwork/golibrary/safemap"
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/component"
+	"image/color"
 	"reflect"
+	"time"
 )
 
 // 相当于StructView，formView，但是他是绑定结构体的
@@ -38,13 +39,12 @@ type InputModal[T any] struct { //其实就是一个标题row+list滚动多个ro
 	applyBtn widget.Clickable
 	closeBtn widget.Clickable
 	onApply  func()
-	onClose  func()
 
 	unmarshal unmarshalFun //反序列化函数，用于将输入框的值反序列化成结构体
 
 	widget.List //滚动所有行
-
-	Visit bool //是否显示模态窗口
+	*component.ModalState
+	Visible bool
 }
 
 type marshalFun func(any) []string
@@ -73,13 +73,14 @@ func NewInputModal[T any](title string, object T, marshal marshalFun, unmarshal 
 	for k, v := range visibleFields.Range() {
 		FieldRows.Set(k+"：", NewInput(v))
 	}
+	//modalLayer := component.NewModal()
+	const defaultModalAnimationDuration = time.Millisecond * 250
 	return &InputModal[T]{
 		Title:     title,
 		rows:      FieldRows,
 		applyBtn:  widget.Clickable{},
 		closeBtn:  widget.Clickable{},
 		onApply:   nil, //用于刷新编辑够的节点元数据
-		onClose:   nil,
 		unmarshal: unmarshal,
 		List: widget.List{
 			Scrollbar: widget.Scrollbar{},
@@ -89,18 +90,21 @@ func NewInputModal[T any](title string, object T, marshal marshalFun, unmarshal 
 				Position:    layout.Position{},
 			},
 		},
-		Visit: true, //默认显示，点击关闭按钮后变为false隐藏渲染
+		ModalState: &component.ModalState{
+			ScrimState: component.ScrimState{
+				Clickable: widget.Clickable{},
+				VisibilityAnimation: component.VisibilityAnimation{
+					Duration: defaultModalAnimationDuration,
+					//State:    component.Invisible,
+					//Started:  gtx.Now,
+				},
+			},
+		},
+		Visible: true,
 	}
 }
 
-func (m *InputModal[T]) SetOnClose(f func()) { m.onClose = f }
 func (m *InputModal[T]) SetOnApply(f func()) { m.onApply = f }
-func (m *InputModal[T]) Layout(gtx layout.Context) layout.Dimensions {
-	ops := op.Record(gtx.Ops)
-	dims := m.layout(gtx)
-	defer op.Defer(gtx.Ops, ops.Stop())
-	return dims
-}
 
 // RightAlignLabel keygen需要一个下拉框select,form表单, structView, input都可以用这个方法右对齐label
 func RightAlignLabel(gtx layout.Context, width unit.Dp, text string) layout.Dimensions { //布局label右对齐文本
@@ -119,10 +123,9 @@ func RightAlignLabel(gtx layout.Context, width unit.Dp, text string) layout.Dime
 	)
 }
 
-func (m *InputModal[T]) layout(gtx layout.Context) layout.Dimensions {
+func (m *InputModal[T]) Layout(gtx layout.Context) layout.Dimensions {
 	if m.closeBtn.Clicked(gtx) {
-		//m.onClose()
-		m.Visit = false
+		m.Visible = false
 	}
 
 	if m.onApply != nil && m.applyBtn.Clicked(gtx) {
@@ -130,8 +133,8 @@ func (m *InputModal[T]) layout(gtx layout.Context) layout.Dimensions {
 	}
 
 	border := widget.Border{
-		Color:        th.BorderBlueColor,
-		CornerRadius: unit.Dp(4),
+		Color:        color.NRGBA{R: 0xFD, G: 0xB5, B: 0x0E, A: 0xFF},
+		CornerRadius: unit.Dp(18),
 		Width:        unit.Dp(1),
 	}
 
@@ -206,13 +209,17 @@ func (m *InputModal[T]) layout(gtx layout.Context) layout.Dimensions {
 
 	return layout.Inset{Top: unit.Dp(80)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return component.NewModalSheet(component.NewModal()).Layout(gtx, th.Theme, &component.VisibilityAnimation{}, func(gtx layout.Context) layout.Dimensions {
+			m.ModalState.Show(gtx.Now, func(gtx layout.Context) layout.Dimensions {
 				return layout.UniformInset(unit.Dp(15)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					return material.List(th.Theme, &m.List).Layout(gtx, len(rows), func(gtx layout.Context, index int) layout.Dimensions {
 						return rows[index](gtx)
 					})
 				})
 			})
+			return component.ModalStyle{
+				ModalState: m.ModalState,
+				Scrim:      component.NewScrim(th.Theme, &m.ModalState.ScrimState, 10),
+			}.Layout(gtx)
 		})
 	})
 }

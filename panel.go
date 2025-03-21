@@ -194,11 +194,9 @@ func Run(p *Panel[Widget]) {
 				case app.FrameEvent:
 					gtx := app.NewContext(&ops, e)
 
-					if m != nil {
-						if m.Visit {
-							m.layout(gtx)
-							gtx.Execute(op.InvalidateCmd{})
-						}
+					if m != nil && m.Visible {
+						m.Layout(gtx)
+						//gtx.Execute(op.InvalidateCmd{})
 					} else {
 						p.Layout(gtx)
 					}
