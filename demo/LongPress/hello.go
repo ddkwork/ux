@@ -1,21 +1,19 @@
 package main
 
 import (
-	"log"
-	"os"
-	"time"
-
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/x/component"
 	"gioui.org/x/outlay"
+	"github.com/ddkwork/ux/widget/material"
+	"github.com/ddkwork/ux/x/component"
+	"log"
+	"os"
 
 	"gioui.org/app"
 	"gioui.org/font/gofont"
-	"gioui.org/widget/material"
 )
 
 // https://github.com/hkontrol/hkapp
@@ -84,11 +82,7 @@ func loop(w *app.Window) error {
 		"wwwwww",
 	}
 	tagClickables := make([]widget.Clickable, len(selectedAccTags))
-	tagCtxAreas := make([]ContextArea, len(selectedAccTags))
-	for i := range tagCtxAreas {
-		tagCtxAreas[i].LongPressDuration = 500 * time.Millisecond
-	}
-
+	tagCtxAreas := make([]component.ContextArea, len(selectedAccTags))
 	var ops op.Ops
 	for {
 		switch e := w.Event().(type) {
@@ -101,6 +95,7 @@ func loop(w *app.Window) error {
 				Alignment: 0,
 			}.Layout(gtx, len(selectedAccTags), func(gtx layout.Context, i int) layout.Dimensions {
 				state := &tagCtxAreas[i]
+
 				return layout.Stack{}.Layout(gtx,
 					layout.Stacked(func(gtx C) D {
 						return layout.UniformInset(unit.Dp(2)).Layout(gtx, func(gtx C) D {

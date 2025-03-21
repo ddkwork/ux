@@ -988,23 +988,10 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 
 				switch e.Buttons {
 				case pointer.ButtonPrimary:
-					/*
-						var LongPressDuration time.Duration = 250 * time.Millisecond
-
-								case gesture.KindPress:
-							i.pressStarted = gtx.Now
-
-							if !i.longPressed && i.pressing && gtx.Now.Sub(i.pressStarted) > LongPressDuration {
-								i.longPressed = true
-								return Event{Type: LongPress}, true
-							}
-
-						所以合理的方案是patch官方的contextAreas和gtx的input source代码，支持长按事件
-					*/
-					//todo模拟长按事件并给上下文区域增加长按事件来支持移动平台，body也要模拟，以及代码编辑器也要支持右键和长按弹出复制选中文本到剪切板的功能
 				case pointer.ButtonSecondary:
 					if e.Kind == pointer.Press {
 						t.header.clickedColumnIndex = i
+						t.header.contextAreas[i].Show()
 					}
 				}
 			}

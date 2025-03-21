@@ -269,3 +269,8 @@ func (r *ContextArea) Dismissed() bool {
 	}()
 	return r.justDismissed
 }
+
+func (r *ContextArea) Show() {
+	r.active = true
+	r.justActivated = true
+}

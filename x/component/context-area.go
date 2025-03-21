@@ -20,6 +20,9 @@ import (
 // widget is overlaid using an op.DeferOp. The contextual widget
 // can be dismissed by primary-clicking within or outside of it.
 type ContextArea struct {
+	LongPressDuration time.Duration
+	activationTimer   *time.Timer
+
 	lastUpdate    time.Time
 	position      f32.Point
 	dims          D
@@ -43,6 +46,14 @@ type ContextArea struct {
 	// position the contextual widget without it overflowing the edge of
 	// the window.
 	PositionHint layout.Direction
+}
+
+func (r *ContextArea) Activate(p f32.Point) {
+	r.active = true
+	r.justActivated = true
+	if !r.AbsolutePosition {
+		r.position = p
+	}
 }
 
 // Update performs event processing for the context area but does not lay it out.
@@ -87,12 +98,25 @@ func (r *ContextArea) Update(gtx C) {
 				}
 			}
 		}
-		if e.Buttons.Contain(r.Activation) && e.Kind == pointer.Press {
-			r.active = true
-			r.justActivated = true
-			if !r.AbsolutePosition {
-				r.position = e.Position
+		if (e.Buttons.Contain(pointer.ButtonPrimary) && e.Kind == pointer.Press) ||
+			(e.Source == pointer.Touch && e.Kind == pointer.Press) {
+			if r.activationTimer != nil {
+				r.activationTimer.Stop()
 			}
+			if r.LongPressDuration == 0 {
+				r.LongPressDuration = 500 * time.Millisecond
+			}
+			r.activationTimer = time.AfterFunc(r.LongPressDuration, func() {
+				r.Activate(e.Position)
+			})
+		}
+		if e.Kind == pointer.Release {
+			if r.activationTimer != nil {
+				r.activationTimer.Stop()
+			}
+		}
+		if e.Buttons.Contain(r.Activation) && e.Kind == pointer.Press {
+			r.Activate(e.Position)
 		}
 	}
 
@@ -246,4 +270,9 @@ func (r *ContextArea) Dismissed() bool {
 		r.justDismissed = false
 	}()
 	return r.justDismissed
+}
+
+func (r *ContextArea) Show() {
+	r.active = true
+	r.justActivated = true
 }

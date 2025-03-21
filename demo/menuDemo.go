@@ -19,7 +19,7 @@ type MenuObj struct {
 	menuState                                component.MenuState
 	menuInit                                 bool
 	menuDemoList                             widget.List
-	contextAreas                             []component.ContextArea
+	contextAreas                             []*component.ContextArea
 	widget.List
 }
 
@@ -34,6 +34,7 @@ type (
 )
 
 func (p *MenuObj) Layout(gtx layout.Context) layout.Dimensions {
+
 	// paint.Fill(gtx.Ops, color.NRGBA(Grey800))
 	if !p.menuInit {
 		p.menuState = component.MenuState{
@@ -73,15 +74,16 @@ func (p *MenuObj) Layout(gtx layout.Context) layout.Dimensions {
 			p.menuDemoList.Axis = layout.Vertical
 			return material.List(ux.ThemeDefault().Theme, &p.menuDemoList).Layout(gtx, 30, func(gtx C, index int) D {
 				if len(p.contextAreas) < index+1 {
-					p.contextAreas = append(p.contextAreas, component.ContextArea{})
+					p.contextAreas = append(p.contextAreas, &component.ContextArea{})
 				}
-				contextArea := &p.contextAreas[index]
+				contextArea := p.contextAreas[index]
 				return layout.Stack{}.Layout(gtx,
 					layout.Stacked(func(gtx C) D {
 						gtx.Constraints.Min.X = gtx.Constraints.Max.X
 						return layout.UniformInset(unit.Dp(8)).Layout(gtx, material.Body1(ux.ThemeDefault().Theme, fmt.Sprintf("Item %d", index)).Layout)
 					}),
 					layout.Expanded(func(gtx C) D {
+
 						return contextArea.Layout(gtx, func(gtx C) D {
 							gtx.Constraints.Min.X = 0
 							return p.drawContextArea(gtx, ux.ThemeDefault().Theme)
