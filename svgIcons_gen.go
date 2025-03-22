@@ -2,11 +2,10 @@ package ux
 
 import (
 	"embed"
-	"strings"
-
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/ux/giosvg"
+	"strings"
 )
 
 func Svg2Icon(b []byte) *giosvg.Icon {
@@ -15,7 +14,7 @@ func Svg2Icon(b []byte) *giosvg.Icon {
 
 func svgCallback(value []byte) []byte {
 	if strings.Contains(string(value), "fill=\"none\"") {
-		// return []byte(strings.Replace(string(value), "fill=\"none\"", "fill=\"white\"", 1))
+		//return []byte(strings.Replace(string(value), "fill=\"none\"", "fill=\"white\"", 1))
 	}
 	return []byte(strings.Replace(string(value), "<path", "<path fill=\"white\"", 1))
 }
@@ -25,7 +24,6 @@ func svgCallback(value []byte) []byte {
 //
 //go:embed resources/images/*.svg
 var images embed.FS
-
 var (
 	svgEmbedFileMap                = stream.ReadEmbedFileMap(images, "resources/images")
 	SvgIconBookmark                = Svg2Icon(svgEmbedFileMap.GetMustCallback("Bookmark.svg", svgCallback))
@@ -54,6 +52,7 @@ var (
 	SvgIconClone                   = Svg2Icon(svgEmbedFileMap.GetMustCallback("clone.svg", svgCallback))
 	SvgIconClosedFolder            = Svg2Icon(svgEmbedFileMap.GetMustCallback("closed_folder.svg", svgCallback))
 	SvgIconCoins                   = Svg2Icon(svgEmbedFileMap.GetMustCallback("coins.svg", svgCallback))
+	SvgIconContentPasteTwotone     = Svg2Icon(svgEmbedFileMap.GetMustCallback("content_paste_twotone.svg", svgCallback))
 	SvgIconCopy                    = Svg2Icon(svgEmbedFileMap.GetMustCallback("copy.svg", svgCallback))
 	SvgIconDash                    = Svg2Icon(svgEmbedFileMap.GetMustCallback("dash.svg", svgCallback))
 	SvgIconDatabase                = Svg2Icon(svgEmbedFileMap.GetMustCallback("database.svg", svgCallback))

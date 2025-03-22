@@ -1,13 +1,5 @@
 package ux_test
 
-import (
-	"testing"
-
-	"github.com/ddkwork/golibrary/stream"
-
-	"github.com/ddkwork/golibrary"
-)
-
 //
 //import (
 //	"fmt"
@@ -33,11 +25,11 @@ import (
 //	"github.com/ddkwork/ux"
 //)
 
-func TestName(t *testing.T) {
-	stream.UpdateModsByWorkSpace(false)
-	return
-	golibrary.StaticCheck()
-}
+//func TestName(t *testing.T) {
+//	stream.UpdateModsByWorkSpace(false)
+//	return
+//	golibrary.StaticCheck()
+//}
 
 //func BenchmarkTransposeMatrix(b *testing.B) {
 //	columnCells := ux.InitHeader(packet{})

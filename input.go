@@ -326,11 +326,11 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 											Clickable:     widget.Clickable{},
 										},
 										{
-											Title: "parse",
-											Icon:  SvgIconPrevious,
+											Title: "paste",
+											Icon:  SvgIconContentPasteTwotone,
 											Can:   func() bool { return true },
 											Do: func() {
-												mylog.Todo("get clipboard text and parse")
+												mylog.Todo("get clipboard text and paste")
 												//gtx.Execute(clipboard.ReadCmd{Data: io.NopCloser(strings.NewReader(i.editor.SelectedText()))})
 												//i.editor.SetText(clipboard.ReadCmd{})
 											},
@@ -340,7 +340,7 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 
 										{
 											Title:         "clean",
-											Icon:          SvgIconDash,
+											Icon:          SvgIconTrash,
 											Can:           func() bool { return true },
 											Do:            func() { i.editor.SetText("") },
 											AppendDivider: false,
