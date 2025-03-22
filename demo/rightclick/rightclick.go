@@ -1,7 +1,8 @@
 package main
 
 import (
-	"demo/rightclick/anchor"
+	"fmt"
+	"gioui.org/f32"
 	"gioui.org/io/event"
 	"gioui.org/op/clip"
 	"gioui.org/text"
@@ -25,13 +26,82 @@ type (
 	D = layout.Dimensions
 )
 
+// Anchor is an opaque reference to a global coordinate position.
+// It can be provided to methods in this package as a reference
+// to a global coordinate.
+type Anchor struct {
+	point f32.Point
+}
+
+// AnchorFrom wraps an f32.Point within an Anchor, preventing the
+// coordinates within from being used in any way other than determining
+// an offset using the OffsetWithin method.
+func AnchorFrom(point f32.Point) Anchor {
+	return Anchor{point}
+}
+
+// String is provided for debugging purposes.
+func (a Anchor) String() string {
+	return fmt.Sprintf("anchor (%f,%f)", a.point.X, a.point.Y)
+}
+
+// OffsetWithin returns an offset that will allow a widget of size contentSize
+// to be rendered within the provided bounds. The offset is as close as possible
+// to the coordinates wrapped within the
+func (a Anchor) OffsetWithin(contentSize, bounds f32.Point) f32.Point {
+	var offset = a.point
+	if contentSize.X+a.point.X > bounds.X {
+		offset.X = bounds.X - contentSize.X
+	}
+	if contentSize.Y+a.point.Y > bounds.Y {
+		offset.Y = bounds.Y - contentSize.Y
+	}
+	return offset
+}
+
+type Overlay struct {
+	items []overlayItem
+}
+
+type overlayItem struct {
+	Anchor
+	layout.Widget
+}
+
+func (o *Overlay) LayoutAt(anchor Anchor, widget layout.Widget) {
+	o.items = append(o.items, overlayItem{Anchor: anchor, Widget: widget})
+}
+
+func (o *Overlay) Layout(gtx layout.Context) layout.Dimensions {
+	for _, item := range o.items {
+		macro := op.Record(gtx.Ops)
+		dims := item.Widget(gtx)
+		call := macro.Stop()
+
+		offset := item.OffsetWithin(layout.FPt(dims.Size), layout.FPt(gtx.Constraints.Max))
+		func(item overlayItem) {
+			defer op.TransformOp{}.Push(gtx.Ops).Pop()
+			//defer op.Push(gtx.Ops).Pop()
+			op.Offset(image.Point{
+				X: int(offset.X),
+				Y: int(offset.Y),
+			}).Add(gtx.Ops)
+			call.Add(gtx.Ops)
+		}(item)
+	}
+	o.items = o.items[:0]
+	return layout.Dimensions{
+		Size: gtx.Constraints.Max,
+	}
+}
+
 // RightClickArea wraps a widget and provides a right-click context menu
 type RightClickArea struct {
 	// Content is the actual right-clickable widget
 	Content layout.Widget
 	// Menu is the widget that should be rendered as a right-click context menu
 	Menu layout.Widget
-	*anchor.Anchor
+	*Anchor
 	*Overlay
 	leftPressed *pointer.ID
 }
@@ -80,7 +150,7 @@ func (r *RightClickArea) CloseMenu() {
 // Layout renders the clickable area and configures its overlay.
 func (r *RightClickArea) Layout(gtx C) D {
 	//defer op.Push(gtx.Ops).Pop()
-
+	//defer op.TransformOp{}.Push(gtx.Ops).Pop()
 	for {
 		ev, ok := gtx.Event(pointer.Filter{
 			Target: r,
@@ -96,7 +166,7 @@ func (r *RightClickArea) Layout(gtx C) D {
 		if e.Buttons.Contain(pointer.ButtonSecondary) {
 			switch e.Kind {
 			case pointer.Press, pointer.Drag:
-				anchor := anchor.AnchorFrom(e.Position)
+				anchor := AnchorFrom(e.Position)
 				r.Anchor = &anchor
 				log.Print(anchor)
 			case pointer.Cancel:
@@ -133,7 +203,7 @@ func (r *RightClickArea) Layout(gtx C) D {
 
 	}
 	if r.Anchor != nil {
-		r.Overlay.LayoutAt(anchor.Anchor{}, r.LayoutUnderlay)
+		r.Overlay.LayoutAt(Anchor{}, r.LayoutUnderlay)
 		r.Overlay.LayoutAt(*r.Anchor, r.Menu)
 	}
 	dims := r.Content(gtx)
