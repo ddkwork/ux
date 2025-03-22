@@ -2,6 +2,7 @@ package main
 
 import (
 	"demo/rightclick/anchor"
+	"gioui.org/io/event"
 	"gioui.org/op/clip"
 	"gioui.org/text"
 	"image"
@@ -44,19 +45,28 @@ func (r *RightClickArea) LayoutUnderlay(gtx C) D {
 	pointer.PassOp{}.Push(gtx.Ops)
 	//pointer.Rect(image.Rectangle{Max: gtx.Constraints.Max}).Add(gtx.Ops)
 	clip.Rect{Max: gtx.Constraints.Max}.Push(gtx.Ops)
-	pointer.InputOp{
-		Tag:   &r.leftPressed,
-		Types: pointer.Press | pointer.Release,
-	}.Add(gtx.Ops)
+	//pointer.InputOp{
+	//	Tag:   &r.leftPressed,
+	//	Types: pointer.Press | pointer.Release,
+	//}.Add(gtx.Ops)
 
-	gtx.Event()
-
-	pointer.Filter{
-		Target:  nil,
-		Kinds:   0,
-		ScrollX: pointer.ScrollRange{},
-		ScrollY: pointer.ScrollRange{},
-	}.ImplementsFilter()
+	for {
+		ev, ok := gtx.Event(pointer.Filter{
+			Target: &r.leftPressed,
+			Kinds:  pointer.Press | pointer.Release,
+		})
+		if !ok {
+			break
+		}
+		e, ok := ev.(pointer.Event)
+		if !ok {
+			continue
+		}
+		if e.Kind == pointer.Press {
+			//r.Dismiss()//todo
+			event.Op(gtx.Ops, r) //?
+		}
+	}
 
 	return D{Size: gtx.Constraints.Max}
 }
@@ -69,51 +79,66 @@ func (r *RightClickArea) CloseMenu() {
 
 // Layout renders the clickable area and configures its overlay.
 func (r *RightClickArea) Layout(gtx C) D {
-	defer op.Push(gtx.Ops).Pop()
+	//defer op.Push(gtx.Ops).Pop()
 
-	for _, event := range gtx.Events(r) {
-		if event, ok := event.(pointer.Event); ok {
-			if event.Buttons.Contain(pointer.ButtonRight) {
-				switch event.Type {
-				case pointer.Press, pointer.Drag:
-					anchor := event.AbsolutePosition
-					r.Anchor = &anchor
-					log.Print(anchor)
-				case pointer.Cancel:
-					r.Anchor = nil
-				}
+	for {
+		ev, ok := gtx.Event(pointer.Filter{
+			Target: r,
+			Kinds:  pointer.Press | pointer.Release | pointer.Drag,
+		})
+		if !ok {
+			break
+		}
+		e, ok := ev.(pointer.Event)
+		if !ok {
+			continue
+		}
+		if e.Buttons.Contain(pointer.ButtonSecondary) {
+			switch e.Kind {
+			case pointer.Press, pointer.Drag:
+				anchor := anchor.AnchorFrom(e.Position)
+				r.Anchor = &anchor
+				log.Print(anchor)
+			case pointer.Cancel:
+				r.Anchor = nil
 			}
 		}
 	}
-	for _, event := range gtx.Events(&r.leftPressed) {
-		if event, ok := event.(pointer.Event); ok {
-			switch event.Type {
-			case pointer.Press:
-				if event.Buttons.Contain(pointer.ButtonLeft) {
-					id := event.PointerID
-					r.leftPressed = &id
-				}
-			case pointer.Release, pointer.Cancel:
-				if r.leftPressed != nil && event.PointerID == *r.leftPressed {
-					log.Println("left", event)
-					r.Anchor = nil
-					r.leftPressed = nil
-				}
+
+	for {
+		ev, ok := gtx.Event(pointer.Filter{
+			Target: &r.leftPressed,
+			Kinds:  pointer.Press | pointer.Release | pointer.Drag,
+		})
+		if !ok {
+			break
+		}
+		e, ok := ev.(pointer.Event)
+		if !ok {
+			continue
+		}
+		switch e.Kind {
+		case pointer.Press, pointer.Drag:
+			if e.Buttons.Contain(pointer.ButtonPrimary) {
+				id := e.PointerID
+				r.leftPressed = &id
+			}
+		case pointer.Release, pointer.Cancel:
+			if r.leftPressed != nil && e.PointerID == *r.leftPressed {
+				log.Println("left", e)
+				r.Anchor = nil
+				r.leftPressed = nil
 			}
 		}
+
 	}
 	if r.Anchor != nil {
 		r.Overlay.LayoutAt(anchor.Anchor{}, r.LayoutUnderlay)
 		r.Overlay.LayoutAt(*r.Anchor, r.Menu)
 	}
 	dims := r.Content(gtx)
-
-	pointer.PassOp{Pass: true}.Add(gtx.Ops)
-	pointer.Rect(image.Rectangle{Max: dims.Size}).Add(gtx.Ops)
-	pointer.InputOp{
-		Tag:   r,
-		Types: pointer.Press | pointer.Release | pointer.Drag,
-	}.Add(gtx.Ops)
+	pointer.PassOp{}.Push(gtx.Ops)
+	clip.Rect(image.Rectangle{Max: dims.Size}).Push(gtx.Ops)
 	return dims
 }
 
