@@ -1,7 +1,7 @@
 package ux
 
 import (
-	"github.com/ddkwork/golibrary/mylog"
+	"gioui.org/io/transfer"
 	"image"
 	"image/color"
 	"io"
@@ -315,12 +315,13 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 										{
 											Title: "copy",
 											Icon:  SvgIconCopy,
-											Can: func() bool {
-												return true // why?
-												//return i.editor.SelectedText() != ""
-											},
+											Can:   func() bool { return true },
 											Do: func() {
-												gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(i.editor.SelectedText()))})
+												//i.editor.SelectedText()
+												//todo add selectAll api,或者在这里发送按键按下的事件?
+												//e.text.SetCaret(0, e.text.Len())//ctrl +a,复制的同时应该显示选中全部，不然不知道复制的区域
+												//安卓上应该增加一个全选菜单，以及选中的左右拉伸拓展选中区域的功能
+												gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(i.editor.Text()))})
 											},
 											AppendDivider: false,
 											Clickable:     widget.Clickable{},
@@ -330,9 +331,22 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 											Icon:  SvgIconContentPasteTwotone,
 											Can:   func() bool { return true },
 											Do: func() {
-												mylog.Todo("get clipboard text and paste")
-												//gtx.Execute(clipboard.ReadCmd{Data: io.NopCloser(strings.NewReader(i.editor.SelectedText()))})
-												//i.editor.SetText(clipboard.ReadCmd{})
+												for {
+													ke, ok := gtx.Event(transfer.TargetFilter{Target: &i.editor, Type: "application/text"})
+													if !ok {
+														break
+													}
+													switch ke := ke.(type) {
+													case transfer.DataEvent:
+														content, err := io.ReadAll(ke.Open())
+														if err == nil {
+															if i.editor.Insert(string(content)) != 0 {
+																break
+															}
+														}
+													}
+												}
+												gtx.Execute(clipboard.ReadCmd{Tag: &i.editor})
 											},
 											AppendDivider: false,
 											Clickable:     widget.Clickable{},
