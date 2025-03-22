@@ -1,6 +1,9 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/text"
@@ -10,8 +13,6 @@ import (
 	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/component"
-	"log"
-	"os"
 
 	"gioui.org/app"
 	"gioui.org/font/gofont"

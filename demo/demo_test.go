@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/ddkwork/golibrary"
 	"testing"
+
+	"github.com/ddkwork/golibrary"
 
 	"github.com/ddkwork/golibrary/safemap"
 	"github.com/ddkwork/golibrary/stream"

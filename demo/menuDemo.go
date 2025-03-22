@@ -34,7 +34,6 @@ type (
 )
 
 func (p *MenuObj) Layout(gtx layout.Context) layout.Dimensions {
-
 	// paint.Fill(gtx.Ops, color.NRGBA(Grey800))
 	if !p.menuInit {
 		p.menuState = component.MenuState{
@@ -83,7 +82,6 @@ func (p *MenuObj) Layout(gtx layout.Context) layout.Dimensions {
 						return layout.UniformInset(unit.Dp(8)).Layout(gtx, material.Body1(ux.ThemeDefault().Theme, fmt.Sprintf("Item %d", index)).Layout)
 					}),
 					layout.Expanded(func(gtx C) D {
-
 						return contextArea.Layout(gtx, func(gtx C) D {
 							gtx.Constraints.Min.X = 0
 							return p.drawContextArea(gtx, ux.ThemeDefault().Theme)

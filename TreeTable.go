@@ -583,7 +583,7 @@ func (t *TreeTable[T]) drawContextMenu(n *Node[T], i int) layout.StackChild {
 			contextArea = &component.ContextArea{
 				Activation:       pointer.ButtonSecondary,
 				AbsolutePosition: true,
-				PositionHint:     layout.S,
+				PositionHint:     layout.Center,
 			}
 			n.rowContextAreas[i] = contextArea
 		}
@@ -1685,7 +1685,7 @@ func (t *TreeTable[T]) Remove(gtx layout.Context) {
 func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大深度有影响
 	defer t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
 	ModalCallbacks.Reset()
-	editor := NewStructView("edit row", t.SelectedNode.Data, //todo merge StructView
+	editor := NewStructView("edit row", t.SelectedNode.Data, // todo merge StructView
 		func(a any) []string {
 			rowCells := t.MarshalRowCells(t.SelectedNode)
 			var rows []string
@@ -1699,7 +1699,7 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 			return t.SelectedNode.Data
 		},
 	)
-	editor.SetOnApply(func() { //todo bug ,debug it
+	editor.SetOnApply(func() { // todo bug ,debug it
 		t.rootRows = t.Root.Children
 		t.updateMaxHierarchyColumnCellWidth()
 		mylog.Todo("save json data ?")
@@ -1709,9 +1709,9 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 			editor.Layout(gtx)
 		}
 	})
-	//todo 其实泽丽不用更新 t.updateMaxHierarchyColumnCellWidth()
-	//但如果编辑的时候把层级列的单元格文本变长就需要，递归一下maxDepth应该不会牺牲多大的性能
-	//如果编辑节点点击应用更新出现卡顿的话，判断下层级列是否被编辑来跳过执行updateMaxHierarchyColumnCellWidth提高性能
+	// todo 其实泽丽不用更新 t.updateMaxHierarchyColumnCellWidth()
+	// 但如果编辑的时候把层级列的单元格文本变长就需要，递归一下maxDepth应该不会牺牲多大的性能
+	// 如果编辑节点点击应用更新出现卡顿的话，判断下层级列是否被编辑来跳过执行updateMaxHierarchyColumnCellWidth提高性能
 }
 
 func (n *Node[T]) Find() (found *Node[T]) {

@@ -520,25 +520,24 @@ func main() {
 					}
 				},
 			)
-			//modal.Show()
+			// modal.Show()
 			form.SetOnApply(func() {
-
 			})
 
-			//userName := ux.NewInput("please input username")
-			//password := ux.NewInput("please input password")
-			//email := ux.NewInput("please input email")
+			// userName := ux.NewInput("please input username")
+			// password := ux.NewInput("please input password")
+			// email := ux.NewInput("please input email")
 
-			//form.Add("username", userName.Layout)
-			//form.Add("password", password.Layout)
-			//form.Add("email", email.Layout)
+			// form.Add("username", userName.Layout)
+			// form.Add("password", password.Layout)
+			// form.Add("email", email.Layout)
 			// dropDown := ux.NewDropDown(SuperRecovery2Type.Names()...)
 			dropDown := ux.NewDropDown()
 			for _, s := range SuperRecovery2Type.Names() {
 				dropDown.SetOptions(ux.NewDropDownOption(s))
 			}
 
-			//form.InsertAt(0, "choose a app", dropDown.Layout)
+			// form.InsertAt(0, "choose a app", dropDown.Layout)
 			// form.Add("", ux.BlueButton(&clickable, "submit", unit.Dp(100)).Layout)
 			m.Set(StructViewType, form.Layout)
 		case ColorPickerType:

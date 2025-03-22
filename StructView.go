@@ -1,6 +1,10 @@
 package ux
 
 import (
+	"image/color"
+	"reflect"
+	"time"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -9,9 +13,6 @@ import (
 	"github.com/ddkwork/golibrary/safemap"
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/component"
-	"image/color"
-	"reflect"
-	"time"
 )
 
 // 相当于StructView，formView，但是他是绑定结构体的
@@ -21,34 +22,36 @@ import (
 //	Value *Input
 //}
 
-type StructView[T any] struct { //其实就是一个标题row+list滚动多个row
+type StructView[T any] struct { // 其实就是一个标题row+list滚动多个row
 
-	//布局预期视觉样式：1个元素的一行
-	Title string //标题，label渲染，不进入list滚动，需要固定位置，字体大小是h4
+	// 布局预期视觉样式：1个元素的一行
+	Title string // 标题，label渲染，不进入list滚动，需要固定位置，字体大小是h4
 
-	//select keygen需要一个下拉框，
-	//布局预期视觉样式：2个元素的一行，key右对齐，value左对齐
+	// select keygen需要一个下拉框，
+	// 布局预期视觉样式：2个元素的一行，key右对齐，value左对齐
 
-	//布局预期视觉样式：2个元素的一行，key右对齐，value左对齐
+	// 布局预期视觉样式：2个元素的一行，key右对齐，value左对齐
 	rows *safemap.M[string, *Input] //
 
-	//底部布局成一行，对于密码箱的rsa，这里需要额外的按钮，所以应该增加个outlay布局，
-	//填充到这一行的左侧，关闭和应用始终在右下角 layout.N
-	//这样如果不在list内滚动就不会渲染，不知道是什么原因，总感觉一个整体的widget只能有一个list，先滚动吧
-	//布局预期视觉样式：多个元素的一行
+	// 底部布局成一行，对于密码箱的rsa，这里需要额外的按钮，所以应该增加个outlay布局，
+	// 填充到这一行的左侧，关闭和应用始终在右下角 layout.N
+	// 这样如果不在list内滚动就不会渲染，不知道是什么原因，总感觉一个整体的widget只能有一个list，先滚动吧
+	// 布局预期视觉样式：多个元素的一行
 	applyBtn widget.Clickable
 	closeBtn widget.Clickable
 	onApply  func()
 
-	unmarshal unmarshalFun //反序列化函数，用于将输入框的值反序列化成结构体
+	unmarshal unmarshalFun // 反序列化函数，用于将输入框的值反序列化成结构体
 
-	widget.List //滚动所有行
+	widget.List // 滚动所有行
 	*component.ModalState
 	Visible bool
 }
 
-type marshalFun func(any) []string
-type unmarshalFun func([]string) any
+type (
+	marshalFun   func(any) []string
+	unmarshalFun func([]string) any
+)
 
 func ReflectStruct2Map(object any, marshal marshalFun, unmarshal unmarshalFun) *safemap.M[string, string] {
 	keys := reflect.VisibleFields(reflect.TypeOf(object))
@@ -73,14 +76,14 @@ func NewStructView[T any](title string, object T, marshal marshalFun, unmarshal 
 	for k, v := range visibleFields.Range() {
 		FieldRows.Set(k+"：", NewInput(v))
 	}
-	//modalLayer := component.NewModal()
+	// modalLayer := component.NewModal()
 	const defaultModalAnimationDuration = time.Millisecond * 250
 	return &StructView[T]{
 		Title:     title,
 		rows:      FieldRows,
 		applyBtn:  widget.Clickable{},
 		closeBtn:  widget.Clickable{},
-		onApply:   nil, //用于刷新编辑够的节点元数据
+		onApply:   nil, // 用于刷新编辑够的节点元数据
 		unmarshal: unmarshal,
 		List: widget.List{
 			Scrollbar: widget.Scrollbar{},
@@ -95,8 +98,8 @@ func NewStructView[T any](title string, object T, marshal marshalFun, unmarshal 
 				Clickable: widget.Clickable{},
 				VisibilityAnimation: component.VisibilityAnimation{
 					Duration: defaultModalAnimationDuration,
-					//State:    component.Invisible,
-					//Started:  gtx.Now,
+					// State:    component.Invisible,
+					// Started:  gtx.Now,
 				},
 			},
 		},
@@ -107,7 +110,7 @@ func NewStructView[T any](title string, object T, marshal marshalFun, unmarshal 
 func (s *StructView[T]) SetOnApply(f func()) { s.onApply = f }
 
 // RightAlignLabel keygen需要一个下拉框select,form表单, structView, input都可以用这个方法右对齐label
-func RightAlignLabel(gtx layout.Context, width unit.Dp, text string) layout.Dimensions { //布局label右对齐文本
+func RightAlignLabel(gtx layout.Context, width unit.Dp, text string) layout.Dimensions { // 布局label右对齐文本
 	gtx.Constraints.Min.X = int(width)
 	gtx.Constraints.Max.X = gtx.Constraints.Min.X
 	return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
@@ -168,7 +171,7 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 					Axis:    layout.Horizontal,
 					Spacing: layout.SpaceSides,
 				}.Layout(gtx,
-					layout.Rigid(func(gtx layout.Context) layout.Dimensions { //布局label右对齐文本
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions { // 布局label右对齐文本
 						return RightAlignLabel(gtx, MaxLabelWidth(gtx, s.rows.Keys()), k)
 					}),
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -176,14 +179,14 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 						gtx.Constraints.Max.X = 500
 						return layout.Flex{
 							Axis: layout.Horizontal,
-							//Spacing: 0,
-							//Alignment: layout.Middle,
-							//WeightSum: 0,
+							// Spacing: 0,
+							// Alignment: layout.Middle,
+							// WeightSum: 0,
 						}.Layout(gtx,
 							outlay.EmptyRigidVertical(20),
-							//layout.Rigid(layout.Spacer{Height: unit.Dp(20)}.Layout),
+							// layout.Rigid(layout.Spacer{Height: unit.Dp(20)}.Layout),
 							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-								return v.Layout(gtx) //todo fake make input
+								return v.Layout(gtx) // todo fake make input
 							}))
 					}))
 			})
@@ -208,7 +211,7 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 	})
 
 	return layout.Inset{Top: unit.Dp(80)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		//return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		// return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			s.ModalState.Show(gtx.Now, func(gtx layout.Context) layout.Dimensions {
 				return layout.UniformInset(unit.Dp(15)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -223,7 +226,6 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 						return rows[index](gtx)
 					})
 				})
-
 			})
 			return component.ModalStyle{
 				ModalState: s.ModalState,
@@ -231,6 +233,5 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 			}.Layout(gtx)
 		})
 		//})
-
 	})
 }

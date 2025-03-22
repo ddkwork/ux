@@ -2,10 +2,11 @@ package ux
 
 import (
 	"fmt"
-	"gioui.org/widget"
-	"github.com/ddkwork/golibrary/safemap"
 	"io"
 	"strings"
+
+	"gioui.org/widget"
+	"github.com/ddkwork/golibrary/safemap"
 
 	"gioui.org/io/clipboard"
 	"gioui.org/layout"
@@ -14,7 +15,7 @@ import (
 
 type IconView struct {
 	clickMap    *safemap.M[string, *animationButton.Button]
-	filterInput *Input //todo 调用appBar的搜索输入框
+	filterInput *Input // todo 调用appBar的搜索输入框
 	keyWords    string
 	filterMap   []layout.Widget
 	flow        *Flow
@@ -41,7 +42,7 @@ func NewIconView() *IconView {
 		v.keyWords = v.filterInput.GetText()
 	})
 	for _, name := range IconMap.Keys() {
-		v.clickMap.Set(name, NewButtonAnimation(name, IconMap.GetMust(name), func(gtx layout.Context) { //todo 增加右键回调弹出菜单
+		v.clickMap.Set(name, NewButtonAnimation(name, IconMap.GetMust(name), func(gtx layout.Context) { // todo 增加右键回调弹出菜单
 			gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(name))})
 		}))
 	}

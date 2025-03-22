@@ -1,8 +1,9 @@
 package ux_test
 
 import (
-	"github.com/ddkwork/golibrary/stream"
 	"testing"
+
+	"github.com/ddkwork/golibrary/stream"
 
 	"github.com/ddkwork/golibrary"
 )

@@ -2,13 +2,14 @@ package ux
 
 import (
 	"bytes"
-	"github.com/ddkwork/golibrary/safemap"
 	"image"
 	"image/color"
 	"image/draw"
 	"image/png"
 	"os"
 	"path/filepath"
+
+	"github.com/ddkwork/golibrary/safemap"
 
 	"github.com/ddkwork/ux/widget/material"
 
@@ -313,15 +314,15 @@ func LabelWidth(gtx layout.Context, text string) unit.Dp {
 }
 
 func MaxLabelWidth(gtx layout.Context, keys []string) unit.Dp {
-	//originalConstraints := gtx.Constraints
+	// originalConstraints := gtx.Constraints
 	maxWidth := unit.Dp(0)
 	for _, data := range keys {
-		currentWidth := LabelWidth(gtx, data) //可以使用max []unit.Dp，但是多了一层make []unit.Dp，浪费内存
+		currentWidth := LabelWidth(gtx, data) // 可以使用max []unit.Dp，但是多了一层make []unit.Dp，浪费内存
 		if currentWidth > maxWidth {
 			maxWidth = currentWidth
 		}
 	}
-	//gtx.Constraints = originalConstraints
+	// gtx.Constraints = originalConstraints
 	return maxWidth
 }
 

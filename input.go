@@ -1,13 +1,14 @@
 package ux
 
 import (
-	"gioui.org/io/clipboard"
-	"github.com/ddkwork/ux/x/component"
 	"image"
 	"image/color"
 	"io"
 	"slices"
 	"strings"
+
+	"gioui.org/io/clipboard"
+	"github.com/ddkwork/ux/x/component"
 
 	"github.com/ddkwork/ux/widget/material"
 
@@ -299,33 +300,34 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 								return editor.Layout(gtx)
 							}),
 							layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-								contextMenu := NewContextMenu()
-								item := ContextMenuItem{
-									Title: "copy",
-									Icon:  SvgIconCopy,
-									Can:   func() bool { return i.editor.SelectedText() != "" },
-									Do: func() {
-										gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(i.editor.SelectedText()))})
-									},
-									AppendDivider: false,
-									Clickable:     widget.Clickable{},
-								}
-								if item.Can() {
-									contextMenu.AddItem(item)
-								}
-								contextMenu.OnClicked(gtx)
-								if i.contextMenu == nil {
-									i.contextMenu = NewContextMenu()
-								}
-
 								if i.contextArea == nil {
 									i.contextArea = &component.ContextArea{
 										LongPressDuration: 0,
 										Activation:        pointer.ButtonSecondary,
 										AbsolutePosition:  true,
-										PositionHint:      layout.S,
+										PositionHint:      layout.W,
 									}
 								}
+								if i.contextMenu == nil {
+									i.contextMenu = NewContextMenu()
+									item := ContextMenuItem{
+										Title: "copy",
+										Icon:  SvgIconCopy,
+										Can: func() bool {
+											return true // why?
+											//return i.editor.SelectedText() != ""
+										},
+										Do: func() {
+											gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(i.editor.SelectedText()))})
+										},
+										AppendDivider: false,
+										Clickable:     widget.Clickable{},
+									}
+									if item.Can() {
+										i.contextMenu.AddItem(item)
+									}
+								}
+								i.contextMenu.OnClicked(gtx)
 								return i.contextArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 									return drawContextArea(gtx, &i.contextMenu.MenuState)
 								})
