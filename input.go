@@ -300,7 +300,7 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 							layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 								return editor.Layout(gtx)
 							}),
-							layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+							layout.Expanded(func(gtx layout.Context) layout.Dimensions { //这也应该适用于代码编辑器控件
 								if i.contextArea == nil {
 									i.contextArea = &component.ContextArea{
 										LongPressDuration: 0,
@@ -351,7 +351,6 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 											AppendDivider: false,
 											Clickable:     widget.Clickable{},
 										},
-
 										{
 											Title:         "clean",
 											Icon:          SvgIconTrash,
