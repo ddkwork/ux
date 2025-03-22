@@ -1,6 +1,7 @@
 package ux
 
 import (
+	"github.com/ddkwork/golibrary/mylog"
 	"image"
 	"image/color"
 	"io"
@@ -310,21 +311,46 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 								}
 								if i.contextMenu == nil {
 									i.contextMenu = NewContextMenu()
-									item := ContextMenuItem{
-										Title: "copy",
-										Icon:  SvgIconCopy,
-										Can: func() bool {
-											return true // why?
-											//return i.editor.SelectedText() != ""
+									items := []ContextMenuItem{
+										{
+											Title: "copy",
+											Icon:  SvgIconCopy,
+											Can: func() bool {
+												return true // why?
+												//return i.editor.SelectedText() != ""
+											},
+											Do: func() {
+												gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(i.editor.SelectedText()))})
+											},
+											AppendDivider: false,
+											Clickable:     widget.Clickable{},
 										},
-										Do: func() {
-											gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(i.editor.SelectedText()))})
+										{
+											Title: "parse",
+											Icon:  SvgIconPrevious,
+											Can:   func() bool { return true },
+											Do: func() {
+												mylog.Todo("get clipboard text and parse")
+												//gtx.Execute(clipboard.ReadCmd{Data: io.NopCloser(strings.NewReader(i.editor.SelectedText()))})
+												//i.editor.SetText(clipboard.ReadCmd{})
+											},
+											AppendDivider: false,
+											Clickable:     widget.Clickable{},
 										},
-										AppendDivider: false,
-										Clickable:     widget.Clickable{},
+
+										{
+											Title:         "clean",
+											Icon:          SvgIconDash,
+											Can:           func() bool { return true },
+											Do:            func() { i.editor.SetText("") },
+											AppendDivider: false,
+											Clickable:     widget.Clickable{},
+										},
 									}
-									if item.Can() {
-										i.contextMenu.AddItem(item)
+									for _, item := range items {
+										if item.Can() {
+											i.contextMenu.AddItem(item)
+										}
 									}
 								}
 								i.contextMenu.OnClicked(gtx)
