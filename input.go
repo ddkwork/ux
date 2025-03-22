@@ -1,9 +1,13 @@
 package ux
 
 import (
+	"gioui.org/io/clipboard"
+	"github.com/ddkwork/ux/x/component"
 	"image"
 	"image/color"
+	"io"
 	"slices"
+	"strings"
 
 	"github.com/ddkwork/ux/widget/material"
 
@@ -56,6 +60,9 @@ type (
 		onFocus     ActionFun
 		onLostFocus ActionFun
 		onChange    func(text string)
+
+		contextMenu *ContextMenu
+		contextArea *component.ContextArea
 	}
 )
 
@@ -287,7 +294,43 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 						} else {
 							editor.Color = th.Color.DefaultTextWhiteColor
 						}
-						return editor.Layout(gtx)
+						return layout.Stack{Alignment: layout.Center}.Layout(gtx,
+							layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+								return editor.Layout(gtx)
+							}),
+							layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+								contextMenu := NewContextMenu()
+								item := ContextMenuItem{
+									Title: "copy",
+									Icon:  SvgIconCopy,
+									Can:   func() bool { return i.editor.SelectedText() != "" },
+									Do: func() {
+										gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(i.editor.SelectedText()))})
+									},
+									AppendDivider: false,
+									Clickable:     widget.Clickable{},
+								}
+								if item.Can() {
+									contextMenu.AddItem(item)
+								}
+								contextMenu.OnClicked(gtx)
+								if i.contextMenu == nil {
+									i.contextMenu = NewContextMenu()
+								}
+
+								if i.contextArea == nil {
+									i.contextArea = &component.ContextArea{
+										LongPressDuration: 0,
+										Activation:        pointer.ButtonSecondary,
+										AbsolutePosition:  true,
+										PositionHint:      layout.S,
+									}
+								}
+								return i.contextArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+									return drawContextArea(gtx, &i.contextMenu.MenuState)
+								})
+							}),
+						)
 					})
 
 					var widgets []layout.FlexChild

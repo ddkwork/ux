@@ -721,12 +721,12 @@ func (t *TreeTable[T]) drawContextMenu(n *Node[T], i int) layout.StackChild {
 		}
 		n.contextMenu.OnClicked(gtx)
 		return contextArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return t.drawContextArea(gtx, &n.contextMenu.MenuState)
+			return drawContextArea(gtx, &n.contextMenu.MenuState)
 		})
 	})
 }
 
-func (t *TreeTable[T]) drawContextArea(gtx C, menuState *component.MenuState) D {
+func drawContextArea(gtx C, menuState *component.MenuState) D {
 	return layout.Center.Layout(gtx, func(gtx C) D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
 		gtx.Constraints.Min.X = 0
 		gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(400)) // 当行高限制后，这里需要取消限制，理想值是取表格高度或者屏幕高度，其次是增加滚动条或者树形右键菜单
@@ -1035,7 +1035,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 						}
 						t.header.contextMenu.OnClicked(gtx)
 						return contextArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-							return t.drawContextArea(gtx, &t.header.contextMenu.MenuState)
+							return drawContextArea(gtx, &t.header.contextMenu.MenuState)
 						})
 					}),
 				)
