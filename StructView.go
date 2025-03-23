@@ -212,31 +212,17 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 	})
 
 	return layout.Inset{Top: 100, Left: 150}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		// return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			s.ModalState.Show(gtx.Now, func(gtx layout.Context) layout.Dimensions {
 				return layout.UniformInset(unit.Dp(15)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					return material.List(th.Theme, &s.List).Layout(gtx, len(rows), func(gtx layout.Context, index int) layout.Dimensions {
-						BackgroundDark(gtx)
-						//exact := layout.Exact(image.Point{
-						//	X: gtx.Constraints.Max.X / 2,
-						//	Y: gtx.Constraints.Max.Y / 2,
-						//})
-						//rect := clip.Rect{Max: exact.Max}
-						//paint.FillShape(gtx.Ops, ColorHeaderFg, rect.Op())
-						gtx.Constraints.Min.X /= 2
-						gtx.Constraints.Min.Y /= 2
-						gtx.Constraints.Max.X /= 2
-						gtx.Constraints.Max.Y /= 2
-						return rows[index](gtx)
+						return Background{Color: BackgroundColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { //todo 这样把边框整没了
+							return rows[index](gtx)
+						})
 					})
 				})
 			})
-			return component.ModalStyle{
-				ModalState: s.ModalState,
-				Scrim:      component.NewScrim(th.Theme, &s.ModalState.ScrimState, 0),
-			}.Layout(gtx)
+			return component.ModalStyle{ModalState: s.ModalState, Scrim: component.NewScrim(th.Theme, &s.ModalState.ScrimState, 0)}.Layout(gtx)
 		})
-		//})
 	})
 }
