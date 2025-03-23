@@ -5,22 +5,19 @@ import (
 	_ "embed"
 	"image/color"
 
+	"gioui.org/font"
+	"gioui.org/font/opentype"
 	"gioui.org/io/event"
 	"gioui.org/io/key"
-
-	"gioui.org/font/opentype"
-	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/ux/widget/material"
-
-	"gioui.org/font"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
+	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/ux/widget/material"
 	"github.com/oligo/gvcode"
 )
 
