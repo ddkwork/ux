@@ -145,6 +145,7 @@ func (r *RightClickArea) CloseMenu() {
 func (r *RightClickArea) Layout(gtx C) D {
 	//defer op.Push(gtx.Ops).Pop()
 	//defer op.TransformOp{}.Push(gtx.Ops).Pop()
+	event.Op(gtx.Ops, r)
 	for {
 		ev, ok := gtx.Event(pointer.Filter{
 			Target: r,
