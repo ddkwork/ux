@@ -5,11 +5,10 @@ import (
 	"io"
 	"strings"
 
-	"gioui.org/widget"
-	"github.com/ddkwork/golibrary/safemap"
-
 	"gioui.org/io/clipboard"
 	"gioui.org/layout"
+	"gioui.org/widget"
+	"github.com/ddkwork/golibrary/safemap"
 	"github.com/ddkwork/ux/animationButton"
 )
 

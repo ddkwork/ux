@@ -3,11 +3,10 @@ package ux
 import (
 	"image"
 
-	"gioui.org/widget"
-	"github.com/ddkwork/ux/widget/material"
-
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/widget"
+	"github.com/ddkwork/ux/widget/material"
 )
 
 // inf is an infinite axis constraint.
