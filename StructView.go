@@ -46,6 +46,7 @@ type StructView[T any] struct { // 其实就是一个标题row+list滚动多个r
 	widget.List // 滚动所有行
 	*component.ModalState
 	Visible bool
+	Modal   bool
 }
 
 type (
@@ -222,7 +223,11 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 					})
 				})
 			})
-			return component.ModalStyle{ModalState: s.ModalState, Scrim: component.NewScrim(th.Theme, &s.ModalState.ScrimState, 0)}.Layout(gtx)
+			alpha := byte(0)
+			if s.Modal {
+				alpha = 20
+			}
+			return component.ModalStyle{ModalState: s.ModalState, Scrim: component.NewScrim(th.Theme, &s.ModalState.ScrimState, alpha)}.Layout(gtx)
 		})
 	})
 }

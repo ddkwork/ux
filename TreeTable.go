@@ -1699,6 +1699,7 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 			return t.SelectedNode.Data
 		},
 	)
+	editor.Modal = true
 	editor.SetOnApply(func() { // todo bug ,debug it
 		t.rootRows = t.Root.Children
 		t.updateMaxHierarchyColumnCellWidth()
