@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
-	"gioui.org/f32"
-	"gioui.org/io/event"
-	"gioui.org/op/clip"
-	"gioui.org/text"
 	"image"
 	"image/color"
 	"log"
 	"os"
+
+	"gioui.org/f32"
+	"gioui.org/io/event"
+	"gioui.org/op/clip"
+	"gioui.org/text"
 
 	"gioui.org/app"
 	"gioui.org/font/gofont"
@@ -49,7 +50,7 @@ func (a Anchor) String() string {
 // to be rendered within the provided bounds. The offset is as close as possible
 // to the coordinates wrapped within the
 func (a Anchor) OffsetWithin(contentSize, bounds f32.Point) f32.Point {
-	var offset = a.point
+	offset := a.point
 	if contentSize.X+a.point.X > bounds.X {
 		offset.X = bounds.X - contentSize.X
 	}
@@ -81,7 +82,7 @@ func (o *Overlay) Layout(gtx layout.Context) layout.Dimensions {
 		offset := item.OffsetWithin(layout.FPt(dims.Size), layout.FPt(gtx.Constraints.Max))
 		func(item overlayItem) {
 			defer op.TransformOp{}.Push(gtx.Ops).Pop()
-			//defer op.Push(gtx.Ops).Pop()
+			// defer op.Push(gtx.Ops).Pop()
 			op.Offset(image.Point{X: int(offset.X), Y: int(offset.Y)}).Add(gtx.Ops)
 			call.Add(gtx.Ops)
 		}(item)
@@ -107,10 +108,10 @@ type RightClickArea struct {
 // across the entire graphics context. It sizes itself to be the maximum
 // size of the context, and should be anchored at the origin.
 func (r *RightClickArea) LayoutUnderlay(gtx C) D {
-	//defer op.Push(gtx.Ops).Pop()
+	// defer op.Push(gtx.Ops).Pop()
 	defer op.TransformOp{}.Push(gtx.Ops).Pop()
 	pt := pointer.PassOp{}.Push(gtx.Ops)
-	//pointer.Rect(image.Rectangle{Max: gtx.Constraints.Max}).Add(gtx.Ops)
+	// pointer.Rect(image.Rectangle{Max: gtx.Constraints.Max}).Add(gtx.Ops)
 	stack := clip.Rect{Max: gtx.Constraints.Max}.Push(gtx.Ops)
 	event.Op(gtx.Ops, r)
 	stack.Pop()
@@ -143,8 +144,8 @@ func (r *RightClickArea) CloseMenu() {
 
 // Layout renders the clickable area and configures its overlay.
 func (r *RightClickArea) Layout(gtx C) D {
-	//defer op.Push(gtx.Ops).Pop()
-	//defer op.TransformOp{}.Push(gtx.Ops).Pop()
+	// defer op.Push(gtx.Ops).Pop()
+	// defer op.TransformOp{}.Push(gtx.Ops).Pop()
 	event.Op(gtx.Ops, r)
 	for {
 		ev, ok := gtx.Event(pointer.Filter{

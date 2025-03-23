@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"time"
 
+	"gioui.org/text"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -75,7 +77,9 @@ func NewStructView[T any](title string, object T, marshal marshalFun, unmarshal 
 	visibleFields := ReflectStruct2Map(object, marshal, unmarshal)
 	FieldRows := new(safemap.M[string, *Input])
 	for k, v := range visibleFields.Range() {
-		FieldRows.Set(k+"：", NewInput(v))
+		input := NewInput(v)
+		input.editor.Alignment = text.Start // 左对齐 todo bug, not work
+		FieldRows.Set(k+"：", input)
 	}
 	// modalLayer := component.NewModal()
 	const defaultModalAnimationDuration = time.Millisecond * 250
@@ -176,8 +180,8 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 						return RightAlignLabel(gtx, MaxLabelWidth(gtx, s.rows.Keys()), k)
 					}),
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						gtx.Constraints.Min.X = 500
-						gtx.Constraints.Max.X = 500
+						gtx.Constraints.Min.X = 700
+						gtx.Constraints.Max.X = 700
 						return layout.Flex{
 							Axis: layout.Horizontal,
 							// Spacing: 0,
@@ -194,16 +198,16 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 	}
 
 	rows = append(rows, func(gtx layout.Context) layout.Dimensions {
-		return layout.Spacer{Height: unit.Dp(20)}.Layout(gtx) //垂直间距
+		return layout.Spacer{Height: unit.Dp(20)}.Layout(gtx) // 垂直间距
 	})
 	rows = append(rows, func(gtx layout.Context) layout.Dimensions {
 		return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-				outlay.EmptyRigidHorizontal(230), //标签站位
+				outlay.EmptyRigidHorizontal(300), // 标签站位
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					return Button(&s.closeBtn, NavigationCloseIcon, "Close").Layout(gtx)
 				}),
-				outlay.EmptyRigidHorizontal(20), //按钮间距
+				outlay.EmptyRigidHorizontal(20), // 按钮间距
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					return Button(&s.applyBtn, ActionAssignmentTurnedInIcon, "Apply").Layout(gtx)
 				}),
@@ -217,7 +221,7 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 			s.ModalState.Show(gtx.Now, func(gtx layout.Context) layout.Dimensions {
 				return layout.UniformInset(unit.Dp(15)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					return material.List(th.Theme, &s.List).Layout(gtx, len(rows), func(gtx layout.Context, index int) layout.Dimensions {
-						return Background{Color: BackgroundColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { //todo 这样把边框整没了
+						return Background{Color: BackgroundColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { // todo 这样把边框整没了
 							return rows[index](gtx)
 						})
 					})

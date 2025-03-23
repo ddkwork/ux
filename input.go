@@ -1,30 +1,27 @@
 package ux
 
 import (
-	"gioui.org/io/transfer"
 	"image"
 	"image/color"
 	"io"
 	"slices"
 	"strings"
 
-	"gioui.org/io/clipboard"
-	"github.com/ddkwork/ux/x/component"
-
-	"github.com/ddkwork/ux/widget/material"
-
 	"gioui.org/gesture"
+	"gioui.org/io/clipboard"
 	"gioui.org/io/event"
 	"gioui.org/io/input"
 	"gioui.org/io/key"
 	"gioui.org/io/pointer"
+	"gioui.org/io/transfer"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"golang.org/x/exp/shiny/materialdesign/icons"
+	"github.com/ddkwork/ux/widget/material"
+	"github.com/ddkwork/ux/x/component"
 )
 
 type state uint8
@@ -127,7 +124,7 @@ func (i *Input) SetOnChanged(f func(text string)) *Input {
 
 func (i *Input) Password() *Input {
 	i.editor.Mask = '*'
-	i.icon, _ = widget.NewIcon(icons.ActionVisibilityOff)
+	i.icon = ActionVisibilityOffIcon
 	// t.IconPositionEnd = IconPositionEnd
 	i.showPassword = false
 	return i
@@ -300,7 +297,7 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 							layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 								return editor.Layout(gtx)
 							}),
-							layout.Expanded(func(gtx layout.Context) layout.Dimensions { //这也应该适用于代码编辑器控件
+							layout.Expanded(func(gtx layout.Context) layout.Dimensions { // 这也应该适用于代码编辑器控件
 								if i.contextArea == nil {
 									i.contextArea = &component.ContextArea{
 										LongPressDuration: 0,
@@ -317,10 +314,10 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 											Icon:  SvgIconCopy,
 											Can:   func() bool { return true },
 											Do: func() {
-												//i.editor.SelectedText()
-												//todo add selectAll api,或者在这里发送按键按下的事件?
-												//e.text.SetCaret(0, e.text.Len())//ctrl +a,复制的同时应该显示选中全部，不然不知道复制的区域
-												//安卓上应该增加一个全选菜单，以及选中的左右拉伸拓展选中区域的功能
+												// i.editor.SelectedText()
+												// todo add selectAll api,或者在这里发送按键按下的事件?
+												// e.text.SetCaret(0, e.text.Len())//ctrl +a,复制的同时应该显示选中全部，不然不知道复制的区域
+												// 安卓上应该增加一个全选菜单，以及选中的左右拉伸拓展选中区域的功能
 												gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(i.editor.Text()))})
 											},
 											AppendDivider: false,
