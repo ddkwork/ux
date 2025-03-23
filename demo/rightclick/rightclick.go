@@ -82,10 +82,7 @@ func (o *Overlay) Layout(gtx layout.Context) layout.Dimensions {
 		func(item overlayItem) {
 			defer op.TransformOp{}.Push(gtx.Ops).Pop()
 			//defer op.Push(gtx.Ops).Pop()
-			op.Offset(image.Point{
-				X: int(offset.X),
-				Y: int(offset.Y),
-			}).Add(gtx.Ops)
+			op.Offset(image.Point{X: int(offset.X), Y: int(offset.Y)}).Add(gtx.Ops)
 			call.Add(gtx.Ops)
 		}(item)
 	}
@@ -112,32 +109,29 @@ type RightClickArea struct {
 func (r *RightClickArea) LayoutUnderlay(gtx C) D {
 	//defer op.Push(gtx.Ops).Pop()
 	defer op.TransformOp{}.Push(gtx.Ops).Pop()
-	pointer.PassOp{}.Push(gtx.Ops)
+	pt := pointer.PassOp{}.Push(gtx.Ops)
 	//pointer.Rect(image.Rectangle{Max: gtx.Constraints.Max}).Add(gtx.Ops)
-	clip.Rect{Max: gtx.Constraints.Max}.Push(gtx.Ops)
-	//pointer.InputOp{
-	//	Tag:   &r.leftPressed,
-	//	Types: pointer.Press | pointer.Release,
-	//}.Add(gtx.Ops)
-
-	for {
-		ev, ok := gtx.Event(pointer.Filter{
-			Target: &r.leftPressed,
-			Kinds:  pointer.Press | pointer.Release,
-		})
-		if !ok {
-			break
-		}
-		e, ok := ev.(pointer.Event)
-		if !ok {
-			continue
-		}
-		if e.Kind == pointer.Press {
-			//r.Dismiss()//todo
-			event.Op(gtx.Ops, r) //?
-		}
-	}
-
+	stack := clip.Rect{Max: gtx.Constraints.Max}.Push(gtx.Ops)
+	event.Op(gtx.Ops, r)
+	stack.Pop()
+	pt.Pop()
+	//for {
+	//	ev, ok := gtx.Event(pointer.Filter{
+	//		Target: &r.leftPressed,
+	//		Kinds:  pointer.Press | pointer.Release,
+	//	})
+	//	if !ok {
+	//		break
+	//	}
+	//	e, ok := ev.(pointer.Event)
+	//	if !ok {
+	//		continue
+	//	}
+	//	if e.Kind == pointer.Press {
+	//		//r.Dismiss()//todo
+	//		event.Op(gtx.Ops, r) //?
+	//	}
+	//}
 	return D{Size: gtx.Constraints.Max}
 }
 
@@ -207,8 +201,8 @@ func (r *RightClickArea) Layout(gtx C) D {
 		r.Overlay.LayoutAt(*r.Anchor, r.Menu)
 	}
 	dims := r.Content(gtx)
-	pointer.PassOp{}.Push(gtx.Ops)
-	clip.Rect(image.Rectangle{Max: dims.Size}).Push(gtx.Ops)
+	pointer.PassOp{}.Push(gtx.Ops).Pop()
+	clip.Rect(image.Rectangle{Max: dims.Size}).Push(gtx.Ops).Pop()
 	return dims
 }
 
