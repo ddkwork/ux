@@ -167,7 +167,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("gofmt failed: %v\n\nGenerated code:\n%s", err, raw)
 	}
-	if err := os.WriteFile("data.go", formatted, 0644); err != nil {
+	if err := os.WriteFile("data.go", formatted, 0o644); err != nil {
 		log.Fatalf("WriteFile failed: %s\n", err)
 	}
 
@@ -185,7 +185,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("gofmt failed: %v\n\nGenerated code:\n%s", err, raw)
 		}
-		if err := os.WriteFile("data_test.go", formatted, 0644); err != nil {
+		if err := os.WriteFile("data_test.go", formatted, 0o644); err != nil {
 			log.Fatalf("WriteFile failed: %s\n", err)
 		}
 	}

@@ -172,7 +172,7 @@ func main() {
 		log.Fatalf("Error while formatting code: %s\n", err)
 	}
 
-	if err := os.WriteFile("table.go", fmted, 0644); err != nil {
+	if err := os.WriteFile("table.go", fmted, 0o644); err != nil {
 		log.Fatalf("Error writing table.go: %s\n", err)
 	}
 }
