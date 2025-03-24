@@ -581,9 +581,8 @@ func (t *TreeTable[T]) drawContextMenu(n *Node[T], i int) layout.StackChild {
 		contextArea := n.rowContextAreas[i]
 		if contextArea == nil {
 			contextArea = &component.ContextArea{
-				Activation:       pointer.ButtonSecondary,
-				AbsolutePosition: true,
-				PositionHint:     layout.Center,
+				Activation:   pointer.ButtonSecondary,
+				PositionHint: layout.Center,
 			}
 			n.rowContextAreas[i] = contextArea
 		}
@@ -1016,9 +1015,8 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 
 									所以合理的方案是patch官方的contextAreas和gtx的input source代码，支持长按事件
 								*/
-								Activation:       pointer.ButtonSecondary,
-								AbsolutePosition: true,
-								PositionHint:     0,
+								Activation:   pointer.ButtonSecondary,
+								PositionHint: 0,
 							}
 							t.header.contextAreas[i] = contextArea
 						}

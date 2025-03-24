@@ -306,9 +306,8 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 				cellMenu := m.cellsAreas[idx]
 				if cellMenu == nil {
 					cellMenu = &component.ContextArea{
-						Activation:       pointer.ButtonSecondary,
-						AbsolutePosition: true,
-						PositionHint:     0,
+						Activation:   pointer.ButtonSecondary,
+						PositionHint: 0,
 					}
 					m.cellsAreas[idx] = cellMenu
 				}
