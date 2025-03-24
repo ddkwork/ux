@@ -7,16 +7,15 @@ import (
 	"log"
 	"os"
 
-	"gioui.org/f32"
-	"gioui.org/io/event"
-	"gioui.org/op/clip"
-	"gioui.org/text"
-
 	"gioui.org/app"
+	"gioui.org/f32"
 	"gioui.org/font/gofont"
+	"gioui.org/io/event"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/op/clip"
+	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
@@ -78,12 +77,9 @@ func (o *Overlay) Layout(gtx layout.Context) layout.Dimensions {
 		macro := op.Record(gtx.Ops)
 		dims := item.Widget(gtx)
 		call := macro.Stop()
-
 		offset := item.OffsetWithin(layout.FPt(dims.Size), layout.FPt(gtx.Constraints.Max))
-
 		func(item overlayItem) {
 			defer op.TransformOp{}.Push(gtx.Ops).Pop()
-			// defer op.Push(gtx.Ops).Pop()
 			op.Offset(image.Point{X: int(offset.X), Y: int(offset.Y)}).Add(gtx.Ops)
 			call.Add(gtx.Ops)
 		}(item)
@@ -107,10 +103,7 @@ type RightClickArea struct {
 // across the entire graphics context. It sizes itself to be the maximum
 // size of the context, and should be anchored at the origin.
 func (r *RightClickArea) LayoutUnderlay(gtx C) D {
-	// defer op.Push(gtx.Ops).Pop()
-	defer op.TransformOp{}.Push(gtx.Ops).Pop()
 	pt := pointer.PassOp{}.Push(gtx.Ops)
-	// pointer.Rect(image.Rectangle{Max: gtx.Constraints.Max}).Add(gtx.Ops)
 	stack := clip.Rect{Max: gtx.Constraints.Max}.Push(gtx.Ops)
 	event.Op(gtx.Ops, r)
 	stack.Pop()
@@ -143,8 +136,6 @@ func (r *RightClickArea) CloseMenu() {
 
 // Layout renders the clickable area and configures its overlay.
 func (r *RightClickArea) Layout(gtx C) D {
-	// defer op.Push(gtx.Ops).Pop()
-	// defer op.TransformOp{}.Push(gtx.Ops).Pop()
 	event.Op(gtx.Ops, r)
 	for {
 		ev, ok := gtx.Event(pointer.Filter{
@@ -259,7 +250,6 @@ func loop(w *app.Window) error {
 			return e.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
-
 			menuClicked := false
 			if rBtn.Clicked(gtx) {
 				menuClicked = true
