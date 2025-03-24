@@ -176,8 +176,7 @@ func (r *RightClickArea) Layout(gtx C) D {
 		switch e.Kind {
 		case pointer.Press, pointer.Drag:
 			if e.Buttons.Contain(pointer.ButtonPrimary) {
-				id := e.PointerID
-				r.leftPressed = &id
+				r.leftPressed = &e.PointerID
 			}
 		case pointer.Release, pointer.Cancel:
 			if r.leftPressed != nil && e.PointerID == *r.leftPressed {
