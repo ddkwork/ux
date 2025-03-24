@@ -2,8 +2,8 @@ eliasnaur.com/font v0.0.0-20230308162249-dd43949cb42d h1:ARo7NCVvN2NdhLlJE9xAbKw
 eliasnaur.com/font v0.0.0-20230308162249-dd43949cb42d/go.mod h1:OYVuxibdk9OSLX8vAqydtRPP87PyTFcT9uH3MlEGBQA=
 gioui.org v0.8.1-0.20250223181602-72a72a2bc21a h1:s87Jhp366z1StNZmdOBu2696L6k+NQR7jFV9k8BNK88=
 gioui.org v0.8.1-0.20250223181602-72a72a2bc21a/go.mod h1:JnoLsqpYezue9ZRMG7E2hOXar1/oAE9ZFkiFfF4oULs=
-gioui.org/cmd v0.8.0 h1:oy5qOlc1UXcglc5HBCMZQELiIzQ2obhT98mw+SuWafQ=
-gioui.org/cmd v0.8.0/go.mod h1:wKLAyAgRR25VMYFzGX2Ecia0m0Td562wDcZ3LaPHPTI=
+gioui.org/cmd v0.8.1-0.20250321120711-01ffdf788daa h1:KF5RNvVkslrCCAvxNNKldwKPUi4EXfBiONjm64Hj+kM=
+gioui.org/cmd v0.8.1-0.20250321120711-01ffdf788daa/go.mod h1:leSxAyTne/BCsyZp7zLrjxzS0trQ3wQ0YWqIPDuKJmQ=
 gioui.org/cpu v0.0.0-20210808092351-bfe733dd3334/go.mod h1:A8M0Cn5o+vY5LTMlnRoK3O5kG+rH0kWfJjeKd9QpBmQ=
 gioui.org/example v0.8.2-0.20250227093625-76286d538a44 h1:fNFDQk9ApJ3NCowGH8FJOQI2CdmPgG8eRtTkmVZtS+o=
 gioui.org/example v0.8.2-0.20250227093625-76286d538a44/go.mod h1:NTctrwkcz3Jj2TbcgPTaqmQjDZaRhvcJr2Hn8uA6BLI=
@@ -36,10 +36,10 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dblohm7/wingoes v0.0.0-20240820181039-f2b84150679e h1:L+XrFvD0vBIBm+Wf9sFN6aU395t7JROoai0qXZraA4U=
 github.com/dblohm7/wingoes v0.0.0-20240820181039-f2b84150679e/go.mod h1:SUxUaAK/0UG5lYyZR1L1nC4AaYYvSSYTWQSH3FPcxKU=
-github.com/ddkwork/golibrary v0.0.91-0.20250306173050-a0dbb6222439 h1:RUGDU8N0A1RvO+/VbH2Bmcgp9LPY7Rb+92S13OA/GxU=
-github.com/ddkwork/golibrary v0.0.91-0.20250306173050-a0dbb6222439/go.mod h1:asHnV6kPJrWJ5J2QeDZnQawJ1iroGQVifvC8+UoMaXA=
-github.com/ddkwork/ux v0.0.0-20250307192701-99749ca4b442 h1:hCneV46PQ2WR8ybJcbv4j46y23dIs+j0OkpVIUCChHw=
-github.com/ddkwork/ux v0.0.0-20250307192701-99749ca4b442/go.mod h1:+/KXJ916GwsRsiLvNAwDiLETulDrampPNeqBlICCQW4=
+github.com/ddkwork/golibrary v0.0.91-0.20250324091236-7773f1c26781 h1:UAInGeDRB13O+j7rnrhCGs1WEZTcUkunvtd0rRhPM+k=
+github.com/ddkwork/golibrary v0.0.91-0.20250324091236-7773f1c26781/go.mod h1:asHnV6kPJrWJ5J2QeDZnQawJ1iroGQVifvC8+UoMaXA=
+github.com/ddkwork/ux v0.0.0-20250324055700-65ee8f77e2b0 h1:J2o2DSPDCGg5fF2NB9k7XR2cYNXAwCb1zWRflMrTook=
+github.com/ddkwork/ux v0.0.0-20250324055700-65ee8f77e2b0/go.mod h1:9/oRCwIQIE6nBWc6sTZkEavMmlHJwPHfmz1sYmeUezg=
 github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
 github.com/dlclark/regexp2 v1.11.5/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
 github.com/ebitengine/purego v0.9.0-alpha.2.0.20250319192307-d99d2bef7bd5 h1:jab4Vcxo8w40yCeB1Hpxpwb2rORGzU+RCZbxwnMiaU0=

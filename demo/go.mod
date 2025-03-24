@@ -5,18 +5,17 @@ go 1.24.0
 require (
 	eliasnaur.com/font v0.0.0-20230308162249-dd43949cb42d
 	gioui.org v0.8.1-0.20250223181602-72a72a2bc21a
-	gioui.org/cmd v0.8.0
+	gioui.org/cmd v0.8.1-0.20250321120711-01ffdf788daa
 	gioui.org/example v0.8.2-0.20250227093625-76286d538a44
 	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
-	github.com/ddkwork/golibrary v0.0.91-0.20250306173050-a0dbb6222439
-	github.com/ddkwork/ux v0.0.0-20250307192701-99749ca4b442
+	github.com/ddkwork/golibrary v0.0.91-0.20250324091236-7773f1c26781
+	github.com/ddkwork/ux v0.0.0-20250324055700-65ee8f77e2b0
 	github.com/go-vgo/robotgo v0.110.5
 	github.com/gorpher/gowin32 v0.0.11
 	github.com/kbinani/screenshot v0.0.0-20250118074034-a3924b7bbc8c
 	github.com/robotn/gohook v0.42.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.36.0
-	golang.org/x/exp/shiny v0.0.0-20250305212735-054e65f0b394
 	golang.org/x/sys v0.31.0
 )
 
@@ -62,6 +61,7 @@ require (
 	github.com/yuin/goldmark v1.7.8 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
+	golang.org/x/exp/shiny v0.0.0-20250305212735-054e65f0b394 // indirect
 	golang.org/x/image v0.25.0 // indirect
 	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/net v0.37.0 // indirect

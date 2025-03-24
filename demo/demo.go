@@ -149,7 +149,7 @@ func main() {
 					}
 				},
 				RowSelectedCallback: func() {
-					mylog.Struct("selected node", t.SelectedNode.Data)
+					mylog.Struct(t.SelectedNode.Data)
 				},
 				RowDoubleClickCallback: func() {
 					mylog.Info("node:", t.SelectedNode.Data.Path, " double clicked")
@@ -311,7 +311,7 @@ func main() {
 			table := ux.NewTable(datatable)
 			table.SelectionChangedCallback = func(gtx layout.Context, row, col int) {
 				data := table.GetRow(row)
-				mylog.Struct("todo", data) // todo check data
+				mylog.Struct(data) // todo check data
 			}
 
 			table.DoubleClickCallback = func(gtx layout.Context, row, col int) {
