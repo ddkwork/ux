@@ -89,9 +89,7 @@ func (o *Overlay) Layout(gtx layout.Context) layout.Dimensions {
 		}(item)
 	}
 	o.items = o.items[:0]
-	return layout.Dimensions{
-		Size: gtx.Constraints.Max,
-	}
+	return layout.Dimensions{Size: gtx.Constraints.Max}
 }
 
 // RightClickArea wraps a widget and provides a right-click context menu

@@ -117,7 +117,7 @@ func main() {
 							sumBytes += node.Data.ContentLength
 							sumTime += node.Data.PadTime
 						}
-						n.Data.ContentLength = sumBytes
+						n.Data.ContentLength = sumBytes //todo 对容器节点自动求和的单元格着色
 						n.Data.PadTime = sumTime
 					}
 					return []ux.CellData{
@@ -171,7 +171,7 @@ func main() {
 						}
 						var node *ux.Node[packet]
 						if i%10 == 3 {
-							node = ux.NewContainerNode(fmt.Sprintf("Row %d", i+1), data)
+							node = ux.NewContainerNode(fmt.Sprintf("Row %d", i+1), packet{})
 							t.Root.AddChild(node)
 							for j := 0; j < 5; j++ {
 								subData := packet{
@@ -187,7 +187,7 @@ func main() {
 									PadTime:       time.Duration(i+1+j+1) * time.Second,
 								}
 								if j < 2 {
-									subNode := ux.NewContainerNode("Sub Row "+fmt.Sprint(j+1), subData)
+									subNode := ux.NewContainerNode("Sub Row "+fmt.Sprint(j+1), packet{})
 									node.AddChild(subNode)
 									for k := 0; k < 2; k++ {
 										subSubData := packet{
