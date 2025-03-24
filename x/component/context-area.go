@@ -4,6 +4,7 @@ package component
 
 import (
 	"image"
+	"log"
 	"math"
 	"time"
 
@@ -20,37 +21,38 @@ import (
 // widget is overlaid using an op.DeferOp. The contextual widget
 // can be dismissed by primary-clicking within or outside of it.
 type ContextArea struct {
-	LongPressDuration time.Duration
-	activationTimer   *time.Timer
-
-	lastUpdate    time.Time
-	position      f32.Point
-	dims          D
-	active        bool
-	startedActive bool
-	justActivated bool
-	justDismissed bool
+	LongPressDuration time.Duration //长按激活的时间
+	activationTimer   *time.Timer   //用于检测长按的定时器
+	lastUpdate        time.Time     //上次更新的时间，用于避免重复处理事件
+	position          f32.Point     //上下文菜单的位置
+	dims              D             //上下文菜单的尺寸
+	active            bool          //表示上下文菜单是否显示
+	startedActive     bool          //用于记录是否在当前帧开始时菜单是激活状态
+	justActivated     bool          //标记菜单是否刚刚被激活
+	justDismissed     bool          //标记菜单是否刚刚被隐藏
 	// Activation is the pointer Buttons within the context area
 	// that trigger the presentation of the contextual widget. If this
 	// is zero, it will default to pointer.ButtonSecondary.
-	Activation pointer.Buttons
+	Activation pointer.Buttons //触发菜单显示的指针按钮（默认为右键）
 	// AbsolutePosition will position the contextual widget in the
 	// relative to the position of the context area instead of relative
 	// to the position of the click event that triggered the activation.
 	// This is useful for controls (like button-activated menus) where
 	// the contextual content should not be precisely attached to the
 	// click position, but should instead be attached to the button.
-	AbsolutePosition bool
+	AbsolutePosition bool //是否将菜单固定在 ContextArea 的位置，而不是点击位置,下拉菜单，弹出菜单，顶部菜单栏等需要固定位置，表格右键菜单则需要点哪弹哪，不要固定位置，应该根据右击按下的位置计算相对坐标给弹出区域
 	// PositionHint tells the ContextArea the closest edge/corner of the
 	// window to where it is being used in the layout. This helps it to
 	// position the contextual widget without it overflowing the edge of
 	// the window.
-	PositionHint layout.Direction
+	PositionHint layout.Direction //提示 ContextArea 在窗口中的位置，用于调整菜单显示以避免溢出窗口边缘,todo bug
 }
 
 func (r *ContextArea) Activate(p f32.Point) {
 	r.active = true
 	r.justActivated = true
+	r.position = p
+
 	if !r.AbsolutePosition {
 		r.position = p
 	}
@@ -71,6 +73,7 @@ func (r *ContextArea) Update(gtx C) {
 	dismissTag := &r.dims
 
 	r.startedActive = r.active
+	// 处理指针事件
 	// Summon the contextual widget if the area recieved a secondary click.
 	for {
 		ev, ok := gtx.Event(pointer.Filter{
@@ -85,6 +88,7 @@ func (r *ContextArea) Update(gtx C) {
 			continue
 		}
 		if r.active {
+			// 检查是否应关闭菜单
 			// Check whether we should dismiss menu.
 			if e.Buttons.Contain(pointer.ButtonPrimary) {
 				clickPos := e.Position.Sub(r.position)
@@ -120,6 +124,7 @@ func (r *ContextArea) Update(gtx C) {
 		}
 	}
 
+	// 处理外部点击事件以关闭菜单
 	// Dismiss the contextual widget if the user clicked outside of it.
 	for {
 		ev, ok := gtx.Event(pointer.Filter{
@@ -137,6 +142,8 @@ func (r *ContextArea) Update(gtx C) {
 			r.Dismiss()
 		}
 	}
+
+	// 处理内部释放事件以关闭菜单
 	// Dismiss the contextual widget if the user released a click within it.
 	for {
 		ev, ok := gtx.Event(pointer.Filter{
@@ -161,8 +168,6 @@ func (r *ContextArea) Update(gtx C) {
 func (r *ContextArea) Layout(gtx C, w layout.Widget) D {
 	r.Update(gtx)
 	suppressionTag := &r.active
-	dismissTag := &r.dims
-	dims := D{Size: gtx.Constraints.Min}
 
 	var contextual op.CallOp
 	if r.active || r.startedActive {
@@ -172,16 +177,18 @@ func (r *ContextArea) Layout(gtx C, w layout.Widget) D {
 		contextual = func() op.CallOp {
 			macro := op.Record(gtx.Ops)
 			r.dims = w(gtx)
+			//dims = r.dims
 			return macro.Stop()
 		}()
 	}
 
 	if r.active {
-		if int(r.position.X)+r.dims.Size.X > dims.Size.X {
+		// 调整菜单位置以避免溢出窗口边缘
+		if int(r.position.X)+r.dims.Size.X > gtx.Constraints.Max.X {
 			if newX := int(r.position.X) - r.dims.Size.X; newX < 0 {
 				switch r.PositionHint {
 				case layout.E, layout.NE, layout.SE:
-					r.position.X = float32(dims.Size.X - r.dims.Size.X)
+					r.position.X = float32(gtx.Constraints.Max.X - r.dims.Size.X)
 				case layout.W, layout.NW, layout.SW:
 					r.position.X = 0
 				}
@@ -189,18 +196,27 @@ func (r *ContextArea) Layout(gtx C, w layout.Widget) D {
 				r.position.X = float32(newX)
 			}
 		}
-		if int(r.position.Y)+r.dims.Size.Y > dims.Size.Y {
+		if int(r.position.Y)+r.dims.Size.Y > gtx.Constraints.Max.Y {
 			if newY := int(r.position.Y) - r.dims.Size.Y; newY < 0 {
 				switch r.PositionHint {
 				case layout.S, layout.SE, layout.SW:
-					r.position.Y = float32(dims.Size.Y - r.dims.Size.Y)
+					r.position.Y = float32(gtx.Constraints.Max.Y - r.dims.Size.Y)
 				case layout.N, layout.NE, layout.NW:
-					r.position.Y = 0
+					r.position.Y = 0 // 确保菜单顶部不超出窗口顶部
+				default:
+					r.position.Y = float32(gtx.Constraints.Max.Y - r.dims.Size.Y)
 				}
 			} else {
 				r.position.Y = float32(newY)
 			}
 		}
+		// 确保菜单顶部不超出窗口最小Y限制
+		if r.position.Y < float32(gtx.Constraints.Min.Y) {
+			r.position.Y = float32(gtx.Constraints.Min.Y)
+		}
+		log.Println(r.position)
+
+		// 创建透明的遮罩层以阻止对菜单下方内容的输入
 		// Lay out a transparent scrim to block input to things beneath the
 		// contextual widget.
 		suppressionScrim := func() op.CallOp {
@@ -213,6 +229,7 @@ func (r *ContextArea) Layout(gtx C, w layout.Widget) D {
 		}()
 		op.Defer(gtx.Ops, suppressionScrim)
 
+		// 布局上下文菜单
 		// Lay out the contextual widget itself.
 		pos := image.Point{
 			X: int(math.Round(float64(r.position.X))),
@@ -222,11 +239,12 @@ func (r *ContextArea) Layout(gtx C, w layout.Widget) D {
 		op.Offset(pos).Add(gtx.Ops)
 		contextual.Add(gtx.Ops)
 
+		// 创建遮罩层以检测完成与菜单的交互
 		// Lay out a scrim on top of the contextual widget to detect
 		// completed interactions with it (that should dismiss it).
 		pt := pointer.PassOp{}.Push(gtx.Ops)
 		stack := clip.Rect(image.Rectangle{Max: r.dims.Size}).Push(gtx.Ops)
-		event.Op(gtx.Ops, dismissTag)
+		event.Op(gtx.Ops, &r.dims)
 
 		stack.Pop()
 		pt.Pop()
@@ -234,12 +252,13 @@ func (r *ContextArea) Layout(gtx C, w layout.Widget) D {
 		op.Defer(gtx.Ops, contextual)
 	}
 
+	// 捕获上下文区域的指针事件
 	// Capture pointer events in the contextual area.
 	defer pointer.PassOp{}.Push(gtx.Ops).Pop()
 	defer clip.Rect(image.Rectangle{Max: gtx.Constraints.Min}).Push(gtx.Ops).Pop()
 	event.Op(gtx.Ops, r)
 
-	return dims
+	return D{Size: gtx.Constraints.Min}
 }
 
 // Dismiss sets the ContextArea to not be active.

@@ -80,6 +80,7 @@ func (o *Overlay) Layout(gtx layout.Context) layout.Dimensions {
 		call := macro.Stop()
 
 		offset := item.OffsetWithin(layout.FPt(dims.Size), layout.FPt(gtx.Constraints.Max))
+
 		func(item overlayItem) {
 			defer op.TransformOp{}.Push(gtx.Ops).Pop()
 			// defer op.Push(gtx.Ops).Pop()
