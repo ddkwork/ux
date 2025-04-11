@@ -4,15 +4,16 @@ go 1.24.0
 
 require (
 	eliasnaur.com/font v0.0.0-20230308162249-dd43949cb42d
-	gioui.org v0.8.1-0.20250223181602-72a72a2bc21a
+	gioui.org v0.8.1-0.20250409080910-cc6048bc25aa
 	gioui.org/cmd v0.8.1-0.20250321120711-01ffdf788daa
 	gioui.org/example v0.8.2-0.20250227093625-76286d538a44
 	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
-	github.com/ddkwork/golibrary v0.0.91-0.20250324091236-7773f1c26781
-	github.com/ddkwork/ux v0.0.0-20250324055700-65ee8f77e2b0
+	github.com/ddkwork/golibrary v0.1.2-0.20250410110228-d8e55f9c9eda
+	github.com/ddkwork/ux v0.0.0-20250325020620-5f3de8432e18
 	github.com/go-vgo/robotgo v0.110.5
 	github.com/gorpher/gowin32 v0.0.11
 	github.com/kbinani/screenshot v0.0.0-20250118074034-a3924b7bbc8c
+	github.com/oligo/gvcode v0.2.1-0.20250407164913-96886af5c2a8
 	github.com/robotn/gohook v0.42.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.36.0
@@ -42,7 +43,6 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/lufia/plan9stats v0.0.0-20250224150550-a661cff19cfb // indirect
 	github.com/lxn/win v0.0.0-20210218163916-a377121e959e // indirect
-	github.com/oligo/gvcode v0.1.1 // indirect
 	github.com/otiai10/gosseract v2.2.1+incompatible // indirect
 	github.com/otiai10/mint v1.6.3 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
@@ -62,12 +62,12 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
 	golang.org/x/exp/shiny v0.0.0-20250305212735-054e65f0b394 // indirect
-	golang.org/x/image v0.25.0 // indirect
+	golang.org/x/image v0.26.0 // indirect
 	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/net v0.37.0 // indirect
 	golang.org/x/oauth2 v0.27.0 // indirect
-	golang.org/x/sync v0.12.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
+	golang.org/x/sync v0.13.0 // indirect
+	golang.org/x/text v0.24.0 // indirect
 	golang.org/x/tools v0.31.0 // indirect
 	gonum.org/v1/gonum v0.15.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect

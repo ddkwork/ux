@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/ddkwork/ux"
 	"image"
-	"image/color"
 	"log"
 	"os"
 
@@ -16,7 +16,6 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/text"
-	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 )
@@ -108,23 +107,6 @@ func (r *RightClickArea) LayoutUnderlay(gtx C) D {
 	event.Op(gtx.Ops, r)
 	stack.Pop()
 	pt.Pop()
-	//for {
-	//	ev, ok := gtx.Event(pointer.Filter{
-	//		Target: &r.leftPressed,
-	//		Kinds:  pointer.Press | pointer.Release,
-	//	})
-	//	if !ok {
-	//		break
-	//	}
-	//	e, ok := ev.(pointer.Event)
-	//	if !ok {
-	//		continue
-	//	}
-	//	if e.Kind == pointer.Press {
-	//		//r.Dismiss()//todo
-	//		event.Op(gtx.Ops, r) //?
-	//	}
-	//}
 	return D{Size: gtx.Constraints.Max}
 }
 
@@ -210,80 +192,73 @@ func main() {
 
 func loop(w *app.Window) error {
 	var (
-		th                    = material.NewTheme()
-		btn, rBtn, gBtn, bBtn widget.Clickable
-		ops                   op.Ops
-		overlay               Overlay
-		areaColor             = color.NRGBA{A: 255}
-		rca                   = RightClickArea{
-			Overlay: &overlay,
-			Content: func(gtx C) D {
-				btn := material.Button(th, &btn, "Reset")
-				btn.Background = areaColor
-				return btn.Layout(gtx)
-			},
-			Menu: func(gtx C) D {
-				gtx.Constraints.Min = image.Point{}
-				gtx.Constraints.Max.X = gtx.Dp(unit.Dp(200))
-				return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-					layout.Rigid(func(gtx C) D {
-						gtx.Constraints.Min.X = gtx.Constraints.Max.X
-						return material.Button(th, &rBtn, "Redden").Layout(gtx)
-					}),
-					layout.Rigid(func(gtx C) D {
-						gtx.Constraints.Min.X = gtx.Constraints.Max.X
-						return material.Button(th, &bBtn, "Bluify").Layout(gtx)
-					}),
-					layout.Rigid(func(gtx C) D {
-						gtx.Constraints.Min.X = gtx.Constraints.Max.X
-						return material.Button(th, &gBtn, "Greenenate").Layout(gtx)
-					}),
-				)
-			},
-		}
+		th  = material.NewTheme()
+		ops op.Ops
 	)
 	th.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
+
+	rows := make([]RightClickArea, 0, 30)
+	for range 30 {
+		var (
+			overlay               Overlay
+			btn, rBtn, gBtn, bBtn widget.Clickable
+		)
+		rows = append(rows,
+			RightClickArea{
+				Overlay: &overlay,
+				Content: func(gtx C) D {
+					return material.Button(th, &btn, "Reset").Layout(gtx)
+				},
+				Menu: func(gtx C) D {
+					gtx.Constraints.Min = image.Point{}
+					gtx.Constraints.Max.X = gtx.Dp(200)
+					return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+						layout.Rigid(func(gtx C) D {
+							gtx.Constraints.Min.X = gtx.Constraints.Max.X
+							return material.Button(th, &rBtn, "Redden").Layout(gtx)
+						}),
+						layout.Rigid(func(gtx C) D {
+							gtx.Constraints.Min.X = gtx.Constraints.Max.X
+							return material.Button(th, &bBtn, "Bluify").Layout(gtx)
+						}),
+						layout.Rigid(func(gtx C) D {
+							gtx.Constraints.Min.X = gtx.Constraints.Max.X
+							return material.Button(th, &gBtn, "Greenenate").Layout(gtx)
+						}),
+					)
+				},
+			},
+		)
+	}
+
+	list := widget.List{
+		Scrollbar: widget.Scrollbar{},
+		List: layout.List{
+			Axis:        layout.Vertical,
+			ScrollToEnd: false,
+			Alignment:   0,
+			Position:    layout.Position{},
+		},
+	}
+
 	for {
 		switch e := w.Event().(type) {
 		case app.DestroyEvent:
 			return e.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
-			menuClicked := false
-			if rBtn.Clicked(gtx) {
-				menuClicked = true
-				areaColor.R += 64
-			}
-			if gBtn.Clicked(gtx) {
-				menuClicked = true
-				areaColor.G += 64
-			}
-			if bBtn.Clicked(gtx) {
-				menuClicked = true
-				areaColor.B += 64
-			}
-			if menuClicked {
-				rca.CloseMenu()
-			}
-			if btn.Clicked(gtx) {
-				areaColor.R = 0
-				areaColor.G = 0
-				areaColor.B = 0
-			}
-			layout.Center.Layout(gtx, func(gtx C) D {
-				return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-					layout.Rigid(func(gtx C) D {
-						return material.Body1(th, "Right-click or click this button:").Layout(gtx)
+			ux.BackgroundDark(gtx)
+			material.List(th, &list).Layout(gtx, len(rows), func(gtx layout.Context, index int) layout.Dimensions {
+				item := rows[index]
+				return layout.Stack{}.Layout(gtx,
+					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+						return item.Layout(gtx)
 					}),
-					layout.Rigid(func(gtx C) D {
-						gtx.Constraints.Max.X /= 2
-						gtx.Constraints.Max.Y /= 2
-						gtx.Constraints.Min = gtx.Constraints.Max
-						return rca.Layout(gtx)
+					layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+						return item.Overlay.Layout(gtx)
 					}),
 				)
 			})
-			overlay.Layout(gtx)
 			e.Frame(gtx.Ops)
 		}
 	}
