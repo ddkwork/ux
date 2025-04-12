@@ -36,8 +36,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dblohm7/wingoes v0.0.0-20240820181039-f2b84150679e h1:L+XrFvD0vBIBm+Wf9sFN6aU395t7JROoai0qXZraA4U=
 github.com/dblohm7/wingoes v0.0.0-20240820181039-f2b84150679e/go.mod h1:SUxUaAK/0UG5lYyZR1L1nC4AaYYvSSYTWQSH3FPcxKU=
-github.com/ddkwork/golibrary v0.1.2-0.20250410110228-d8e55f9c9eda h1:dP+/IKGPoG0LtgNvAirr1liaQa57yQjRKFq2GJ/CAmY=
-github.com/ddkwork/golibrary v0.1.2-0.20250410110228-d8e55f9c9eda/go.mod h1:ACtaoQlcW1kT94+1qqpiAOuIkxN+CsLpQhcOvmiPsN4=
+github.com/ddkwork/golibrary v0.1.2-0.20250411050210-1497894f0f31 h1:CJ8jCel4Py1RfLh060vDdDTx9ww02u6KMW6uDI1V6L0=
+github.com/ddkwork/golibrary v0.1.2-0.20250411050210-1497894f0f31/go.mod h1:ACtaoQlcW1kT94+1qqpiAOuIkxN+CsLpQhcOvmiPsN4=
 github.com/ddkwork/ux v0.0.0-20250325020620-5f3de8432e18 h1:EciVDNaT/QtnV1aK1M5kNEmD5clKHe+Elz/LzIj1I/8=
 github.com/ddkwork/ux v0.0.0-20250325020620-5f3de8432e18/go.mod h1:b3oanIdlyHzj3OFefpf9XhodGyT1U+wFPfaJj9b6whs=
 github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
@@ -102,8 +102,8 @@ github.com/mailru/easyjson v0.7.0 h1:aizVhC/NAAcKWb+5QsU1iNOZb4Yws5UO2I+aIprQITM
 github.com/mailru/easyjson v0.7.0/go.mod h1:KAzv3t3aY1NaHWoQz1+4F1ccyAH66Jk7yos7ldAVICs=
 github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 h1:zYyBkD/k9seD2A7fsi6Oo2LfFZAehjjQMERAvZLEDnQ=
 github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646/go.mod h1:jpp1/29i3P1S/RLdc7JQKbRpFeM1dOBd8T9ki5s+AY8=
-github.com/oligo/gvcode v0.2.1-0.20250407164913-96886af5c2a8 h1:D5D6A0Zrtj4QiN3mmWYC+Twpm0S4N0vXaskWJRRfU8s=
-github.com/oligo/gvcode v0.2.1-0.20250407164913-96886af5c2a8/go.mod h1:FbEzms1rI1zSHa7EEkupx9FtGnuNa+pqdXuaRbr0YxE=
+github.com/oligo/gvcode v0.2.1-0.20250410165334-c3e76c32a80c h1:yPVn0IPkUk/YtG/8ny5au0PFP1noynpe1+oa5MV1d3Q=
+github.com/oligo/gvcode v0.2.1-0.20250410165334-c3e76c32a80c/go.mod h1:FbEzms1rI1zSHa7EEkupx9FtGnuNa+pqdXuaRbr0YxE=
 github.com/otiai10/gosseract v2.2.1+incompatible h1:Ry5ltVdpdp4LAa2bMjsSJH34XHVOV7XMi41HtzL8X2I=
 github.com/otiai10/gosseract v2.2.1+incompatible/go.mod h1:XrzWItCzCpFRZ35n3YtVTgq5bLAhFIkascoRo8G32QE=
 github.com/otiai10/mint v1.6.3 h1:87qsV/aw1F5as1eH1zS/yqHY85ANKVMgkDrf9rcxbQs=

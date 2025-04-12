@@ -24,7 +24,7 @@ type TextField struct {
 	onTextChange func(text string)
 	borderColor  color.NRGBA
 
-	OnKeyPress func(k key.Name)
+	OnKeyPress func(gtx layout.Context, k key.Name)
 }
 
 func NewTextField(text, placeholder string) *TextField {
@@ -69,14 +69,14 @@ func (t *TextField) Layout(gtx layout.Context) layout.Dimensions {
 		case key.Event:
 			if ev.Name == key.NameReturn {
 				if t.OnKeyPress != nil {
-					t.OnKeyPress(ev.Name)
+					t.OnKeyPress(gtx, ev.Name)
 				}
 			}
 
 			if ev.Name == key.NameEscape {
 				gtx.Execute(key.FocusCmd{Tag: nil})
 				if t.OnKeyPress != nil {
-					t.OnKeyPress(ev.Name)
+					t.OnKeyPress(gtx, ev.Name)
 				}
 			}
 		}

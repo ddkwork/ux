@@ -47,7 +47,7 @@ func NewSearchDropDown() *SearchDropDown {
 	return c
 }
 
-func (c *SearchDropDown) onKeyPress(k key.Name) {
+func (c *SearchDropDown) onKeyPress(gtx layout.Context, k key.Name) {
 	switch k {
 	case key.NameEscape:
 		c.menuContextArea.Dismiss()
@@ -92,7 +92,7 @@ func (c *SearchDropDown) onSearch(query string) {
 	}
 
 	c.results = results
-	c.menuContextArea.Show()
+	c.menuContextArea.Active()
 }
 
 func (c *SearchDropDown) SetLoader(fn func() []Item) {

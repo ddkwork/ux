@@ -133,7 +133,7 @@ type overflowMenu struct {
 	list layout.List
 	// the button that triggers the overflow menu
 	widget.Clickable
-	selectedTag interface{}
+	selectedTag any
 }
 
 func (o *overflowMenu) updateState(gtx layout.Context, th *material.Theme, barPos VerticalAnchorPosition, actions *actionGroup) {
@@ -331,7 +331,7 @@ var overflowButtonInset = layout.Inset{
 // OverflowAction holds information about an action available in an overflow menu
 type OverflowAction struct {
 	Name string
-	Tag  interface{}
+	Tag  any
 }
 
 func Interpolate(a, b color.NRGBA, progress float32) color.NRGBA {
@@ -470,7 +470,7 @@ func (a AppBarContextMenuDismissed) String() string {
 // AppBarOverflowActionClicked indicates that an action in the app bar overflow
 // menu was clicked during the last frame.
 type AppBarOverflowActionClicked struct {
-	Tag interface{}
+	Tag any
 }
 
 func (a AppBarOverflowActionClicked) AppBarEvent() {}

@@ -13,7 +13,7 @@ import (
 	"github.com/ddkwork/golibrary/mylog"
 )
 
-type AnsiToken interface{}
+type AnsiToken any
 
 type EmptyToken struct {
 	AnsiToken

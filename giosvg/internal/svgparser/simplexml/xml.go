@@ -35,7 +35,7 @@ type EndElement struct {
 
 // A Token is an interface holding one of the token types:
 // StartElement, EndElement.
-type Token interface{}
+type Token any
 
 type Decoder interface {
 	Token() (Token, error)

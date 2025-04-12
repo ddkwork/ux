@@ -33,7 +33,7 @@ func fToFixed(f float64) float32 {
 }
 
 // treat the error according to the errorMode
-func (c *iconCursor) handleError(originFmt string, args ...interface{}) error {
+func (c *iconCursor) handleError(originFmt string, args ...any) error {
 	formatted := fmt.Sprintf(originFmt, args...)
 	if c.errorMode == StrictErrorMode {
 		return errors.New(formatted)

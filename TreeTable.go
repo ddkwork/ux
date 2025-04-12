@@ -971,7 +971,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 				case pointer.ButtonSecondary:
 					if e.Kind == pointer.Press {
 						t.header.clickedColumnIndex = i
-						t.header.contextAreas[i].Show()
+						t.header.contextAreas[i].Active()
 					}
 				}
 			}

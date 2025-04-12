@@ -28,7 +28,7 @@ type Screen struct {
 	// This follows the top variable, but can be overridden by scrolling the window
 	scrollTop int
 
-	updatedChannel chan interface{}
+	updatedChannel chan any
 }
 
 func (s *Screen) Lines() []Line {
@@ -236,7 +236,7 @@ func (s *Screen) SetFaint(b bool) {
 	s.style.SetFaint(true)
 }
 
-func NewScreen(size Point, updatedChannel chan interface{}) *Screen {
+func NewScreen(size Point, updatedChannel chan any) *Screen {
 	// background color
 	defaults := Defaults{
 		FgColor:  white,

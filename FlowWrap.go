@@ -13,7 +13,7 @@ type (
 		Cards []Card
 		widget.List
 		Wrap       outlay.FlowWrap
-		Contextual interface{}
+		Contextual any
 		Loaded     bool
 	}
 )

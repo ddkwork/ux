@@ -7,8 +7,8 @@ require (
 	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0
 	github.com/alecthomas/chroma/v2 v2.15.0
-	github.com/ddkwork/golibrary v0.1.2-0.20250410110228-d8e55f9c9eda
-	github.com/oligo/gvcode v0.2.1-0.20250407164913-96886af5c2a8
+	github.com/ddkwork/golibrary v0.1.2-0.20250411050210-1497894f0f31
+	github.com/oligo/gvcode v0.2.1-0.20250410165334-c3e76c32a80c
 	github.com/yuin/goldmark v1.7.8
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394
 	golang.org/x/exp/shiny v0.0.0-20250305212735-054e65f0b394

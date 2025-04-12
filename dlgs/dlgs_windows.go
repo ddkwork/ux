@@ -493,7 +493,7 @@ func getMessageFont() uintptr {
 	return createFontIndirect(&metrics.lfMessageFont)
 }
 
-func registerClass(className string, instance syscall.Handle, fn interface{}) error {
+func registerClass(className string, instance syscall.Handle, fn any) error {
 	var wcx wndClassExW
 	wcx.size = uint32(unsafe.Sizeof(wcx))
 	wcx.wndProc = syscall.NewCallback(fn)

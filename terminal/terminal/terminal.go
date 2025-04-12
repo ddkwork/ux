@@ -22,8 +22,8 @@ import (
 type TerminalWindow struct {
 	Screen         *os.File
 	screen         *terminal.Screen
-	quitChannel    chan interface{}
-	updatedChannel chan interface{}
+	quitChannel    chan any
+	updatedChannel chan any
 }
 
 func (l TerminalWindow) Close() {
@@ -74,7 +74,7 @@ func (l TerminalWindow) Open() error {
 }
 
 func NewTerminalWindow(size terminal.Point) *TerminalWindow {
-	updatedChannel := make(chan interface{})
+	updatedChannel := make(chan any)
 	screen := terminal.NewScreen(size, updatedChannel)
 
 	r, w := mylog.Check3(os.Pipe())
@@ -87,7 +87,7 @@ func NewTerminalWindow(size terminal.Point) *TerminalWindow {
 		Screen:         w,
 		screen:         screen,
 		updatedChannel: updatedChannel,
-		quitChannel:    make(chan interface{}),
+		quitChannel:    make(chan any),
 	}
 }
 
