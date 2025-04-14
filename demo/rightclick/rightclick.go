@@ -71,11 +71,9 @@ func (o *Overlay) Layout(gtx layout.Context) layout.Dimensions {
 		dims := item.Widget(gtx)
 		call := macro.Stop()
 		offset := item.OffsetWithin(layout.FPt(dims.Size), layout.FPt(gtx.Constraints.Max))
-		func(item overlayItem) {
-			defer op.TransformOp{}.Push(gtx.Ops).Pop()
-			op.Offset(image.Point{X: int(offset.X), Y: int(offset.Y)}).Add(gtx.Ops)
-			call.Add(gtx.Ops)
-		}(item)
+		stack := op.Offset(image.Point{X: int(offset.X), Y: int(offset.Y)}).Push(gtx.Ops)
+		call.Add(gtx.Ops)
+		stack.Pop()
 	}
 	o.items = o.items[:0]
 	return layout.Dimensions{Size: gtx.Constraints.Max}
@@ -188,24 +186,13 @@ type PopMenu struct {
 	Overlay
 	itemProvider *ux.ContextMenu
 	content      layout.Widget //row or button or label
-	rowButton    *widget.Clickable
 	*RightClickArea
 }
 
 func (p *PopMenu) Layout(gtx layout.Context) layout.Dimensions {
 	//event.Op(gtx.Ops, p)
-
-	//行单双击实践
-	if p.rowButton.Clicked(gtx) {
-		println("row selected")
-	}
-	p.RightClickArea.Layout(gtx) //在哪弹出菜单，
-	// todo 弹出菜单限制在他的区域内？似乎不合理,并且可能会导致溢出,
-	//  但是不这样限制的话应该关联点击了哪一行，如果不在当前行弹出菜单也是有点奇怪
-	//  原版似乎是限制区域的,这似乎合理，得实现这个事件行为
-
-	//右键菜单的item事件
-	for _, item := range p.itemProvider.Items {
+	p.RightClickArea.Layout(gtx)                //在哪弹出菜单，
+	for _, item := range p.itemProvider.Items { //右键菜单的item事件
 		if item.Clickable.Clicked(gtx) {
 			println(item.Title)
 			p.CloseMenu()
@@ -214,7 +201,7 @@ func (p *PopMenu) Layout(gtx layout.Context) layout.Dimensions {
 	return p.Overlay.Layout(gtx) //弹出菜单
 }
 
-func NewPopMenu(rowButton *widget.Clickable, content layout.Widget, itemProvider *ux.ContextMenu) *PopMenu {
+func NewPopMenu(itemProvider *ux.ContextMenu, drawRow layout.Widget) *PopMenu {
 	p := &PopMenu{
 		Overlay:      Overlay{},
 		itemProvider: itemProvider,
@@ -222,9 +209,8 @@ func NewPopMenu(rowButton *widget.Clickable, content layout.Widget, itemProvider
 			//gtx.Constraints.Max.X /= 2
 			gtx.Constraints.Max.Y = 68 //模拟行高
 			gtx.Constraints.Min = gtx.Constraints.Max
-			return content(gtx)
+			return drawRow(gtx)
 		},
-		rowButton:      rowButton,
 		RightClickArea: nil,
 	}
 	r := &RightClickArea{
@@ -236,7 +222,7 @@ func NewPopMenu(rowButton *widget.Clickable, content layout.Widget, itemProvider
 			for i, item := range p.itemProvider.Items {
 				children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = gtx.Constraints.Max.X
-					//gtx.Constraints.Min.Y = 700 //gtx.Constraints.Max.Y
+					//gtx.Constraints.Min.Y = 1700 //gtx.Constraints.Max.Y
 					return ux.Background{Color: ux.RowColor(i + 1)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return material.Button(th.Theme, &item.Clickable, item.Title).Layout(gtx)
 					})
@@ -256,14 +242,10 @@ func NewPopMenu(rowButton *widget.Clickable, content layout.Widget, itemProvider
 }
 
 func loop(w *app.Window) error {
-	row1Button := new(widget.Clickable)
-	popMenu := NewPopMenu(row1Button,
-		func(gtx layout.Context) layout.Dimensions {
-			return material.Button(th.Theme, row1Button, "row").Layout(gtx)
-			//return ux.Button(new(widget.Clickable), nil, "row").Layout(gtx)
-		},
-		ux.NewContextMenu(),
-	)
+	rowClick := &widget.Clickable{}
+	popMenu := NewPopMenu(ux.NewContextMenu(), func(gtx layout.Context) layout.Dimensions {
+		return material.Button(th.Theme, rowClick, "draw row").Layout(gtx)
+	})
 	popMenu.itemProvider.AddItem(ux.ContextMenuItem{
 		Title:         "item1",
 		Icon:          nil,
