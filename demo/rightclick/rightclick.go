@@ -19,11 +19,6 @@ import (
 	"gioui.org/widget"
 )
 
-type (
-	C = layout.Context
-	D = layout.Dimensions
-)
-
 // Anchor is an opaque reference to a global coordinate position.
 // It can be provided to methods in this package as a reference
 // to a global coordinate.
@@ -100,13 +95,13 @@ type RightClickArea struct {
 // LayoutUnderlay creates an invisible layer to listen for click events
 // across the entire graphics context. It sizes itself to be the maximum
 // size of the context, and should be anchored at the origin.
-func (r *RightClickArea) LayoutUnderlay(gtx C) D {
+func (r *RightClickArea) LayoutUnderlay(gtx layout.Context) layout.Dimensions {
 	pt := pointer.PassOp{}.Push(gtx.Ops)
 	stack := clip.Rect{Max: gtx.Constraints.Max}.Push(gtx.Ops)
 	event.Op(gtx.Ops, r)
 	stack.Pop()
 	pt.Pop()
-	return D{Size: gtx.Constraints.Max}
+	return layout.Dimensions{Size: gtx.Constraints.Max}
 }
 
 // CloseMenu cancels the display of the context menu.
@@ -116,7 +111,7 @@ func (r *RightClickArea) CloseMenu() {
 }
 
 // Layout renders the clickable area and configures its overlay.
-func (r *RightClickArea) Layout(gtx C) D {
+func (r *RightClickArea) Layout(gtx layout.Context) layout.Dimensions {
 	event.Op(gtx.Ops, r)
 	for {
 		ev, ok := gtx.Event(pointer.Filter{
@@ -189,17 +184,11 @@ func main() {
 	app.Main()
 }
 
-type itemCtx struct {
-	button *widget.Clickable
-	icon   any
-	text   string
-}
-
 type PopMenu struct {
 	Overlay
-	items     []itemCtx
-	content   layout.Widget //row or button or label
-	rowButton *widget.Clickable
+	itemProvider *ux.ContextMenu
+	content      layout.Widget //row or button or label
+	rowButton    *widget.Clickable
 	*RightClickArea
 }
 
@@ -216,9 +205,9 @@ func (p *PopMenu) Layout(gtx layout.Context) layout.Dimensions {
 	//  原版似乎是限制区域的,这似乎合理，得实现这个事件行为
 
 	//右键菜单的item事件
-	for _, item := range p.items {
-		if item.button.Clicked(gtx) {
-			println(item.text)
+	for _, item := range p.itemProvider.Items {
+		if item.Clickable.Clicked(gtx) {
+			println(item.Title)
 			p.CloseMenu()
 		}
 	}
@@ -226,12 +215,10 @@ func (p *PopMenu) Layout(gtx layout.Context) layout.Dimensions {
 	return layout.Dimensions{Size: gtx.Constraints.Max}
 }
 
-var th = ux.ThemeDefault()
-
-func NewPopMenu(rowButton *widget.Clickable, content layout.Widget, items ...itemCtx) *PopMenu {
+func NewPopMenu(rowButton *widget.Clickable, content layout.Widget, itemProvider *ux.ContextMenu) *PopMenu {
 	p := &PopMenu{
-		Overlay: Overlay{},
-		items:   items,
+		Overlay:      Overlay{},
+		itemProvider: itemProvider,
 		content: func(gtx layout.Context) layout.Dimensions {
 			//gtx.Constraints.Max.X /= 2
 			gtx.Constraints.Max.Y = 68 //模拟行高
@@ -247,13 +234,13 @@ func NewPopMenu(rowButton *widget.Clickable, content layout.Widget, items ...ite
 			gtx.Constraints.Min = image.Point{}
 			gtx.Constraints.Max.X = gtx.Dp(unit.Dp(200)) //todo 斑马线，分隔条，圆角，长按支持apk
 			var children []layout.FlexChild
-			for i, item := range items {
-				children = append(children, layout.Rigid(func(gtx C) D {
+			for i, item := range p.itemProvider.Items {
+				children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = gtx.Constraints.Max.X
+					//gtx.Constraints.Min.Y = 700 //gtx.Constraints.Max.Y
 					return ux.Background{Color: ux.RowColor(i + 1)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						return material.Button(th.Theme, item.button, item.text).Layout(gtx)
+						return material.Button(th.Theme, &item.Clickable, item.Title).Layout(gtx)
 					})
-
 					//return component.Surface().Layout(gtx)
 					//gtx.Constraints.Min.X = 1900
 					//return ux.Button(item.button, item.icon, item.text).Layout(gtx)
@@ -276,22 +263,34 @@ func loop(w *app.Window) error {
 			return material.Button(th.Theme, row1Button, "row").Layout(gtx)
 			//return ux.Button(new(widget.Clickable), nil, "row").Layout(gtx)
 		},
-		itemCtx{
-			button: &widget.Clickable{},
-			icon:   nil,
-			text:   "item1",
-		},
-		itemCtx{
-			button: &widget.Clickable{},
-			icon:   nil,
-			text:   "item2",
-		},
-		itemCtx{
-			button: &widget.Clickable{},
-			icon:   nil,
-			text:   "item3",
-		},
+		ux.NewContextMenu(),
 	)
+	popMenu.itemProvider.AddItem(ux.ContextMenuItem{
+		Title:         "item1",
+		Icon:          nil,
+		Can:           nil,
+		Do:            nil,
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
+	})
+
+	popMenu.itemProvider.AddItem(ux.ContextMenuItem{
+		Title:         "item2",
+		Icon:          nil,
+		Can:           nil,
+		Do:            nil,
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
+	})
+
+	popMenu.itemProvider.AddItem(ux.ContextMenuItem{
+		Title:         "item3",
+		Icon:          nil,
+		Can:           nil,
+		Do:            nil,
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
+	})
 
 	var ops op.Ops
 	for {
@@ -306,3 +305,5 @@ func loop(w *app.Window) error {
 		}
 	}
 }
+
+var th = ux.NewTheme()

@@ -39,21 +39,21 @@ func (p *MenuObj) Layout(gtx layout.Context) layout.Dimensions {
 		p.menuState = component.MenuState{
 			Options: []func(gtx C) D{
 				func(gtx C) D {
-					item := component.MenuItem(ux.ThemeDefault().Theme, &p.balanceButton, "Balance")
+					item := component.MenuItem(th.Theme, &p.balanceButton, "Balance")
 					item.Icon = ux.ContentCreateIcon
-					item.Hint = component.MenuHintText(ux.ThemeDefault().Theme, "Hint")
+					item.Hint = component.MenuHintText(th.Theme, "Hint")
 					return item.Layout(gtx)
 				},
 				func(gtx C) D {
-					item := component.MenuItem(ux.ThemeDefault().Theme, &p.accountButton, "Account")
+					item := component.MenuItem(th.Theme, &p.accountButton, "Account")
 					item.Icon = ux.ActionCodeIcon
-					item.Hint = component.MenuHintText(ux.ThemeDefault().Theme, "Hint")
+					item.Hint = component.MenuHintText(th.Theme, "Hint")
 					return item.Layout(gtx)
 				},
 				func(gtx C) D {
-					item := component.MenuItem(ux.ThemeDefault().Theme, &p.cartButton, "Cart")
+					item := component.MenuItem(th.Theme, &p.cartButton, "Cart")
 					item.Icon = ux.ActionSearchIcon
-					item.Hint = component.MenuHintText(ux.ThemeDefault().Theme, "Hint")
+					item.Hint = component.MenuHintText(th.Theme, "Hint")
 					return item.Layout(gtx)
 				},
 			},
@@ -71,7 +71,7 @@ func (p *MenuObj) Layout(gtx layout.Context) layout.Dimensions {
 	return layout.Flex{}.Layout(gtx,
 		layout.Flexed(.5, func(gtx C) D {
 			p.menuDemoList.Axis = layout.Vertical
-			return material.List(ux.ThemeDefault().Theme, &p.menuDemoList).Layout(gtx, 30, func(gtx C, index int) D {
+			return material.List(th.Theme, &p.menuDemoList).Layout(gtx, 30, func(gtx C, index int) D {
 				if len(p.contextAreas) < index+1 {
 					p.contextAreas = append(p.contextAreas, &component.ContextArea{})
 				}
@@ -79,13 +79,13 @@ func (p *MenuObj) Layout(gtx layout.Context) layout.Dimensions {
 				return layout.Stack{}.Layout(gtx,
 					layout.Stacked(func(gtx C) D {
 						gtx.Constraints.Min.X = gtx.Constraints.Max.X
-						return layout.UniformInset(unit.Dp(8)).Layout(gtx, material.Body1(ux.ThemeDefault().Theme, fmt.Sprintf("Item %d", index)).Layout)
+						return layout.UniformInset(unit.Dp(8)).Layout(gtx, material.Body1(th.Theme, fmt.Sprintf("Item %d", index)).Layout)
 					}),
 					layout.Expanded(func(gtx C) D {
 						return contextArea.Layout(gtx, func(gtx C) D {
 							gtx.Constraints.Min.X = 0
-							return p.drawContextArea(gtx, ux.ThemeDefault().Theme)
-							return component.Menu(ux.ThemeDefault().Theme, &p.menuState).Layout(gtx)
+							return p.drawContextArea(gtx, th.Theme)
+							return component.Menu(th.Theme, &p.menuState).Layout(gtx)
 						})
 					}),
 				)
@@ -112,3 +112,5 @@ func (p *MenuObj) drawContextArea(gtx C, th *material.Theme) D {
 		return menuStyle.Layout(gtx)
 	})
 }
+
+var th = ux.NewTheme()

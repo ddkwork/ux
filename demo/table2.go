@@ -236,7 +236,7 @@ func (g *GoroutineList) GetCellData() [][]string {
 }
 
 func LabelCell(label string) material.LabelStyle {
-	l := material.Label(ux.ThemeDefault().Theme, 12, label)
+	l := material.Label(ux.NewTheme().Theme, 12, label)
 	l.MaxLines = 1
 	return l
 }

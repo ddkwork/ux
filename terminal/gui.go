@@ -67,7 +67,7 @@ func Console(screen *Screen, settings *ConsoleSettings) layout.Widget {
 						Bottom: settings.paddingY,
 						Left:   settings.paddingX,
 					}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						t := styledtext.Text(ux.ThemeDefault().Shaper, createSpansFrom(screen)...)
+						t := styledtext.Text(ux.NewTheme().Shaper, createSpansFrom(screen)...)
 						t.WrapPolicy = styledtext.WrapGraphemes
 						return t.Layout(gtx, nil)
 					})

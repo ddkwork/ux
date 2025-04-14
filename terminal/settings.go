@@ -50,7 +50,7 @@ const (
 )
 
 func (s *ConsoleSettings) update(screen *Screen, gtx layout.Context) layout.Context {
-	cs := s.getCharSize(screen.defaults.Font, gtx.Sp(screen.defaults.FontSize), ux.ThemeDefault().Shaper)
+	cs := s.getCharSize(screen.defaults.Font, gtx.Sp(screen.defaults.FontSize), ux.NewTheme().Shaper)
 
 	if s.lastLayoutWidth != gtx.Constraints.Max.X {
 		s.lastLayoutWidth = gtx.Constraints.Max.X

@@ -11,10 +11,6 @@ import (
 
 var th = NewTheme()
 
-func ThemeDefault() *Theme {
-	return th
-}
-
 //var theme = Theme()
 //
 //func Theme() *material.Theme {

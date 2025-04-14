@@ -44,7 +44,7 @@ type Page struct {
 
 func (p *Page) Layout(gtx layout.Context) layout.Dimensions {
 	// if click on "Open Dialog:
-	th := ux.ThemeDefault()
+	th := ux.NewTheme()
 	if p.submit.Clicked(gtx) {
 		// Your dialog:
 		p.dialog = func(gtx layout.Context) layout.Dimensions {
