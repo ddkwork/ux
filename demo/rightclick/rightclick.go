@@ -247,10 +247,14 @@ func NewPopMenu(rowButton *widget.Clickable, content layout.Widget, items ...ite
 			gtx.Constraints.Min = image.Point{}
 			gtx.Constraints.Max.X = gtx.Dp(unit.Dp(200)) //todo 斑马线，分隔条，圆角，长按支持apk
 			var children []layout.FlexChild
-			for _, item := range items {
+			for i, item := range items {
 				children = append(children, layout.Rigid(func(gtx C) D {
 					gtx.Constraints.Min.X = gtx.Constraints.Max.X
-					return material.Button(th.Theme, item.button, item.text).Layout(gtx)
+					return ux.Background{Color: ux.RowColor(i + 1)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return material.Button(th.Theme, item.button, item.text).Layout(gtx)
+					})
+
+					//return component.Surface().Layout(gtx)
 					//gtx.Constraints.Min.X = 1900
 					//return ux.Button(item.button, item.icon, item.text).Layout(gtx)
 				}))

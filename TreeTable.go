@@ -216,9 +216,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return list.Layout(gtx, len(t.rootRows), func(gtx layout.Context, index int) layout.Dimensions {
-				t.UpdateTouch(gtx) // 更新触摸事件处理逻辑
 				return t.RowFrame(gtx, t.rootRows[index], index)
-
 				//////////////////////////
 				//t.inLayoutHeader = false
 				//return t.layoutDrag(gtx, func(gtx layout.Context, row int) layout.Dimensions {
@@ -1093,66 +1091,6 @@ func (t *TreeTable[T]) CopyColumn(gtx layout.Context) string {
 	gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(g.Format()))})
 	return g.String()
 }
-
-func (t *TreeTable[T]) UpdateTouch(gtx layout.Context) {
-	// 检测触摸事件
-	//for _, ev := range gtx.Events(n) {
-	//	if e, ok := ev.(pointer.Event); ok {
-	//		switch e.Type {
-	//		case pointer.Press:
-	//			n.pressStarted = time.Now() // 记录按压开始时间
-	//			n.longPressed = false       // 重置长按状态
-	//		case pointer.Release:
-	//			if n.longPressed {
-	//				// 如果已经触发了长按事件，不需要额外处理
-	//				return
-	//			}
-	//			// 检查是否是点击事件
-	//			if time.Since(n.pressStarted) < LongPressDuration {
-	//				// 处理点击事件
-	//				if n.rowClick.OnClicked() {
-	//					n.isOpen = !n.isOpen
-	//					if n.cellClickedCallback != nil {
-	//						n.cellClickedCallback(n)
-	//					}
-	//					if t.RowSelectedCallback != nil {
-	//						t.RowSelectedCallback(n)
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
-
-	// 检测长按事件
-	if gtx.Now.Sub(t.pressStarted) > LongPressDuration && !t.longPressed {
-		t.longPressed = true
-		if t.LongPressCallback != nil {
-			t.LongPressCallback(t.SelectedNode)
-		}
-	}
-}
-
-//func (t *TreeTable[T]) UpdateTouch2(gtx layout.Context) {
-//	if gtx.Now.Sub(t.pressStarted) > LongPressDuration && !t.longPressed {
-//		t.longPressed = true
-//		if t.LongPressCallback != nil {
-//			t.LongPressCallback(t.SelectedNode)
-//		}
-//	}
-//	// 添加对 pointer.Press 事件的处理以更新 pressStarted
-//	if evt, ok := gtx.Source.Event(pointer.Filter{
-//		Target: &t.rowClick,
-//		Kinds:  pointer.Press,
-//	}); ok {
-//		if e, ok := evt.(pointer.Event); ok {
-//			if e.Kind == pointer.Press {
-//				t.pressStarted = gtx.Now
-//				t.longPressed = false
-//			}
-//		}
-//	}
-//}
 
 type TableDragData[T any] struct {
 	Table *Node[T]
