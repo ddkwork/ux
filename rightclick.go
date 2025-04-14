@@ -1,8 +1,7 @@
-package main
+package ux
 
 import (
 	"fmt"
-	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/widget/material"
 	"image"
 	"log"
@@ -65,15 +64,17 @@ func (o *Overlay) LayoutAt(anchor Anchor, widget layout.Widget) {
 	o.items = append(o.items, overlayItem{Anchor: anchor, Widget: widget})
 }
 
-func (o *Overlay) Layout(gtx layout.Context) layout.Dimensions { //类似stack布局的遮罩,但是在表格内不生效？
+func (o *Overlay) Layout(gtx layout.Context) layout.Dimensions { //stack遮罩layout的自定义坐标布局实现
 	for _, item := range o.items {
 		macro := op.Record(gtx.Ops)
 		dims := item.Widget(gtx)
 		call := macro.Stop()
 		offset := item.OffsetWithin(layout.FPt(dims.Size), layout.FPt(gtx.Constraints.Max))
+		//func(item overlayItem) {
 		stack := op.Offset(image.Point{X: int(offset.X), Y: int(offset.Y)}).Push(gtx.Ops)
 		call.Add(gtx.Ops)
 		stack.Pop()
+		//}(item)
 	}
 	o.items = o.items[:0]
 	return layout.Dimensions{Size: gtx.Constraints.Max}
@@ -93,13 +94,13 @@ type RightClickArea struct {
 // LayoutUnderlay creates an invisible layer to listen for click events
 // across the entire graphics context. It sizes itself to be the maximum
 // size of the context, and should be anchored at the origin.
-func (r *RightClickArea) LayoutUnderlay(gtx layout.Context) layout.Dimensions {
+func (r *RightClickArea) LayoutUnderlay(gtx C) D {
 	pt := pointer.PassOp{}.Push(gtx.Ops)
 	stack := clip.Rect{Max: gtx.Constraints.Max}.Push(gtx.Ops)
 	event.Op(gtx.Ops, r)
 	stack.Pop()
 	pt.Pop()
-	return layout.Dimensions{Size: gtx.Constraints.Max}
+	return D{Size: gtx.Constraints.Max}
 }
 
 // CloseMenu cancels the display of the context menu.
@@ -109,7 +110,7 @@ func (r *RightClickArea) CloseMenu() {
 }
 
 // Layout renders the clickable area and configures its overlay.
-func (r *RightClickArea) Layout(gtx layout.Context) layout.Dimensions {
+func (r *RightClickArea) Layout(gtx C) D {
 	event.Op(gtx.Ops, r)
 	for {
 		ev, ok := gtx.Event(pointer.Filter{
@@ -184,31 +185,40 @@ func main() {
 
 type PopMenu struct {
 	Overlay
-	itemProvider *ux.ContextMenu
+	itemProvider *ContextMenu
 	content      layout.Widget //row or button or label
 	*RightClickArea
 }
 
 func (p *PopMenu) Layout(gtx layout.Context) layout.Dimensions {
-	p.RightClickArea.Layout(gtx)                //在哪弹出菜单，
-	for _, item := range p.itemProvider.Items { //右键菜单的item事件，点击item执行回调，然后销毁弹出菜单
+	//event.Op(gtx.Ops, p)
+
+	//行单双击实践
+	//if p.rowButton.Clicked(gtx) {
+	//	println("row selected")
+	//}
+	p.RightClickArea.Layout(gtx) //在哪弹出菜单，通过调用content布局，也就是点击行触发rowButton的点击事件，获点击的行，然后rowButton的layout内布局表格ro的渲染，所以理论上可以无需渲染rowButton出来任何东西，调试模式可以渲染一个带标题的按钮
+	// todo 弹出菜单限制在他的区域内？似乎不合理,并且可能会导致溢出,
+	//  但是不这样限制的话应该关联点击了哪一行，如果不在当前行弹出菜单也是有点奇怪
+	//  原版似乎是限制区域的,这似乎合理，得实现这个事件行为
+
+	//右键菜单的item事件
+	for _, item := range p.itemProvider.Items {
 		if item.Clickable.Clicked(gtx) {
-			println(item.Title) //todo 增加回调
+			println(item.Title) //todo call item callback
 			p.CloseMenu()
 		}
 	}
 	return p.Overlay.Layout(gtx) //弹出菜单
 }
 
-func NewPopMenu(itemProvider *ux.ContextMenu, drawRow layout.Widget) *PopMenu { //todo 既然塞入表格失败了，那么可以试试音速启动的按钮右键看是否工作
+func NewPopMenu(itemProvider *ContextMenu, drawRow layout.Widget) *PopMenu {
 	p := &PopMenu{
 		Overlay:      Overlay{},
 		itemProvider: itemProvider,
 		content: func(gtx layout.Context) layout.Dimensions {
-			//gtx.Constraints.Max.X /= 2
-			gtx.Constraints.Max.Y = 68 //模拟行高
 			gtx.Constraints.Min = gtx.Constraints.Max
-			return drawRow(gtx) //todo 理论上这里就是把表格的行渲染塞进来而已，因为overlay的布局已经实现了stack布局的遮罩效果了，但是塞入表格后似乎没有阻塞事件的效果还是别的原因，渲染不正常
+			return drawRow(gtx) //todo bug
 		},
 		RightClickArea: nil,
 	}
@@ -219,17 +229,16 @@ func NewPopMenu(itemProvider *ux.ContextMenu, drawRow layout.Widget) *PopMenu { 
 			gtx.Constraints.Max.X = gtx.Dp(unit.Dp(200)) //todo 斑马线，分隔条，圆角，长按支持apk
 			var children []layout.FlexChild
 			for i, item := range p.itemProvider.Items {
-				children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					gtx.Constraints.Min.X = gtx.Constraints.Max.X
-					//gtx.Constraints.Min.Y = 1700 //gtx.Constraints.Max.Y
-					return ux.Background{Color: ux.RowColor(i + 1)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { //todo 菜单item背景色不生效
+				children = append(children, layout.Rigid(func(gtx C) D {
+					gtx.Constraints.Min.X = gtx.Constraints.Max.X //弹出菜单的item统一宽度，太窄不美观
+					//gtx.Constraints.Min.Y = 3000                  //todo bug                  //gtx.Constraints.Max.Y
+					//return material.Button(th.Theme, &item.Clickable, item.Title).Layout(gtx)
+					return Background{Color: RowColor(i + 1)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { //not work
 						return material.Button(th.Theme, &item.Clickable, item.Title).Layout(gtx)
 					})
-					//gtx.Constraints.Min.X = 1900
-					//return ux.Button(item.button, item.icon, item.text).Layout(gtx)
 				}))
 			}
-			return layout.Flex{Axis: layout.Vertical}.Layout(gtx, children...) //塞进表格这里渲染不正常
+			return layout.Flex{Axis: layout.Vertical}.Layout(gtx, children...)
 		},
 		Anchor:      nil,
 		Overlay:     &p.Overlay,
@@ -240,11 +249,8 @@ func NewPopMenu(itemProvider *ux.ContextMenu, drawRow layout.Widget) *PopMenu { 
 }
 
 func loop(w *app.Window) error {
-	rowClick := &widget.Clickable{}
-	popMenu := NewPopMenu(ux.NewContextMenu(), func(gtx layout.Context) layout.Dimensions { //todo 多行布局各种右键菜单模拟失败
-		return material.Button(th.Theme, rowClick, "draw row").Layout(gtx)
-	})
-	popMenu.itemProvider.AddItem(ux.ContextMenuItem{
+	popMenu := NewPopMenu(NewContextMenu(), nil)
+	popMenu.itemProvider.AddItem(ContextMenuItem{
 		Title:         "item1",
 		Icon:          nil,
 		Can:           nil,
@@ -253,7 +259,7 @@ func loop(w *app.Window) error {
 		Clickable:     widget.Clickable{},
 	})
 
-	popMenu.itemProvider.AddItem(ux.ContextMenuItem{
+	popMenu.itemProvider.AddItem(ContextMenuItem{
 		Title:         "item2",
 		Icon:          nil,
 		Can:           nil,
@@ -262,7 +268,7 @@ func loop(w *app.Window) error {
 		Clickable:     widget.Clickable{},
 	})
 
-	popMenu.itemProvider.AddItem(ux.ContextMenuItem{
+	popMenu.itemProvider.AddItem(ContextMenuItem{
 		Title:         "item3",
 		Icon:          nil,
 		Can:           nil,
@@ -278,11 +284,9 @@ func loop(w *app.Window) error {
 			return e.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
-			ux.BackgroundDark(gtx)
+			BackgroundDark(gtx)
 			layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions { return popMenu.Layout(gtx) })
 			e.Frame(gtx.Ops)
 		}
 	}
 }
-
-var th = ux.NewTheme()
