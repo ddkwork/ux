@@ -2,23 +2,21 @@ package main
 
 import (
 	"fmt"
+	"github.com/ddkwork/ux"
+	"github.com/ddkwork/ux/widget/material"
 	"image"
-	"image/color"
 	"log"
 	"os"
 
 	"gioui.org/app"
 	"gioui.org/f32"
-	"gioui.org/font/gofont"
 	"gioui.org/io/event"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
-	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
 )
 
 type (
@@ -108,23 +106,6 @@ func (r *RightClickArea) LayoutUnderlay(gtx C) D {
 	event.Op(gtx.Ops, r)
 	stack.Pop()
 	pt.Pop()
-	//for {
-	//	ev, ok := gtx.Event(pointer.Filter{
-	//		Target: &r.leftPressed,
-	//		Kinds:  pointer.Press | pointer.Release,
-	//	})
-	//	if !ok {
-	//		break
-	//	}
-	//	e, ok := ev.(pointer.Event)
-	//	if !ok {
-	//		continue
-	//	}
-	//	if e.Kind == pointer.Press {
-	//		//r.Dismiss()//todo
-	//		event.Op(gtx.Ops, r) //?
-	//	}
-	//}
 	return D{Size: gtx.Constraints.Max}
 }
 
@@ -208,82 +189,115 @@ func main() {
 	app.Main()
 }
 
-func loop(w *app.Window) error {
-	var (
-		th                    = material.NewTheme()
-		btn, rBtn, gBtn, bBtn widget.Clickable
-		ops                   op.Ops
-		overlay               Overlay
-		areaColor             = color.NRGBA{A: 255}
-		rca                   = RightClickArea{
-			Overlay: &overlay,
-			Content: func(gtx C) D {
-				btn := material.Button(th, &btn, "Reset")
-				btn.Background = areaColor
-				return btn.Layout(gtx)
-			},
-			Menu: func(gtx C) D {
-				gtx.Constraints.Min = image.Point{}
-				gtx.Constraints.Max.X = gtx.Dp(unit.Dp(200))
-				return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-					layout.Rigid(func(gtx C) D {
-						gtx.Constraints.Min.X = gtx.Constraints.Max.X
-						return material.Button(th, &rBtn, "Redden").Layout(gtx)
-					}),
-					layout.Rigid(func(gtx C) D {
-						gtx.Constraints.Min.X = gtx.Constraints.Max.X
-						return material.Button(th, &bBtn, "Bluify").Layout(gtx)
-					}),
-					layout.Rigid(func(gtx C) D {
-						gtx.Constraints.Min.X = gtx.Constraints.Max.X
-						return material.Button(th, &gBtn, "Greenenate").Layout(gtx)
-					}),
-				)
-			},
+type itemCtx struct {
+	button *widget.Clickable
+	icon   any
+	text   string
+}
+
+type PopMenu struct {
+	Overlay
+	items     []itemCtx
+	content   layout.Widget //row or button or label
+	rowButton *widget.Clickable
+	*RightClickArea
+}
+
+func (p *PopMenu) Layout(gtx layout.Context) layout.Dimensions {
+	//event.Op(gtx.Ops, p)
+
+	//行单双击实践
+	if p.rowButton.Clicked(gtx) {
+		println("row selected")
+	}
+	p.RightClickArea.Layout(gtx) //在哪弹出菜单，
+	// todo 弹出菜单限制在他的区域内？似乎不合理,并且可能会导致溢出,
+	//  但是不这样限制的话应该关联点击了哪一行，如果不在当前行弹出菜单也是有点奇怪
+	//  原版似乎是限制区域的,这似乎合理，得实现这个事件行为
+
+	//右键菜单的item事件
+	for _, item := range p.items {
+		if item.button.Clicked(gtx) {
+			println(item.text)
+			p.CloseMenu()
 		}
+	}
+	p.Overlay.Layout(gtx) //弹出菜单
+	return layout.Dimensions{Size: gtx.Constraints.Max}
+}
+
+var th = ux.ThemeDefault()
+
+func NewPopMenu(rowButton *widget.Clickable, content layout.Widget, items ...itemCtx) *PopMenu {
+	p := &PopMenu{
+		Overlay: Overlay{},
+		items:   items,
+		content: func(gtx layout.Context) layout.Dimensions {
+			//gtx.Constraints.Max.X /= 2
+			gtx.Constraints.Max.Y = 68 //模拟行高
+			gtx.Constraints.Min = gtx.Constraints.Max
+			return content(gtx)
+		},
+		rowButton:      rowButton,
+		RightClickArea: nil,
+	}
+	r := &RightClickArea{
+		Content: func(gtx layout.Context) layout.Dimensions { return p.content(gtx) },
+		Menu: func(gtx layout.Context) layout.Dimensions {
+			gtx.Constraints.Min = image.Point{}
+			gtx.Constraints.Max.X = gtx.Dp(unit.Dp(200)) //todo 斑马线，分隔条，圆角，长按支持apk
+			var children []layout.FlexChild
+			for _, item := range items {
+				children = append(children, layout.Rigid(func(gtx C) D {
+					gtx.Constraints.Min.X = gtx.Constraints.Max.X
+					return material.Button(th.Theme, item.button, item.text).Layout(gtx)
+					//gtx.Constraints.Min.X = 1900
+					//return ux.Button(item.button, item.icon, item.text).Layout(gtx)
+				}))
+			}
+			return layout.Flex{Axis: layout.Vertical}.Layout(gtx, children...)
+		},
+		Anchor:      nil,
+		Overlay:     &p.Overlay,
+		leftPressed: nil,
+	}
+	p.RightClickArea = r
+	return p
+}
+
+func loop(w *app.Window) error {
+	row1Button := new(widget.Clickable)
+	popMenu := NewPopMenu(row1Button,
+		func(gtx layout.Context) layout.Dimensions {
+			return material.Button(th.Theme, row1Button, "row").Layout(gtx)
+			//return ux.Button(new(widget.Clickable), nil, "row").Layout(gtx)
+		},
+		itemCtx{
+			button: &widget.Clickable{},
+			icon:   nil,
+			text:   "item1",
+		},
+		itemCtx{
+			button: &widget.Clickable{},
+			icon:   nil,
+			text:   "item2",
+		},
+		itemCtx{
+			button: &widget.Clickable{},
+			icon:   nil,
+			text:   "item3",
+		},
 	)
-	th.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
+
+	var ops op.Ops
 	for {
 		switch e := w.Event().(type) {
 		case app.DestroyEvent:
 			return e.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
-			menuClicked := false
-			if rBtn.Clicked(gtx) {
-				menuClicked = true
-				areaColor.R += 64
-			}
-			if gBtn.Clicked(gtx) {
-				menuClicked = true
-				areaColor.G += 64
-			}
-			if bBtn.Clicked(gtx) {
-				menuClicked = true
-				areaColor.B += 64
-			}
-			if menuClicked {
-				rca.CloseMenu()
-			}
-			if btn.Clicked(gtx) {
-				areaColor.R = 0
-				areaColor.G = 0
-				areaColor.B = 0
-			}
-			layout.Center.Layout(gtx, func(gtx C) D {
-				return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-					layout.Rigid(func(gtx C) D {
-						return material.Body1(th, "Right-click or click this button:").Layout(gtx)
-					}),
-					layout.Rigid(func(gtx C) D {
-						gtx.Constraints.Max.X /= 2
-						gtx.Constraints.Max.Y /= 2
-						gtx.Constraints.Min = gtx.Constraints.Max
-						return rca.Layout(gtx)
-					}),
-				)
-			})
-			overlay.Layout(gtx)
+			ux.BackgroundDark(gtx)
+			layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions { return popMenu.Layout(gtx) })
 			e.Frame(gtx.Ops)
 		}
 	}
