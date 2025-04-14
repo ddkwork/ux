@@ -300,10 +300,9 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 							layout.Expanded(func(gtx layout.Context) layout.Dimensions { // 这也应该适用于代码编辑器控件
 								if i.contextArea == nil {
 									i.contextArea = &component.ContextArea{
-										LongPressDuration: 0,
-										Activation:        pointer.ButtonSecondary,
-										AbsolutePosition:  true,
-										PositionHint:      layout.W,
+										Activation:       pointer.ButtonSecondary,
+										AbsolutePosition: true,
+										PositionHint:     layout.W,
 									}
 								}
 								if i.contextMenu == nil {
