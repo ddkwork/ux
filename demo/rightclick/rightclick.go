@@ -211,8 +211,7 @@ func (p *PopMenu) Layout(gtx layout.Context) layout.Dimensions {
 			p.CloseMenu()
 		}
 	}
-	p.Overlay.Layout(gtx) //弹出菜单
-	return layout.Dimensions{Size: gtx.Constraints.Max}
+	return p.Overlay.Layout(gtx) //弹出菜单
 }
 
 func NewPopMenu(rowButton *widget.Clickable, content layout.Widget, itemProvider *ux.ContextMenu) *PopMenu {
