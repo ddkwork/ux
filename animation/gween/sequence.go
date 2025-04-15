@@ -1,5 +1,7 @@
 package gween
 
+import "slices"
+
 // Sequence represents a sequence of Tweens, executed one after the other.
 type Sequence struct {
 	Tweens []*Tween
@@ -34,7 +36,7 @@ func (seq *Sequence) Add(tweens ...*Tween) {
 // Remove removes a Tween of the specified index from the Sequence.
 func (seq *Sequence) Remove(index int) {
 	if index >= 0 && index < len(seq.Tweens) {
-		seq.Tweens = append(seq.Tweens[:index], seq.Tweens[index+1:]...)
+		seq.Tweens = slices.Delete(seq.Tweens, index, index+1)
 	}
 }
 

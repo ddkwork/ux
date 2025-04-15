@@ -107,7 +107,7 @@ func (c *Calendar) Layout(gtx layout.Context) layout.Dimensions {
 			c.SetTime(now)
 		}
 		c.cellItemsArr = make([]*cellItem, 0)
-		for i := 0; i < 42; i++ {
+		for range 42 {
 			c.cellItemsArr = append(c.cellItemsArr, &cellItem{})
 		}
 		c.weekdays = [7]time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday, time.Saturday, time.Sunday}
@@ -262,7 +262,7 @@ func (c *Calendar) drawBodyRows(gtx layout.Context) layout.Dimensions {
 	cellItemsArr := make([]*cellItem, 0)
 	for rowIndex, cellIndex := 0, 0; day.Before(endDate) || rowIndex < 6; rowIndex++ {
 		var shouldBreak bool
-		for i := 0; i < 7; i++ {
+		for i := range 7 {
 			// Minimum row cellIndex is 3 (ie at least 4 rows) and max row cellIndex is 5 (ie at least 6 rows)
 			if (rowIndex == 4 || rowIndex == 5) && i == 0 {
 				if day.Month() != c.Time().Month() {
@@ -286,7 +286,7 @@ func (c *Calendar) drawBodyRows(gtx layout.Context) layout.Dimensions {
 	cellIndex := 0
 	for rowIndex := range allRows {
 		var flexChildren []layout.FlexChild
-		for i := 0; i < 7; i++ {
+		for range 7 {
 			flexChildren = append(flexChildren, c.drawColumn(gtx, columnWidth, cellItemsArr[cellIndex]))
 			cellIndex++
 		}

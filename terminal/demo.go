@@ -59,7 +59,7 @@ func Demo() (*Screen, *ConsoleSettings) {
 func randomString(n int) string {
 	s := make([]rune, n)
 	letterRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	for i := 0; i < n; i++ {
+	for i := range n {
 		s[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(s)

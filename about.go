@@ -107,10 +107,7 @@ func About[T Widget](w *app.Window, data string) error {
 					break
 				}
 				fmt.Printf("SCROLL: %+v\n", ev)
-				scrollY = scrollY + unit.Dp(ev.(pointer.Event).Scroll.Y*float32(fontSize))
-				if scrollY < 0 {
-					scrollY = 0
-				}
+				scrollY = max(scrollY+unit.Dp(ev.(pointer.Event).Scroll.Y*float32(fontSize)), 0)
 			}
 
 			// Pressed a mouse button?

@@ -166,7 +166,7 @@ func (m *DataTable[G]) Find(text string, colIdx int) (err error) {
 		}
 	}()
 
-	for i := 0; i < size; i++ {
+	for i := range size {
 		row := m.GetRow(i)
 		if strings.Contains(m.GetItemText(row, i, colIdx), text) {
 			newList.Index(idx).Set(list.Index(i))
@@ -179,7 +179,7 @@ func (m *DataTable[G]) Find(text string, colIdx int) (err error) {
 
 func (m *DataTable[G]) CopyRow(record any, row int, buf io.Writer) { // todo 写入剪切板
 	n := m.GetColumnCount()
-	for i := 0; i < n; i++ {
+	for i := range n {
 		if i != 0 {
 			buf.Write([]byte(","))
 		}
@@ -288,7 +288,7 @@ func MapNameID(prefix string, mapKeyId map[string][]int, paths []int, t reflect.
 		t = t.Elem()
 	}
 	// log.Println(prefix + meta.String())
-	for i := 0; i < t.NumField(); i++ {
+	for i := range t.NumField() {
 		newPaths := make([]int, len(paths))
 		copy(newPaths, paths)
 		newPaths = append(newPaths, i)

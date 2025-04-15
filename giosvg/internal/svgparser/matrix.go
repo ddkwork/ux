@@ -39,8 +39,8 @@ func (m *matrix3) coFact(i, j int) float64 {
 
 func (m *matrix3) invert() *matrix3 {
 	var cofact matrix3
-	for i := 0; i < 3; i++ {
-		for j := 0; j < 3; j++ {
+	for i := range 3 {
+		for j := range 3 {
 			sign := float64(1 - (i+j%2)%2*2) // "checkerboard of minuses" grid
 			cofact[i+j*3] = m.coFact(i, j) * sign
 		}
@@ -48,12 +48,12 @@ func (m *matrix3) invert() *matrix3 {
 	deteriminate := m[0]*cofact[0] + m[1]*cofact[1] + m[2]*cofact[2]
 
 	// transpose cofact
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		for j := i + 1; j < 3; j++ {
 			cofact[i+j*3], cofact[j+i*3] = cofact[j+i*3], cofact[i+j*3]
 		}
 	}
-	for i := 0; i < 9; i++ {
+	for i := range 9 {
 		cofact[i] /= deteriminate
 	}
 	return &cofact

@@ -9,6 +9,7 @@ import (
 
 	"golang.org/x/image/colornames"
 	"golang.org/x/image/math/fixed"
+	"slices"
 )
 
 // This file defines colors and gradients used in SVG
@@ -241,7 +242,7 @@ func localizeGradIfStopClrNil(g *Gradient, defaultColor Pattern) Gradient {
 			// and fill in the default color
 
 			// Copy the stops
-			stops := append([]GradStop{}, grad.Stops...)
+			stops := slices.Clone(grad.Stops)
 			grad.Stops = stops
 			// Use the background color when a stop color is nil
 			clr := getColor(defaultColor)

@@ -233,10 +233,7 @@ func drawInk(gtx layout.Context, c widget.Press) {
 			}
 		}
 		// Fade in.
-		half1 := t/fadeDuration + haste
-		if half1 > 0.5 {
-			half1 = 0.5
-		}
+		half1 := min(t/fadeDuration+haste, 0.5)
 
 		// Fade out.
 		half2 := float32(now.Sub(end).Seconds())

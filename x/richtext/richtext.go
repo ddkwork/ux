@@ -14,6 +14,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/x/styledtext"
+	"maps"
 )
 
 // LongPressDuration is the default duration of a long press gesture.
@@ -201,9 +202,7 @@ func (ss SpanStyle) DeepCopy() SpanStyle {
 	out := ss
 	if len(ss.metadata) > 0 {
 		md := make(map[string]any)
-		for k, v := range ss.metadata {
-			md[k] = v
-		}
+		maps.Copy(md, ss.metadata)
 		out.metadata = md
 	}
 	return out

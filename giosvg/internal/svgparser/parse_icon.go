@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/ddkwork/ux/giosvg/internal/svgparser/simplexml"
+	"slices"
 )
 
 type (
@@ -346,7 +347,7 @@ func (c *iconCursor) readStartElement(se simplexml.StartElement) (err error) {
 
 	if len(c.path) > 0 {
 		// The cursor parsed a path from the xml element
-		pathCopy := append(Path{}, c.path...)
+		pathCopy := slices.Clone(c.path)
 		c.icon.SVGPaths = append(c.icon.SVGPaths,
 			SvgPath{Path: pathCopy, Style: c.styleStack[len(c.styleStack)-1]})
 		c.path = c.path[:0]

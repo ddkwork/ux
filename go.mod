@@ -7,13 +7,13 @@ require (
 	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0
 	github.com/alecthomas/chroma/v2 v2.15.0
-	github.com/ddkwork/golibrary v0.1.2-0.20250411050210-1497894f0f31
+	github.com/ddkwork/golibrary v0.1.2-0.20250415063831-d52e0fd7e02c
 	github.com/oligo/gvcode v0.2.1-0.20250410165334-c3e76c32a80c
 	github.com/yuin/goldmark v1.7.8
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394
 	golang.org/x/exp/shiny v0.0.0-20250305212735-054e65f0b394
 	golang.org/x/image v0.26.0
-	golang.org/x/net v0.37.0
+	golang.org/x/net v0.39.0
 	golang.org/x/text v0.24.0
 )
 
@@ -24,6 +24,6 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/sync v0.13.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
-	golang.org/x/tools v0.31.0 // indirect
+	golang.org/x/sys v0.32.0 // indirect
+	golang.org/x/tools v0.32.0 // indirect
 )

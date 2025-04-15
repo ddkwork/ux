@@ -88,10 +88,7 @@ func (a *actionGroup) layout(gtx C, th *material.Theme, overflowBtn *widget.Clic
 	overflowedActions := len(a.actions)
 	gtx.Constraints.Min.Y = 0
 	widthDp := float32(gtx.Constraints.Max.X) / gtx.Metric.PxPerDp
-	visibleActionItems := int((widthDp / 48) - 1)
-	if visibleActionItems < 0 {
-		visibleActionItems = 0
-	}
+	visibleActionItems := max(int((widthDp/48)-1), 0)
 	visibleActionItems = min(visibleActionItems, len(a.actions))
 	overflowedActions -= visibleActionItems
 	var actions []layout.FlexChild

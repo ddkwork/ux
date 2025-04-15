@@ -199,7 +199,7 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 			defCount := 0
 			defWidth := 0
 			n := m.GetColumnCount()
-			for i := 0; i < n; i++ {
+			for i := range n {
 				if m.GetColumnWitdh(i) == 0 {
 					defCount++
 					continue

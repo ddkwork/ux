@@ -1,6 +1,6 @@
 module demo
 
-go 1.24.0
+go 1.24.1
 
 require (
 	eliasnaur.com/font v0.0.0-20230308162249-dd43949cb42d
@@ -8,16 +8,16 @@ require (
 	gioui.org/cmd v0.8.1-0.20250321120711-01ffdf788daa
 	gioui.org/example v0.8.2-0.20250227093625-76286d538a44
 	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
-	github.com/ddkwork/golibrary v0.1.2-0.20250411050210-1497894f0f31
-	github.com/ddkwork/ux v0.0.0-20250325020620-5f3de8432e18
+	github.com/ddkwork/golibrary v0.1.2-0.20250415063831-d52e0fd7e02c
+	github.com/ddkwork/ux v0.0.0-20250414151012-58a9a57d87cd
 	github.com/go-vgo/robotgo v0.110.5
 	github.com/gorpher/gowin32 v0.0.11
 	github.com/kbinani/screenshot v0.0.0-20250118074034-a3924b7bbc8c
 	github.com/oligo/gvcode v0.2.1-0.20250410165334-c3e76c32a80c
 	github.com/robotn/gohook v0.42.0
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/crypto v0.36.0
-	golang.org/x/sys v0.31.0
+	golang.org/x/crypto v0.37.0
+	golang.org/x/sys v0.32.0
 )
 
 require (
@@ -29,7 +29,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dblohm7/wingoes v0.0.0-20240820181039-f2b84150679e // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
-	github.com/ebitengine/purego v0.9.0-alpha.2.0.20250319192307-d99d2bef7bd5 // indirect
+	github.com/ebitengine/purego v0.9.0-alpha.2.0.20250411144656-9059adfae616 // indirect
 	github.com/esiqveland/notify v0.13.3 // indirect
 	github.com/gen2brain/shm v0.1.1 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
@@ -64,11 +64,11 @@ require (
 	golang.org/x/exp/shiny v0.0.0-20250305212735-054e65f0b394 // indirect
 	golang.org/x/image v0.26.0 // indirect
 	golang.org/x/mod v0.24.0 // indirect
-	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/net v0.39.0 // indirect
 	golang.org/x/oauth2 v0.27.0 // indirect
 	golang.org/x/sync v0.13.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
-	golang.org/x/tools v0.31.0 // indirect
+	golang.org/x/tools v0.32.0 // indirect
 	gonum.org/v1/gonum v0.15.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

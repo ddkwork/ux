@@ -7,7 +7,7 @@ import (
 
 func main() {
 	b := strings.Builder{}
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		b.WriteString(fmt.Sprintf("%d---|----|", i))
 	}
 	fmt.Println(b.String())

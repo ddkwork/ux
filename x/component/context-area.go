@@ -120,6 +120,7 @@ func (r *ContextArea) Update(gtx C) {
 			}
 		}
 		if e.Buttons.Contain(r.Activation) && e.Kind == pointer.Press {
+			r.Show()
 			r.Activate(e.Position)
 		}
 	}

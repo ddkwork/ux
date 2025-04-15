@@ -64,10 +64,7 @@ func (l *Line) DashedLine(gtx layout.Context, start, end f32.Point) *Line {
 	length := float32(math.Sqrt(float64(dx*dx + dy*dy)))
 	// Draw dashes
 	for i := float32(0); i < length; i += l.dashLength + l.sap {
-		dashEnd := i + l.dashLength
-		if dashEnd > length {
-			dashEnd = length
-		}
+		dashEnd := min(i+l.dashLength, length)
 		// Calculate start and end points of the current dash
 		t0 := i / length
 		t1 := dashEnd / length

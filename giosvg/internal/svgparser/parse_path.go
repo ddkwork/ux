@@ -79,7 +79,7 @@ func reflect(px, py, rx, ry float64) (x, y float64) {
 }
 
 func (c *pathCursor) valsToAbs(last float64) {
-	for i := 0; i < len(c.points); i++ {
+	for i := range c.points {
 		last += c.points[i]
 		c.points[i] = last
 	}

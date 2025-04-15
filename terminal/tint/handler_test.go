@@ -635,7 +635,7 @@ func BenchmarkLogAttrs(b *testing.B) {
 				b.Run(bench.Name, func(b *testing.B) {
 					b.ReportAllocs()
 					logger := slog.New(h.H)
-					for i := 0; i < b.N; i++ {
+					for b.Loop() {
 						bench.F(logger)
 					}
 				})
