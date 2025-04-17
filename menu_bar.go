@@ -57,7 +57,7 @@ func (m *MenuBar) Layout(gtx layout.Context) layout.Dimensions {
 			items = append(items, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						return material.Body1(th.Theme, "|").Layout(gtx)
+						return material.Body1(th, "|").Layout(gtx)
 					}),
 				)
 			}))
@@ -68,7 +68,7 @@ func (m *MenuBar) Layout(gtx layout.Context) layout.Dimensions {
 					return layout.Stack{}.Layout(gtx,
 						layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 							return layout.Inset{Left: unit.Dp(3), Right: unit.Dp(3)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-								return material.Body2(th.Theme, m.menus[key].Title).Layout(gtx)
+								return material.Body2(th, m.menus[key].Title).Layout(gtx)
 							})
 						}),
 						layout.Expanded(func(gtx layout.Context) layout.Dimensions {
@@ -84,7 +84,7 @@ func (m *MenuBar) Layout(gtx layout.Context) layout.Dimensions {
 														DrawBackground(gtx, gtx.Constraints.Max, th.Color.MenuBarHoveredColor)
 														gtx.Execute(op.InvalidateCmd{})
 													}
-													return material.Body2(th.Theme, m.menus[key].Items[subKey].Name).Layout(gtx)
+													return material.Body2(th, m.menus[key].Items[subKey].Name).Layout(gtx)
 												})
 											})
 										}),

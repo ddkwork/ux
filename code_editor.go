@@ -107,7 +107,7 @@ func NewCodeEditor(code string, lang string) *CodeEditor {
 	// c.editor.WithOptions(gvcode.WithTabWidth(4))
 	// c.editor.WithOptions(gvcode.WithSoftTab(true))
 	c.editor.WithOptions(gvcode.WrapLine(true))
-	c.vScrollbarStyle = material.Scrollbar(th.Theme, &c.vScrollbar)
+	c.vScrollbarStyle = material.Scrollbar(th, &c.vScrollbar)
 	c.border = widget.Border{
 		Color:        rgb(0x6c6f76), // todo
 		Width:        unit.Dp(1),

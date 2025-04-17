@@ -79,15 +79,15 @@ func (modal *MessageModal) layout(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Max.X = gtx.Dp(500)
 				gtx.Constraints.Max.Y = gtx.Dp(180)
 
-				return component.NewModalSheet(component.NewModal()).Layout(gtx, th.Theme, &component.VisibilityAnimation{}, func(gtx layout.Context) layout.Dimensions {
+				return component.NewModalSheet(component.NewModal()).Layout(gtx, th, &component.VisibilityAnimation{}, func(gtx layout.Context) layout.Dimensions {
 					return layout.UniformInset(unit.Dp(15)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-								return material.Label(th.Theme, unit.Sp(14), modal.Title).Layout(gtx)
+								return material.Label(th, unit.Sp(14), modal.Title).Layout(gtx)
 							}),
 							layout.Rigid(layout.Spacer{Height: unit.Dp(20)}.Layout),
 							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-								return material.Body1(th.Theme, modal.Body).Layout(gtx)
+								return material.Body1(th, modal.Body).Layout(gtx)
 							}),
 							layout.Rigid(layout.Spacer{Height: unit.Dp(20)}.Layout),
 							layout.Rigid(func(gtx layout.Context) layout.Dimensions {

@@ -121,7 +121,7 @@ func (t *TextField) Layout(gtx layout.Context) layout.Dimensions {
 			Right:  4,
 		}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			inputLayout := layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-				ed := material.Editor(th.Theme, &t.textEditor, t.Placeholder)
+				ed := material.Editor(th, &t.textEditor, t.Placeholder)
 				ed.SelectionColor = th.TextSelectionColor
 				return ed.Layout(gtx)
 			})

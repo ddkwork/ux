@@ -65,10 +65,10 @@ package ux
 //	}
 //
 //	editorConf := &giovieweditor.EditorConf{
-//		Shaper:    th.Theme.Shaper,
-//		TextColor: th.Theme.Fg,
-//		Bg:        th.Theme.Bg,
-//		// SelectionColor:  th.Theme.TextSelectionColor,
+//		Shaper:    th.Shaper,
+//		TextColor: th.Fg,
+//		Bg:        th.Bg,
+//		// SelectionColor:  th.TextSelectionColor,
 //		TextSize:        unit.Sp(14),
 //		LineHeightScale: 1,
 //	}

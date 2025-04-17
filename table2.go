@@ -188,8 +188,8 @@ func (t *Table2) resize(gtx layout.Context) {
 	}
 
 	var (
-		oldAvailable = unit.Dp(t.prevMaxWidth - t.prevMetric.Dp(material.Scrollbar(th.Theme, nil).Width()) - len(t.Columns)*t.prevMetric.Dp(defaultDividerWidth)) // 之前的可用宽度
-		available    = unit.Dp(gtx.Constraints.Max.X - gtx.Dp(material.Scrollbar(th.Theme, nil).Width()) - len(t.Columns)*gtx.Dp(defaultDividerWidth))            // 当前可用宽度
+		oldAvailable = unit.Dp(t.prevMaxWidth - t.prevMetric.Dp(material.Scrollbar(th, nil).Width()) - len(t.Columns)*t.prevMetric.Dp(defaultDividerWidth)) // 之前的可用宽度
+		available    = unit.Dp(gtx.Constraints.Max.X - gtx.Dp(material.Scrollbar(th, nil).Width()) - len(t.Columns)*gtx.Dp(defaultDividerWidth))            // 当前可用宽度
 	)
 
 	// 避免负值和零导致计算错误
@@ -502,7 +502,7 @@ func (row *TableHeaderRowStyle) Layout(gtx layout.Context) layout.Dimensions {
 					Right:  0,
 				}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.Y = gtx.Dp(20) // 限制行高
-					body1 := material.Body1(th.Theme, s)
+					body1 := material.Body1(th, s)
 					body1.MaxLines = 1
 					return body1.Layout(gtx)
 				})
@@ -577,7 +577,7 @@ func SimpleTable(gtx layout.Context, tbl *Table2, rows int, cellFn cellFn) layou
 				return TableHeaderRow(tbl).Layout(gtx)
 			}),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return material.List(th.Theme, tbl.List).Layout(gtx, rows, func(gtx layout.Context, row int) layout.Dimensions {
+				return material.List(th, tbl.List).Layout(gtx, rows, func(gtx layout.Context, row int) layout.Dimensions {
 					return TableSimpleRow(tbl).Layout(gtx, row, cellFn)
 				})
 			}),

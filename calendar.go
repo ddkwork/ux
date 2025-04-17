@@ -182,7 +182,7 @@ func (c *Calendar) drawHeaderColumn(gtx layout.Context, day string, columnWidth 
 		}
 		return inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				label := material.Label(th.Theme, th.TextSize, day)
+				label := material.Label(th, th.TextSize, day)
 				label.Color = th.ContrastFg
 				label.MaxLines = 1
 				if c.maxWidth < gtx.Dp(500) {
@@ -229,7 +229,7 @@ func (c *Calendar) drawColumn(gtx layout.Context, columnWidth int, btn *cellItem
 				txtSize := th.TextSize
 				txtSize *= 1.5
 				d := center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					label := material.Label(th.Theme, txtSize, dayStr)
+					label := material.Label(th, txtSize, dayStr)
 					label.MaxLines = 1
 					label.Color = txtColor
 					label.Alignment = text.Middle
@@ -352,7 +352,7 @@ func (c *Calendar) drawMonthsDropdownItems(gtx layout.Context) layout.Dimensions
 						inset := layout.Inset{Top: 8, Bottom: 8, Left: 16, Right: 16}
 						return inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							txt := allMonthsButtonsArr[index].Month.String()
-							label := material.Label(th.Theme, th.TextSize, txt)
+							label := material.Label(th, th.TextSize, txt)
 							label.Alignment = text.Start
 							label.Color = txtColor
 							return label.Layout(gtx)
@@ -406,7 +406,7 @@ func (c *Calendar) drawYearsDropdownItems(gtx layout.Context) layout.Dimensions 
 						inset := layout.Inset{Top: 8, Bottom: 8, Left: 16, Right: 16}
 						return inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							txt := fmt.Sprintf("%d", allYearsButtonsSlice[index].Year)
-							label := material.Label(th.Theme, th.TextSize, txt)
+							label := material.Label(th, th.TextSize, txt)
 							label.Alignment = text.Start
 							label.Color = txtColor
 							return label.Layout(gtx)
@@ -455,7 +455,7 @@ func (c *Calendar) drawViewHeader(gtx layout.Context) layout.Dimensions {
 				flex := layout.Flex{Spacing: layout.SpaceBetween}
 				return flex.Layout(gtx,
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						return material.Label(th.Theme, th.TextSize, month).Layout(gtx)
+						return material.Label(th, th.TextSize, month).Layout(gtx)
 					}),
 					layout.Rigid(layout.Spacer{Width: unit.Dp(16)}.Layout),
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -480,7 +480,7 @@ func (c *Calendar) drawViewHeader(gtx layout.Context) layout.Dimensions {
 				flex := layout.Flex{Spacing: layout.SpaceBetween}
 				return flex.Layout(gtx,
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						label := material.Label(th.Theme, th.TextSize, year)
+						label := material.Label(th, th.TextSize, year)
 						return label.Layout(gtx)
 					}),
 					layout.Rigid(layout.Spacer{Width: unit.Dp(16)}.Layout),

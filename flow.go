@@ -42,7 +42,7 @@ func (g *Flow) Layout(gtx layout.Context, num int, el FlowElement) layout.Dimens
 		g.list.Alignment = g.Alignment
 	}
 	csMax := gtx.Constraints.Max
-	return material.List(th.Theme, g.list).Layout(gtx, (num+g.Num-1)/g.Num, func(gtx layout.Context, idx int) layout.Dimensions {
+	return material.List(th, g.list).Layout(gtx, (num+g.Num-1)/g.Num, func(gtx layout.Context, idx int) layout.Dimensions {
 		if g.Axis == layout.Horizontal {
 			gtx.Constraints.Max.Y = inf
 		} else {

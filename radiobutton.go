@@ -30,7 +30,7 @@ func NewRadioButton(group *widget.Enum, key, label string) *RadioButton {
 	return r
 }
 
-func (r *RadioButton) SetSize(size ElementStyle) {
+func (r *RadioButton) SetSize(size material.ElementStyle) {
 	r.iconSize = size.IconSize
 	r.textSize = size.TextSize
 }
@@ -45,7 +45,7 @@ func (r *RadioButton) Layout(gtx layout.Context) layout.Dimensions {
 		if r.radioButton.Hovered() {
 			iconColor = th.Color.RadioSelectBgColor
 		}
-		rb := material.RadioButton(th.Theme, r.group, r.key, r.label)
+		rb := material.RadioButton(th, r.group, r.key, r.label)
 		rb.IconColor = iconColor
 		rb.Color = th.Color.DefaultTextWhiteColor
 		rb.Size = r.iconSize

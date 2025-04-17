@@ -66,7 +66,7 @@ func (p *Page) Layout(gtx layout.Context) layout.Dimensions {
 			return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Min.Y = 0
 				paint.ColorOp{Color: color.NRGBA{0, 0, 0, 255}}.Add(gtx.Ops)
-				return material.Button(th.Theme, &p.content, "Text on dialog").Layout(gtx)
+				return material.Button(th, &p.content, "Text on dialog").Layout(gtx)
 			})
 		}
 	}
@@ -112,7 +112,7 @@ func (p *Page) Layout(gtx layout.Context) layout.Dimensions {
 
 		// left
 		layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return material.H5(th.Theme, "Some sidebar text here").Layout(gtx)
+			return material.H5(th, "Some sidebar text here").Layout(gtx)
 		})
 
 		// right
@@ -132,7 +132,7 @@ func (p *Page) Layout(gtx layout.Context) layout.Dimensions {
 							gtx.Constraints.Min.Y = 0
 							paint.ColorOp{Color: color.NRGBA{0, 0, 0, 255}}.Add(gtx.Ops)
 							//return widget.Label{}.Layout(gtx, shaper, text.Font{}, 14, "Open Dialog")
-							return material.Button(th.Theme, &p.submit, "Open Dialog").Layout(gtx)
+							return material.Button(th, &p.submit, "Open Dialog").Layout(gtx)
 						})
 					})
 				}),

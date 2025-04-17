@@ -15,7 +15,7 @@ func NewSwitch(description string) *Switch {
 	ok := widget.Bool{}
 	openSwitch := &Switch{
 		ok:   ok,
-		open: material.Switch(th.Theme, &ok, description),
+		open: material.Switch(th, &ok, description),
 	}
 	openSwitch.open.Color.Enabled = th.Color.GreenColor
 	openSwitch.open.Color.Disabled = th.Color.InfoColor

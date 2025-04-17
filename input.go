@@ -49,7 +49,7 @@ type (
 		bgColor     color.NRGBA
 		hint        string
 		radius      unit.Dp
-		size        ElementStyle
+		size        material.ElementStyle
 		width       unit.Dp
 		hasBorder   bool
 
@@ -156,7 +156,7 @@ func (i *Input) SetAfter(after layout.Widget) *Input {
 	return i
 }
 
-func (i *Input) SetSize(size ElementStyle) *Input {
+func (i *Input) SetSize(size material.ElementStyle) *Input {
 	i.size = size
 	return i
 }
@@ -276,7 +276,7 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 						if i.width > 0 {
 							gtx.Constraints.Max.X = gtx.Dp(i.width)
 						}
-						editor := material.Editor(th.Theme, &i.editor, i.hint)
+						editor := material.Editor(th, &i.editor, i.hint)
 						editor.HintColor = th.Color.HintTextColor
 						editor.SelectionColor = th.Color.TextSelectionColor
 

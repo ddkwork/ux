@@ -18,7 +18,7 @@ func LayoutErrorLabel(gtx C, e error) D {
 			Left:   unit.Dp(15),
 			Right:  unit.Dp(15),
 		}.Layout(gtx, func(gtx C) D {
-			label := material.Label(th.Theme, th.TextSize*0.8, e.Error())
+			label := material.Label(th, th.TextSize*0.8, e.Error())
 			label.Color = color.NRGBA{R: 255, A: 255}
 			label.Alignment = text.Middle
 			return label.Layout(gtx)

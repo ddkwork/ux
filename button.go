@@ -46,7 +46,7 @@ func NewButtonAnimation(text string, icon *widget.Icon, callBack func(gtx layout
 	if icon == nil {
 		style.Border.CornerRadius = 13
 	}
-	return animationButton.NewButton(style, th.Theme, text, callBack)
+	return animationButton.NewButton(style, th, text, callBack)
 }
 
 func NewButtonAnimationDefault() animationButton.ButtonAnimation {
@@ -143,7 +143,7 @@ func (b ButtonStyle) Layout(gtx layout.Context) layout.Dimensions {
 			return layout.Dimensions{}
 		})
 		labelDims := layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return material.Label(th.Theme, b.TextSize, b.Text).Layout(gtx)
+			return material.Label(th, b.TextSize, b.Text).Layout(gtx)
 		})
 
 		items := []layout.FlexChild{iconDims, labelDims}

@@ -57,7 +57,7 @@ func (c *ColorPicker) Layout(gtx layout.Context) layout.Dimensions {
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return colorpicker.PickerStyle{
 				Label:         "Current",
-				Theme:         th.Theme,
+				Theme:         th,
 				State:         c.picker,
 				MonospaceFace: "Go Mono",
 			}.Layout(gtx)
@@ -65,7 +65,7 @@ func (c *ColorPicker) Layout(gtx layout.Context) layout.Dimensions {
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return layout.Flex{}.Layout(gtx,
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					return colorpicker.Mux(th.Theme, c.muxState, "Display Right:").Layout(gtx)
+					return colorpicker.Mux(th, c.muxState, "Display Right:").Layout(gtx)
 				}),
 				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 					size := gtx.Constraints.Max

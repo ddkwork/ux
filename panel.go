@@ -2,17 +2,6 @@ package ux
 
 import (
 	"bytes"
-	"image"
-	"image/color"
-	"image/draw"
-	"image/png"
-	"os"
-	"path/filepath"
-
-	"github.com/ddkwork/golibrary/safemap"
-
-	"github.com/ddkwork/ux/widget/material"
-
 	"gioui.org/app"
 	_ "gioui.org/app/permission/networkstate"
 	_ "gioui.org/app/permission/storage"
@@ -24,7 +13,21 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/safemap"
+	"github.com/ddkwork/ux/widget/material"
+	"image"
+	"image/color"
+	"image/draw"
+	"image/png"
+	"os"
+	"path/filepath"
 )
+
+var th = material.NewTheme()
+
+func NewTheme() *material.Theme {
+	return th
+}
 
 type Widget layout.Widget
 
@@ -202,7 +205,7 @@ func Run(p *Panel[Widget]) {
 					p.Layout(gtx)
 
 					//p.w.Perform(deco.Update(gtx))
-					//decorationsStyle := material.Decorations(th.Theme, &deco, ^system.Action(0), title)
+					//decorationsStyle := material.Decorations(th, &deco, ^system.Action(0), title)
 					//decorationsStyle.Background = color.NRGBA{
 					//	R: 44,
 					//	G: 44,
@@ -304,7 +307,7 @@ func LabelWidth(gtx layout.Context, text string) unit.Dp {
 	//// fmt.Printf("Calculated dragWidth: %v\n", unit.Dp(recording.Dimensions.Size.X))
 	//return unit.Dp(recording.Dimensions.Size.X)
 	text += "  ⇧" // 为排序图标留位置,不要修改这里，稳定了
-	body := material.Body1(th.Theme, text)
+	body := material.Body1(th, text)
 	body.MaxLines = 1
 	recording := Record(gtx, func(gtx layout.Context) layout.Dimensions {
 		gtx.Constraints.Min.X = 0

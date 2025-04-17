@@ -763,6 +763,6 @@ type CustomView struct {
 
 func (c *CustomView) Layout(gtx layout.Context) layout.Dimensions {
 	return func(gtx layout.Context) layout.Dimensions {
-		return material.Body1(ux.NewTheme().Theme, c.Title).Layout(gtx)
+		return material.Body1(th, c.Title).Layout(gtx)
 	}(gtx)
 }

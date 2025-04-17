@@ -40,7 +40,7 @@ type (
 func (c *Card) LayCard(gtx C) D {
 	size := image.Pt(gtx.Dp(unit.Dp(float32(200))), gtx.Dp(unit.Dp(float32(250))))
 
-	c.container.Theme = th.Theme
+	c.container.Theme = th
 	c.container.Theme.Bg = BackgroundColor
 	c.container.Elevation = unit.Dp(5)
 	c.shadow.CornerRadius = unit.Dp(18)
@@ -63,12 +63,12 @@ func (c *Card) LayCard(gtx C) D {
 			Bottom: unit.Dp(5),
 			// Left:   unit.Dp(5),
 		}
-		item = component.MenuItem(th.Theme, btn, lbl)
+		item = component.MenuItem(th, btn, lbl)
 
 		c.menu = component.MenuState{
 			Options: []func(gtx C) D{
 				item.Layout,
-				component.MenuItem(th.Theme, &c.copyToClipBtn, "Copy as JSON").Layout,
+				component.MenuItem(th, &c.copyToClipBtn, "Copy as JSON").Layout,
 			},
 		}
 	}
@@ -105,7 +105,7 @@ func (c *Card) LayCard(gtx C) D {
 								return layout.Flex{}.Layout(gtx,
 									layout.Flexed(1, func(gtx C) D {
 										return layout.Center.Layout(gtx, func(gtx C) D {
-											return material.Body2(th.Theme, c.Name).Layout(gtx)
+											return material.Body2(th, c.Name).Layout(gtx)
 										})
 									}),
 								)
@@ -118,7 +118,7 @@ func (c *Card) LayCard(gtx C) D {
 										return layout.Center.Layout(gtx, func(gtx C) D {
 											var flag D
 											if c.Flag == nil {
-												flag = material.Loader(th.Theme).Layout(gtx)
+												flag = material.Loader(th).Layout(gtx)
 											} else {
 												flag = widget.Image{
 													Src: paint.NewImageOp(c.Flag),
@@ -136,7 +136,7 @@ func (c *Card) LayCard(gtx C) D {
 		layout.Expanded(func(gtx C) D {
 			return c.ctxArea.Layout(gtx, func(gtx C) D {
 				gtx.Constraints.Min = image.Point{}
-				return component.Menu(th.Theme, &c.menu).Layout(gtx)
+				return component.Menu(th, &c.menu).Layout(gtx)
 			})
 		}))
 }

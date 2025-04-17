@@ -68,7 +68,7 @@ func (p *Page) NavItem() component.NavItem {
 	}
 }
 
-var th = ux.NewTheme().Theme
+var th = ux.NewTheme()
 
 func (p *Page) Layout(gtx C) D {
 	if !p.menuInit {

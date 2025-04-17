@@ -15,7 +15,7 @@ func NewProgressBar(initProgress float32) *ProgressBar {
 	progressBar := &ProgressBar{
 		initProgress:    initProgress,
 		currentProgress: initProgress,
-		progressBar:     material.ProgressBar(th.Theme, initProgress),
+		progressBar:     material.ProgressBar(th, initProgress),
 	}
 	progressBar.progressBar.Color = th.Color.ProgressBarColor
 	return progressBar

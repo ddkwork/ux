@@ -22,7 +22,7 @@ func layoutEmoji(gtx layout.Context) layout.Dimensions {
 
 	inset := layout.UniformInset(5)
 
-	l := material.H4(th.Theme, message)
+	l := material.H4(th, message)
 	if customTruncator.Value {
 		l.Truncator = "cont..."
 	} else {

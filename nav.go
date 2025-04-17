@@ -37,17 +37,17 @@ func Nav(gtx layout.Context) layout.Dimensions {
 	return resize.Layout(gtx,
 		func(gtx layout.Context) layout.Dimensions {
 			// return nav.Layout(gtx, th.Material(), &visibilityAnimation)
-			return nav.LayoutContents(gtx, th.Theme, &visibilityAnimation)
+			return nav.LayoutContents(gtx, th, &visibilityAnimation)
 		},
 		func(gtx layout.Context) layout.Dimensions {
 			return layout.UniformInset(unit.Dp(20)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						return material.H6(th.Theme, "Hello").Layout(gtx)
+						return material.H6(th, "Hello").Layout(gtx)
 					}),
 					layout.Rigid(layout.Spacer{Height: unit.Dp(10)}.Layout),
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						return material.Body1(th.Theme, "Subtitle").Layout(gtx)
+						return material.Body1(th, "Subtitle").Layout(gtx)
 					}),
 				)
 			})

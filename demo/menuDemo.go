@@ -83,25 +83,25 @@ func (p *MenuObj) Layout(gtx layout.Context) layout.Dimensions {
 				//	})
 				//},
 				//component.SubheadingDivider(th, "Colors").Layout,
-				component.MenuItem(th.Theme, &p.redButton, "Red").Layout,
-				component.MenuItem(th.Theme, &p.greenButton, "Green").Layout,
-				component.MenuItem(th.Theme, &p.blueButton, "Blue").Layout,
+				component.MenuItem(th, &p.redButton, "Red").Layout,
+				component.MenuItem(th, &p.greenButton, "Green").Layout,
+				component.MenuItem(th, &p.blueButton, "Blue").Layout,
 				func(gtx C) D {
-					item := component.MenuItem(th.Theme, &p.balanceButton, "Balance")
+					item := component.MenuItem(th, &p.balanceButton, "Balance")
 					item.Icon = icon.AccountBalanceIcon
-					item.Hint = component.MenuHintText(th.Theme, "Hint")
+					item.Hint = component.MenuHintText(th, "Hint")
 					return item.Layout(gtx)
 				},
 				func(gtx C) D {
-					item := component.MenuItem(th.Theme, &p.accountButton, "Account")
+					item := component.MenuItem(th, &p.accountButton, "Account")
 					item.Icon = icon.AccountBoxIcon
-					item.Hint = component.MenuHintText(th.Theme, "Hint")
+					item.Hint = component.MenuHintText(th, "Hint")
 					return item.Layout(gtx)
 				},
 				func(gtx C) D {
-					item := component.MenuItem(th.Theme, &p.cartButton, "Cart")
+					item := component.MenuItem(th, &p.cartButton, "Cart")
 					item.Icon = icon.CartIcon
-					item.Hint = component.MenuHintText(th.Theme, "Hint")
+					item.Hint = component.MenuHintText(th, "Hint")
 					return item.Layout(gtx)
 				},
 			},
@@ -118,7 +118,7 @@ func (p *MenuObj) Layout(gtx layout.Context) layout.Dimensions {
 	}
 	return layout.Stack{}.Layout(gtx,
 		layout.Stacked(func(gtx C) D {
-			return material.List(th.Theme, &p.List).Layout(gtx, 100, func(gtx layout.Context, index int) layout.Dimensions {
+			return material.List(th, &p.List).Layout(gtx, 100, func(gtx layout.Context, index int) layout.Dimensions {
 				rowClicks := &p.rowClicks[index]
 				return rowClicks.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = gtx.Constraints.Max.X
@@ -135,14 +135,14 @@ func (p *MenuObj) Layout(gtx layout.Context) layout.Dimensions {
 							}
 						}
 					}
-					return material.Button(th.Theme, rowClicks, "item"+fmt.Sprintf("%d", index)).Layout(gtx)
+					return material.Button(th, rowClicks, "item"+fmt.Sprintf("%d", index)).Layout(gtx)
 				})
 			})
 		}),
 		layout.Expanded(func(gtx C) D {
 			return p.contextArea.Layout(gtx, func(gtx C) D {
 				gtx.Constraints.Min = image.Point{}
-				return component.Menu(th.Theme, &p.menuState).Layout(gtx)
+				return component.Menu(th, &p.menuState).Layout(gtx)
 			})
 		}),
 	)

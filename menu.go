@@ -91,7 +91,7 @@ func (m *MenuItem) layout(gtx layout.Context, parent *Menu, haasLine bool) layou
 					}),
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 						return layout.Inset{Left: unit.Dp(5)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-							label := material.Label(th.Theme, unit.Sp(13), m.Text)
+							label := material.Label(th, unit.Sp(13), m.Text)
 							label.Color = textColor
 							return label.Layout(gtx)
 						})

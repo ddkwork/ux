@@ -128,7 +128,7 @@ func (t *TextFieldFuzz) Layout(gtx layout.Context) layout.Dimensions {
 			Right:  4,
 		}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			inputLayout := layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-				return material.Editor(th.Theme, &t.textEditor, t.Placeholder).Layout(gtx)
+				return material.Editor(th, &t.textEditor, t.Placeholder).Layout(gtx)
 			})
 			widgets := []layout.FlexChild{inputLayout}
 

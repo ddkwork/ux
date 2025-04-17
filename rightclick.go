@@ -232,9 +232,9 @@ func NewPopMenu(itemProvider *ContextMenu, drawRow layout.Widget) *PopMenu {
 				children = append(children, layout.Rigid(func(gtx C) D {
 					gtx.Constraints.Min.X = gtx.Constraints.Max.X //弹出菜单的item统一宽度，太窄不美观
 					//gtx.Constraints.Min.Y = 3000                  //todo bug                  //gtx.Constraints.Max.Y
-					//return material.Button(th.Theme, &item.Clickable, item.Title).Layout(gtx)
+					//return material.Button(th, &item.Clickable, item.Title).Layout(gtx)
 					return Background{Color: RowColor(i + 1)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { //not work
-						return material.Button(th.Theme, &item.Clickable, item.Title).Layout(gtx)
+						return material.Button(th, &item.Clickable, item.Title).Layout(gtx)
 					})
 				}))
 			}

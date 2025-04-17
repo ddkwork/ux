@@ -182,7 +182,7 @@ package ux
 //									}),
 //									layout.Rigid(layout.Spacer{Width: unit.Dp(5)}.Layout),
 //									layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-//										return material.Body1(th.Theme, c.title).Layout(gtx)
+//										return material.Body1(th, c.title).Layout(gtx)
 //									}),
 //								)
 //

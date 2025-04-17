@@ -143,14 +143,14 @@ func (p *Prompt) Layout(gtx layout.Context) layout.Dimensions {
 				}.Layout(gtx,
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 						return layout.Inset{Bottom: unit.Dp(8)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-							h := material.H6(th.Theme, p.Title)
+							h := material.H6(th, p.Title)
 							h.Color = textColor
 							return h.Layout(gtx)
 						})
 					}),
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 						return layout.Inset{Bottom: unit.Dp(8)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-							b := material.Body1(th.Theme, p.Content)
+							b := material.Body1(th, p.Content)
 							b.Color = textColor
 							return b.Layout(gtx)
 						})
@@ -166,7 +166,7 @@ func (p *Prompt) Layout(gtx layout.Context) layout.Dimensions {
 							items = append(
 								items,
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-									return material.CheckBox(th.Theme, p.rememberBool, "Don't ask again").Layout(gtx)
+									return material.CheckBox(th, p.rememberBool, "Don't ask again").Layout(gtx)
 								}),
 								layout.Rigid(layout.Spacer{Width: unit.Dp(4)}.Layout),
 							)

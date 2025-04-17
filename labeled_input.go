@@ -45,13 +45,13 @@ package ux
 //		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 //			return layout.Inset{Right: unit.Dp(l.SpaceBetween)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 //				gtx.Constraints.Min.X = gtx.Dp(l.MinLabelWidth)
-//				return material.Label(th.Theme, th.Theme.TextSize, l.Label).Layout(gtx)
+//				return material.Label(th, th.TextSize, l.Label).Layout(gtx)
 //			})
 //		}),
 //		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 //			gtx.Constraints.Min.X = gtx.Dp(l.MinEditorWidth)
 //			return widget.Border{
-//				// Color:        th.Theme.BorderColor,
+//				// Color:        th.BorderColor,
 //				Width:        unit.Dp(1),
 //				CornerRadius: unit.Dp(4),
 //			}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {

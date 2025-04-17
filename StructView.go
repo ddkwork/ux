@@ -125,7 +125,7 @@ func RightAlignLabel(gtx layout.Context, width unit.Dp, text string) layout.Dime
 		//}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return layout.Inset{Top: 8}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return material.Body1(th.Theme, text).Layout(gtx)
+				return material.Body1(th, text).Layout(gtx)
 			})
 		}),
 	)
@@ -149,7 +149,7 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 	rows := []layout.Widget{
 		func(gtx layout.Context) layout.Dimensions {
 			return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return material.H4(th.Theme, s.Title).Layout(gtx)
+				return material.H4(th, s.Title).Layout(gtx)
 			})
 		},
 		func(gtx layout.Context) layout.Dimensions {
@@ -220,7 +220,7 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 		return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			s.ModalState.Show(gtx.Now, func(gtx layout.Context) layout.Dimensions {
 				return layout.UniformInset(unit.Dp(15)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return material.List(th.Theme, &s.List).Layout(gtx, len(rows), func(gtx layout.Context, index int) layout.Dimensions {
+					return material.List(th, &s.List).Layout(gtx, len(rows), func(gtx layout.Context, index int) layout.Dimensions {
 						return Background{Color: BackgroundColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { // todo 这样把边框整没了
 							return rows[index](gtx)
 						})
@@ -231,7 +231,7 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 			if s.Modal {
 				alpha = 20
 			}
-			return component.ModalStyle{ModalState: s.ModalState, Scrim: component.NewScrim(th.Theme, &s.ModalState.ScrimState, alpha)}.Layout(gtx)
+			return component.ModalStyle{ModalState: s.ModalState, Scrim: component.NewScrim(th, &s.ModalState.ScrimState, alpha)}.Layout(gtx)
 		})
 	})
 }

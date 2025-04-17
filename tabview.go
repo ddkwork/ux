@@ -157,7 +157,7 @@ func (t *TabItem) layoutTitle(gtx C) D {
 							return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx,
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									maxTitleWidth := 20
-									label := material.Label(th.Theme, unit.Sp(13), ellipticalTruncate(t.title, maxTitleWidth))
+									label := material.Label(th, unit.Sp(13), ellipticalTruncate(t.title, maxTitleWidth))
 									label.Color = th.Color.DefaultTextWhiteColor
 									if t.btn.Hovered() {
 										// label.Font.Weight = font.Bold
@@ -204,7 +204,7 @@ func (t *TabItem) layoutTitle(gtx C) D {
 						})
 					} else {
 						dims = material.Clickable(gtx, &t.btn, func(gtx layout.Context) layout.Dimensions {
-							label := material.Label(th.Theme, unit.Sp(13), t.title)
+							label := material.Label(th, unit.Sp(13), t.title)
 							label.Color = th.Color.DefaultTextWhiteColor
 							if t.btn.Hovered() {
 								label.Font.Weight = font.Bold

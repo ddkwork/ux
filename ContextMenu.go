@@ -28,13 +28,13 @@ func NewContextMenu() *ContextMenu {
 }
 
 func (m *ContextMenu) AddItem(item ContextMenuItem) {
-	menuItem := component.MenuItem(th.Theme, &item.Clickable, item.Title)
+	menuItem := component.MenuItem(th, &item.Clickable, item.Title)
 	menuItem.Icon = item.Icon
 	m.Options = append(m.Options, func(gtx C) D {
 		return menuItem.Layout(gtx)
 	})
 	if item.AppendDivider {
-		m.Options = append(m.Options, component.Divider(th.Theme).Layout)
+		m.Options = append(m.Options, component.Divider(th).Layout)
 	}
 	m.Items = append(m.Items, &item)
 }

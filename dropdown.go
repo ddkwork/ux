@@ -233,7 +233,7 @@ func (c *DropDown) box(gtx layout.Context, text string, maxWidth unit.Dp) layout
 			return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle, Spacing: layout.SpaceBetween}.Layout(gtx,
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					return layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(4)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						return material.Label(th.Theme, th.TextSize, text).Layout(gtx)
+						return material.Label(th, th.TextSize, text).Layout(gtx)
 					})
 				}),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -302,7 +302,7 @@ func (c *DropDown) Layout(gtx layout.Context) layout.Dimensions {
 					if c.MaxWidth != 0 {
 						gtx.Constraints.Max.X = gtx.Dp(c.MaxWidth)
 					}
-					m := component.Menu(th.Theme, &c.menu)
+					m := component.Menu(th, &c.menu)
 					m.SurfaceStyle.Fill = th.FocusedBgColor // theme.DropDownMenuBgColor
 					return m.Layout(gtx)
 				})
@@ -318,12 +318,12 @@ func (c *DropDown) updateMenuItems() {
 		opt := opt
 		c.menu.Options = append(c.menu.Options, func(gtx layout.Context) layout.Dimensions {
 			if opt.isDivider {
-				dv := component.Divider(th.Theme)
+				dv := component.Divider(th)
 				dv.Fill = th.FullIconColor // theme.BorderColor
 				return dv.Layout(gtx)
 			}
 
-			itm := component.MenuItem(th.Theme, &opt.clickable, opt.Text)
+			itm := component.MenuItem(th, &opt.clickable, opt.Text)
 			if opt.Icon != nil {
 				itm.Icon = opt.Icon
 				itm.IconColor = opt.IconColor

@@ -120,7 +120,7 @@ func (c *SearchDropDown) resultItemLayout(gtx layout.Context, item *SearchResult
 				}),
 				layout.Rigid(layout.Spacer{Width: unit.Dp(8)}.Layout),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					return material.Label(th.Theme, th.TextSize, item.Item.Title).Layout(gtx)
+					return material.Label(th, th.TextSize, item.Item.Title).Layout(gtx)
 				}),
 			)
 		})
@@ -149,7 +149,7 @@ func (c *SearchDropDown) Layout(gtx layout.Context) layout.Dimensions {
 					Left: unit.Dp(0),
 				}
 				return offset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					sf := component.Surface(th.Theme)
+					sf := component.Surface(th)
 					// sf.Fill = theme.DropDownMenuBgColor
 					sf.Elevation = unit.Dp(2)
 					return sf.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -164,12 +164,12 @@ func (c *SearchDropDown) Layout(gtx layout.Context) layout.Dimensions {
 								Left:   unit.Dp(10),
 								Right:  unit.Dp(5),
 							}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-								return material.Label(th.Theme, th.TextSize, "Search in workspace").Layout(gtx)
+								return material.Label(th, th.TextSize, "Search in workspace").Layout(gtx)
 							})
 						}
 
 						gtx.Constraints.Min.Y = gtx.Dp(200)
-						c.listStyle = material.List(th.Theme, c.list)
+						c.listStyle = material.List(th, c.list)
 
 						return c.listStyle.Layout(gtx, len(c.results), func(gtx layout.Context, index int) layout.Dimensions {
 							return c.resultItemLayout(gtx, c.results[index])

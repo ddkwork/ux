@@ -20,13 +20,13 @@ type (
 )
 
 func NewTooltipButton(icon *widget.Icon, tip string, callback func()) *TipIconButton {
-	t := component.PlatformTooltip(th.Theme, tip)
+	t := component.PlatformTooltip(th, tip)
 	t.Bg = Yellow100
 	t.Text.Color = th.Color.ButtonTextBlackColor
 	t.CornerRadius = 14
 	t.Text.MaxLines = 3 // todo newlines
 	clickable := &widget.Clickable{}
-	iconButtonStyle := material.IconButton(th.Theme, clickable, icon, "")
+	iconButtonStyle := material.IconButton(th, clickable, icon, "")
 	iconButtonStyle.Color = th.Fg
 	iconButtonStyle.Background = th.Color.InputFocusedBgColor
 	iconButtonStyle.Inset = layout.UniformInset(unit.Dp(6))

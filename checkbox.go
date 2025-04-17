@@ -1,6 +1,7 @@
 package ux
 
 import (
+	"github.com/ddkwork/ux/widget/material"
 	"image"
 	"image/color"
 
@@ -44,7 +45,7 @@ func NewCheckBox(checkBox *widget.Bool, label string) Checkbox {
 }
 
 // SetSize 设置Size
-func (c *Checkbox) SetSize(size ElementStyle) {
+func (c *Checkbox) SetSize(size material.ElementStyle) {
 	c.Size = size.IconSize
 	c.TextSize = size.TextSize
 }

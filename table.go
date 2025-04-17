@@ -193,7 +193,7 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 	if len(m.cellsAreas) != m.Size()*m.GetColumnCount() {
 		m.cellsAreas = make([]*component.ContextArea, m.Size()*m.GetColumnCount())
 	}
-	return component.Table(th.Theme, &m.GridState).Layout(gtx, m.Size(), m.GetColumnCount(),
+	return component.Table(th, &m.GridState).Layout(gtx, m.Size(), m.GetColumnCount(),
 		/*单元格动态尺寸计算，适应可见区域，支持不同轴方向 dimensioner outlay.Dimensioner*/ func(axis layout.Axis, index, constraint int) int {
 			used := float32(0)
 			defCount := 0
@@ -245,13 +245,13 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 					}
 				}
 
-				// button := material.Button(th.Theme, RowSelectedCallback, m.GetTitle(col))
+				// button := material.Button(th, RowSelectedCallback, m.GetTitle(col))
 				// button.Background = color.NRGBA(colornames.Grey500)
 				// return DefaultDraw.Center.Layout(gtx, button.Layout)
 				return material.Clickable(gtx, click, func(gtx C) D {
 					return layout.UniformInset(0).Layout(gtx, func(gtx C) D {
 						DrawColumnDivider(gtx, col) // 为每列绘制列分隔条
-						body1 := material.Body1(th.Theme, m.GetTitle(col))
+						body1 := material.Body1(th, m.GetTitle(col))
 						body1.MaxLines = 1
 						body1.Truncator = "..."
 						body1.Color = th.Color.DefaultTextWhiteColor
@@ -316,7 +316,7 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 				return layout.Stack{}.Layout(gtx,
 					layout.Stacked(func(gtx C) D {
 						return layout.UniformInset(0).Layout(gtx, func(gtx C) D {
-							cellText := material.Body1(th.Theme, txt)
+							cellText := material.Body1(th, txt)
 							cellText.Color = th.Color.DefaultTextWhiteColor
 							if m.rowIdx == row {
 								if m.colIdx == col {
@@ -349,9 +349,9 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 func (m *Table) drawContextArea(gtx C) D {
 	return layout.Center.Layout(gtx, func(gtx C) D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
 		// mylog.Struct("todo",gtx.Constraints)
-		menuStyle := component.Menu(th.Theme, &m.menu.MenuState)
+		menuStyle := component.Menu(th, &m.menu.MenuState)
 		menuStyle.SurfaceStyle = component.SurfaceStyle{
-			Theme: th.Theme,
+			Theme: th,
 			ShadowStyle: component.ShadowStyle{
 				CornerRadius: 18, // 弹出菜单的椭圆角度
 				Elevation:    0,
