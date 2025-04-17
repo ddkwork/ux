@@ -156,7 +156,7 @@ func main() {
 				},
 				LongPressCallback: nil,
 				SetRootRowsCallBack: func() {
-					for i := 0; i < 100; i++ {
+					for i := range 100 {
 						data := packet{
 							Scheme:        "Row" + fmt.Sprint(i+1),
 							Method:        http.MethodGet,
@@ -173,7 +173,7 @@ func main() {
 						if i%10 == 3 {
 							node = ux.NewContainerNode(fmt.Sprintf("Row %d", i+1), packet{})
 							t.Root.AddChild(node)
-							for j := 0; j < 5; j++ {
+							for j := range 5 {
 								subData := packet{
 									Scheme:        "Row" + fmt.Sprint(j+1),
 									Method:        http.MethodGet,
@@ -189,7 +189,7 @@ func main() {
 								if j < 2 {
 									subNode := ux.NewContainerNode("Sub Row "+fmt.Sprint(j+1), packet{})
 									node.AddChild(subNode)
-									for k := 0; k < 2; k++ {
+									for k := range 2 {
 										subSubData := packet{
 											Scheme:        "Sub Sub Row" + fmt.Sprint(k+1),
 											Method:        http.MethodGet,
@@ -304,7 +304,7 @@ func main() {
 				FanLocalType string `json:"fanLocalType"` // fan_local_type 海风陆风
 			}
 			var fans []*BasicFan
-			for i := 0; i < 100*10000; i++ {
+			for i := range 100 * 10000 {
 				fans = append(fans, &BasicFan{ID: i + 1, CompanyID: 1, CompanyName: "company1", PlantName: "plant1", StagingName: "staging1", CircuitName: "circuit1", FanName: "#1风机"})
 			}
 			datatable := ux.NewDataTable(fans, nil, nil)
@@ -562,7 +562,7 @@ func main() {
 			}
 
 			all := image.Rect(0, 0, 0, 0)
-			for i := 0; i < n; i++ {
+			for i := range n {
 				bounds := screenshot.GetDisplayBounds(i)
 				all = bounds.Union(all)
 				img := mylog.Check2(screenshot.CaptureRect(bounds))

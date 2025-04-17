@@ -8,8 +8,8 @@ require (
 	gioui.org/cmd v0.8.1-0.20250321120711-01ffdf788daa
 	gioui.org/example v0.8.2-0.20250227093625-76286d538a44
 	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
-	github.com/ddkwork/golibrary v0.1.2-0.20250415063831-d52e0fd7e02c
-	github.com/ddkwork/ux v0.0.0-20250414151012-58a9a57d87cd
+	github.com/ddkwork/golibrary v0.1.2-0.20250415124605-de715c1ec5fa
+	github.com/ddkwork/ux v0.0.0-20250415093220-70f18fdc66b6
 	github.com/go-vgo/robotgo v0.110.5
 	github.com/gorpher/gowin32 v0.0.11
 	github.com/kbinani/screenshot v0.0.0-20250118074034-a3924b7bbc8c
@@ -29,7 +29,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dblohm7/wingoes v0.0.0-20240820181039-f2b84150679e // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
-	github.com/ebitengine/purego v0.9.0-alpha.2.0.20250411144656-9059adfae616 // indirect
+	github.com/ebitengine/purego v0.9.0-alpha.3 // indirect
 	github.com/esiqveland/notify v0.13.3 // indirect
 	github.com/gen2brain/shm v0.1.1 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
