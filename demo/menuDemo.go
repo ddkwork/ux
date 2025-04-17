@@ -43,7 +43,7 @@ func NewMenuObj() *MenuObj {
 		List: widget.List{
 			Scrollbar: widget.Scrollbar{},
 			List: layout.List{
-				Axis:        layout.Vertical, //todo bug
+				Axis:        layout.Vertical,
 				ScrollToEnd: false,
 				Alignment:   0,
 				Position:    layout.Position{},
