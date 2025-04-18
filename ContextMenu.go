@@ -135,6 +135,7 @@ func (m *ContextMenu) LayoutOld(gtx layout.Context) layout.Dimensions {
 }
 
 func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
+	//return m.LayoutOld(gtx)
 	return layout.Stack{}.Layout(gtx,
 		layout.Stacked(func(gtx C) D {
 			return material.List(th, &m.List).Layout(gtx, len(m.RowClicks), func(gtx layout.Context, index int) layout.Dimensions {
