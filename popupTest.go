@@ -47,6 +47,10 @@ func NewPopupTest(length int) *PopupTest {
 	}
 }
 
+func (p *PopupTest) LayoutDefault(gtx layout.Context) layout.Dimensions {
+	return p.Layout(gtx, nil)
+}
+
 func (p *PopupTest) Layout(gtx layout.Context, drawRow func(gtx layout.Context, index int) layout.Dimensions) layout.Dimensions {
 	if !p.MenuInit {
 		p.MenuState = component.MenuState{

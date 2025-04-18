@@ -24,7 +24,10 @@ import (
 	"github.com/kbinani/screenshot"
 )
 
-var appBar *ux.AppBar
+var (
+	th     = ux.NewTheme()
+	appBar *ux.AppBar
+)
 
 func main() {
 	// stream.FileServerWindowsDisk()
@@ -676,7 +679,7 @@ func main() {
 		case Gif123Type: // todo gif123
 		case HexEditorType: // todo hex editor
 		case ContextMenuType: // todo contextmenu
-			m.Set(ContextMenuType, NewMenuObj().Layout)
+			m.Set(ContextMenuType, ux.NewPopupTest(100).LayoutDefault)
 		case ImageEditorType: // todo 图片编辑器
 		case MediaPlayerType: // todo 媒体播放器
 		case MindType: // todo 思维导图
