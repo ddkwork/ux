@@ -209,7 +209,7 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParen
 		gtx.Constraints.Min.X = gtx.Dp(t.width)
 		return node.clickable.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return layout.Inset{Top: unit.Dp(6)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return material.Label(th.Theme, 12, node.Title).Layout(gtx)
+				return material.Label(th, 12, node.Title).Layout(gtx)
 			})
 		})
 	}))
@@ -267,16 +267,16 @@ func (t *Tree) GetCurrentNode() *TreeNode {
 	return t.clickedNode
 }
 
-func (t *Tree) MinTree(gtx layout.Context, nodes []*TreeNode) {
+func (t *Tree) OpenAll(gtx layout.Context, nodes []*TreeNode) {
 	if nodes == nil {
 		nodes = t.nodes
 	}
 	for _, node := range nodes {
 		if node.Expanded {
-			node.Expanded = false
+			node.Expanded = true
 		}
 		if len(node.Children) > 0 {
-			t.MinTree(gtx, node.Children)
+			t.OpenAll(gtx, node.Children)
 		}
 	}
 	gtx.Execute(op.InvalidateCmd{})
