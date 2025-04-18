@@ -189,10 +189,10 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParen
 	if node.clickable.Hovered() {
 		bgColor = th.Color.TreeHoveredBgColor
 	}
-	var sonItems []layout.FlexChild
+	var cells []layout.FlexChild
 	// 绘制展开/折叠图标
 	if len(node.Children) > 0 {
-		sonItems = append(sonItems, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+		cells = append(cells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return node.clickable.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return layout.Inset{Top: unit.Dp(1)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Max.X = gtx.Dp(th.Size.DefaultIconSize)
@@ -205,7 +205,7 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParen
 			})
 		}))
 	}
-	sonItems = append(sonItems, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+	cells = append(cells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 		gtx.Constraints.Min.X = gtx.Dp(t.width)
 		return node.clickable.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return layout.Inset{Top: unit.Dp(6)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -214,7 +214,7 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParen
 		})
 	}))
 
-	items := []layout.FlexChild{
+	rows := []layout.FlexChild{
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return layout.Background{}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				// defer clip.Rect(image.Rectangle{Max: gtx.Constraints.Max}, gtx.Dp(th.Size.DefaultElementRadiusSize)).Push(gtx.Ops).Pop()
@@ -233,7 +233,7 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParen
 				gtx.Constraints.Min.Y = gtx.Dp(unit.Dp(25))
 				return layout.Inset{Left: unit.Dp(10)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					return layout.Inset{Left: unit.Dp(depth * 16)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, sonItems...)
+						return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, cells...)
 					})
 				})
 			})
@@ -250,13 +250,11 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParen
 				return t.renderNode(gtx, child, depth+1, false)
 			}))
 		}
-		items = append(items, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			// return layout.Inset{}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return layout.Flex{Axis: layout.Vertical}.Layout(gtx, dims...)
-			// })
 		}))
 	}
-	return layout.Flex{Axis: layout.Vertical}.Layout(gtx, items...)
+	return layout.Flex{Axis: layout.Vertical}.Layout(gtx, rows...)
 }
 
 func (t *Tree) SetCurrentNode(node *TreeNode) {
