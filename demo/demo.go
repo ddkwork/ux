@@ -39,7 +39,7 @@ func main() {
 	panel := ux.NewPanel(w)
 
 	hPanel := ux.NewHPanel(w)
-	panel.AddChild(hPanel.Layout)
+	panel.AddChild(hPanel)
 
 	tipIconButtons := []*ux.TipIconButton{
 		ux.NewTooltipButton(ux.NavigationArrowBackIcon, "action code", nil),
@@ -228,7 +228,7 @@ func main() {
 				// todo 这里可以设计一个类似aggrid的高级搜索功能：把n叉树的元数据结构体取出来，然后通过反射结构体布局一个所有字段值的过滤综合条件，最后设置过滤结果填充到表格的过滤rows中
 				t.Filter(text)
 			})
-			m.Set(TreeTableType, t.Layout)
+			m.Set(TreeTableType, t)
 		case TreeType:
 			rootNodes := []*ux.TreeNode{
 				{
@@ -295,10 +295,10 @@ func main() {
 			tree.OnClick(func(gtx layout.Context, node *ux.TreeNode) {
 				fmt.Println("node:", node.Title, " clicked")
 			})
-			m.Set(TreeType, tree.Layout)
+			m.Set(TreeType, tree)
 		case Table2Type:
 			t := table2(Packets)
-			m.Set(Table2Type, t.Layout)
+			m.Set(Table2Type, t)
 		case TableType:
 			type BasicFan struct {
 				ID          int     `json:"id"`          // id
@@ -380,7 +380,7 @@ func main() {
 			//header.Add(layout.Rigid(button2.Layout))
 			//header.Add(layout.Rigid(button2.Layout))
 			//header.Add(layout.Rigid(button2.Layout))
-			m.Set(TableType, table.Layout)
+			m.Set(TableType, table)
 		case SearchDropDownType:
 			dropDown := ux.NewSearchDropDown()
 			dropDown.SetLoader(func() []ux.Item {
@@ -429,9 +429,9 @@ func main() {
 			//		IconColor:  color.NRGBA{},
 			//	},
 			//})
-			m.Set(SearchDropDownType, dropDown.Layout)
+			m.Set(SearchDropDownType, dropDown)
 		case IconvgViewType:
-			m.Set(IconvgViewType, ux.NewIconView().Layout)
+			m.Set(IconvgViewType, ux.NewIconView())
 		case StructViewType:
 			type Object struct {
 				MachineID string
@@ -561,9 +561,9 @@ func main() {
 
 			// form.InsertAt(0, "choose a app", dropDown.Layout)
 			// form.Add("", ux.BlueButton(&clickable, "submit", unit.Dp(100)).Layout)
-			m.Set(StructViewType, form.Layout)
+			m.Set(StructViewType, form)
 		case ColorPickerType:
-			m.Set(ColorPickerType, ux.NewColorPicker().Layout)
+			m.Set(ColorPickerType, ux.NewColorPicker())
 		case ScreenshotType:
 			continue // apk测试失败
 			// save *image.RGBA to filePath with PNG format.
@@ -613,12 +613,12 @@ func main() {
 				Contextual: nil,
 				Loaded:     false,
 			}
-			m.Set(CardType, f.Layout)
+			m.Set(CardType, f)
 		case DataPickerType:
-			c := ux.Calendar{}
+			c := &ux.Calendar{}
 			c.Inset = layout.UniformInset(unit.Dp(16))
 			c.FirstDayOfWeek = time.Monday
-			m.Set(DataPickerType, c.Layout)
+			m.Set(DataPickerType, c)
 		case ResizerType:
 			// resizer := ux.Resize{}
 			cust1 := CustomView{Title: "Widget One Widget One Widget One Widget One Widget One Widget One Widget One Widget One"}
@@ -635,16 +635,16 @@ func main() {
 				fmt.Printf("列 %d 新宽度: %dpx\n", index, newWidth)
 				// 这里可以更新表格列宽或执行其他操作
 			}, resizeables...)
-			m.Set(ResizerType, resizer.Layout)
+			m.Set(ResizerType, resizer)
 			// resizer.Layout(gtx, cust2.Layout, nil)
 			// resizer.Layout(gtx, cust3.Layout, nil)
 			// resizer.Layout(gtx, cust4.Layout, nil)
 
 		case MobileType:
 		case SvgButtonType:
-			m.Set(SvgButtonType, ux.Button(new(widget.Clickable), ux.SvgIconCircledChevronRight, "").Layout)
+			m.Set(SvgButtonType, ux.Button(new(widget.Clickable), ux.SvgIconCircledChevronRight, ""))
 		case CodeEditorType:
-			m.Set(CodeEditorType, ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout)
+			m.Set(CodeEditorType, ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang))
 		case AsmViewType:
 		case LogViewType:
 			m.Set(LogViewType, ux.LogView()) // todo 日志没有对齐，控制台是对齐的，增加滚动条
@@ -658,14 +658,14 @@ func main() {
 				First:  ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout,
 				Second: ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang).Layout,
 			})
-			m.Set(SplitViewType, sp.Layout)
+			m.Set(SplitViewType, sp)
 		case ListViewType:
 		case JsonTreeType:
 		case AnimationButtonType:
 			newButtonAnimation := ux.NewButtonAnimation("animation button", ux.NavigationArrowBackIcon, func(gtx layout.Context) {
 				mylog.Info("animation button clicked")
 			})
-			m.Set(AnimationButtonType, newButtonAnimation.Layout) // todo bug
+			m.Set(AnimationButtonType, newButtonAnimation) // todo bug
 		case TerminalType: // todo 控制台被接管了
 			if mylog.IsWindows() {
 				continue // todo bug
@@ -673,13 +673,13 @@ func main() {
 			screen, settings := terminal.Demo()
 			m.Set(TerminalType, ux.NewTabItem("Tab 5", func(gtx layout.Context) layout.Dimensions {
 				return terminal.Console(screen, settings)(gtx)
-			}).LayoutContent)
+			}))
 		case StackViewType: // todo stackview
 		case DockViewType: // todo dockview
 		case Gif123Type: // todo gif123
 		case HexEditorType: // todo hex editor
 		case ContextMenuType: // todo contextmenu
-			m.Set(ContextMenuType, ux.NewPopupTest(100).LayoutDefault)
+			m.Set(ContextMenuType, ux.NewPopupTest(100, nil))
 		case ImageEditorType: // todo 图片编辑器
 		case MediaPlayerType: // todo 媒体播放器
 		case MindType: // todo 思维导图
@@ -738,7 +738,7 @@ func main() {
 
 	vtab := ux.NewTabView(layout.Vertical)
 	for k, v := range m.Range() {
-		tab := ux.NewTabItem(k.String(), v)
+		tab := ux.NewTabItem(k.String(), v.Layout)
 		vtab.AddTab(tab)
 	}
 	// mylog.Success("test append log")
@@ -751,7 +751,7 @@ func main() {
 	// buildTabItems(vtab)
 
 	// panel.AddChild(htab.Layout)
-	panel.AddChild(vtab.Layout)
+	panel.AddChild(vtab)
 
 	//app.FileDropCallback(func(files []string) {
 	//	for _, file := range files {

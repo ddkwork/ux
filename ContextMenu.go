@@ -1,6 +1,7 @@
 package ux
 
 import (
+	"gioui.org/layout"
 	"gioui.org/widget"
 	"github.com/ddkwork/ux/giosvg"
 	"github.com/ddkwork/ux/x/component"
@@ -17,7 +18,13 @@ type ContextMenuItem struct {
 
 type ContextMenu struct {
 	Items []*ContextMenuItem
+	component.ContextArea
 	component.MenuState
+}
+
+func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
+	//TODO implement me
+	panic("implement me")
 }
 
 func NewContextMenu() *ContextMenu {

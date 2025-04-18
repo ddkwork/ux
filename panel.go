@@ -29,69 +29,63 @@ func NewTheme() *material.Theme {
 	return th
 }
 
-type Widget layout.Widget
+type Widget interface {
+	Layout(gtx layout.Context) layout.Dimensions
+}
 
 var ZeroWidget = func(gtx layout.Context) layout.Dimensions {
 	return layout.Dimensions{}
 }
 
-type Panel[T Widget] struct { // 使用泛型而不是接口，这样返回的每个控件结构体字段无需断言，并且有类型约束，是安全的
+type Panel struct { // 使用泛型而不是接口，这样返回的每个控件结构体字段无需断言，并且有类型约束，是安全的
 	layout.Flex
-	Data              T
 	children          []layout.FlexChild
 	w                 *app.Window
 	dumpCanvas        bool
 	imageAsBackground bool
 }
 
-func (p *Panel[T]) Empty() bool {
+func (p *Panel) Empty() bool {
 	return len(p.children) == 0
 }
 
-func NewHPanel[T Widget](w *app.Window) *Panel[T] {
-	panel := NewPanel[T](w)
+func NewHPanel(w *app.Window) *Panel {
+	panel := NewPanel(w)
 	panel.Axis = layout.Horizontal
 	return panel
 }
 
-func NewPanel[T Widget](w *app.Window) *Panel[T] {
-	return &Panel[T]{
+func NewPanel(w *app.Window) *Panel {
+	return &Panel{
 		Flex: layout.Flex{
 			Axis:      layout.Vertical,
 			Spacing:   0,
 			Alignment: 0,
 			WeightSum: 0,
 		},
-		Data:     nil,
 		children: make([]layout.FlexChild, 0),
 		w:        w,
 	}
 }
 
-func (p *Panel[T]) AddChildCallback(childCallback func(gtx layout.Context) layout.Dimensions) {
+func (p *Panel) AddChildCallback(childCallback func(gtx layout.Context) layout.Dimensions) {
 	p.children = append(p.children, layout.Rigid(childCallback))
 }
 
-func (p *Panel[T]) AddChild(child ...Widget) {
-	if p.Data == nil {
-		p.Data = any(child[0]).(T) // todo test if child is T
-	}
+func (p *Panel) AddChild(child ...Widget) {
 	for _, c := range child {
-		p.children = append(p.children, layout.Rigid(layout.Widget(c)))
+		p.children = append(p.children, layout.Rigid(c.Layout))
 	}
 }
 
-func (p *Panel[T]) AddChildFlexed(weight float32, child Widget) {
-	if p.Data == nil {
-		p.Data = any(child).(T)
-	}
-	p.children = append(p.children, layout.Flexed(weight, layout.Widget(child)))
+func (p *Panel) AddChildFlexed(weight float32, child Widget) {
+	p.children = append(p.children, layout.Flexed(weight, child.Layout))
 }
 
-func (p *Panel[T]) Layout(gtx layout.Context) layout.Dimensions {
+func (p *Panel) Layout(gtx layout.Context) layout.Dimensions {
 	BackgroundDark(gtx)
 	if p.dumpCanvas {
-		SaveScreenshot(p.Layout)
+		SaveScreenshot(p)
 	}
 	if p.imageAsBackground {
 		drawImageBackground(gtx)
@@ -102,11 +96,11 @@ func (p *Panel[T]) Layout(gtx layout.Context) layout.Dimensions {
 	return p.Flex.Layout(gtx, p.children...)
 }
 
-func (p *Panel[T]) SetDumpCanvas(dumpCanvas bool) {
+func (p *Panel) SetDumpCanvas(dumpCanvas bool) {
 	p.dumpCanvas = dumpCanvas
 }
 
-func (p *Panel[T]) SetImageAsBackground(imageAsBackground bool) {
+func (p *Panel) SetImageAsBackground(imageAsBackground bool) {
 	p.imageAsBackground = imageAsBackground
 }
 
@@ -116,12 +110,12 @@ type AppBar struct {
 	About    *TipIconButton
 }
 
-func InitAppBar[T Widget](panel *Panel[T], toolBars []*TipIconButton, speechTxt string) *AppBar {
+func InitAppBar(panel *Panel, toolBars []*TipIconButton, speechTxt string) *AppBar {
 	search := NewInput("请输入搜索关键字...").SetIcon(ActionSearchIcon).SetRadius(16)
-	panel.AddChildFlexed(1, search.Layout) // todo 太多之后apk需要管理溢出
+	panel.AddChildFlexed(1, search) // todo 太多之后apk需要管理溢出
 
 	for _, toolbar := range toolBars {
-		panel.AddChild(toolbar.Layout)
+		panel.AddChild(toolbar)
 	}
 
 	about := NewTooltipButton(AlertErrorIcon, "about", func() { // todo ico make
@@ -131,7 +125,7 @@ func InitAppBar[T Widget](panel *Panel[T], toolBars []*TipIconButton, speechTxt 
 		}
 		About(NewWindow("about"), speechTxt)
 	})
-	panel.AddChild(about.Layout)
+	panel.AddChild(about)
 	return &AppBar{
 		Search:   search,
 		ToolBars: toolBars,
@@ -169,7 +163,7 @@ func NewWindow(title string) *app.Window {
 	return w
 }
 
-func Run(p *Panel[Widget]) {
+func Run(p *Panel) {
 	mylog.Call(func() {
 		/*
 				var et event.Event
@@ -236,7 +230,7 @@ func SaveScreenshot(callback Widget) {
 		Constraints: layout.Exact(size),
 	}
 	BackgroundDark(gtx)
-	callback(gtx)
+	callback.Layout(gtx)
 	mylog.Check(w.Frame(gtx.Ops))
 	img := image.NewRGBA(image.Rectangle{Max: size})
 	mylog.Check(w.Screenshot(img))

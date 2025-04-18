@@ -7,5 +7,5 @@ func LogView() Widget {
 	mylog.SetCallBack(func() {
 		logView.AppendText(mylog.Row())
 	})
-	return logView.Layout
+	return logView
 }

@@ -39,7 +39,7 @@ type TabItem struct {
 	// Title of the tab.
 	title string
 	// Main part of the tab content.
-	Content Widget
+	Content layout.Widget
 	// Title padding of the tab item.
 	Inset     layout.Inset
 	direction layout.Direction
@@ -234,7 +234,7 @@ func (t *TabItem) layoutTitle(gtx C) D {
 	})
 }
 
-func (t *TabItem) LayoutContent(gtx C) D {
+func (t *TabItem) Layout(gtx C) D {
 	return layout.Inset{Top: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return t.Content(gtx)
 	})
@@ -305,7 +305,7 @@ func (v *TabView) Layout(gtx C) D {
 		}),
 
 		layout.Rigid(func(gtx C) D {
-			return v.tabItems[v.index].LayoutContent(gtx)
+			return v.tabItems[v.index].Layout(gtx)
 		}),
 	)
 }
@@ -333,7 +333,7 @@ func NewTabView(axis layout.Axis, item ...*TabItem) *TabView {
 	}
 }
 
-func NewTabItem(title string, content Widget) *TabItem {
+func NewTabItem(title string, content layout.Widget) *TabItem {
 	return &TabItem{
 		title:     title,
 		Content:   content,

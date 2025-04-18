@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/ddkwork/golibrary/safemap"
-
 	"github.com/ddkwork/golibrary/stream"
 )
 

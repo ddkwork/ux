@@ -40,7 +40,7 @@ func readText(data string) []string {
 }
 
 // The main draw function
-func About[T Widget](w *app.Window, data string) error {
+func About(w *app.Window, data string) error {
 	paragraphList = readText(data)
 	// y-position for text
 	var scrollY unit.Dp = 0

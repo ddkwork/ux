@@ -123,17 +123,7 @@ func (m *MenuBar) Layout(gtx layout.Context) layout.Dimensions {
 	return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, items...)
 }
 
-// DrawBackground 在给定的尺寸上绘制一个背景颜色
 func DrawBackground(gtx layout.Context, size image.Point, col color.NRGBA) {
 	defer clip.Rect{Max: size}.Push(gtx.Ops).Pop()
 	paint.Fill(gtx.Ops, col)
 }
-
-//
-// return layout.Stack{}.Layout(gtx,
-// layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-// 	return layout.Inset{Top: unit.Dp(3), Bottom: unit.Dp(3)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-// 		return Body1(m.theme, "▼").Layout(gtx)
-// 	})
-// }),
-// )

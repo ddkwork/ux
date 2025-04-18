@@ -21,9 +21,10 @@ type PopupTest struct {
 	MenuInit bool
 	widget.List
 	RowClicks []widget.Clickable
+	DrawRow   func(gtx layout.Context, index int) layout.Dimensions
 }
 
-func NewPopupTest(length int) *PopupTest {
+func NewPopupTest(length int, DrawRow func(gtx layout.Context, index int) layout.Dimensions) *PopupTest {
 	return &PopupTest{
 		RedButton:     widget.Clickable{},
 		GreenButton:   widget.Clickable{},
@@ -44,14 +45,11 @@ func NewPopupTest(length int) *PopupTest {
 			},
 		},
 		RowClicks: make([]widget.Clickable, length),
+		DrawRow:   DrawRow,
 	}
 }
 
-func (p *PopupTest) LayoutDefault(gtx layout.Context) layout.Dimensions {
-	return p.Layout(gtx, nil)
-}
-
-func (p *PopupTest) Layout(gtx layout.Context, drawRow func(gtx layout.Context, index int) layout.Dimensions) layout.Dimensions {
+func (p *PopupTest) Layout(gtx layout.Context) layout.Dimensions {
 	if !p.MenuInit {
 		p.MenuState = component.MenuState{
 			Options: []func(gtx C) D{
@@ -114,7 +112,7 @@ func (p *PopupTest) Layout(gtx layout.Context, drawRow func(gtx layout.Context, 
 				rowClicks := &p.RowClicks[index]
 				return rowClicks.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = gtx.Constraints.Max.X
-					if drawRow == nil {
+					if p.DrawRow == nil {
 						if event, b := gtx.Event(pointer.Filter{Target: rowClicks, Kinds: pointer.Press | pointer.Release}); b {
 							if e, ok := event.(pointer.Event); ok {
 								if e.Kind == pointer.Press {
@@ -132,7 +130,7 @@ func (p *PopupTest) Layout(gtx layout.Context, drawRow func(gtx layout.Context, 
 							return material.Button(th, rowClicks, "item"+fmt.Sprintf("%d", index)).Layout(gtx)
 						})
 					}
-					return drawRow(gtx, index)
+					return p.DrawRow(gtx, index)
 				})
 			})
 		}),

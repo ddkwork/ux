@@ -63,7 +63,7 @@ func (c *Card_) Layout(gtx layout.Context) layout.Dimensions {
 			return fill(gtx, c.bgColor)
 		}),
 		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-			return layout.UniformInset(c.padding).Layout(gtx, layout.Widget(c.content))
+			return layout.UniformInset(c.padding).Layout(gtx, c.content.Layout)
 		}),
 	)
 }
