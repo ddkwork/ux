@@ -24,13 +24,13 @@ func Layout(gtx layout.Context, icon any, color color.NRGBA, size unit.Dp) layou
 		case *widget.Image:
 			v.Layout(gtx)
 		case image.Image:
-			icon := &widget.Image{
+			img := &widget.Image{
 				Src:      paint.NewImageOp(v),
 				Fit:      widget.Unscaled,
 				Position: layout.Center,
 				Scale:    1.0, // todo 测试按钮图标和层级图标
 			}
-			icon.Layout(gtx)
+			img.Layout(gtx)
 		}
 	}
 	return layout.Dimensions{

@@ -229,13 +229,16 @@ func main() {
 		case TreeType:
 			rootNodes := []*ux.TreeNode{
 				{
-					Title: "Root 0",
+					Title:    "Root 0",
+					Expanded: true,
 				},
 				{
-					Title: "Root 1",
+					Title:    "Root 1",
+					Expanded: true,
 					Children: []*ux.TreeNode{
 						{
-							Title: "Child 1.1",
+							Title:    "Child 1.1",
+							Expanded: true,
 							Children: []*ux.TreeNode{
 								{Title: "Grandchild 1.1.1"},
 								{Title: "Grandchild 1.1.2"},
@@ -245,7 +248,8 @@ func main() {
 							},
 						},
 						{
-							Title: "Child 1.2",
+							Title:    "Child 1.2",
+							Expanded: true,
 							Children: []*ux.TreeNode{
 								{Title: "Grandchild 1.2.1"},
 							},
@@ -254,21 +258,36 @@ func main() {
 				},
 
 				{
-					Title: "Root 2",
+					Title:    "Root 2",
+					Expanded: true,
 					Children: []*ux.TreeNode{
 						{
-							Title: "Child 2.1",
+							Title:    "Child 2.1",
+							Expanded: true,
 							Children: []*ux.TreeNode{
-								{Title: "Grandchild 2.1.1"},
+								{Title: "Grandchild 2.1.1",
+									Expanded: true},
 							},
 						},
 					},
 				},
 				{
-					Title: "Root 3",
+					Title:    "Root 3",
+					Expanded: true,
+					Children: []*ux.TreeNode{
+						{
+							Title:    "Child 3.1",
+							Expanded: true,
+							Children: []*ux.TreeNode{
+								{Title: "Grandchild 3.1.1",
+									Expanded: true},
+							},
+						},
+					},
 				},
 			}
-			tree := ux.NewTree()
+
+			tree := ux.NewTree(len(rootNodes))
 			tree.SetNodes(rootNodes)
 			tree.OnClick(func(gtx layout.Context, node *ux.TreeNode) {
 				fmt.Println("node:", node.Title, " clicked")
