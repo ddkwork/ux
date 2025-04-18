@@ -108,6 +108,32 @@ func (m *ContextMenu) LayoutRow(gtx layout.Context, index int) layout.Dimensions
 		}),
 	)
 }
+
+func (m *ContextMenu) LayoutOld(gtx layout.Context) layout.Dimensions {
+	return material.List(th, &m.List).Layout(gtx, len(m.RowClicks), func(gtx layout.Context, index int) layout.Dimensions {
+		return layout.Stack{}.Layout(gtx,
+			layout.Stacked(func(gtx C) D {
+				rowClicks := &m.RowClicks[index]
+				return rowClicks.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					gtx.Constraints.Min.X = gtx.Constraints.Max.X
+					if m.DrawRow == nil {
+						return m.drawRowDefault(gtx, rowClicks, index)
+					}
+					return m.DrawRow(gtx, index)
+				})
+			}),
+			layout.Expanded(func(gtx C) D {
+				return m.ContextArea.Layout(gtx, func(gtx C) D {
+					gtx.Constraints.Min = image.Point{}
+					m.OnClicked(gtx)
+					return m.drawContextArea(gtx, th)
+					return component.Menu(th, &m.MenuState).Layout(gtx) //所有行的item公用一个popup菜单而不是每行popup一个
+				})
+			}),
+		)
+	})
+}
+
 func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
 	return layout.Stack{}.Layout(gtx,
 		layout.Stacked(func(gtx C) D {
