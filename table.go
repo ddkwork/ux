@@ -311,7 +311,6 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 					}
 					m.cellsAreas[idx] = cellMenu
 				}
-				m.menu.OnClicked(gtx) // callback
 
 				return layout.Stack{}.Layout(gtx,
 					layout.Stacked(func(gtx C) D {
@@ -332,6 +331,7 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 						})
 					}),
 					layout.Expanded(func(gtx C) D {
+						m.menu.OnClicked(gtx) // callback
 						return cellMenu.Layout(gtx, func(gtx C) D {
 							m.rowIdx = row
 							m.colIdx = col

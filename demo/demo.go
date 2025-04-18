@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"gioui.org/example/component/icon"
 	"image"
 	"image/png"
 	"net/http"
@@ -342,7 +343,7 @@ func main() {
 				mylog.Info("double click for edit row data")
 			}
 
-			contextMenu := ux.NewContextMenu()
+			contextMenu := ux.NewContextMenu(len(fans), nil)
 			contextMenu.AddItem(ux.ContextMenuItem{
 				Title: "addRow",
 				// Icon:  ux.IconAdd,//todo
@@ -679,7 +680,57 @@ func main() {
 		case Gif123Type: // todo gif123
 		case HexEditorType: // todo hex editor
 		case ContextMenuType: // todo contextmenu
-			m.Set(ContextMenuType, ux.NewPopupTest(100, nil))
+			menu := ux.NewContextMenu(100, nil)
+			menu.AddItem(ux.ContextMenuItem{
+				Title:         "Red",
+				Icon:          nil,
+				Can:           func() bool { return false },
+				Do:            func() { mylog.Info("red item clicked") },
+				AppendDivider: false,
+				Clickable:     widget.Clickable{},
+			})
+			menu.AddItem(ux.ContextMenuItem{
+				Title:         "Green",
+				Icon:          nil,
+				Can:           func() bool { return false },
+				Do:            func() { mylog.Info("Green item clicked") },
+				AppendDivider: false,
+				Clickable:     widget.Clickable{},
+			})
+			menu.AddItem(ux.ContextMenuItem{
+				Title:         "Blue",
+				Icon:          nil,
+				Can:           func() bool { return false },
+				Do:            func() { mylog.Info("Blue item clicked") },
+				AppendDivider: false,
+				Clickable:     widget.Clickable{},
+			})
+			menu.AddItem(ux.ContextMenuItem{
+				Title:         "Balance",
+				Icon:          icon.AccountBalanceIcon,
+				Can:           func() bool { return false },
+				Do:            func() { mylog.Info("Balance item clicked") },
+				AppendDivider: false,
+				Clickable:     widget.Clickable{},
+			})
+			menu.AddItem(ux.ContextMenuItem{
+				Title:         "Account",
+				Icon:          icon.AccountBoxIcon,
+				Can:           func() bool { return false },
+				Do:            func() { mylog.Info("Account item clicked") },
+				AppendDivider: false,
+				Clickable:     widget.Clickable{},
+			})
+			menu.AddItem(ux.ContextMenuItem{
+				Title:         "Cart",
+				Icon:          icon.CartIcon,
+				Can:           func() bool { return false },
+				Do:            func() { mylog.Info("Cart item clicked") },
+				AppendDivider: false,
+				Clickable:     widget.Clickable{},
+			})
+
+			m.Set(ContextMenuType, menu)
 		case ImageEditorType: // todo 图片编辑器
 		case MediaPlayerType: // todo 媒体播放器
 		case MindType: // todo 思维导图

@@ -306,7 +306,7 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 									}
 								}
 								if i.contextMenu == nil {
-									i.contextMenu = NewContextMenu()
+									i.contextMenu = NewContextMenu(1, nil)
 									items := []ContextMenuItem{
 										{
 											Title: "copy",
