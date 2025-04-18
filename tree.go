@@ -214,7 +214,7 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParen
 		})
 	}))
 
-	rows := []layout.FlexChild{
+	containerRow := []layout.FlexChild{
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return layout.Background{}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				// defer clip.Rect(image.Rectangle{Max: gtx.Constraints.Max}, gtx.Dp(th.Size.DefaultElementRadiusSize)).Push(gtx.Ops).Pop()
@@ -241,20 +241,20 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParen
 	}
 	// 递归渲染子节点
 	if node.Expanded && len(node.Children) > 0 {
-		var dims []layout.FlexChild
+		var containerRowChildren []layout.FlexChild
 		for _, child := range node.Children {
 			if child.IsDeleted {
 				continue
 			}
-			dims = append(dims, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			containerRowChildren = append(containerRowChildren, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				return t.renderNode(gtx, child, depth+1, false)
 			}))
 		}
-		rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return layout.Flex{Axis: layout.Vertical}.Layout(gtx, dims...)
+		containerRow = append(containerRow, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return layout.Flex{Axis: layout.Vertical}.Layout(gtx, containerRowChildren...)
 		}))
 	}
-	return layout.Flex{Axis: layout.Vertical}.Layout(gtx, rows...)
+	return layout.Flex{Axis: layout.Vertical}.Layout(gtx, containerRow...)
 }
 
 func (t *Tree) SetCurrentNode(node *TreeNode) {
