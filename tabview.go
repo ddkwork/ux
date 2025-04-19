@@ -4,7 +4,7 @@ import (
 	"image"
 	"unicode"
 
-	colors2 "github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/resources/icons"
 
 	"github.com/ddkwork/ux/widget/material"
@@ -164,7 +164,7 @@ func (t *TabItem) layoutTitle(gtx C) D {
 									if t.btn.Hovered() {
 										// label.Font.Weight = font.Bold
 										label.TextSize++
-										label.Color = colors2.Red100
+										label.Color = colors.Red100
 									}
 									return layout.UniformInset(unit.Dp(7)).Layout(gtx, label.Layout)
 								}),
@@ -210,7 +210,7 @@ func (t *TabItem) layoutTitle(gtx C) D {
 							label.Color = th.Color.DefaultTextWhiteColor
 							if t.btn.Hovered() {
 								label.Font.Weight = font.Bold
-								label.Color = colors2.Red100
+								label.Color = colors.Red100
 							}
 							return layout.UniformInset(unit.Dp(7)).Layout(gtx,
 								label.Layout,
@@ -226,7 +226,7 @@ func (t *TabItem) layoutTitle(gtx C) D {
 					}
 					tabHeight := gtx.Dp(unit.Dp(4))
 					tabRect := image.Rect(0, 0, tabWidth, tabHeight)
-					paint.FillShape(gtx.Ops, colors2.ColorPink, clip.Rect(tabRect).Op())
+					paint.FillShape(gtx.Ops, colors.ColorPink, clip.Rect(tabRect).Op())
 					return layout.Dimensions{
 						Size: image.Point{X: tabWidth, Y: tabHeight},
 					}

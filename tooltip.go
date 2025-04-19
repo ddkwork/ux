@@ -4,7 +4,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	colors2 "github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/x/component"
 
 	"github.com/ddkwork/ux/widget/material"
@@ -22,7 +22,7 @@ type (
 
 func NewTooltipButton(icon *widget.Icon, tip string, callback func()) *TipIconButton {
 	t := component.PlatformTooltip(th, tip)
-	t.Bg = colors2.Yellow100
+	t.Bg = colors.Yellow100
 	t.Text.Color = th.Color.ButtonTextBlackColor
 	t.CornerRadius = 14
 	t.Text.MaxLines = 3 // todo newlines

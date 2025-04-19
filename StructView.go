@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"time"
 
-	colors2 "github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/resources/icons"
 
 	"gioui.org/text"
@@ -224,7 +224,7 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 			s.ModalState.Show(gtx.Now, func(gtx layout.Context) layout.Dimensions {
 				return layout.UniformInset(unit.Dp(15)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					return material.List(th, &s.List).Layout(gtx, len(rows), func(gtx layout.Context, index int) layout.Dimensions {
-						return Background{Color: colors2.BackgroundColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { // todo 这样把边框整没了
+						return Background{Color: colors.BackgroundColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { // todo 这样把边框整没了
 							return rows[index](gtx)
 						})
 					})

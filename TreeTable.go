@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	colors2 "github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/resources/icons"
 
 	"gioui.org/gesture"
@@ -727,7 +727,7 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData, width unit.D
 	DrawColumnDivider(gtx, data.columID) // 为每列绘制列分隔条
 
 	if data.FgColor == (color.NRGBA{}) {
-		data.FgColor = colors2.White
+		data.FgColor = colors.White
 	}
 	//richText := NewRichText()
 	//richText.AddSpan(richtext.SpanStyle{
@@ -962,7 +962,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 				}
 			}
 			cols = append(cols, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return Background{Color: colors2.ColorHeaderFg}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return Background{Color: colors.ColorHeaderFg}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					return material.Clickable(gtx, clickable, func(gtx layout.Context) layout.Dimensions {
 						cellFrame := t.CellFrame(gtx, t.header.columnCells[i], t.maxColumnCellWidths[i], true, layout.Inset{
 							Top:    8,
@@ -1012,7 +1012,7 @@ func DrawColumnDivider(gtx layout.Context, col int) {
 	if col > 0 { // 层级列不要绘制分隔线
 		tallestHeight := gtx.Dp(unit.Dp(gtx.Constraints.Max.Y))
 		stack3 := clip.Rect{Max: image.Pt(int(DividerWidth), tallestHeight)}.Push(gtx.Ops)
-		paint.Fill(gtx.Ops, colors2.DividerFg)
+		paint.Fill(gtx.Ops, colors.DividerFg)
 		stack3.Pop()
 	}
 }
@@ -1239,8 +1239,8 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w rowFn) layout.Dimensions
 					handleRight := handleShape
 					handleRight.Rect = handleRight.Rect.Add(image.Pt(dividerWidth+dividerMargin, 0)) // 为右边形状添加偏移
 
-					paint.FillShape(gtx.Ops, colors2.Red200, handleLeft.Op(gtx.Ops))     // 填充左侧形状
-					paint.FillShape(gtx.Ops, colors2.Yellow100, handleRight.Op(gtx.Ops)) // 填充右侧形状
+					paint.FillShape(gtx.Ops, colors.Red200, handleLeft.Op(gtx.Ops))     // 填充左侧形状
+					paint.FillShape(gtx.Ops, colors.Yellow100, handleRight.Op(gtx.Ops)) // 填充右侧形状
 				}
 
 				// Draw the vertical bar
@@ -1250,7 +1250,7 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w rowFn) layout.Dimensions
 			}
 			// 为表头和每列绘制列分隔条
 			stack3 := clip.Rect{Max: image.Pt(dividerWidth, tallestHeight)}.Push(gtx.Ops) // 绘制分隔条的矩形区域
-			paint.Fill(gtx.Ops, colors2.DividerFg)                                        // 填充分隔条的颜色
+			paint.Fill(gtx.Ops, colors.DividerFg)                                         // 填充分隔条的颜色
 			stack3.Pop()                                                                  // 弹出分隔条的绘制堆栈
 
 			dividerStart += dividerWidth // 更新分隔符的起始位置

@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"math"
 
-	colors2 "github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/resources/icons"
 
 	"github.com/ddkwork/ux/animationButton"
@@ -32,7 +32,7 @@ func NewButtonAnimation(text string, icon *widget.Icon, callBack func(gtx layout
 		IconGap:   unit.Dp(1),
 		Animation: animationButton.NewButtonAnimationDefault(),
 		Border: widget.Border{
-			Color:        colors2.Grey200,
+			Color:        colors.Grey200,
 			CornerRadius: 16,
 			Width:        0.5,
 		},
@@ -42,7 +42,7 @@ func NewButtonAnimation(text string, icon *widget.Icon, callBack func(gtx layout
 			BackgroundColor:      th.Color.InputFocusedBgColor,
 			HoverBackgroundColor: &th.ContrastFg,
 			HoverTextColor:       &th.Color.HoveredBorderBlueColor,
-			BorderColor:          colors2.White,
+			BorderColor:          colors.White,
 		},
 	}
 	if icon == nil {
@@ -119,7 +119,7 @@ func Button(button *widget.Clickable, icon any, text string) ButtonStyle {
 		Button:          button,
 		shaper:          th.Shaper,
 		border: widget.Border{
-			Color:        colors2.Grey200,
+			Color:        colors.Grey200,
 			CornerRadius: 16,
 			Width:        .5,
 		},
@@ -158,7 +158,7 @@ func (b ButtonStyle) Layout(gtx layout.Context) layout.Dimensions {
 		case !gtx.Enabled():
 			background = Disabled(b.Background)
 		case b.Button.Hovered() || gtx.Focused(b.Button):
-			background = colors2.Grey400
+			background = colors.Grey400
 		}
 		b.border.Color = background
 		if b.Icon == nil {

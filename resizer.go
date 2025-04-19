@@ -4,7 +4,7 @@ import (
 	"image"
 
 	"github.com/ddkwork/golibrary/mylog"
-	colors2 "github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/colors"
 
 	"gioui.org/gesture"
 	"gioui.org/io/pointer"
@@ -282,6 +282,6 @@ func (r *Resize) CustomResizeHandleBar(gtx layout.Context) layout.Dimensions {
 			Y: y,
 		},
 	}
-	paint.FillShape(gtx.Ops, colors2.DividerFg, clip.Rect(rect).Op())
+	paint.FillShape(gtx.Ops, colors.DividerFg, clip.Rect(rect).Op())
 	return layout.Dimensions{Size: rect.Max}
 }

@@ -4,7 +4,7 @@ import (
 	"image"
 	"image/color"
 
-	colors2 "github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/colors"
 
 	"github.com/ddkwork/ux/widget/material"
 
@@ -185,8 +185,8 @@ func (p *Prompt) Layout(gtx layout.Context) layout.Dimensions {
 								items,
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									btn := Button(&p.options[i].Button, nil, p.options[i].Text)
-									btn.Background = colors2.White
-									btn.color = colors2.Black
+									btn.Background = colors.White
+									btn.color = colors.Black
 									return btn.Layout(gtx)
 								}),
 								layout.Rigid(layout.Spacer{Width: unit.Dp(4)}.Layout),
