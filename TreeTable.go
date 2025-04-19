@@ -205,7 +205,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		t.SizeColumnsToFit(gtx)
 	})
 	t.rootRows = t.Root.Children // 增删改查不一定去计算列宽导致有些节点已经删除，是空指针导致panic，所有这里需要刷新一下rootRows，不知道这里是否会内存泄漏
-	list := material.List(th.Theme, &t.List)
+	list := material.List(th, &t.List)
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return t.HeaderFrame(gtx) // 渲染表头
@@ -585,7 +585,8 @@ func (t *TreeTable[T]) drawContextMenu(n *Node[T], i int) layout.StackChild {
 			n.rowContextAreas[i] = contextArea
 		}
 		if n.contextMenu == nil {
-			n.contextMenu = NewContextMenu()
+			mylog.Todo("contextMenu is nil")
+			n.contextMenu = NewContextMenu(0, nil)
 			item := ContextMenuItem{}
 			for _, kind := range CopyRowType.EnumTypes() {
 				switch kind {
@@ -727,9 +728,9 @@ func drawContextArea(gtx C, menuState *component.MenuState) D {
 	return layout.Center.Layout(gtx, func(gtx C) D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
 		gtx.Constraints.Min.X = 0
 		gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(400)) // 当行高限制后，这里需要取消限制，理想值是取表格高度或者屏幕高度，其次是增加滚动条或者树形右键菜单
-		menuStyle := component.Menu(th.Theme, menuState)
+		menuStyle := component.Menu(th, menuState)
 		menuStyle.SurfaceStyle = component.SurfaceStyle{
-			Theme: th.Theme,
+			Theme: th,
 			ShadowStyle: component.ShadowStyle{
 				CornerRadius: 18, // 弹出菜单的椭圆角度
 				Elevation:    100,
@@ -789,7 +790,7 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData, width unit.D
 			})
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return inset.Layout(gtx, material.Body2(th.Theme, data.Text).Layout)
+			return inset.Layout(gtx, material.Body2(th, data.Text).Layout)
 		}),
 	)
 	// return inset.Layout(gtx, richText.Layout)
@@ -1019,7 +1020,8 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 							t.header.contextAreas[i] = contextArea
 						}
 						if t.header.contextMenu == nil {
-							t.header.contextMenu = NewContextMenu()
+							mylog.Todo("xxxxxxxxxxxxxxxx")
+							t.header.contextMenu = NewContextMenu(0, nil)
 							t.header.contextMenu.AddItem(ContextMenuItem{
 								Title:         "CopyColumn",
 								Icon:          SvgIconCopy,
