@@ -121,9 +121,6 @@ func (m *ContextMenu) LayoutOld(gtx layout.Context) layout.Dimensions {
 					}
 					return m.DrawRow(gtx, index)
 				})
-				//return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				//
-				//})
 			}),
 			layout.Expanded(func(gtx C) D {
 				return m.ContextArea.Layout(gtx, func(gtx C) D {
@@ -142,11 +139,11 @@ func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
 	return layout.Stack{}.Layout(gtx,
 		layout.Stacked(func(gtx C) D {
 			return material.List(th, &m.List).Layout(gtx, len(m.RowClicks), func(gtx layout.Context, index int) layout.Dimensions {
-				rowClicks := &m.RowClicks[index] //todo 这个不在DrawRow回调内似乎无法取到右击了第几行
-				return rowClicks.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				rowClick := &m.RowClicks[index] //todo 这个不在DrawRow回调内似乎无法取到右击了第几行
+				return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = gtx.Constraints.Max.X
 					if m.DrawRow == nil {
-						return m.drawRowDefault(gtx, rowClicks, index)
+						return m.drawRowDefault(gtx, rowClick, index)
 					}
 					return m.DrawRow(gtx, index)
 				})
