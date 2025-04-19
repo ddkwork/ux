@@ -169,7 +169,7 @@ func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
 	return layout.Stack{}.Layout(gtx,
 		layout.Stacked(func(gtx C) D {
 			return material.List(th, &m.List).Layout(gtx, len(m.RowClicks), func(gtx layout.Context, index int) layout.Dimensions {
-				rowClick := &m.RowClicks[index] //todo 这个不在DrawRow回调内似乎无法取到右击了第几行
+				rowClick := &m.RowClicks[index]
 				return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = gtx.Constraints.Max.X
 					if event, b := gtx.Event(pointer.Filter{Target: rowClick, Kinds: pointer.Press | pointer.Release}); b {
