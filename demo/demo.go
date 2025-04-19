@@ -63,13 +63,13 @@ func main() {
 	m := new(safemap.M[DemoType, ux.Widget])
 	for _, Type := range TreeTableType.EnumTypes() {
 		switch Type {
-		case ContextMenuType: // todo contextmenu
+		case ContextMenuType:
 			menu := ux.NewContextMenu(100, nil)
 			menu.AddItem(ux.ContextMenuItem{
 				Title:         "Red",
 				Icon:          nil,
 				Can:           func() bool { return false },
-				Do:            func() { mylog.Info("red item clicked") },
+				Do:            func() { mylog.Info(menu.ClickedRowindex, "red item clicked") },
 				AppendDivider: false,
 				Clickable:     widget.Clickable{},
 			})
@@ -77,7 +77,7 @@ func main() {
 				Title:         "Green",
 				Icon:          nil,
 				Can:           func() bool { return false },
-				Do:            func() { mylog.Info("Green item clicked") },
+				Do:            func() { mylog.Info(menu.ClickedRowindex, "Green item clicked") },
 				AppendDivider: false,
 				Clickable:     widget.Clickable{},
 			})
@@ -85,7 +85,7 @@ func main() {
 				Title:         "Blue",
 				Icon:          nil,
 				Can:           func() bool { return false },
-				Do:            func() { mylog.Info("Blue item clicked") },
+				Do:            func() { mylog.Info(menu.ClickedRowindex, "Blue item clicked") },
 				AppendDivider: false,
 				Clickable:     widget.Clickable{},
 			})
@@ -93,7 +93,7 @@ func main() {
 				Title:         "Balance",
 				Icon:          ux.ActionAccountBalanceIcon,
 				Can:           func() bool { return false },
-				Do:            func() { mylog.Info("Balance item clicked") },
+				Do:            func() { mylog.Info(menu.ClickedRowindex, "Balance item clicked") },
 				AppendDivider: false,
 				Clickable:     widget.Clickable{},
 			})
@@ -101,7 +101,7 @@ func main() {
 				Title:         "Account",
 				Icon:          ux.ActionAccountBoxIcon,
 				Can:           func() bool { return false },
-				Do:            func() { mylog.Info("Account item clicked") },
+				Do:            func() { mylog.Info(menu.ClickedRowindex, "Account item clicked") },
 				AppendDivider: false,
 				Clickable:     widget.Clickable{},
 			})
@@ -109,7 +109,7 @@ func main() {
 				Title:         "Cart",
 				Icon:          ux.ActionAddShoppingCartIcon,
 				Can:           func() bool { return false },
-				Do:            func() { mylog.Info("Cart item clicked") },
+				Do:            func() { mylog.Info(menu.ClickedRowindex, "Cart item clicked") },
 				AppendDivider: false,
 				Clickable:     widget.Clickable{},
 			})
