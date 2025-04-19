@@ -69,7 +69,7 @@ func (r *ContextArea) Update(gtx C) {
 	dismissTag := &r.dims
 
 	r.startedActive = r.active
-	// Summon the contextual widget if the area recieved a secondary click.
+	// Summon the contextual widget if the area received a secondary click.
 	for {
 		ev, ok := gtx.Event(pointer.Filter{
 			Target: r,
@@ -86,12 +86,12 @@ func (r *ContextArea) Update(gtx C) {
 			// Check whether we should dismiss menu.
 			if e.Buttons.Contain(pointer.ButtonPrimary) {
 				clickPos := e.Position.Sub(r.position)
-				min := f32.Point{}
-				max := f32.Point{
+				minPtr := f32.Point{}
+				maxPtr := f32.Point{
 					X: float32(r.dims.Size.X),
 					Y: float32(r.dims.Size.Y),
 				}
-				if !(clickPos.X > min.X && clickPos.Y > min.Y && clickPos.X < max.X && clickPos.Y < max.Y) {
+				if !(clickPos.X > minPtr.X && clickPos.Y > minPtr.Y && clickPos.X < maxPtr.X && clickPos.Y < maxPtr.Y) {
 					r.Dismiss()
 				}
 			}
@@ -147,7 +147,7 @@ func (r *ContextArea) Layout(gtx C, w layout.Widget) D {
 	var contextual op.CallOp
 	if r.active || r.startedActive {
 		// Render if the layout started as active to ensure that widgets
-		// within the contextual content get to update their state in reponse
+		// within the contextual content get to update their state in repose
 		// to the event that dismissed the contextual widget.
 		contextual = func() op.CallOp {
 			macro := op.Record(gtx.Ops)
@@ -164,6 +164,8 @@ func (r *ContextArea) Layout(gtx C, w layout.Widget) D {
 					r.position.X = float32(gtx.Constraints.Max.X - r.dims.Size.X)
 				case layout.W, layout.NW, layout.SW:
 					r.position.X = 0
+				default:
+					panic("unhandled default case")
 				}
 			} else {
 				r.position.X = float32(newX)
@@ -222,12 +224,12 @@ func (r *ContextArea) Dismiss() {
 
 // Active returns whether the ContextArea is currently active (whether
 // it is currently displaying overlaid content or not).
-func (r ContextArea) Active() bool {
+func (r *ContextArea) Active() bool {
 	return r.active
 }
 
 // Activated returns true if the context area has become active since
-// the last call to Activated.
+// the last call to Activate.
 func (r *ContextArea) Activated() bool {
 	defer func() {
 		r.justActivated = false
