@@ -364,7 +364,7 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 								}
 								i.contextMenu.OnClicked(gtx)
 								return i.contextArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-									return drawContextArea(gtx, &i.contextMenu.MenuState)
+									return drawContextArea(gtx, i.contextMenu.MenuState)
 								})
 							}),
 						)

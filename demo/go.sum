@@ -36,10 +36,10 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dblohm7/wingoes v0.0.0-20240820181039-f2b84150679e h1:L+XrFvD0vBIBm+Wf9sFN6aU395t7JROoai0qXZraA4U=
 github.com/dblohm7/wingoes v0.0.0-20240820181039-f2b84150679e/go.mod h1:SUxUaAK/0UG5lYyZR1L1nC4AaYYvSSYTWQSH3FPcxKU=
-github.com/ddkwork/golibrary v0.1.2-0.20250415124605-de715c1ec5fa h1:d0ep9u/C7P4FH/sYvmc3/WiHksEnLYcbpbCYLTHfqNE=
-github.com/ddkwork/golibrary v0.1.2-0.20250415124605-de715c1ec5fa/go.mod h1:18KTZJJNy4ipDkNQubnL7fTv3CIN02j/Gmeoh+xxBcs=
-github.com/ddkwork/ux v0.0.0-20250415093220-70f18fdc66b6 h1:+CIrcsSH4GdyG0Ui5lo1juJTyA6UgY4es/SE/tTiP8s=
-github.com/ddkwork/ux v0.0.0-20250415093220-70f18fdc66b6/go.mod h1:86LMNms3jSt37TnfQfFkCy0isUQidNDk8pK+OMuOEBc=
+github.com/ddkwork/golibrary v0.1.2-0.20250419111928-41a591a7eb76 h1:J3bzPyUCDzSnJ1+GlMq/4cX0ANpWjWx2BLLcWNvjVLY=
+github.com/ddkwork/golibrary v0.1.2-0.20250419111928-41a591a7eb76/go.mod h1:18KTZJJNy4ipDkNQubnL7fTv3CIN02j/Gmeoh+xxBcs=
+github.com/ddkwork/ux v0.0.0-20250419073258-70c9c9ce457e h1:dL9X0F9RSJ0lhgwkkLibHRLE8hbdIV3HHQVC4wc23S4=
+github.com/ddkwork/ux v0.0.0-20250419073258-70c9c9ce457e/go.mod h1:X6qJ6mLofDehkQ+7XZgZwf6K1x2fZVS7gDmbOfrrCFc=
 github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
 github.com/dlclark/regexp2 v1.11.5/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
 github.com/ebitengine/purego v0.9.0-alpha.3 h1:5kv5zzhJYYLOYAdA/ZBMt+L89cG2B3cNyYWeDgFw73I=

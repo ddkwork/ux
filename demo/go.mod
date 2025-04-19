@@ -8,8 +8,8 @@ require (
 	gioui.org/cmd v0.8.1-0.20250321120711-01ffdf788daa
 	gioui.org/example v0.8.2-0.20250227093625-76286d538a44
 	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
-	github.com/ddkwork/golibrary v0.1.2-0.20250415124605-de715c1ec5fa
-	github.com/ddkwork/ux v0.0.0-20250415093220-70f18fdc66b6
+	github.com/ddkwork/golibrary v0.1.2-0.20250419111928-41a591a7eb76
+	github.com/ddkwork/ux v0.0.0-20250419073258-70c9c9ce457e
 	github.com/go-vgo/robotgo v0.110.5
 	github.com/gorpher/gowin32 v0.0.11
 	github.com/kbinani/screenshot v0.0.0-20250118074034-a3924b7bbc8c

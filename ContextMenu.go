@@ -10,6 +10,7 @@ import (
 	"image"
 	"image/color"
 	"strconv"
+	"sync"
 )
 
 type ContextMenuItem struct {
@@ -29,6 +30,7 @@ type ContextMenu struct {
 	RowClicks       []widget.Clickable
 	DrawRow         func(gtx layout.Context, index int) layout.Dimensions
 	ClickedRowindex int
+	sync.Once
 }
 
 func NewContextMenu(length int, drawRow func(gtx layout.Context, index int) layout.Dimensions) *ContextMenu {
@@ -160,15 +162,15 @@ func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
 			return m.ContextArea.Layout(gtx, func(gtx C) D {
 				gtx.Constraints.Min = image.Point{}
 				m.OnClicked(gtx)
-				return m.drawContextArea(gtx, th)
+				return drawContextArea(gtx, m.MenuState)
 				return component.Menu(th, &m.MenuState).Layout(gtx) //所有行的item共用一个popup菜单而不是每行popup一个
 			})
 		}),
 	)
 }
 
-func (m *ContextMenu) drawContextArea(gtx C, th *material.Theme) D { //popup区域的背景色，位置，四角弧度
-	menuStyle := component.Menu(th, &m.MenuState)
+func drawContextArea(gtx C, menuState component.MenuState) D { //popup区域的背景色，位置，四角弧度
+	menuStyle := component.Menu(th, &menuState)
 	menuStyle.SurfaceStyle = component.SurfaceStyle{
 		Theme: th,
 		ShadowStyle: component.ShadowStyle{

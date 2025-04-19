@@ -229,22 +229,6 @@ func (t *Tree) RootRows(gtx layout.Context, nodes []*TreeNode) []layout.Widget {
 	return dims
 }
 
-//func (t *Tree) renderTree(gtx layout.Context, nodes []*TreeNode) []layout.FlexChild {
-//	if len(nodes) == 0 {
-//		return []layout.FlexChild{}
-//	}
-//	var dims []layout.FlexChild
-//	for _, node := range nodes {
-//		if node.IsDeleted {
-//			continue
-//		}
-//		dims = append(dims, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-//			return t.renderNode(gtx, node, 0, true)
-//		}))
-//	}
-//	return dims
-//}
-
 func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParent bool) layout.Dimensions {
 	// 渲节点标题
 	bgColor := th.Bg

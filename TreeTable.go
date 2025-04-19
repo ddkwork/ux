@@ -33,7 +33,6 @@ import (
 	"github.com/ddkwork/golibrary/stream/uuid"
 	"github.com/ddkwork/ux/icon"
 	"github.com/ddkwork/ux/widget/material"
-	"github.com/ddkwork/ux/x/component"
 )
 
 type (
@@ -44,6 +43,7 @@ type (
 		rootRows                     []*Node[T]     // from root.children
 		filteredRows                 []*Node[T]     // 过滤后的行
 		SelectedNode                 *Node[T]       // 选中的节点,文件管理器外部自定义右键菜单增删改查文件需要通过它取出节点元数据结构体的文件路径字段，所以需要导出
+		contextMenu                  *ContextMenu   // 行右键菜单,rootRows只需要一个
 		columnCount                  int            // 列数
 		maxDepth                     unit.Dp        // 最大层级深度,todo add Cache like maxHierarchyColumnWidthCache
 		maxColumnCellWidths          []unit.Dp      // 最宽的列label文本宽度for单元格
@@ -79,42 +79,42 @@ type (
 		IsDocument             bool                                                           // 是否生成markdown文档
 	}
 	tableHeader[T any] struct {
-		sortOrder          sortOrder                // 排序方式
-		sortedBy           int                      // 排序列索引
-		drags              []tableDrag              // 拖动表头列参数
-		columnCells        []CellData               // 每列的最大深度，宽度,也可以把它看做一行
-		clickedColumnIndex int                      // 被点击的列索引
-		manualWidthSet     []bool                   // 新增状态标志数组，记录列是否被手动调整
-		sortAscending      bool                     // 升序还是降序
-		contextAreas       []*component.ContextArea // 右键菜单区域
-		contextMenu        *ContextMenu             // 右键菜单，实现复制列数据到剪贴板
+		sortOrder          sortOrder    // 排序方式
+		sortedBy           int          // 排序列索引
+		drags              []tableDrag  // 拖动表头列参数
+		columnCells        []CellData   // 每列的最大深度，宽度,也可以把它看做一行
+		clickedColumnIndex int          // 被点击的列索引
+		manualWidthSet     []bool       // 新增状态标志数组，记录列是否被手动调整
+		sortAscending      bool         // 升序还是降序
+		contextMenu        *ContextMenu // 右键菜单，实现复制列数据到剪贴板
 	}
 
-	//		//func Layout(gtx layout.Context, icon any, color color.NRGBA, size unit.Dp) layout.Dimensions {
-	//		//	sizeDp := gtx.Dp(size)
-	//		//	if icon != nil {
-	//		//		gtx.Constraints.Min = image.Point{X: sizeDp}
-	//		//		switch v := icon.(type) {
-	//		//		case *giosvg.Icon:
-	//		//			v.Layout(gtx)
-	//		//		case *widget.Icon:
-	//		//			v.Layout(gtx, color)
-	//		//		case *widget.Image:
-	//		//			v.Layout(gtx)
-	//		//		case image.Image:
-	//		//			icon := &widget.Image{
-	//		//				Src:      paint.NewImageOp(v),
-	//		//				Fit:      widget.Unscaled,
-	//		//				Position: layout.Center,
-	//		//				Scale:    1.0, // todo 测试按钮图标和层级图标
-	//		//			}
-	//		//			icon.Layout(gtx)
-	//		//		}
-	//		//	}
-	//		//	return layout.Dimensions{
-	//		//		Size: image.Point{X: sizeDp, Y: sizeDp},
-	//		//	}
-	//		//}
+	//func Layout(gtx layout.Context, icon any, color color.NRGBA, size unit.Dp) layout.Dimensions {
+	//	sizeDp := gtx.Dp(size)
+	//	if icon != nil {
+	//		gtx.Constraints.Min = image.Point{X: sizeDp}
+	//		switch v := icon.(type) {
+	//		case *giosvg.Icon:
+	//			v.Layout(gtx)
+	//		case *widget.Icon:
+	//			v.Layout(gtx, color)
+	//		case *widget.Image:
+	//			v.Layout(gtx)
+	//		case image.Image:
+	//			icon := &widget.Image{
+	//				Src:      paint.NewImageOp(v),
+	//				Fit:      widget.Unscaled,
+	//				Position: layout.Center,
+	//				Scale:    1.0, // todo 测试按钮图标和层级图标
+	//			}
+	//			icon.Layout(gtx)
+	//		}
+	//	}
+	//	return layout.Dimensions{
+	//		Size: image.Point{X: sizeDp, Y: sizeDp},
+	//	}
+	//}
+
 	CellData struct {
 		Text             string      // 单元格文本
 		Tooltip          string      // 单元格提示信息
@@ -145,27 +145,29 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 			clickedColumnIndex: -1,
 			manualWidthSet:     make([]bool, columnCount),
 		},
-		rootRows:                nil,
-		filteredRows:            nil,
-		SelectedNode:            nil,
-		columnCount:             columnCount,
-		maxDepth:                0,
-		maxColumnCellWidths:     nil,
-		maxColumnTextWidths:     nil,
-		columns:                 nil,
-		DragRemovedRowsCallback: nil,
-		DropOccurredCallback:    nil,
-		inLayoutHeader:          false,
-		columnResizeStart:       0,
-		columnResizeBase:        0,
-		columnResizeOverhead:    0,
-		preventUserColumnResize: false,
-		awaitingSyncToModel:     false,
-		wasDragged:              false,
-		dividerDrag:             false,
-		LongPressCallback:       nil,
-		pressStarted:            time.Time{},
-		longPressed:             false,
+		rootRows:                     nil,
+		filteredRows:                 nil,
+		SelectedNode:                 nil,
+		contextMenu:                  nil,
+		columnCount:                  columnCount,
+		maxDepth:                     0,
+		maxColumnCellWidths:          nil,
+		maxColumnTextWidths:          nil,
+		maxHierarchyColumnWidthCache: 0,
+		columns:                      nil,
+		DragRemovedRowsCallback:      nil,
+		DropOccurredCallback:         nil,
+		inLayoutHeader:               false,
+		columnResizeStart:            0,
+		columnResizeBase:             0,
+		columnResizeOverhead:         0,
+		preventUserColumnResize:      false,
+		awaitingSyncToModel:          false,
+		wasDragged:                   false,
+		dividerDrag:                  false,
+		LongPressCallback:            nil,
+		pressStarted:                 time.Time{},
+		longPressed:                  false,
 		List: widget.List{
 			Scrollbar: widget.Scrollbar{},
 			List: layout.List{
@@ -175,6 +177,7 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 				Position:    layout.Position{},
 			},
 		},
+		once: sync.Once{},
 	}
 }
 
@@ -205,7 +208,11 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		t.SizeColumnsToFit(gtx)
 	})
 	t.rootRows = t.Root.Children // 增删改查不一定去计算列宽导致有些节点已经删除，是空指针导致panic，所有这里需要刷新一下rootRows，不知道这里是否会内存泄漏
-	list := material.List(th, &t.List)
+	//list := material.List(th, &t.List)
+	if t.contextMenu == nil {
+		t.contextMenu = NewContextMenu(len(t.rootRows), nil)
+	}
+
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return t.HeaderFrame(gtx) // 渲染表头
@@ -215,20 +222,287 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 			//})
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return list.Layout(gtx, len(t.rootRows), func(gtx layout.Context, index int) layout.Dimensions {
-				return t.RowFrame(gtx, t.rootRows[index], index)
-				//////////////////////////
-				//t.inLayoutHeader = false
-				//return t.layoutDrag(gtx, func(gtx layout.Context, row int) layout.Dimensions {
-				//	return t.RowFrame(gtx, t.rootRows[index], index)
-				//})
-			})
+			var rootRows []layout.Widget
+			for i, n := range t.rootRows {
+				rootRows = append(rootRows, func(gtx layout.Context) layout.Dimensions {
+					t.contextMenu.Once.Do(func() {
+						item := ContextMenuItem{}
+						for _, kind := range CopyRowType.EnumTypes() {
+							switch kind {
+							case CopyRowType:
+								item = ContextMenuItem{
+									Title:     "",
+									Icon:      SvgIconCopy,
+									Can:       func() bool { return true },
+									Do:        func() { t.SelectedNode.CopyRow(gtx, t.maxColumnTextWidths) },
+									Clickable: widget.Clickable{},
+								}
+							case ConvertToContainerType:
+								item = ContextMenuItem{
+									Title: "",
+									Icon:  SvgIconConvertToContainer,
+									Can:   func() bool { return !n.Container() }, // n是当前渲染的行
+									Do: func() {
+										t.SelectedNode.SetType("ConvertToContainer" + ContainerKeyPostfix) //? todo bug：这里是失败的，导致再次点击这里转换的节点后ConvertToNonContainer没有弹出来
+										t.SelectedNode.ID = newID()
+										t.SelectedNode.SetOpen(true)
+										t.SelectedNode.Children = make([]*Node[T], 0)
+										t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
+									},
+									Clickable: widget.Clickable{},
+								}
+							case ConvertToNonContainerType:
+								item = ContextMenuItem{
+									Title: "",
+									Icon:  SvgIconConvertToNonContainer,
+									Can:   func() bool { return n.Container() }, // n是当前渲染的行
+									Do: func() {
+										t.SelectedNode.SetType("")
+										t.SelectedNode.ID = newID()
+										for _, child := range t.SelectedNode.Children {
+											child.parent = t.SelectedNode.parent
+											child.ID = newID()
+										}
+										t.SelectedNode.ResetChildren()
+										t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
+									},
+									AppendDivider: true,
+									Clickable:     widget.Clickable{},
+								}
+							case NewType:
+								item = ContextMenuItem{
+									Title: "",
+									Icon:  SvgIconCircledAdd,
+									Can:   func() bool { return true },
+									Do: func() {
+										var zero T
+										t.InsertAfter(gtx, NewNode(zero))
+									},
+									Clickable: widget.Clickable{},
+								}
+							case NewContainerType:
+								item = ContextMenuItem{
+									Title: "",
+									Icon:  SvgIconCircledVerticalEllipsis,
+									Can:   func() bool { return true },
+									Do: func() {
+										var zero T // todo edit type?
+										t.InsertAfter(gtx, NewContainerNode("NewContainerNode", zero))
+									},
+									Clickable: widget.Clickable{},
+								}
+							case DeleteType:
+								item = ContextMenuItem{
+									Title:     "",
+									Icon:      SvgIconTrash,
+									Can:       func() bool { return true },
+									Do:        func() { t.Remove(gtx) },
+									Clickable: widget.Clickable{},
+								}
+							case DuplicateType:
+								item = ContextMenuItem{
+									Title: "",
+									Icon:  SvgIconDuplicate,
+									Can:   func() bool { return true },
+									Do: func() {
+										t.InsertAfter(gtx, t.SelectedNode.Clone())
+									},
+									Clickable: widget.Clickable{},
+								}
+							case EditType:
+								item = ContextMenuItem{
+									Title:         "",
+									Icon:          SvgIconEdit,
+									Can:           func() bool { return true },
+									Do:            func() { t.Edit(gtx) },
+									AppendDivider: true,
+									Clickable:     widget.Clickable{},
+								}
+							case OpenAllType:
+								item = ContextMenuItem{
+									Title:     "",
+									Icon:      SvgIconHierarchy,
+									Can:       func() bool { return true },
+									Do:        func() { t.Root.OpenAll() },
+									Clickable: widget.Clickable{},
+								}
+							case CloseAllType:
+								item = ContextMenuItem{
+									Title:     "",
+									Icon:      SvgIconCircledVerticalEllipsis,
+									Can:       func() bool { return true },
+									Do:        func() { t.Root.CloseAll() },
+									Clickable: widget.Clickable{},
+								}
+							case SaveDataType:
+								item = ContextMenuItem{
+									Title:     "",
+									Icon:      SvgIconSaveContent,
+									Can:       func() bool { return true },
+									Do:        func() { t.SaveDate() },
+									Clickable: widget.Clickable{},
+								}
+							}
+							item.Title = kind.String()
+							if item.Can() {
+								t.contextMenu.AddItem(item)
+							}
+						}
+						if items := t.ContextMenuItems(gtx, n); items != nil { // gtx用于调整列宽，触发增删改之后，n是正在渲染的节点，用于取出元数据控制菜单是否渲染
+							for _, item := range items {
+								if item.Can() {
+									t.contextMenu.AddItem(item)
+								}
+							}
+						}
+					})
+					return t.RowFrame2(gtx, n, i)
+				})
+			}
+			t.contextMenu.DrawRow = func(gtx C, i int) D {
+				return rootRows[i](gtx)
+			}
+			return t.contextMenu.Layout(gtx)
+
+			//return list.Layout(gtx, len(t.rootRows), func(gtx layout.Context, index int) layout.Dimensions {
+			//////////////////////////
+			//t.inLayoutHeader = false
+			//return t.layoutDrag(gtx, func(gtx layout.Context, row int) layout.Dimensions {
+			//	return t.RowFrame(gtx, t.rootRows[index], index)
+			//})
+			//})
 		}),
 	)
 }
+func (t *TreeTable[T]) RowFrame2(gtx layout.Context, n *Node[T], rowIndex int) layout.Dimensions {
+	n.rowCells = t.MarshalRowCells(n)
+	for i := range n.rowCells {
+		n.rowCells[i].rowID = rowIndex                          // 斑马线
+		n.rowCells[i].columID = t.header.columnCells[i].columID // 列分隔符,更新层级列宽度
+	}
+
+	bgColor := t.processEvent(gtx, n, rowIndex) // 处理鼠标事件
+	rowClick := &n.rowClick
+
+	var rowCells []layout.FlexChild
+
+	layoutHierarchyColumn := func(gtx layout.Context, cell CellData) layout.Dimensions {
+		leftIndent := t.calcCurrentHierarchyColumnLeftIndent(gtx, n, cell)
+		t.calcCurrentHierarchyColumnWidthAndSafeCheck(gtx, cell, leftIndent)
+
+		maxColumnCellWidth := t.maxColumnCellWidths[hierarchyColumnID]
+		gtx.Constraints.Min.X = int(maxColumnCellWidth)
+		gtx.Constraints.Max.X = int(maxColumnCellWidth)
+
+		return layout.Flex{
+			Axis: layout.Horizontal,
+			// Spacing:   0,
+			// Alignment: layout.Start,
+			// WeightSum: 0,
+		}.Layout(gtx, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				// 绘制层级图标-----------------------------------------------------------------------------------------------------------------
+				HierarchyInsert := layout.Inset{Left: leftIndent, Top: -1} // 层级图标居中,行高调整后这里需要下移使得图标居中
+				if !n.Container() {
+					return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return layout.Dimensions{}
+					})
+				}
+				return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					svg := SvgIconCircledChevronRight
+					if n.isOpen {
+						svg = SvgIconCircledChevronDown
+					}
+					return iconButtonSmall(new(widget.Clickable), svg, "").Layout(gtx)
+					// return NewButton("", nil).SetRectIcon(true).SetIcon(svg).Layout(gtx)
+				})
+			})
+		}),
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					return t.CellFrame(gtx, cell, t.maxColumnCellWidths[hierarchyColumnID], false, layout.Inset{
+						Top:    topPadding, // 层级列文本不知道什么原因往上飘了，top: 0的样子，所以往下挪一下让它居中
+						Bottom: 0,
+						Left:   leftPadding, // 绘制层级列文本,和层级图标聚拢在一起--------------------------------------
+						Right:  0,
+					})
+				})
+				//DrawColumnDivider(gtx, cell.columID) // 这里绘制的列分割线才没有虚线,gtx被破坏了? 永远不要移动这个位置
+				//return layout.Stack{Alignment: layout.Center}.Layout(gtx,//似乎会影响层级列文本布局
+				//	layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+				//		if len(cell.Text) > 80 {
+				//			cell.Text = cell.Text[:len(cell.Text)/2] + "..."
+				//			// todo 更好的办法是让富文本编辑器做这个事情，对 maxline 。。。 看看代码编辑器扩建是如何实现这个的
+				//			// 然后双击编辑行的时候从富文本取出完整行并换行显示，structView需要好好设计一下这个
+				//			// 这个在抓包场景很那个，url列一般都长
+				//		}
+				//		return t.CellFrame(gtx, cell, t.maxColumnCellWidths[hierarchyColumnID], false, layout.Inset{
+				//			Top:    topPadding, // 层级列文本不知道什么原因往上飘了，top: 0的样子，所以往下挪一下让它居中
+				//			Bottom: 0,
+				//			Left:   leftPadding, // 绘制层级列文本,和层级图标聚拢在一起--------------------------------------
+				//			Right:  0,
+				//		})
+				//	}),
+				//	//t.drawContextMenu(n, hierarchyColumnID), //todo bug
+				//)
+			}),
+		)
+	}
+
+	rowCells = append(rowCells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+		hierarchyColumnCell := n.rowCells[hierarchyColumnID] // 层级列单元格
+		return layoutHierarchyColumn(gtx, hierarchyColumnCell)
+	}))
+
+	// 绘制非层级列-----------------------------------------------------------------------------------------------------------------
+	for i, cell := range n.rowCells {
+		if i == hierarchyColumnID {
+			continue
+		}
+		rowCells = append(rowCells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return material.Clickable(gtx, &n.rowCells[i].Clickable, func(gtx layout.Context) layout.Dimensions {
+					DrawColumnDivider(gtx, cell.columID) // 这里绘制的列分割线才没有虚线,gtx被破坏了? 永远不要移动这个位置
+					if len(cell.Text) > 80 {
+						cell.Text = cell.Text[:len(cell.Text)/2] + "..."
+						// todo 更好的办法是让富文本编辑器做这个事情，对 maxline 。。。 看看代码编辑器扩建是如何实现这个的
+						// 然后双击编辑行的时候从富文本取出完整行并换行显示，structView需要好好设计一下这个
+						// 这个在抓包场景很那个，url列一般都长
+					}
+					return t.CellFrame(gtx, cell, t.maxColumnCellWidths[i], false, layout.Inset{
+						Top:    0,
+						Bottom: 0,
+						Left:   leftPadding,
+						// Right:  rightPadding,
+					})
+				})
+			})
+		}))
+	}
+
+	rows := []layout.FlexChild{ // 合成层级列和其他列的单元格为一行,并设置该行的背景和行高
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return Background{bgColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				gtx.Constraints.Min.Y = gtx.Dp(defaultRowHeight) // 主题的字体大小也会影响行高，这里设置最小行高为14dp
+				gtx.Constraints.Max.Y = gtx.Dp(defaultRowHeight) // 限制行高以避免列分割线呈现虚线视觉
+				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, rowCells...)
+			})
+
+		}),
+	}
+	if n.CanHaveChildren() && n.isOpen { // 如果是容器节点则递归填充孩子节点形成多行
+		for _, child := range n.Children {
+			rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				rowIndex++
+				return t.RowFrame2(gtx, child, rowIndex)
+			}))
+		}
+	}
+	// 把全部行垂直居中排列，rowClick点击后根据点击状态显示了这里填充了多少行，展开节点后看到的行就是这里来的
+	return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle}.Layout(gtx, rows...)
+}
 
 func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) layout.Dimensions {
-	return t.RowFrame2(gtx, n, rowIndex)
 	n.rowCells = t.MarshalRowCells(n)
 	for i := range n.rowCells {
 		n.rowCells[i].rowID = rowIndex                          // 斑马线
@@ -439,311 +713,6 @@ func (t *TreeTable[T]) processEvent(gtx layout.Context, n *Node[T], rowIndex int
 	return bgColor
 }
 
-func (t *TreeTable[T]) RowFrame2(gtx layout.Context, n *Node[T], rowIndex int) layout.Dimensions {
-	n.rowCells = t.MarshalRowCells(n)
-	for i := range n.rowCells {
-		n.rowCells[i].rowID = rowIndex                          // 斑马线
-		n.rowCells[i].columID = t.header.columnCells[i].columID // 列分隔符,更新层级列宽度
-	}
-
-	bgColor := t.processEvent(gtx, n, rowIndex) // 处理鼠标事件
-	rowClick := &n.rowClick
-
-	var rowCells []layout.FlexChild
-
-	layoutHierarchyColumn := func(gtx layout.Context, cell CellData) layout.Dimensions {
-		leftIndent := t.calcCurrentHierarchyColumnLeftIndent(gtx, n, cell)
-		t.calcCurrentHierarchyColumnWidthAndSafeCheck(gtx, cell, leftIndent)
-
-		maxColumnCellWidth := t.maxColumnCellWidths[hierarchyColumnID]
-		gtx.Constraints.Min.X = int(maxColumnCellWidth)
-		gtx.Constraints.Max.X = int(maxColumnCellWidth)
-
-		return layout.Flex{
-			Axis: layout.Horizontal,
-			// Spacing:   0,
-			// Alignment: layout.Start,
-			// WeightSum: 0,
-		}.Layout(gtx, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				// 绘制层级图标-----------------------------------------------------------------------------------------------------------------
-				HierarchyInsert := layout.Inset{Left: leftIndent, Top: -1} // 层级图标居中,行高调整后这里需要下移使得图标居中
-				if !n.Container() {
-					return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						return layout.Dimensions{}
-					})
-				}
-				return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					svg := SvgIconCircledChevronRight
-					if n.isOpen {
-						svg = SvgIconCircledChevronDown
-					}
-					return iconButtonSmall(new(widget.Clickable), svg, "").Layout(gtx)
-					// return NewButton("", nil).SetRectIcon(true).SetIcon(svg).Layout(gtx)
-				})
-			})
-		}),
-			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return t.CellFrame(gtx, cell, t.maxColumnCellWidths[hierarchyColumnID], false, layout.Inset{
-						Top:    topPadding, // 层级列文本不知道什么原因往上飘了，top: 0的样子，所以往下挪一下让它居中
-						Bottom: 0,
-						Left:   leftPadding, // 绘制层级列文本,和层级图标聚拢在一起--------------------------------------
-						Right:  0,
-					})
-				})
-				//DrawColumnDivider(gtx, cell.columID) // 这里绘制的列分割线才没有虚线,gtx被破坏了? 永远不要移动这个位置
-				//return layout.Stack{Alignment: layout.Center}.Layout(gtx,//似乎会影响层级列文本布局
-				//	layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-				//		if len(cell.Text) > 80 {
-				//			cell.Text = cell.Text[:len(cell.Text)/2] + "..."
-				//			// todo 更好的办法是让富文本编辑器做这个事情，对 maxline 。。。 看看代码编辑器扩建是如何实现这个的
-				//			// 然后双击编辑行的时候从富文本取出完整行并换行显示，structView需要好好设计一下这个
-				//			// 这个在抓包场景很那个，url列一般都长
-				//		}
-				//		return t.CellFrame(gtx, cell, t.maxColumnCellWidths[hierarchyColumnID], false, layout.Inset{
-				//			Top:    topPadding, // 层级列文本不知道什么原因往上飘了，top: 0的样子，所以往下挪一下让它居中
-				//			Bottom: 0,
-				//			Left:   leftPadding, // 绘制层级列文本,和层级图标聚拢在一起--------------------------------------
-				//			Right:  0,
-				//		})
-				//	}),
-				//	//t.drawContextMenu(n, hierarchyColumnID), //todo bug
-				//)
-			}),
-		)
-	}
-
-	rowCells = append(rowCells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-		hierarchyColumnCell := n.rowCells[hierarchyColumnID] // 层级列单元格
-		return layoutHierarchyColumn(gtx, hierarchyColumnCell)
-	}))
-
-	// 绘制非层级列-----------------------------------------------------------------------------------------------------------------
-	for i, cell := range n.rowCells {
-		if i == hierarchyColumnID {
-			continue
-		}
-		rowCells = append(rowCells, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return material.Clickable(gtx, &n.rowCells[i].Clickable, func(gtx layout.Context) layout.Dimensions {
-					DrawColumnDivider(gtx, cell.columID) // 这里绘制的列分割线才没有虚线,gtx被破坏了? 永远不要移动这个位置
-					return layout.Stack{Alignment: layout.Center}.Layout(gtx,
-						layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-							if len(cell.Text) > 80 {
-								cell.Text = cell.Text[:len(cell.Text)/2] + "..."
-								// todo 更好的办法是让富文本编辑器做这个事情，对 maxline 。。。 看看代码编辑器扩建是如何实现这个的
-								// 然后双击编辑行的时候从富文本取出完整行并换行显示，structView需要好好设计一下这个
-								// 这个在抓包场景很那个，url列一般都长
-							}
-							return t.CellFrame(gtx, cell, t.maxColumnCellWidths[i], false, layout.Inset{
-								Top:    0,
-								Bottom: 0,
-								Left:   leftPadding,
-								// Right:  rightPadding,
-							})
-						}),
-						t.drawContextMenu(n, i),
-					)
-				})
-			})
-		}))
-	}
-
-	rows := []layout.FlexChild{ // 合成层级列和其他列的单元格为一行,并设置该行的背景和行高
-		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return Background{bgColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				gtx.Constraints.Min.Y = gtx.Dp(defaultRowHeight) // 主题的字体大小也会影响行高，这里设置最小行高为14dp
-				gtx.Constraints.Max.Y = gtx.Dp(defaultRowHeight) // 限制行高以避免列分割线呈现虚线视觉
-				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, rowCells...)
-			})
-		}),
-	}
-	if n.CanHaveChildren() && n.isOpen { // 如果是容器节点则递归填充孩子节点形成多行
-		for _, child := range n.Children {
-			rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				rowIndex++
-				return t.RowFrame(gtx, child, rowIndex)
-			}))
-		}
-	}
-	// 把全部行垂直居中排列，rowClick点击后根据点击状态显示了这里填充了多少行，展开节点后看到的行就是这里来的
-	return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle}.Layout(gtx, rows...)
-}
-
-func (t *TreeTable[T]) drawContextMenu(n *Node[T], i int) layout.StackChild {
-	return layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-		if n.rowContextAreas == nil {
-			n.rowContextAreas = make([]*component.ContextArea, len(n.rowCells))
-		}
-		contextArea := n.rowContextAreas[i]
-		if contextArea == nil {
-			contextArea = &component.ContextArea{
-				Activation:   pointer.ButtonSecondary,
-				PositionHint: layout.Center,
-			}
-			n.rowContextAreas[i] = contextArea
-		}
-		if n.contextMenu == nil {
-			mylog.Todo("contextMenu is nil")
-			n.contextMenu = NewContextMenu(0, nil)
-			item := ContextMenuItem{}
-			for _, kind := range CopyRowType.EnumTypes() {
-				switch kind {
-				case CopyRowType:
-					item = ContextMenuItem{
-						Title:     "",
-						Icon:      SvgIconCopy,
-						Can:       func() bool { return true },
-						Do:        func() { t.SelectedNode.CopyRow(gtx, t.maxColumnTextWidths) },
-						Clickable: widget.Clickable{},
-					}
-				case ConvertToContainerType:
-					item = ContextMenuItem{
-						Title: "",
-						Icon:  SvgIconConvertToContainer,
-						Can:   func() bool { return !n.Container() }, // n是当前渲染的行
-						Do: func() {
-							t.SelectedNode.SetType("ConvertToContainer" + ContainerKeyPostfix) //? todo bug：这里是失败的，导致再次点击这里转换的节点后ConvertToNonContainer没有弹出来
-							t.SelectedNode.ID = newID()
-							t.SelectedNode.SetOpen(true)
-							t.SelectedNode.Children = make([]*Node[T], 0)
-							t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
-						},
-						Clickable: widget.Clickable{},
-					}
-				case ConvertToNonContainerType:
-					item = ContextMenuItem{
-						Title: "",
-						Icon:  SvgIconConvertToNonContainer,
-						Can:   func() bool { return n.Container() }, // n是当前渲染的行
-						Do: func() {
-							t.SelectedNode.SetType("")
-							t.SelectedNode.ID = newID()
-							for _, child := range t.SelectedNode.Children {
-								child.parent = t.SelectedNode.parent
-								child.ID = newID()
-							}
-							t.SelectedNode.ResetChildren()
-							t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
-						},
-						AppendDivider: true,
-						Clickable:     widget.Clickable{},
-					}
-				case NewType:
-					item = ContextMenuItem{
-						Title: "",
-						Icon:  SvgIconCircledAdd,
-						Can:   func() bool { return true },
-						Do: func() {
-							var zero T
-							t.InsertAfter(gtx, NewNode(zero))
-						},
-						Clickable: widget.Clickable{},
-					}
-				case NewContainerType:
-					item = ContextMenuItem{
-						Title: "",
-						Icon:  SvgIconCircledVerticalEllipsis,
-						Can:   func() bool { return true },
-						Do: func() {
-							var zero T // todo edit type?
-							t.InsertAfter(gtx, NewContainerNode("NewContainerNode", zero))
-						},
-						Clickable: widget.Clickable{},
-					}
-				case DeleteType:
-					item = ContextMenuItem{
-						Title:     "",
-						Icon:      SvgIconTrash,
-						Can:       func() bool { return true },
-						Do:        func() { t.Remove(gtx) },
-						Clickable: widget.Clickable{},
-					}
-				case DuplicateType:
-					item = ContextMenuItem{
-						Title: "",
-						Icon:  SvgIconDuplicate,
-						Can:   func() bool { return true },
-						Do: func() {
-							t.InsertAfter(gtx, t.SelectedNode.Clone())
-						},
-						Clickable: widget.Clickable{},
-					}
-				case EditType:
-					item = ContextMenuItem{
-						Title:         "",
-						Icon:          SvgIconEdit,
-						Can:           func() bool { return true },
-						Do:            func() { t.Edit(gtx) },
-						AppendDivider: true,
-						Clickable:     widget.Clickable{},
-					}
-				case OpenAllType:
-					item = ContextMenuItem{
-						Title:     "",
-						Icon:      SvgIconHierarchy,
-						Can:       func() bool { return true },
-						Do:        func() { t.Root.OpenAll() },
-						Clickable: widget.Clickable{},
-					}
-				case CloseAllType:
-					item = ContextMenuItem{
-						Title:     "",
-						Icon:      SvgIconCircledVerticalEllipsis,
-						Can:       func() bool { return true },
-						Do:        func() { t.Root.CloseAll() },
-						Clickable: widget.Clickable{},
-					}
-				case SaveDataType:
-					item = ContextMenuItem{
-						Title:     "",
-						Icon:      SvgIconSaveContent,
-						Can:       func() bool { return true },
-						Do:        func() { t.SaveDate() },
-						Clickable: widget.Clickable{},
-					}
-				}
-				item.Title = kind.String()
-				if item.Can() {
-					n.contextMenu.AddItem(item)
-				}
-			}
-			if items := t.ContextMenuItems(gtx, n); items != nil { // gtx用于调整列宽，触发增删改之后，n是正在渲染的节点，用于取出元数据控制菜单是否渲染
-				for _, item := range items {
-					if item.Can() {
-						n.contextMenu.AddItem(item)
-					}
-				}
-			}
-		}
-		n.contextMenu.OnClicked(gtx)
-		return contextArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return drawContextArea(gtx, &n.contextMenu.MenuState)
-		})
-	})
-}
-
-func drawContextArea(gtx C, menuState *component.MenuState) D {
-	return layout.Center.Layout(gtx, func(gtx C) D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
-		gtx.Constraints.Min.X = 0
-		gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(400)) // 当行高限制后，这里需要取消限制，理想值是取表格高度或者屏幕高度，其次是增加滚动条或者树形右键菜单
-		menuStyle := component.Menu(th, menuState)
-		menuStyle.SurfaceStyle = component.SurfaceStyle{
-			Theme: th,
-			ShadowStyle: component.ShadowStyle{
-				CornerRadius: 18, // 弹出菜单的椭圆角度
-				Elevation:    100,
-				// AmbientColor:  color.NRGBA(colornames.Blue400),
-				// PenumbraColor: color.NRGBA(colornames.Blue400),
-				// UmbraColor:    color.NRGBA(colornames.Blue400),
-			},
-			Fill: color.NRGBA{R: 50, G: 50, B: 50, A: 255}, // 弹出菜单的背景色
-		}
-		return menuStyle.Layout(gtx)
-	})
-}
-
 func (t *TreeTable[T]) IsRowSelected() bool { return t.SelectedNode != nil }
 
 func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData, width unit.Dp, isHeader bool, inset layout.Inset) layout.Dimensions {
@@ -908,139 +877,105 @@ func TransposeMatrix[T any](rows [][]T) (columns [][]T) {
 }
 
 func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
-	var cols []layout.FlexChild
-	elems := make([]*Resizable, 0)
-	for i, cell := range t.header.columnCells {
-		if cell.Disabled {
-			continue
-		}
-		clickable := &t.header.columnCells[i].Clickable
-		if clickable.Clicked(gtx) {
-			t.header.clickedColumnIndex = i
-			if t.header.sortedBy == t.header.clickedColumnIndex {
-				t.header.sortAscending = !t.header.sortAscending // 切换升序/降序
-
-				switch t.header.sortOrder {
-				case sortNone:
-					t.header.sortOrder = sortAscending
-				case sortAscending:
-					t.header.sortOrder = sortDescending
-				case sortDescending:
-					t.header.sortOrder = sortAscending
-				}
-
-			} else {
-				t.header.sortedBy = t.header.clickedColumnIndex // 更新排序列
-				t.header.sortAscending = true                   // 设为升序
-				t.header.sortOrder = sortAscending
-			}
-
-			mylog.Info("clickedColumnIndex", t.header.clickedColumnIndex)
-			// mylog.Info(t.header.columnCells[i].Text, LabelWidth(gtx, t.header.columnCells[i].Text))
-			if t.header.clickedColumnIndex > -1 && t.header.sortedBy > -1 {
-				for i := range t.header.columnCells {
-					t.header.columnCells[i].Text = strings.TrimSuffix(t.header.columnCells[i].Text, " ⇩")
-					t.header.columnCells[i].Text = strings.TrimSuffix(t.header.columnCells[i].Text, " ⇧")
-				}
-				switch t.header.sortOrder {
-				case sortNone:
-				case sortAscending:
-					t.header.columnCells[i].Text += " ⇧"
-				case sortDescending:
-					t.header.columnCells[i].Text += " ⇩"
-				}
-				t.Sort()
-				// t.header.clickedColumnIndex = -1 //重置点击列索引
-			}
-		}
-		// 拦截右击事件并在事件中赋值命中的列id
-		evt, ok := gtx.Source.Event(pointer.Filter{
-			Target: clickable,
-			Kinds:  pointer.Press | pointer.Release,
+	// 实现右键复制列到剪切板功能
+	if t.header.contextMenu == nil {
+		t.header.contextMenu = NewContextMenu(1, nil)
+		t.header.contextMenu.AddItem(ContextMenuItem{
+			Title:         "CopyColumn",
+			Icon:          SvgIconCopy,
+			Can:           func() bool { return true },
+			Do:            func() { t.CopyColumn(gtx) },
+			AppendDivider: true,
+			Clickable:     widget.Clickable{},
 		})
-		if ok {
-			e, ok := evt.(pointer.Event)
-			if ok {
-				if e.Kind == pointer.Press || e.Source == pointer.Touch {
-					t.header.clickedColumnIndex = i
+	}
+	t.header.contextMenu.DrawRow = func(gtx layout.Context, index int) layout.Dimensions {
+		var cols []layout.FlexChild
+		elems := make([]*Resizable, 0)
+		for i, cell := range t.header.columnCells {
+			if cell.Disabled {
+				continue
+			}
+			clickable := &t.header.columnCells[i].Clickable
+			if clickable.Clicked(gtx) {
+				t.header.clickedColumnIndex = i
+				if t.header.sortedBy == t.header.clickedColumnIndex {
+					t.header.sortAscending = !t.header.sortAscending // 切换升序/降序
+
+					switch t.header.sortOrder {
+					case sortNone:
+						t.header.sortOrder = sortAscending
+					case sortAscending:
+						t.header.sortOrder = sortDescending
+					case sortDescending:
+						t.header.sortOrder = sortAscending
+					}
+
+				} else {
+					t.header.sortedBy = t.header.clickedColumnIndex // 更新排序列
+					t.header.sortAscending = true                   // 设为升序
+					t.header.sortOrder = sortAscending
 				}
 
-				switch e.Buttons {
-				case pointer.ButtonPrimary:
-				case pointer.ButtonSecondary:
-					if e.Kind == pointer.Press {
+				mylog.Info("clickedColumnIndex", t.header.clickedColumnIndex)
+				// mylog.Info(t.header.columnCells[i].Text, LabelWidth(gtx, t.header.columnCells[i].Text))
+				if t.header.clickedColumnIndex > -1 && t.header.sortedBy > -1 {
+					for i := range t.header.columnCells {
+						t.header.columnCells[i].Text = strings.TrimSuffix(t.header.columnCells[i].Text, " ⇩")
+						t.header.columnCells[i].Text = strings.TrimSuffix(t.header.columnCells[i].Text, " ⇧")
+					}
+					switch t.header.sortOrder {
+					case sortNone:
+					case sortAscending:
+						t.header.columnCells[i].Text += " ⇧"
+					case sortDescending:
+						t.header.columnCells[i].Text += " ⇩"
+					}
+					t.Sort()
+					// t.header.clickedColumnIndex = -1 //重置点击列索引
+				}
+			}
+			// 拦截右击事件并在事件中赋值命中的列id
+			evt, ok := gtx.Source.Event(pointer.Filter{
+				Target: clickable,
+				Kinds:  pointer.Press | pointer.Release,
+			})
+			if ok {
+				e, ok := evt.(pointer.Event)
+				if ok {
+					if e.Kind == pointer.Press || e.Source == pointer.Touch {
 						t.header.clickedColumnIndex = i
-						t.header.contextAreas[i].Active()
+					}
+
+					switch e.Buttons {
+					case pointer.ButtonPrimary:
+					case pointer.ButtonSecondary:
+						if e.Kind == pointer.Press {
+							t.header.clickedColumnIndex = i
+						}
 					}
 				}
 			}
-		}
-
-		cols = append(cols, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return Background{Color: ColorHeaderFg}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				// 实现右键复制列到剪切板功能
-				return layout.Stack{}.Layout(gtx,
-					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-						return material.Clickable(gtx, clickable, func(gtx layout.Context) layout.Dimensions {
-							cellFrame := t.CellFrame(gtx, t.header.columnCells[i], t.maxColumnCellWidths[i], true, layout.Inset{
-								Top:    8,
-								Bottom: 8,
-								Left:   leftPadding,
-								// Right:  rightPadding,
-							})
-							elems = append(elems, &Resizable{Widget: func(gtx layout.Context) layout.Dimensions {
-								return cellFrame
-							}})
+			cols = append(cols, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				return Background{Color: ColorHeaderFg}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					return material.Clickable(gtx, clickable, func(gtx layout.Context) layout.Dimensions {
+						cellFrame := t.CellFrame(gtx, t.header.columnCells[i], t.maxColumnCellWidths[i], true, layout.Inset{
+							Top:    8,
+							Bottom: 8,
+							Left:   leftPadding,
+							// Right:  rightPadding,
+						})
+						elems = append(elems, &Resizable{Widget: func(gtx layout.Context) layout.Dimensions {
 							return cellFrame
-						})
-					}),
-					layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-						if t.header.contextAreas == nil {
-							t.header.contextAreas = make([]*component.ContextArea, t.columnCount)
-						}
-						contextArea := t.header.contextAreas[i]
-						if contextArea == nil {
-							contextArea = &component.ContextArea{
-								/*
-									var LongPressDuration time.Duration = 250 * time.Millisecond
-
-											case gesture.KindPress:
-										i.pressStarted = gtx.Now
-
-										if !i.longPressed && i.pressing && gtx.Now.Sub(i.pressStarted) > LongPressDuration {
-											i.longPressed = true
-											return Event{Type: LongPress}, true
-										}
-
-									所以合理的方案是patch官方的contextAreas和gtx的input source代码，支持长按事件
-								*/
-								Activation:   pointer.ButtonSecondary,
-								PositionHint: 0,
-							}
-							t.header.contextAreas[i] = contextArea
-						}
-						if t.header.contextMenu == nil {
-							mylog.Todo("xxxxxxxxxxxxxxxx")
-							t.header.contextMenu = NewContextMenu(0, nil)
-							t.header.contextMenu.AddItem(ContextMenuItem{
-								Title:         "CopyColumn",
-								Icon:          SvgIconCopy,
-								Can:           func() bool { return true },
-								Do:            func() { t.CopyColumn(gtx) },
-								AppendDivider: true,
-								Clickable:     widget.Clickable{},
-							})
-						}
-						t.header.contextMenu.OnClicked(gtx)
-						return contextArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-							return drawContextArea(gtx, &t.header.contextMenu.MenuState)
-						})
-					}),
-				)
-			})
-		}))
+						}})
+						return cellFrame
+					})
+				})
+			}))
+		}
+		return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle, WeightSum: 0}.Layout(gtx, cols...)
 	}
-	return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle, WeightSum: 0}.Layout(gtx, cols...)
+	return t.header.contextMenu.Layout(gtx)
 
 	//return layout.Stack{}.Layout(gtx,
 	//	layout.Stacked(func(gtx layout.Context) layout.Dimensions {
@@ -1413,10 +1348,8 @@ type Node[T any] struct {
 	isOpen   bool       // 是否展开
 	rowCells []CellData // 行单元格数据
 	// rowSelected         bool                     // 行是否被选中
-	rowClick widget.Clickable // 行点击按钮绘制,每个节点或者每个单元格对应一个
+	rowClick widget.Clickable // 行点击按钮绘制,每个节点或者每个单元格对应一个 todo删除，因为popup已经有了
 	// cellClickedCallback func(n *Node[T])         // 单元格点击回调，todo 删除?
-	rowContextAreas []*component.ContextArea // 行右键菜单区域,每个节点或者每个单元格对应一个
-	contextMenu     *ContextMenu             // 行右键菜单,每个节点或者每个单元格对应一个
 }
 
 const ContainerKeyPostfix = "_container"
@@ -1573,8 +1506,8 @@ func (t *TreeTable[T]) calcCurrentHierarchyColumnWidthAndSafeCheck(gtx layout.Co
 	// 预先计算单元格宽度,todo层级列按需要渲染另外的图标，rootrows深度的左侧还有一个leftPadding没有计算进去，不管了，先这样，反正对齐了
 	currentWidth := leftIndent + leftPadding + defaultHierarchyColumnIconSize + LabelWidth(gtx, cell.Text) + DividerWidth // 预计算body层级列实际宽度,todo 对currentWidth进行渲染单元测试
 	if currentWidth > t.maxColumnCellWidths[hierarchyColumnID] {                                                          // 这个检查是必要的，否则会导致单元格宽度超出限制导致对不齐表头层级列
-		println(currentWidth)
-		println(t.maxColumnCellWidths[hierarchyColumnID])
+		mylog.Todo(currentWidth)
+		mylog.Todo(t.maxColumnCellWidths[hierarchyColumnID])
 		// mylog.Info("currentWidth", currentWidth)
 		// mylog.Info("t.maxColumnCellWidths[hierarchyColumnID]", t.maxColumnCellWidths[hierarchyColumnID])
 		// panic("预渲染列宽大于限制宽度")//对于更新节点单元格文本变长的情况，不要panic
