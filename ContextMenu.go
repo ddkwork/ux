@@ -26,8 +26,9 @@ type ContextMenu struct {
 	component.ContextArea
 	component.MenuState
 	widget.List
-	RowClicks []widget.Clickable
-	DrawRow   func(gtx layout.Context, index int) layout.Dimensions
+	RowClicks       []widget.Clickable
+	DrawRow         func(gtx layout.Context, index int) layout.Dimensions
+	ClickedRowindex int
 }
 
 func NewContextMenu(length int, drawRow func(gtx layout.Context, index int) layout.Dimensions) *ContextMenu {
@@ -92,9 +93,12 @@ func (m *ContextMenu) drawRowDefault(gtx layout.Context, rowClicks *widget.Click
 func (m *ContextMenu) LayoutRow(gtx layout.Context, index int) layout.Dimensions { //官方表格控件已经有水平和垂直滚动条,所以不使用list布局，兼用一下
 	return layout.Stack{}.Layout(gtx,
 		layout.Stacked(func(gtx C) D {
-			rowClicks := m.RowClicks[index]
-			return rowClicks.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			rowClick := &m.RowClicks[index]
+			return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Min.X = gtx.Constraints.Max.X
+				if rowClick.Clicked(gtx) {
+					m.ClickedRowindex = index
+				}
 				return m.DrawRow(gtx, index)
 			})
 		}),
@@ -116,6 +120,9 @@ func (m *ContextMenu) LayoutOld(gtx layout.Context) layout.Dimensions {
 				rowClick := &m.RowClicks[index]
 				return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = gtx.Constraints.Max.X
+					if rowClick.Clicked(gtx) {
+						m.ClickedRowindex = index
+					}
 					if m.DrawRow == nil {
 						return m.drawRowDefault(gtx, rowClick, index)
 					}
@@ -142,6 +149,9 @@ func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
 				rowClick := &m.RowClicks[index] //todo 这个不在DrawRow回调内似乎无法取到右击了第几行
 				return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = gtx.Constraints.Max.X
+					if rowClick.Clicked(gtx) {
+						m.ClickedRowindex = index
+					}
 					if m.DrawRow == nil {
 						return m.drawRowDefault(gtx, rowClick, index)
 					}
