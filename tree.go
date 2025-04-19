@@ -22,12 +22,66 @@ type (
 		width       unit.Dp
 		clickedNode *TreeNode
 		click       ClickAction1
+		*ContextMenu
 	}
 )
 
-func NewTree() *Tree {
+func NewTree(nodes []*TreeNode) *Tree {
+	m := NewContextMenu(len(nodes), nil)
+	m.AddItem(ContextMenuItem{
+		Title:         "Red",
+		Icon:          nil,
+		Can:           func() bool { return false },
+		Do:            func() { mylog.Info(m.ClickedRowindex, "red item clicked") },
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
+	})
+	m.AddItem(ContextMenuItem{
+		Title:         "Green",
+		Icon:          nil,
+		Can:           func() bool { return false },
+		Do:            func() { mylog.Info(m.ClickedRowindex, "Green item clicked") },
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
+	})
+	m.AddItem(ContextMenuItem{
+		Title:         "Blue",
+		Icon:          nil,
+		Can:           func() bool { return false },
+		Do:            func() { mylog.Info(m.ClickedRowindex, "Blue item clicked") },
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
+	})
+	m.AddItem(ContextMenuItem{
+		Title:         "Balance",
+		Icon:          ActionAccountBalanceIcon,
+		Can:           func() bool { return false },
+		Do:            func() { mylog.Info(m.ClickedRowindex, "Balance item clicked") },
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
+	})
+	m.AddItem(ContextMenuItem{
+		Title:         "Account",
+		Icon:          ActionAccountBoxIcon,
+		Can:           func() bool { return false },
+		Do:            func() { mylog.Info(m.ClickedRowindex, "Account item clicked") },
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
+	})
+	m.AddItem(ContextMenuItem{
+		Title:         "Cart",
+		Icon:          ActionAddShoppingCartIcon,
+		Can:           func() bool { return false },
+		Do:            func() { mylog.Info(m.ClickedRowindex, "Cart item clicked") },
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
+	})
 	return &Tree{
-		width: unit.Dp(200),
+		nodes:       nodes,
+		width:       unit.Dp(200),
+		clickedNode: nil,
+		click:       nil,
+		ContextMenu: m,
 	}
 }
 
@@ -119,7 +173,6 @@ func (t *Tree) setPath(nodes []*TreeNode, path []int) {
 }
 
 func (t *Tree) setClick(nodes *TreeNode) {
-	nodes.clickable = &widget.Clickable{}
 	if len(nodes.Children) > 0 {
 		for _, child := range nodes.Children {
 			t.setClick(child)
@@ -137,7 +190,7 @@ type TreeNode struct {
 	Children []*TreeNode
 	Expanded bool
 	// selected      bool
-	clickable     *widget.Clickable
+	clickable     widget.Clickable
 	ClickCallback CallbackFun1
 	Path          []int
 	IsDeleted     bool
@@ -150,26 +203,47 @@ func (t *Tree) Layout(gtx layout.Context) layout.Dimensions {
 			return layout.Dimensions{}
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return layout.Flex{Axis: layout.Vertical}.Layout(gtx, t.renderTree(gtx, t.nodes)...)
+			t.ContextMenu.DrawRow = func(gtx layout.Context, index int) layout.Dimensions {
+				rootRows := t.RootRows(gtx, t.nodes)
+				return rootRows[index](gtx)
+			}
+			return t.ContextMenu.Layout(gtx)
+			//return layout.Flex{Axis: layout.Vertical}.Layout(gtx, t.renderTree(gtx, t.nodes)...)
 		}),
 	)
 }
 
-func (t *Tree) renderTree(gtx layout.Context, nodes []*TreeNode) []layout.FlexChild {
+func (t *Tree) RootRows(gtx layout.Context, nodes []*TreeNode) []layout.Widget {
 	if len(nodes) == 0 {
-		return []layout.FlexChild{}
+		return []layout.Widget{}
 	}
-	var dims []layout.FlexChild
+	var dims []layout.Widget
 	for _, node := range nodes {
 		if node.IsDeleted {
 			continue
 		}
-		dims = append(dims, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+		dims = append(dims, func(gtx layout.Context) layout.Dimensions {
 			return t.renderNode(gtx, node, 0, true)
-		}))
+		})
 	}
 	return dims
 }
+
+//func (t *Tree) renderTree(gtx layout.Context, nodes []*TreeNode) []layout.FlexChild {
+//	if len(nodes) == 0 {
+//		return []layout.FlexChild{}
+//	}
+//	var dims []layout.FlexChild
+//	for _, node := range nodes {
+//		if node.IsDeleted {
+//			continue
+//		}
+//		dims = append(dims, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+//			return t.renderNode(gtx, node, 0, true)
+//		}))
+//	}
+//	return dims
+//}
 
 func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParent bool) layout.Dimensions {
 	// 渲节点标题

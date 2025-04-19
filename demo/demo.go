@@ -342,8 +342,8 @@ func main() {
 				},
 			}
 
-			tree := ux.NewTree()
-			tree.SetNodes(rootNodes)
+			tree := ux.NewTree(rootNodes)
+			//tree.SetNodes(rootNodes)
 			tree.OnClick(func(gtx layout.Context, node *ux.TreeNode) {
 				fmt.Println("node:", node.Title, " clicked")
 			})
