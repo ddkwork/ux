@@ -114,11 +114,7 @@ func (r *ContextArea) Update(gtx C) {
 			}
 		}
 		if e.Buttons.Contain(r.Activation) && e.Kind == pointer.Press {
-			r.active = true
-			r.justActivated = true
-			if !r.AbsolutePosition {
-				r.position = e.Position
-			}
+			r.Activate(e.Position)
 		}
 	}
 
