@@ -11,6 +11,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/icons"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -42,17 +45,17 @@ func main() {
 	panel.AddChild(hPanel)
 
 	tipIconButtons := []*ux.TipIconButton{
-		ux.NewTooltipButton(ux.NavigationArrowBackIcon, "action code", nil),
-		ux.NewTooltipButton(ux.ActionFavoriteIcon, "action code", nil),
-		ux.NewTooltipButton(ux.ActionDoneIcon, "action bug report", nil),
-		ux.NewTooltipButton(ux.ActionDeleteIcon, "action build", nil),
-		ux.NewTooltipButton(ux.NavigationCloseIcon, "action build", nil),
-		ux.NewTooltipButton(ux.NavigationArrowDropDownIcon, "action build", nil),
-		ux.NewTooltipButton(ux.NavigationChevronLeftIcon, "action build", nil),
-		ux.NewTooltipButton(ux.NavigationChevronRightIcon, "action build", nil),
-		ux.NewTooltipButton(ux.FileFolderIcon, "action build", nil),
-		ux.NewTooltipButton(ux.FileFileUploadIcon, "action build", nil),
-		ux.NewTooltipButton(ux.FileFileDownloadIcon, "action build", nil),
+		ux.NewTooltipButton(icons.NavigationArrowBackIcon, "action code", nil),
+		ux.NewTooltipButton(icons.ActionFavoriteIcon, "action code", nil),
+		ux.NewTooltipButton(icons.ActionDoneIcon, "action bug report", nil),
+		ux.NewTooltipButton(icons.ActionDeleteIcon, "action build", nil),
+		ux.NewTooltipButton(icons.NavigationCloseIcon, "action build", nil),
+		ux.NewTooltipButton(icons.NavigationArrowDropDownIcon, "action build", nil),
+		ux.NewTooltipButton(icons.NavigationChevronLeftIcon, "action build", nil),
+		ux.NewTooltipButton(icons.NavigationChevronRightIcon, "action build", nil),
+		ux.NewTooltipButton(icons.FileFolderIcon, "action build", nil),
+		ux.NewTooltipButton(icons.FileFileUploadIcon, "action build", nil),
+		ux.NewTooltipButton(icons.FileFileDownloadIcon, "action build", nil),
 	}
 
 	appBar = ux.InitAppBar(hPanel, tipIconButtons, speechTxt)
@@ -91,7 +94,7 @@ func main() {
 			})
 			menu.AddItem(ux.ContextMenuItem{
 				Title:         "Balance",
-				Icon:          ux.ActionAccountBalanceIcon,
+				Icon:          icons.ActionAccountBalanceIcon,
 				Can:           func() bool { return false },
 				Do:            func() { mylog.Info(menu.ClickedRowindex, "Balance item clicked") },
 				AppendDivider: false,
@@ -99,7 +102,7 @@ func main() {
 			})
 			menu.AddItem(ux.ContextMenuItem{
 				Title:         "Account",
-				Icon:          ux.ActionAccountBoxIcon,
+				Icon:          icons.ActionAccountBoxIcon,
 				Can:           func() bool { return false },
 				Do:            func() { mylog.Info(menu.ClickedRowindex, "Account item clicked") },
 				AppendDivider: false,
@@ -107,7 +110,7 @@ func main() {
 			})
 			menu.AddItem(ux.ContextMenuItem{
 				Title:         "Cart",
-				Icon:          ux.ActionAddShoppingCartIcon,
+				Icon:          icons.ActionAddShoppingCartIcon,
 				Can:           func() bool { return false },
 				Do:            func() { mylog.Info(menu.ClickedRowindex, "Cart item clicked") },
 				AppendDivider: false,
@@ -134,7 +137,7 @@ func main() {
 					return []ux.ContextMenuItem{
 						{
 							Title: "delete file",
-							Icon:  ux.SvgIconTrash,
+							Icon:  icons.SvgIconTrash,
 							Can:   func() bool { return stream.IsFilePath(n.Data.Path) }, // n是当前渲染的行,它的元数据是路径才显示
 							Do: func() {
 								mylog.Check(os.Remove(t.SelectedNode.Data.Path))
@@ -145,7 +148,7 @@ func main() {
 						},
 						{
 							Title: "delete directory",
-							Icon:  ux.SvgIconTrash,
+							Icon:  icons.SvgIconTrash,
 							Can:   func() bool { return stream.IsDir(n.Data.Path) }, // n是当前渲染的行,它的元数据是目录才显示
 							Do: func() {
 								mylog.Check(os.RemoveAll(t.SelectedNode.Data.Path))
@@ -157,11 +160,11 @@ func main() {
 					}
 				},
 				MarshalRowCells: func(n *ux.Node[packet]) (cells []ux.CellData) {
-					icon := ux.SvgIconGcsTemplate
+					icon := icons.SvgIconGcsTemplate
 					if n.Container() {
-						icon = ux.SvgIconOpenFolder
+						icon = icons.SvgIconOpenFolder
 						if !n.IsOpen() {
-							icon = ux.SvgIconClosedFolder
+							icon = icons.SvgIconClosedFolder
 						}
 						n.Data.Scheme = n.SumChildren()
 						sumBytes := 0
@@ -172,12 +175,12 @@ func main() {
 							sumBytes += node.Data.ContentLength
 							sumTime += node.Data.PadTime
 						}
-						n.Data.ContentLength = sumBytes //todo 对容器节点自动求和的单元格着色
+						n.Data.ContentLength = sumBytes // todo 对容器节点自动求和的单元格着色
 						n.Data.PadTime = sumTime
 					}
 					return []ux.CellData{
-						{Text: n.Data.Scheme, FgColor: ux.Orange100, Icon: icon},
-						{Text: n.Data.Method, FgColor: ux.ColorPink},
+						{Text: n.Data.Scheme, FgColor: colors.Orange100, Icon: icon},
+						{Text: n.Data.Method, FgColor: colors.ColorPink},
 						{Text: n.Data.Host},
 						{Text: n.Data.Path},
 						{Text: n.Data.ContentType},
@@ -282,145 +285,149 @@ func main() {
 			})
 			m.Set(TreeTableType, t)
 		case TreeType:
-			rootNodes := []*ux.TreeNode{
-				{
-					Title:    "Root 0",
-					Expanded: true,
-				},
-				{
-					Title:    "Root 1",
-					Expanded: true,
-					Children: []*ux.TreeNode{
-						{
-							Title:    "Child 1.1",
-							Expanded: true,
-							Children: []*ux.TreeNode{
-								{Title: "Grandchild 1.1.1"},
-								{Title: "Grandchild 1.1.2"},
-							},
-							ClickCallback: func(gtx layout.Context) {
-								println("clicked")
-							},
-						},
-						{
-							Title:    "Child 1.2",
-							Expanded: true,
-							Children: []*ux.TreeNode{
-								{Title: "Grandchild 1.2.1"},
-							},
-						},
-					},
-				},
-
-				{
-					Title:    "Root 2",
-					Expanded: true,
-					Children: []*ux.TreeNode{
-						{
-							Title:    "Child 2.1",
-							Expanded: true,
-							Children: []*ux.TreeNode{
-								{Title: "Grandchild 2.1.1",
-									Expanded: true},
-							},
-						},
-					},
-				},
-				{
-					Title:    "Root 3",
-					Expanded: true,
-					Children: []*ux.TreeNode{
-						{
-							Title:    "Child 3.1",
-							Expanded: true,
-							Children: []*ux.TreeNode{
-								{Title: "Grandchild 3.1.1",
-									Expanded: true},
-							},
-						},
-					},
-				},
-			}
-
-			tree := ux.NewTree(rootNodes)
-			//tree.SetNodes(rootNodes)
-			tree.OnClick(func(gtx layout.Context, node *ux.TreeNode) {
-				fmt.Println("node:", node.Title, " clicked")
-			})
-			m.Set(TreeType, tree)
+			//rootNodes := []*old.TreeNode{
+			//	{
+			//		Title:    "Root 0",
+			//		Expanded: true,
+			//	},
+			//	{
+			//		Title:    "Root 1",
+			//		Expanded: true,
+			//		Children: []*old.TreeNode{
+			//			{
+			//				Title:    "Child 1.1",
+			//				Expanded: true,
+			//				Children: []*old.TreeNode{
+			//					{Title: "Grandchild 1.1.1"},
+			//					{Title: "Grandchild 1.1.2"},
+			//				},
+			//				ClickCallback: func(gtx layout.Context) {
+			//					println("clicked")
+			//				},
+			//			},
+			//			{
+			//				Title:    "Child 1.2",
+			//				Expanded: true,
+			//				Children: []*old.TreeNode{
+			//					{Title: "Grandchild 1.2.1"},
+			//				},
+			//			},
+			//		},
+			//	},
+			//
+			//	{
+			//		Title:    "Root 2",
+			//		Expanded: true,
+			//		Children: []*old.TreeNode{
+			//			{
+			//				Title:    "Child 2.1",
+			//				Expanded: true,
+			//				Children: []*old.TreeNode{
+			//					{
+			//						Title:    "Grandchild 2.1.1",
+			//						Expanded: true,
+			//					},
+			//				},
+			//			},
+			//		},
+			//	},
+			//	{
+			//		Title:    "Root 3",
+			//		Expanded: true,
+			//		Children: []*old.TreeNode{
+			//			{
+			//				Title:    "Child 3.1",
+			//				Expanded: true,
+			//				Children: []*old.TreeNode{
+			//					{
+			//						Title:    "Grandchild 3.1.1",
+			//						Expanded: true,
+			//					},
+			//				},
+			//			},
+			//		},
+			//	},
+			//}
+			//
+			//tree := old.NewTree(rootNodes)
+			//// tree.SetNodes(rootNodes)
+			//tree.OnClick(func(gtx layout.Context, node *old.TreeNode) {
+			//	fmt.Println("node:", node.Title, " clicked")
+			//})
+			//m.Set(TreeType, tree)
 		case Table2Type:
-			t := table2(Packets)
-			m.Set(Table2Type, t)
+			// t := table2(Packets)
+			// m.Set(Table2Type, t)
 		case TableType:
-			type BasicFan struct {
-				ID          int     `json:"id"`          // id
-				CompanyID   int     `json:"companyId"`   // 公司id
-				CompanyName string  `json:"companyName"` // 公司名称
-				PlantID     int     `json:"plantId"`     // 场站id
-				PlantName   string  `json:"plantName"`   // 场站名称
-				StagingID   int     `json:"stagingId"`   // 工期id
-				StagingName string  `json:"stagingName"` // 工期名称
-				CircuitID   int     `json:"circuitId"`   // 集电线id
-				CircuitName string  `json:"circuitName"` // 集电线名称
-				FanName     string  `json:"fanName"`     // 风机名称
-				PowerField  string  `json:"powerField"`  // 电量计算的原始点
-				FanCode     string  `json:"fanCode"`     // 风机编码
-				InnerCode   string  `json:"innerCode"`   // 内部编码
-				ModelID     int     `json:"modelId"`     // 型号id
-				ModelName   string  `json:"modelName"`   // 型号名称
-				Status      int     `json:"status"`      // 1 运行 2 调试 3 未接入
-				StartSpeed  float64 `json:"startSpeed"`  // 切入风速(m/s)
-				StopSpeed   float64 `json:"stopSpeed"`   // 切出风速(m/s)
-				FanCap      float64 `json:"fanCap"`      // 装机容量
-				// Host        string  `json:"host"`
-
-				IsParadigm   int    `json:"isParadigm"`   // 是否是标杆
-				FanLocalType string `json:"fanLocalType"` // fan_local_type 海风陆风
-			}
-			var fans []*BasicFan
-			for i := range 100 * 10000 {
-				fans = append(fans, &BasicFan{ID: i + 1, CompanyID: 1, CompanyName: "company1", PlantName: "plant1", StagingName: "staging1", CircuitName: "circuit1", FanName: "#1风机"})
-			}
-			datatable := ux.NewDataTable(fans, nil, nil)
-			table := ux.NewTable(datatable)
-			table.SelectionChangedCallback = func(gtx layout.Context, row, col int) {
-				data := table.GetRow(row)
-				mylog.Struct(data) // todo check data
-			}
-
-			table.DoubleClickCallback = func(gtx layout.Context, row, col int) {
-				// data := table.GetRow(row)
-				// mylog.Struct("todo",data)
-				mylog.Info("double click for edit row data")
-			}
-
-			contextMenu := ux.NewContextMenu(len(fans), nil)
-			contextMenu.AddItem(ux.ContextMenuItem{
-				Title: "addRow",
-				// Icon:  ux.IconAdd,//todo
-				Can: func() bool {
-					return true
-				},
-				Do: func() {
-					mylog.Info("add row")
-				},
-				AppendDivider: false,
-				Clickable:     widget.Clickable{},
-			})
-			contextMenu.AddItem(ux.ContextMenuItem{
-				Title: "deleteRow",
-				// Icon:  ux.IconDelete,//todo
-				Can: func() bool {
-					return true
-				},
-				Do: func() {
-					mylog.Info("delete row")
-				},
-				AppendDivider: true,
-				Clickable:     widget.Clickable{},
-			})
-
-			table.SetMenu(contextMenu)
+			//type BasicFan struct {
+			//	ID          int     `json:"id"`          // id
+			//	CompanyID   int     `json:"companyId"`   // 公司id
+			//	CompanyName string  `json:"companyName"` // 公司名称
+			//	PlantID     int     `json:"plantId"`     // 场站id
+			//	PlantName   string  `json:"plantName"`   // 场站名称
+			//	StagingID   int     `json:"stagingId"`   // 工期id
+			//	StagingName string  `json:"stagingName"` // 工期名称
+			//	CircuitID   int     `json:"circuitId"`   // 集电线id
+			//	CircuitName string  `json:"circuitName"` // 集电线名称
+			//	FanName     string  `json:"fanName"`     // 风机名称
+			//	PowerField  string  `json:"powerField"`  // 电量计算的原始点
+			//	FanCode     string  `json:"fanCode"`     // 风机编码
+			//	InnerCode   string  `json:"innerCode"`   // 内部编码
+			//	ModelID     int     `json:"modelId"`     // 型号id
+			//	ModelName   string  `json:"modelName"`   // 型号名称
+			//	Status      int     `json:"status"`      // 1 运行 2 调试 3 未接入
+			//	StartSpeed  float64 `json:"startSpeed"`  // 切入风速(m/s)
+			//	StopSpeed   float64 `json:"stopSpeed"`   // 切出风速(m/s)
+			//	FanCap      float64 `json:"fanCap"`      // 装机容量
+			//	// Host        string  `json:"host"`
+			//
+			//	IsParadigm   int    `json:"isParadigm"`   // 是否是标杆
+			//	FanLocalType string `json:"fanLocalType"` // fan_local_type 海风陆风
+			//}
+			//var fans []*BasicFan
+			//for i := range 100 * 10000 {
+			//	fans = append(fans, &BasicFan{ID: i + 1, CompanyID: 1, CompanyName: "company1", PlantName: "plant1", StagingName: "staging1", CircuitName: "circuit1", FanName: "#1风机"})
+			//}
+			//datatable := old.NewDataTable(fans, nil, nil)
+			//table := old.NewTable(datatable)
+			//table.SelectionChangedCallback = func(gtx layout.Context, row, col int) {
+			//	data := table.GetRow(row)
+			//	mylog.Struct(data) // todo check data
+			//}
+			//
+			//table.DoubleClickCallback = func(gtx layout.Context, row, col int) {
+			//	// data := table.GetRow(row)
+			//	// mylog.Struct("todo",data)
+			//	mylog.Info("double click for edit row data")
+			//}
+			//
+			//contextMenu := ux.NewContextMenu(len(fans), nil)
+			//contextMenu.AddItem(ux.ContextMenuItem{
+			//	Title: "addRow",
+			//	// Icon:  ux.IconAdd,//todo
+			//	Can: func() bool {
+			//		return true
+			//	},
+			//	Do: func() {
+			//		mylog.Info("add row")
+			//	},
+			//	AppendDivider: false,
+			//	Clickable:     widget.Clickable{},
+			//})
+			//contextMenu.AddItem(ux.ContextMenuItem{
+			//	Title: "deleteRow",
+			//	// Icon:  ux.IconDelete,//todo
+			//	Can: func() bool {
+			//		return true
+			//	},
+			//	Do: func() {
+			//		mylog.Info("delete row")
+			//	},
+			//	AppendDivider: true,
+			//	Clickable:     widget.Clickable{},
+			//})
+			//
+			//table.SetMenu(contextMenu)
 
 			//header := ux.NewContainer(w)
 			//button2 := ux.NewButton(w, "滚动到第100行", func() {
@@ -432,7 +439,7 @@ func main() {
 			//header.Add(layout.Rigid(button2.Layout))
 			//header.Add(layout.Rigid(button2.Layout))
 			//header.Add(layout.Rigid(button2.Layout))
-			m.Set(TableType, table)
+			//m.Set(TableType, table)
 		case SearchDropDownType:
 			dropDown := ux.NewSearchDropDown()
 			dropDown.SetLoader(func() []ux.Item {
@@ -440,17 +447,17 @@ func main() {
 					{
 						Identifier: "",
 						Title:      "aa",
-						Kind:       "", // todo add icon and callback
+						Kind:       "", // todo add icons and callback
 					},
 					{
 						Identifier: "",
 						Title:      "bb",
-						Kind:       "", // todo add icon
+						Kind:       "", // todo add icons
 					},
 					{
 						Identifier: "",
 						Title:      "cc",
-						Kind:       "", // todo add icon
+						Kind:       "", // todo add icons
 					},
 				}
 			})
@@ -606,10 +613,10 @@ func main() {
 			// form.Add("password", password.Layout)
 			// form.Add("email", email.Layout)
 			// dropDown := ux.NewDropDown(SuperRecovery2Type.Names()...)
-			dropDown := ux.NewDropDown()
-			for _, s := range SuperRecovery2Type.Names() {
-				dropDown.SetOptions(ux.NewDropDownOption(s))
-			}
+			//dropDown := ux.NewDropDown()
+			//for _, s := range SuperRecovery2Type.Names() {
+			//	dropDown.SetOptions(ux.NewDropDownOption(s))
+			//}
 
 			// form.InsertAt(0, "choose a app", dropDown.Layout)
 			// form.Add("", ux.BlueButton(&clickable, "submit", unit.Dp(100)).Layout)
@@ -694,7 +701,7 @@ func main() {
 
 		case MobileType:
 		case SvgButtonType:
-			m.Set(SvgButtonType, ux.Button(new(widget.Clickable), ux.SvgIconCircledChevronRight, ""))
+			m.Set(SvgButtonType, ux.Button(new(widget.Clickable), icons.SvgIconCircledChevronRight, ""))
 		case CodeEditorType:
 			m.Set(CodeEditorType, ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang))
 		case AsmViewType:
@@ -714,7 +721,7 @@ func main() {
 		case ListViewType:
 		case JsonTreeType:
 		case AnimationButtonType:
-			newButtonAnimation := ux.NewButtonAnimation("animation button", ux.NavigationArrowBackIcon, func(gtx layout.Context) {
+			newButtonAnimation := ux.NewButtonAnimation("animation button", icons.NavigationArrowBackIcon, func(gtx layout.Context) {
 				mylog.Info("animation button clicked")
 			})
 			m.Set(AnimationButtonType, newButtonAnimation) // todo bug

@@ -4,13 +4,14 @@ import (
 	"log"
 	"os"
 
+	"github.com/ddkwork/ux/resources/icons"
+
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/x/outlay"
-	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/component"
 
@@ -43,13 +44,13 @@ func loop(w *app.Window) error {
 		Options: []func(gtx C) D{
 			func(gtx C) D {
 				item := component.MenuItem(th, &tagSearchBtn, "Search")
-				item.Icon = ux.ActionVisibilityIcon
+				item.Icon = icons.ActionVisibilityIcon
 				item.Hint = component.MenuHintText(th, "")
 				return item.Layout(gtx)
 			},
 			func(gtx C) D {
 				item := component.MenuItem(th, &tagRemoveBtn, "Remove")
-				item.Icon = ux.ContentCreateIcon
+				item.Icon = icons.ContentCreateIcon
 				item.Hint = component.MenuHintText(th, "")
 				return item.Layout(gtx)
 			},

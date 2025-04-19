@@ -5,6 +5,8 @@ import (
 	_ "embed"
 	"image/color"
 
+	"github.com/ddkwork/ux/resources/icons"
+
 	"gioui.org/font"
 	"gioui.org/font/opentype"
 	"gioui.org/io/event"
@@ -247,7 +249,7 @@ func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 						return layout.Dimensions{}
 					}
 
-					btn := Button(&c.loadExample, NavigationRefreshIcon, "Load Example")
+					btn := Button(&c.loadExample, icons.NavigationRefreshIcon, "Load Example")
 					//btn := NewNavButton("Load Example")
 					//btn.Color = theme.ButtonTextColor
 					//btn.Inset = layout.Inset{
@@ -262,7 +264,7 @@ func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 						return layout.Dimensions{}
 					}
 
-					btn := Button(&c.beatufier, EditorFormatColorTextIcon, "Beautify")
+					btn := Button(&c.beatufier, icons.EditorFormatColorTextIcon, "Beautify")
 					// btn.Color = theme.ButtonTextColor//todo
 					btn.Inset = layout.Inset{
 						Top: 4, Bottom: 4,

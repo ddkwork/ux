@@ -1,3 +1,5 @@
+因涉及到一些私有的逆向工程项目引用，即日起不再开源。
+
 gio ux widgets is a go language gui framework based on https://github.com/gioui/gio,
 with added features such as treeGrid widget etc.
 

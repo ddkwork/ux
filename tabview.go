@@ -2,8 +2,10 @@ package ux
 
 import (
 	"image"
-	"image/color"
 	"unicode"
+
+	colors2 "github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/icons"
 
 	"github.com/ddkwork/ux/widget/material"
 
@@ -162,17 +164,17 @@ func (t *TabItem) layoutTitle(gtx C) D {
 									if t.btn.Hovered() {
 										// label.Font.Weight = font.Bold
 										label.TextSize++
-										label.Color = Red100
+										label.Color = colors2.Red100
 									}
 									return layout.UniformInset(unit.Dp(7)).Layout(gtx, label.Layout)
 								}),
 
 								layout.Rigid(layout.Spacer{Width: unit.Dp(2)}.Layout),
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-									bkColor := color.NRGBA{}
-									hoveredColor := Hovered(bkColor)
+									// bkColor := color.NRGBA{}
+									// hoveredColor := Hovered(bkColor)
 									if t.btn.Hovered() {
-										bkColor = hoveredColor
+										// bkColor = hoveredColor
 									}
 									// iconColor := th.ContrastFg
 									// closeIcon := NavigationCloseIcon
@@ -181,7 +183,7 @@ func (t *TabItem) layoutTitle(gtx C) D {
 									if t.isDataChanged {
 										// yellow
 										// iconColor = color.NRGBA{R: 0xff, G: 0xff, B: 0x00, A: 0xff}
-										NavigationCloseIcon = ImageLensIcon
+										icons.NavigationCloseIcon = icons.ImageLensIcon
 										// iconSize = unit.Dp(10)
 										padding = unit.Dp(8)
 									}
@@ -196,7 +198,7 @@ func (t *TabItem) layoutTitle(gtx C) D {
 									//}
 									return layout.UniformInset(padding).Layout(gtx,
 										func(gtx layout.Context) layout.Dimensions {
-											return Button(&t.CloseClickable, NavigationCloseIcon, "").Layout(gtx)
+											return Button(&t.CloseClickable, icons.NavigationCloseIcon, "").Layout(gtx)
 										},
 									)
 								}),
@@ -208,7 +210,7 @@ func (t *TabItem) layoutTitle(gtx C) D {
 							label.Color = th.Color.DefaultTextWhiteColor
 							if t.btn.Hovered() {
 								label.Font.Weight = font.Bold
-								label.Color = Red100
+								label.Color = colors2.Red100
 							}
 							return layout.UniformInset(unit.Dp(7)).Layout(gtx,
 								label.Layout,
@@ -224,7 +226,7 @@ func (t *TabItem) layoutTitle(gtx C) D {
 					}
 					tabHeight := gtx.Dp(unit.Dp(4))
 					tabRect := image.Rect(0, 0, tabWidth, tabHeight)
-					paint.FillShape(gtx.Ops, ColorPink, clip.Rect(tabRect).Op())
+					paint.FillShape(gtx.Ops, colors2.ColorPink, clip.Rect(tabRect).Op())
 					return layout.Dimensions{
 						Size: image.Point{X: tabWidth, Y: tabHeight},
 					}

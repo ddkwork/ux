@@ -9,7 +9,7 @@ import (
 	"syscall"
 )
 
-// MessageBox displays message box and ok button without icon.
+// MessageBox displays message box and ok button without icons.
 func MessageBox(title, text string) (bool, error) {
 	return osaDialog(title, text, "")
 }
@@ -56,7 +56,7 @@ func Question(title, text string, defaultCancel bool) (bool, error) {
 func osaDialog(title, text, icon string) (bool, error) {
 	iconScript := ""
 	if icon != "" {
-		iconScript = ` with icon ` + icon
+		iconScript = ` with icons ` + icon
 	}
 	out, err := osaExecute(`display dialog ` + osaEscapeString(text) + ` with title ` + osaEscapeString(title) + ` buttons {"OK"} default button "OK"` + iconScript)
 	if err != nil {

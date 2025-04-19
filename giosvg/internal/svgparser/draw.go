@@ -190,7 +190,7 @@ func (s *SVGRender) SetTarget(x, y, w, h float64) {
 	s.Transform = Identity.Translate(x-s.ViewBox.X, y-s.ViewBox.Y).Scale(scaleW, scaleH)
 }
 
-// Draw the compiled SVG icon into the driver `d`.
+// Draw the compiled SVG icons into the driver `d`.
 // `opacity` is composed (mutliplied) with the eventual
 // <stroke-opacity> and <fill-opacity> style attributes.
 // All elements should be contained by the Bounds rectangle of the SVGRender:

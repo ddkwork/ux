@@ -1,20 +1,21 @@
 package main
 
 import (
+	"log"
 	"net/http"
+	"os"
 	"reflect"
 	"slices"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/ddkwork/ux/widget/material"
-
-	"github.com/ddkwork/ux"
-
+	"gioui.org/app"
 	"gioui.org/layout"
+	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/text"
+	"github.com/ddkwork/ux/widget/material"
 )
 
 type packet struct {
@@ -40,16 +41,44 @@ func GetHeader(obj any) []string {
 }
 
 type GoroutineList struct {
-	cols []ux.Column2
+	cols []Column2
 	rows []*packet
 	packet
-	table      *ux.Table2
+	table      *Table2
 	sortColumn int  // 当前排序的列索引
 	sortOrder  bool // true 为升序，false 为降序
 }
 
+func main() {
+	go func() {
+		w := new(app.Window)
+		if err := loop(w); err != nil {
+			log.Fatal(err)
+		}
+		os.Exit(0)
+	}()
+	app.Main()
+}
+
+func loop(w *app.Window) error {
+	var ops op.Ops
+
+	t := table2(Packets)
+
+	for {
+		switch e := w.Event().(type) {
+		case app.DestroyEvent:
+			return e.Err
+		case app.FrameEvent:
+			gtx := app.NewContext(&ops, e)
+			t.Layout(gtx)
+			e.Frame(gtx.Ops)
+		}
+	}
+}
+
 func table2(rows []*packet) *GoroutineList {
-	cols := []ux.Column2{
+	cols := []Column2{
 		{
 			Name:      "Scheme",
 			Width:     0,
@@ -111,7 +140,7 @@ func table2(rows []*packet) *GoroutineList {
 			Alignment: text.Start,
 		},
 	}
-	table := ux.NewTable2(cols)
+	table := NewTable2(cols)
 	table.SortedBy = 0
 	// table.SortOrder = ux.sortAscending
 	return &GoroutineList{
@@ -207,7 +236,7 @@ func (g *GoroutineList) Layout(gtx layout.Context) layout.Dimensions {
 		}
 		return layout.Dimensions{}
 	}
-	return ux.SimpleTable(
+	return SimpleTable(
 		gtx,
 		g.table,
 		len(g.rows),

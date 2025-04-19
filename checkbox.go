@@ -1,9 +1,10 @@
 package ux
 
 import (
-	"github.com/ddkwork/ux/widget/material"
 	"image"
 	"image/color"
+
+	"github.com/ddkwork/ux/widget/material"
 
 	"gioui.org/font"
 	"gioui.org/io/semantic"

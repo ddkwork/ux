@@ -47,11 +47,11 @@
 //
 // Widget variants: A widget can have several distinct representations even
 // though the underlying state is the same. A widget.Clickable can be drawn as a
-// round icon button:
+// round icons button:
 //
-//	icon := widget.NewIcon(...)
+//	icons := widget.NewIcon(...)
 //
-//	material.IconButton(theme, button, icon, "Click me!").Layout(gtx)
+//	material.IconButton(theme, button, icons, "Click me!").Layout(gtx)
 //
 // Specialized widgets: Theme both define a generic Label method
 // that takes a text size, and specialized methods for standard text

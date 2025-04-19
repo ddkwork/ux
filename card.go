@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 
+	colors2 "github.com/ddkwork/ux/resources/colors"
+
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/component"
 
@@ -41,11 +43,11 @@ func (c *Card) LayCard(gtx C) D {
 	size := image.Pt(gtx.Dp(unit.Dp(float32(200))), gtx.Dp(unit.Dp(float32(250))))
 
 	c.container.Theme = th
-	c.container.Theme.Bg = BackgroundColor
+	c.container.Theme.Bg = colors2.BackgroundColor
 	c.container.Elevation = unit.Dp(5)
 	c.shadow.CornerRadius = unit.Dp(18)
 	c.shadow.Elevation = unit.Dp(8)
-	c.shadow.AmbientColor = ColorPink // color.NRGBA{A: 0x10}
+	c.shadow.AmbientColor = colors2.ColorPink // color.NRGBA{A: 0x10}
 	c.shadow.PenumbraColor = color.NRGBA{A: 0x20}
 	c.shadow.UmbraColor = color.NRGBA{A: 0x30}
 

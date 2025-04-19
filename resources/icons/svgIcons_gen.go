@@ -1,4 +1,4 @@
-package ux
+package icons
 
 import (
 	"embed"
@@ -22,10 +22,10 @@ func svgCallback(value []byte) []byte {
 // 取色
 // https://products.eptimize.app/zh/color-convert/rgb-to-rgba
 //
-//go:embed resources/images/*.svg
+//go:embed images/*.svg
 var images embed.FS
 var (
-	svgEmbedFileMap                = stream.ReadEmbedFileMap(images, "resources/images")
+	svgEmbedFileMap                = stream.ReadEmbedFileMap(images, "images")
 	SvgIconBookmark                = Svg2Icon(svgEmbedFileMap.GetMustCallback("Bookmark.svg", svgCallback))
 	SvgIconCircledChevronDown      = Svg2Icon(svgEmbedFileMap.GetMustCallback("CircledChevronDown.svg", svgCallback))
 	SvgIconConvertToNonContainer   = Svg2Icon(svgEmbedFileMap.GetMustCallback("ConvertToNonContainer.svg", svgCallback))

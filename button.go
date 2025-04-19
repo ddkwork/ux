@@ -5,8 +5,10 @@ import (
 	"image/color"
 	"math"
 
+	colors2 "github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/icons"
+
 	"github.com/ddkwork/ux/animationButton"
-	"github.com/ddkwork/ux/icon"
 	"github.com/ddkwork/ux/widget/material"
 
 	"gioui.org/font"
@@ -30,7 +32,7 @@ func NewButtonAnimation(text string, icon *widget.Icon, callBack func(gtx layout
 		IconGap:   unit.Dp(1),
 		Animation: animationButton.NewButtonAnimationDefault(),
 		Border: widget.Border{
-			Color:        Grey200,
+			Color:        colors2.Grey200,
 			CornerRadius: 16,
 			Width:        0.5,
 		},
@@ -40,7 +42,7 @@ func NewButtonAnimation(text string, icon *widget.Icon, callBack func(gtx layout
 			BackgroundColor:      th.Color.InputFocusedBgColor,
 			HoverBackgroundColor: &th.ContrastFg,
 			HoverTextColor:       &th.Color.HoveredBorderBlueColor,
-			BorderColor:          White,
+			BorderColor:          colors2.White,
 		},
 	}
 	if icon == nil {
@@ -84,10 +86,10 @@ type ButtonLayoutStyle struct {
 
 type IconButtonStyle struct {
 	Background color.NRGBA
-	// Color is the icon color.
+	// Color is the icons color.
 	Color color.NRGBA
 	Icon  *widget.Icon
-	// Size is the icon size.
+	// Size is the icons size.
 	Size        unit.Dp
 	Inset       layout.Inset
 	Button      *widget.Clickable
@@ -117,7 +119,7 @@ func Button(button *widget.Clickable, icon any, text string) ButtonStyle {
 		Button:          button,
 		shaper:          th.Shaper,
 		border: widget.Border{
-			Color:        Grey200,
+			Color:        colors2.Grey200,
 			CornerRadius: 16,
 			Width:        .5,
 		},
@@ -137,7 +139,7 @@ func (b ButtonStyle) Layout(gtx layout.Context) layout.Dimensions {
 				return layout.Inset{Right: unit.Dp(0)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = gtx.Dp(b.IconSize)
 					gtx.Constraints.Max.X = gtx.Dp(b.IconSize)
-					return icon.Layout(gtx, b.Icon, b.color, b.IconSize)
+					return icons.Layout(gtx, b.Icon, b.color, b.IconSize)
 				})
 			}
 			return layout.Dimensions{}
@@ -156,7 +158,7 @@ func (b ButtonStyle) Layout(gtx layout.Context) layout.Dimensions {
 		case !gtx.Enabled():
 			background = Disabled(b.Background)
 		case b.Button.Hovered() || gtx.Focused(b.Button):
-			background = Grey400
+			background = colors2.Grey400
 		}
 		b.border.Color = background
 		if b.Icon == nil {

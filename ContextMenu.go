@@ -2,15 +2,16 @@ package ux
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+	"strconv"
+	"sync"
+
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/widget"
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/component"
-	"image"
-	"image/color"
-	"strconv"
-	"sync"
 )
 
 type ContextMenuItem struct {
@@ -122,8 +123,8 @@ func (m *ContextMenu) LayoutRow(gtx layout.Context, index int) layout.Dimensions
 			return m.ContextArea.Layout(gtx, func(gtx C) D {
 				gtx.Constraints.Min = image.Point{}
 				m.OnClicked(gtx)
-				//return m.drawContextArea(gtx, th)
-				return component.Menu(th, &m.MenuState).Layout(gtx) //所有行的item共用一个popup菜单而不是每行popup一个
+				// return m.drawContextArea(gtx, th)
+				return component.Menu(th, &m.MenuState).Layout(gtx) // 所有行的item共用一个popup菜单而不是每行popup一个
 			})
 		}),
 	)
@@ -142,7 +143,7 @@ func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
 							if e.Kind == pointer.Press {
 								switch {
 								case e.Buttons.Contain(pointer.ButtonPrimary):
-									m.ClickedRowindex = index //todo 移除树形表格的这个意思的字段?
+									m.ClickedRowindex = index // todo 移除树形表格的这个意思的字段?
 									println("Row selected (left click) " + strconv.Itoa(index))
 								case e.Buttons.Contain(pointer.ButtonSecondary):
 									m.ClickedRowindex = index
@@ -163,22 +164,22 @@ func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Min = image.Point{}
 				m.OnClicked(gtx)
 				return drawContextArea(gtx, m.MenuState)
-				return component.Menu(th, &m.MenuState).Layout(gtx) //所有行的item共用一个popup菜单而不是每行popup一个
+				return component.Menu(th, &m.MenuState).Layout(gtx) // 所有行的item共用一个popup菜单而不是每行popup一个
 			})
 		}),
 	)
 }
 
-func drawContextArea(gtx C, menuState component.MenuState) D { //popup区域的背景色，位置，四角弧度
+func drawContextArea(gtx C, menuState component.MenuState) D { // popup区域的背景色，位置，四角弧度
 	menuStyle := component.Menu(th, &menuState)
 	menuStyle.SurfaceStyle = component.SurfaceStyle{
 		Theme: th,
 		ShadowStyle: component.ShadowStyle{
 			CornerRadius: 18,
-			//Elevation:     0,//todo test elevation
-			//AmbientColor:  color.NRGBA{},//todo test ambient color
-			//PenumbraColor: color.NRGBA{},
-			//UmbraColor:    color.NRGBA{},
+			// Elevation:     0,//todo test elevation
+			// AmbientColor:  color.NRGBA{},//todo test ambient color
+			// PenumbraColor: color.NRGBA{},
+			// UmbraColor:    color.NRGBA{},
 		},
 		Fill: color.NRGBA{R: 50, G: 50, B: 50, A: 255},
 	}

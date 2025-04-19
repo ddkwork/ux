@@ -1,8 +1,10 @@
 package ux
 
 import (
-	"fmt"
 	"image"
+
+	"github.com/ddkwork/golibrary/mylog"
+	colors2 "github.com/ddkwork/ux/resources/colors"
 
 	"gioui.org/gesture"
 	"gioui.org/io/pointer"
@@ -137,8 +139,8 @@ func (r *Resize) init(gtx layout.Context) {
 		currTotalRatio += rz.ratio
 		rz.float.pos = int(float32(r.length) * currTotalRatio)
 	}
-	fmt.Println(totalRatio)
-	fmt.Println(currTotalRatio)
+	mylog.Struct(totalRatio)
+	mylog.Struct(currTotalRatio)
 }
 
 func (r *Resize) onWindowResize(gtx layout.Context) {
@@ -280,6 +282,6 @@ func (r *Resize) CustomResizeHandleBar(gtx layout.Context) layout.Dimensions {
 			Y: y,
 		},
 	}
-	paint.FillShape(gtx.Ops, DividerFg, clip.Rect(rect).Op())
+	paint.FillShape(gtx.Ops, colors2.DividerFg, clip.Rect(rect).Op())
 	return layout.Dimensions{Size: rect.Max}
 }

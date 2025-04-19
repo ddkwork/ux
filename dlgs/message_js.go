@@ -7,7 +7,7 @@ import (
 // "github.com/gopherjs/gopherjs/js"
 )
 
-// MessageBox displays message box and ok button without icon.
+// MessageBox displays message box and ok button without icons.
 func MessageBox(title, text string) (bool, error) {
 	return alertDialog(title, text, "")
 }

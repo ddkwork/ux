@@ -1,8 +1,11 @@
-package ux
+package main
 
 import (
 	"image"
 	"image/color"
+
+	"github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/icons"
 
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/component"
@@ -222,7 +225,7 @@ func (c *DropDown) box(gtx layout.Context, text string, maxWidth unit.Dp) layout
 	c.size.X = gtx.Dp(maxWidth)
 
 	return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		// calculate the minimum width of the box, considering icon and padding
+		// calculate the minimum width of the box, considering icons and padding
 		gtx.Constraints.Min.X = gtx.Dp(maxWidth) - gtx.Dp(8)
 		return layout.Inset{
 			Top:    4,
@@ -238,7 +241,7 @@ func (c *DropDown) box(gtx layout.Context, text string, maxWidth unit.Dp) layout
 				}),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = gtx.Dp(16)
-					return NavigationExpandMoreIcon.Layout(gtx, th.Fg)
+					return icons.NavigationExpandMoreIcon.Layout(gtx, th.Fg)
 				}),
 			)
 		})
@@ -330,7 +333,7 @@ func (c *DropDown) updateMenuItems() {
 				itm.IconSize = opt.IconSize
 			}
 
-			itm.Label.Color = White
+			itm.Label.Color = colors.White
 			return itm.Layout(gtx)
 		})
 	}

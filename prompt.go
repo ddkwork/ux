@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 
+	colors2 "github.com/ddkwork/ux/resources/colors"
+
 	"github.com/ddkwork/ux/widget/material"
 
 	"gioui.org/layout"
@@ -20,7 +22,7 @@ const (
 	ModalTypeErr  = "err"
 )
 
-var colors = map[string]color.NRGBA{
+var colorMap = map[string]color.NRGBA{
 	// Red
 	ModalTypeErr: {R: 0xD1, G: 0x1E, B: 0x35, A: 0xFF},
 	// Light blue
@@ -133,7 +135,7 @@ func (p *Prompt) Layout(gtx layout.Context) layout.Dimensions {
 	return layout.Background{}.Layout(gtx,
 		func(gtx layout.Context) layout.Dimensions {
 			defer clip.UniformRRect(image.Rectangle{Max: gtx.Constraints.Min}, 8).Push(gtx.Ops).Pop()
-			paint.Fill(gtx.Ops, colors[p.Type])
+			paint.Fill(gtx.Ops, colorMap[p.Type])
 			return layout.Dimensions{Size: gtx.Constraints.Min}
 		}, func(gtx layout.Context) layout.Dimensions {
 			return layout.UniformInset(unit.Dp(10)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
@@ -183,8 +185,8 @@ func (p *Prompt) Layout(gtx layout.Context) layout.Dimensions {
 								items,
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									btn := Button(&p.options[i].Button, nil, p.options[i].Text)
-									btn.Background = White
-									btn.color = Black
+									btn.Background = colors2.White
+									btn.color = colors2.Black
 									return btn.Layout(gtx)
 								}),
 								layout.Rigid(layout.Spacer{Width: unit.Dp(4)}.Layout),

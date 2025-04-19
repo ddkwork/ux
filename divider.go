@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 
+	colors2 "github.com/ddkwork/ux/resources/colors"
+
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 
@@ -25,7 +27,7 @@ func (d *DividerStyle) Layout(gtx layout.Context) layout.Dimensions {
 	}
 
 	if d.Fill == (color.NRGBA{}) {
-		d.Fill = DividerFg
+		d.Fill = colors2.DividerFg
 	}
 
 	return d.Inset.Layout(gtx, func(gtx C) D {

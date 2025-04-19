@@ -8,9 +8,9 @@ import (
 	"syscall"
 )
 
-// MessageBox displays message box and ok button without icon.
+// MessageBox displays message box and ok button without icons.
 func MessageBox(title, text string) (bool, error) {
-	return cmdDialog(title, text, "info") // TODO: Remove icon
+	return cmdDialog(title, text, "info") // TODO: Remove icons
 }
 
 // Info displays information dialog.

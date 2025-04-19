@@ -12,7 +12,7 @@ import (
 func TestName(t *testing.T) {
 	g := stream.NewGeneratedFile()
 	g.P(`
-package ux
+package icons
 
 import (
 	"gioui.org/widget"

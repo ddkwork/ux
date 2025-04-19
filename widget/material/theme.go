@@ -3,8 +3,9 @@
 package material
 
 import (
-	"gioui.org/layout"
 	"image/color"
+
+	"gioui.org/layout"
 
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
@@ -88,28 +89,28 @@ func NewTheme(isDark ...bool) *Theme {
 	return t
 }
 
-var ( //todo 如果场景多的话就来一个 colors的包，抓包什么的估计需要更多的自定义颜色，又要用户可更改
-	//Black           = color.NRGBA{A: 0xff}                            // rgb(0, 0, 0)
+var ( // todo 如果场景多的话就来一个 colors的包，抓包什么的估计需要更多的自定义颜色，又要用户可更改
+	// Black           = color.NRGBA{A: 0xff}                            // rgb(0, 0, 0)
 	White = color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff} // rgb(255, 255, 255)
-	//DividerFg       = color.NRGBA{R: 88, G: 88, B: 88, A: 255}
+	// DividerFg       = color.NRGBA{R: 88, G: 88, B: 88, A: 255}
 	BackgroundColor = color.NRGBA{R: 54, G: 54, B: 54, A: 255}
-	//ColorPink       = color.NRGBA{R: 166, G: 96, B: 192, A: 255}
-	//ColorHeaderFg   = color.NRGBA{R: 70, G: 70, B: 70, A: 255}
+	// ColorPink       = color.NRGBA{R: 166, G: 96, B: 192, A: 255}
+	// ColorHeaderFg   = color.NRGBA{R: 70, G: 70, B: 70, A: 255}
 	// ColorHeaderFg = color.NRGBA{R: 76, G: 76, B: 76, A: 255}
-	//DeepPurple900   = color.NRGBA{R: 0x31, G: 0x1b, B: 0x92, A: 0xff} // rgb(49, 27, 146)
+	// DeepPurple900   = color.NRGBA{R: 0x31, G: 0x1b, B: 0x92, A: 0xff} // rgb(49, 27, 146)
 	DeepPurpleA100 = color.NRGBA{R: 0xb3, G: 0x88, B: 0xff, A: 0xff} // rgb(179, 136, 255)
-	//DeepPurpleA200  = color.NRGBA{R: 0x7c, G: 0x4d, B: 0xff, A: 0xff} // rgb(124, 77, 255)
-	//DeepPurpleA400  = color.NRGBA{R: 0x65, G: 0x1f, B: 0xff, A: 0xff} // rgb(101, 31, 255)
-	//DeepPurpleA700  = color.NRGBA{R: 0x62, B: 0xea, A: 0xff}          // rgb(98, 0, 234)
-	//Grey50          = color.NRGBA{R: 0xfa, G: 0xfa, B: 0xfa, A: 0xff} // rgb(250, 250, 250)
-	//Grey100         = color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff} // rgb(245, 245, 245)
-	//Grey200         = color.NRGBA{R: 0xee, G: 0xee, B: 0xee, A: 0xff} // rgb(238, 238, 238)
-	//Grey300         = color.NRGBA{R: 0xe0, G: 0xe0, B: 0xe0, A: 0xff} // rgb(224, 224, 224)
-	//Grey400         = color.NRGBA{R: 0xbd, G: 0xbd, B: 0xbd, A: 0xff} // rgb(189, 189, 189)
-	//Grey500         = color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff} // rgb(158, 158, 158)
-	//Grey600         = color.NRGBA{R: 0x75, G: 0x75, B: 0x75, A: 0xff} // rgb(117, 117, 117)
-	//Grey700         = color.NRGBA{R: 0x61, G: 0x61, B: 0x61, A: 0xff} // rgb(97, 97, 97)
-	//Grey800         = color.NRGBA{R: 0x42, G: 0x42, B: 0x42, A: 0xff} // rgb(66, 66, 66)
+	// DeepPurpleA200  = color.NRGBA{R: 0x7c, G: 0x4d, B: 0xff, A: 0xff} // rgb(124, 77, 255)
+	// DeepPurpleA400  = color.NRGBA{R: 0x65, G: 0x1f, B: 0xff, A: 0xff} // rgb(101, 31, 255)
+	// DeepPurpleA700  = color.NRGBA{R: 0x62, B: 0xea, A: 0xff}          // rgb(98, 0, 234)
+	// Grey50          = color.NRGBA{R: 0xfa, G: 0xfa, B: 0xfa, A: 0xff} // rgb(250, 250, 250)
+	// Grey100         = color.NRGBA{R: 0xf5, G: 0xf5, B: 0xf5, A: 0xff} // rgb(245, 245, 245)
+	// Grey200         = color.NRGBA{R: 0xee, G: 0xee, B: 0xee, A: 0xff} // rgb(238, 238, 238)
+	// Grey300         = color.NRGBA{R: 0xe0, G: 0xe0, B: 0xe0, A: 0xff} // rgb(224, 224, 224)
+	// Grey400         = color.NRGBA{R: 0xbd, G: 0xbd, B: 0xbd, A: 0xff} // rgb(189, 189, 189)
+	// Grey500         = color.NRGBA{R: 0x9e, G: 0x9e, B: 0x9e, A: 0xff} // rgb(158, 158, 158)
+	// Grey600         = color.NRGBA{R: 0x75, G: 0x75, B: 0x75, A: 0xff} // rgb(117, 117, 117)
+	// Grey700         = color.NRGBA{R: 0x61, G: 0x61, B: 0x61, A: 0xff} // rgb(97, 97, 97)
+	// Grey800         = color.NRGBA{R: 0x42, G: 0x42, B: 0x42, A: 0xff} // rgb(66, 66, 66)
 	Grey900 = color.NRGBA{R: 0x21, G: 0x21, B: 0x21, A: 0xff} // rgb(33, 33, 33)
 
 )
@@ -198,8 +199,8 @@ func (t *Theme) dark() *Theme {
 		NotificationBgColor:          color.NRGBA{R: 72, G: 72, B: 77, A: 255},
 		NotificationTextWhiteColor:   color.NRGBA{R: 219, G: 219, B: 220, A: 255},
 		ModalBgGrayColor:             color.NRGBA{R: 44, G: 44, B: 50, A: 255},
-		DropdownMenuBgColor:          color.NRGBA{}, //todo
-		DropdownTextColor:            color.NRGBA{}, //todo
+		DropdownMenuBgColor:          color.NRGBA{}, // todo
+		DropdownTextColor:            color.NRGBA{}, // todo
 		NoticeInfoColor:              color.NRGBA{R: 108, G: 184, B: 221, A: 255},
 		NoticeSuccessColor:           color.NRGBA{R: 101, G: 231, B: 188, A: 255},
 		NoticeWaringColor:            color.NRGBA{R: 242, G: 201, B: 126, A: 255},
@@ -216,7 +217,7 @@ func (t *Theme) dark() *Theme {
 		MinIconColor:                 color.NRGBA{R: 255, G: 188, B: 45, A: 255},
 		FullIconColor:                color.NRGBA{R: 43, G: 200, B: 64, A: 255},
 		TreeIconColor:                color.NRGBA{R: 255, G: 255, B: 255, A: 255},
-		//TreeHoveredBgColor:          color.NRGBA{R: 59, G: 60, B: 61, A: 255},
+		// TreeHoveredBgColor:          color.NRGBA{R: 59, G: 60, B: 61, A: 255},
 		TreeHoveredBgColor:          color.NRGBA{R: 84, G: 84, B: 84, A: 255},
 		TreeClickedBgColor:          color.NRGBA{R: 87, G: 87, B: 87, A: 255},
 		MarkdownMarkColor:           color.NRGBA{R: 255, G: 255, B: 0, A: 255},
@@ -267,7 +268,7 @@ type Size struct {
 	DefaultWidgetRadiusSize  unit.Dp
 	MarkdownPointSize        unit.Sp
 }
-type Color struct { //todo更细的分类和嵌套，方便维护
+type Color struct { // todo更细的分类和嵌套，方便维护
 	DefaultWindowBgGrayColor     color.NRGBA
 	DefaultContentBgGrayColor    color.NRGBA
 	CardBgColor                  color.NRGBA

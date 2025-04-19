@@ -7,10 +7,10 @@ import (
 	"image/color"
 	"math"
 
-	"github.com/ddkwork/ux/f32color"
-	"github.com/ddkwork/ux/icon"
+	"github.com/ddkwork/ux/resources/icons"
 
 	"gioui.org/font"
+	"github.com/ddkwork/ux/f32color"
 
 	"gioui.org/io/semantic"
 	"gioui.org/layout"
@@ -43,10 +43,10 @@ type ButtonLayoutStyle struct {
 
 type IconButtonStyle struct {
 	Background color.NRGBA
-	// Color is the icon color.
+	// Color is the icons color.
 	Color color.NRGBA
 	Icon  any
-	// Size is the icon size.
+	// Size is the icons size.
 	Size        unit.Dp
 	Inset       layout.Inset
 	Button      *widget.Clickable
@@ -181,7 +181,7 @@ func (b IconButtonStyle) Layout(gtx layout.Context) layout.Dimensions {
 			},
 			func(gtx layout.Context) layout.Dimensions {
 				return b.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return icon.Layout(gtx, b.Icon, b.Color, b.Size)
+					return icons.Layout(gtx, b.Icon, b.Color, b.Size)
 				})
 			},
 		)

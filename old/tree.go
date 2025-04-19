@@ -1,8 +1,11 @@
-package ux
+package main
 
 import (
 	"fmt"
 	"image"
+
+	"github.com/ddkwork/ux"
+	"github.com/ddkwork/ux/resources/icons"
 
 	"github.com/ddkwork/ux/widget/material"
 
@@ -22,13 +25,13 @@ type (
 		width       unit.Dp
 		clickedNode *TreeNode
 		click       ClickAction1
-		*ContextMenu
+		*ux.ContextMenu
 	}
 )
 
 func NewTree(nodes []*TreeNode) *Tree {
-	m := NewContextMenu(len(nodes), nil)
-	m.AddItem(ContextMenuItem{
+	m := ux.NewContextMenu(len(nodes), nil)
+	m.AddItem(ux.ContextMenuItem{
 		Title:         "Red",
 		Icon:          nil,
 		Can:           func() bool { return false },
@@ -36,7 +39,7 @@ func NewTree(nodes []*TreeNode) *Tree {
 		AppendDivider: false,
 		Clickable:     widget.Clickable{},
 	})
-	m.AddItem(ContextMenuItem{
+	m.AddItem(ux.ContextMenuItem{
 		Title:         "Green",
 		Icon:          nil,
 		Can:           func() bool { return false },
@@ -44,7 +47,7 @@ func NewTree(nodes []*TreeNode) *Tree {
 		AppendDivider: false,
 		Clickable:     widget.Clickable{},
 	})
-	m.AddItem(ContextMenuItem{
+	m.AddItem(ux.ContextMenuItem{
 		Title:         "Blue",
 		Icon:          nil,
 		Can:           func() bool { return false },
@@ -52,25 +55,25 @@ func NewTree(nodes []*TreeNode) *Tree {
 		AppendDivider: false,
 		Clickable:     widget.Clickable{},
 	})
-	m.AddItem(ContextMenuItem{
+	m.AddItem(ux.ContextMenuItem{
 		Title:         "Balance",
-		Icon:          ActionAccountBalanceIcon,
+		Icon:          icons.ActionAccountBalanceIcon,
 		Can:           func() bool { return false },
 		Do:            func() { mylog.Info(m.ClickedRowindex, "Balance item clicked") },
 		AppendDivider: false,
 		Clickable:     widget.Clickable{},
 	})
-	m.AddItem(ContextMenuItem{
+	m.AddItem(ux.ContextMenuItem{
 		Title:         "Account",
-		Icon:          ActionAccountBoxIcon,
+		Icon:          icons.ActionAccountBoxIcon,
 		Can:           func() bool { return false },
 		Do:            func() { mylog.Info(m.ClickedRowindex, "Account item clicked") },
 		AppendDivider: false,
 		Clickable:     widget.Clickable{},
 	})
-	m.AddItem(ContextMenuItem{
+	m.AddItem(ux.ContextMenuItem{
 		Title:         "Cart",
-		Icon:          ActionAddShoppingCartIcon,
+		Icon:          icons.ActionAddShoppingCartIcon,
 		Can:           func() bool { return false },
 		Do:            func() { mylog.Info(m.ClickedRowindex, "Cart item clicked") },
 		AppendDivider: false,
@@ -208,7 +211,7 @@ func (t *Tree) Layout(gtx layout.Context) layout.Dimensions {
 				return rootRows[index](gtx)
 			}
 			return t.ContextMenu.Layout(gtx)
-			//return layout.Flex{Axis: layout.Vertical}.Layout(gtx, t.renderTree(gtx, t.nodes)...)
+			// return layout.Flex{Axis: layout.Vertical}.Layout(gtx, t.renderTree(gtx, t.nodes)...)
 		}),
 	)
 }
@@ -232,7 +235,7 @@ func (t *Tree) RootRows(gtx layout.Context, nodes []*TreeNode) []layout.Widget {
 func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParent bool) layout.Dimensions {
 	// 渲节点标题
 	bgColor := th.Bg
-	bgColor = RowColor(depth + 1)
+	bgColor = ux.RowColor(depth + 1)
 
 	if node.clickable.Clicked(gtx) {
 		node.Expanded = !node.Expanded
@@ -254,9 +257,9 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParen
 			return node.clickable.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return layout.Inset{Top: unit.Dp(1)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Max.X = gtx.Dp(th.Size.DefaultIconSize)
-					svg := SvgIconCircledChevronRight
+					svg := icons.SvgIconCircledChevronRight
 					if node.Expanded {
-						svg = SvgIconCircledChevronDown
+						svg = icons.SvgIconCircledChevronDown
 					}
 					return iconButtonSmall(new(widget.Clickable), svg, "").Layout(gtx)
 				})
@@ -336,4 +339,12 @@ func (t *Tree) OpenAll(gtx layout.Context, nodes []*TreeNode) {
 		}
 	}
 	gtx.Execute(op.InvalidateCmd{})
+}
+
+func iconButtonSmall(button *widget.Clickable, icon any, txt string) material.IconButtonStyle {
+	style := material.IconButton(th, button, icon, txt)
+	style.Inset = layout.Inset{}
+	// style.IconSize = defaultHierarchyIconSize
+	// style.border = widget.Border{}
+	return style
 }

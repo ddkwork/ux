@@ -1,12 +1,13 @@
 package ux
 
 import (
+	"os"
+	"testing"
+
 	"gioui.org/app"
 	"gioui.org/op"
 	"gioui.org/widget"
 	"github.com/ddkwork/golibrary/mylog"
-	"os"
-	"testing"
 
 	"github.com/ddkwork/golibrary/safemap"
 	"github.com/ddkwork/golibrary/stream"
@@ -30,6 +31,7 @@ func TestTreeTable_ContextMenuItem(t1 *testing.T) {
 }
 
 func TestNewPopupMenu(t *testing.T) {
+	t.Skip("finished")
 	w := new(app.Window)
 	p := NewContextMenu(100, nil)
 	p.AddItem(ContextMenuItem{

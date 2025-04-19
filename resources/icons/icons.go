@@ -1,4 +1,4 @@
-package icon
+package icons
 
 import (
 	"image"

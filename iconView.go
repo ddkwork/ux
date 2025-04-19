@@ -5,6 +5,8 @@ import (
 	"io"
 	"strings"
 
+	"github.com/ddkwork/ux/resources/icons"
+
 	"gioui.org/io/clipboard"
 	"gioui.org/layout"
 	"gioui.org/widget"
@@ -25,7 +27,7 @@ func NewIconView() *IconView {
 		clickMap:    new(safemap.M[string, *animationButton.Button]),
 		filterInput: NewInput("请输入搜索关键字..."),
 		keyWords:    "Edi",
-		filterMap:   make([]layout.Widget, 0, IconMap.Len()),
+		filterMap:   make([]layout.Widget, 0, icons.IconMap.Len()),
 		flow: &Flow{
 			Num:       5,
 			Axis:      layout.Horizontal,
@@ -40,8 +42,8 @@ func NewIconView() *IconView {
 		fmt.Println("change:", v.filterInput.GetText())
 		v.keyWords = v.filterInput.GetText()
 	})
-	for _, name := range IconMap.Keys() {
-		v.clickMap.Set(name, NewButtonAnimation(name, IconMap.GetMust(name), func(gtx layout.Context) { // todo 增加右键回调弹出菜单
+	for _, name := range icons.IconMap.Keys() {
+		v.clickMap.Set(name, NewButtonAnimation(name, icons.IconMap.GetMust(name), func(gtx layout.Context) { // todo 增加右键回调弹出菜单
 			gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(name))})
 		}))
 	}
@@ -65,7 +67,7 @@ func (v *IconView) Layout(gtx layout.Context) layout.Dimensions {
 }
 
 func (v *IconView) filter() {
-	for name := range IconMap.Range() {
+	for name := range icons.IconMap.Range() {
 		if v.keyWords == "" || strings.Contains(strings.ToLower(name), strings.ToLower(v.keyWords)) {
 			v.filterMap = append(v.filterMap, v.clickMap.GetMust(name).Layout)
 		}

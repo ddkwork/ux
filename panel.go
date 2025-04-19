@@ -2,6 +2,13 @@ package ux
 
 import (
 	"bytes"
+	"image"
+	"image/color"
+	"image/draw"
+	"image/png"
+	"os"
+	"path/filepath"
+
 	"gioui.org/app"
 	_ "gioui.org/app/permission/networkstate"
 	_ "gioui.org/app/permission/storage"
@@ -14,27 +21,15 @@ import (
 	"gioui.org/unit"
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/golibrary/safemap"
+	"github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/icons"
 	"github.com/ddkwork/ux/widget/material"
-	"image"
-	"image/color"
-	"image/draw"
-	"image/png"
-	"os"
-	"path/filepath"
 )
 
 var th = material.NewTheme()
 
 func NewTheme() *material.Theme {
 	return th
-}
-
-type Widget interface {
-	Layout(gtx layout.Context) layout.Dimensions
-}
-
-var ZeroWidget = func(gtx layout.Context) layout.Dimensions {
-	return layout.Dimensions{}
 }
 
 type Panel struct { // 使用泛型而不是接口，这样返回的每个控件结构体字段无需断言，并且有类型约束，是安全的
@@ -111,14 +106,14 @@ type AppBar struct {
 }
 
 func InitAppBar(panel *Panel, toolBars []*TipIconButton, speechTxt string) *AppBar {
-	search := NewInput("请输入搜索关键字...").SetIcon(ActionSearchIcon).SetRadius(16)
+	search := NewInput("请输入搜索关键字...").SetIcon(icons.ActionSearchIcon).SetRadius(16)
 	panel.AddChildFlexed(1, search) // todo 太多之后apk需要管理溢出
 
 	for _, toolbar := range toolBars {
 		panel.AddChild(toolbar)
 	}
 
-	about := NewTooltipButton(AlertErrorIcon, "about", func() { // todo ico make
+	about := NewTooltipButton(icons.AlertErrorIcon, "about", func() { // todo ico make
 		if mylog.IsAndroid() {
 			mylog.Info("android not support about window")
 			return
@@ -135,7 +130,7 @@ func InitAppBar(panel *Panel, toolBars []*TipIconButton, speechTxt string) *AppB
 
 func BackgroundDark(gtx layout.Context) {
 	rect := clip.Rect{Max: gtx.Constraints.Max}
-	paint.FillShape(gtx.Ops, BackgroundColor, rect.Op())
+	paint.FillShape(gtx.Ops, colors.BackgroundColor, rect.Op())
 }
 
 func drawImageBackground(gtx layout.Context) {

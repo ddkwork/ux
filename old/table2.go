@@ -1,8 +1,11 @@
-package ux
+package main
 
 import (
 	"fmt"
 	"image"
+
+	"github.com/ddkwork/ux"
+	"github.com/ddkwork/ux/resources/colors"
 
 	"gioui.org/gesture"
 	"gioui.org/io/key"
@@ -109,14 +112,14 @@ func (t *Table2) SetColumns(gtx layout.Context, cols []Column2, cellData [][]str
 		maxWidth := unit.Dp(0) // 当前最大宽度初始化为0
 		for _, data := range cellData {
 			if i < len(data) {
-				currentWidth := LabelWidth(gtx, data[i])
+				currentWidth := ux.LabelWidth(gtx, data[i])
 				// currentWidth += float32(gtx.Dp(material.Scrollbar(th, nil).Width())) + float32(len(cols)*gtx.Dp(defaultDividerWidth))
 				if currentWidth > maxWidth {
 					maxWidth = currentWidth // 更新最大宽度
 				}
 			}
 		}
-		cols[i].Width = max(maxWidth, LabelWidth(gtx, cols[i].Name+" ⇧"))
+		cols[i].Width = max(maxWidth, ux.LabelWidth(gtx, cols[i].Name+" ⇧"))
 	}
 	gtx.Constraints = originalConstraints
 	t.Columns = cols
@@ -426,8 +429,8 @@ func (row *TableRowStyle) Layout(gtx layout.Context, w rowFn) layout.Dimensions 
 					handleRight := handleShape
 					handleRight.Rect = handleRight.Rect.Add(image.Pt(dividerWidth+dividerMargin, 0)) // 为右边形状添加偏移
 
-					paint.FillShape(gtx.Ops, Red200, handleLeft.Op(gtx.Ops))     // 填充左侧形状
-					paint.FillShape(gtx.Ops, Yellow100, handleRight.Op(gtx.Ops)) // 填充右侧形状
+					paint.FillShape(gtx.Ops, colors.Red200, handleLeft.Op(gtx.Ops))     // 填充左侧形状
+					paint.FillShape(gtx.Ops, colors.Yellow100, handleRight.Op(gtx.Ops)) // 填充右侧形状
 				}
 
 				// Draw the vertical bar
@@ -437,7 +440,7 @@ func (row *TableRowStyle) Layout(gtx layout.Context, w rowFn) layout.Dimensions 
 			}
 			// 为表头和每列绘制列分隔条
 			stack3 := clip.Rect{Max: image.Pt(dividerWidth, tallestHeight)}.Push(gtx.Ops) // 绘制分隔条的矩形区域
-			paint.Fill(gtx.Ops, DividerFg)                                                // 填充分隔条的颜色
+			paint.Fill(gtx.Ops, colors.DividerFg)                                         // 填充分隔条的颜色
 			stack3.Pop()                                                                  // 弹出分隔条的绘制堆栈
 
 			dividerStart += dividerWidth // 更新分隔符的起始位置
@@ -469,8 +472,8 @@ func (row *TableHeaderRowStyle) Layout(gtx layout.Context) layout.Dimensions {
 			mylog.Trace("header clicked", col)
 			row.Table.ClickedColumnIndex = col
 		}
-		gtx.Constraints.Min.Y = gtx.Dp(20)                                                // 限制行高
-		paint.FillShape(gtx.Ops, ColorHeaderFg, clip.Rect{Max: gtx.Constraints.Max}.Op()) // 表头背景色
+		gtx.Constraints.Min.Y = gtx.Dp(20)                                                       // 限制行高
+		paint.FillShape(gtx.Ops, colors.ColorHeaderFg, clip.Rect{Max: gtx.Constraints.Max}.Op()) // 表头背景色
 		return layout.Inset{
 			// Top: defaultHeaderPadding,
 			// Top:    5,
@@ -520,7 +523,7 @@ func TableSimpleRow(tbl *Table2) TableSimpleRowStyle {
 }
 
 func (row TableSimpleRowStyle) Layout(gtx layout.Context, rowIdx int, cellFn cellFn) layout.Dimensions {
-	c := RowColor(rowIdx)
+	c := ux.RowColor(rowIdx)
 
 	if row.Table.cells == nil {
 		row.Table.cells = make([]*widget.Clickable, len(row.Table.Columns))
@@ -541,7 +544,7 @@ func (row TableSimpleRowStyle) Layout(gtx layout.Context, rowIdx int, cellFn cel
 			// c = th.ContrastBg
 			// c = ColorPink
 			// HighlightRow(gtx)
-			c = Red400
+			c = colors.Red400
 			// paint.FillShape(gtx.Ops, ColorPink, clip.Rect{Max: gtx.Constraints.Max}.Op())
 		}
 		if row.Table.cells[rowIdx].Hovered() {
@@ -549,7 +552,7 @@ func (row TableSimpleRowStyle) Layout(gtx layout.Context, rowIdx int, cellFn cel
 			// HighlightRow(gtx)
 		}
 	}
-	return Background{Color: c}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+	return ux.Background{Color: c}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return TableRow(row.Table, false).Layout(gtx, func(gtx layout.Context, col int) layout.Dimensions {
 			defer clip.Rect{Max: gtx.Constraints.Max}.Push(gtx.Ops).Pop()
 			gtx.Constraints.Min.Y = 0

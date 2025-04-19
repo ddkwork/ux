@@ -2,6 +2,7 @@ package svgparser
 
 import (
 	"image/color"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -9,7 +10,6 @@ import (
 
 	"golang.org/x/image/colornames"
 	"golang.org/x/image/math/fixed"
-	"slices"
 )
 
 // This file defines colors and gradients used in SVG

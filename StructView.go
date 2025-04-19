@@ -5,6 +5,9 @@ import (
 	"reflect"
 	"time"
 
+	colors2 "github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/icons"
+
 	"gioui.org/text"
 
 	"gioui.org/layout"
@@ -205,11 +208,11 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 			return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 				outlay.EmptyRigidHorizontal(300), // 标签站位
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					return Button(&s.closeBtn, NavigationCloseIcon, "Close").Layout(gtx)
+					return Button(&s.closeBtn, icons.NavigationCloseIcon, "Close").Layout(gtx)
 				}),
 				outlay.EmptyRigidHorizontal(20), // 按钮间距
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					return Button(&s.applyBtn, ActionAssignmentTurnedInIcon, "Apply").Layout(gtx)
+					return Button(&s.applyBtn, icons.ActionAssignmentTurnedInIcon, "Apply").Layout(gtx)
 				}),
 				outlay.EmptyRigidHorizontal(10),
 			)
@@ -221,7 +224,7 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 			s.ModalState.Show(gtx.Now, func(gtx layout.Context) layout.Dimensions {
 				return layout.UniformInset(unit.Dp(15)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					return material.List(th, &s.List).Layout(gtx, len(rows), func(gtx layout.Context, index int) layout.Dimensions {
-						return Background{Color: BackgroundColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { // todo 这样把边框整没了
+						return Background{Color: colors2.BackgroundColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions { // todo 这样把边框整没了
 							return rows[index](gtx)
 						})
 					})

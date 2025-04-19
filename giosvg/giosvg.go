@@ -74,7 +74,7 @@ func NewVectorReader(reader io.Reader) (Vector, error) {
 }
 
 // Constraints is the layout.Constraints with f32.Pt instead of image.Point.
-// This is used to keep aspect ratio, and to keep the size of the icon
+// This is used to keep aspect ratio, and to keep the size of the icons
 // within the constraints.
 type Constraints struct {
 	Max f32.Point
@@ -115,7 +115,7 @@ func NewIcon(vector Vector) *Icon {
 }
 
 // Layout implements widget.Layout.
-// It will render the icon based on the given layout.Constraints.Max.
+// It will render the icons based on the given layout.Constraints.Max.
 // If the SVG uses `currentColor` you can set the color using
 // paint.ColorOp.
 func (icon *Icon) Layout(gtx layout.Context) layout.Dimensions {

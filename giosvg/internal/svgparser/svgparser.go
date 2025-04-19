@@ -44,8 +44,8 @@ type SVGRender struct {
 
 // ReadIcon reads the Icon from the given io.Reader
 // This only supports a sub-set of SVG, but
-// is enough to draw many icons. errMode determines if the icon ignores, errors out, or logs a warning
-// if it does not handle an element found in the icon file.
+// is enough to draw many icons. errMode determines if the icons ignores, errors out, or logs a warning
+// if it does not handle an element found in the icons file.
 func ReadIcon(stream io.Reader) (*SVGRender, error) {
 	icon := &SVGRender{defs: make(map[string][]definition), grads: make(map[string]*Gradient), Transform: Identity}
 	cursor := &iconCursor{styleStack: []PathStyle{DefaultStyle}, icon: icon}

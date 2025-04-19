@@ -3,6 +3,7 @@ package richtext
 
 import (
 	"image/color"
+	"maps"
 	"time"
 
 	"gioui.org/font"
@@ -14,7 +15,6 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/x/styledtext"
-	"maps"
 )
 
 // LongPressDuration is the default duration of a long press gesture.

@@ -1,4 +1,4 @@
-package ux
+package icons
 
 import (
 	"gioui.org/widget"

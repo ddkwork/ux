@@ -24,10 +24,10 @@ type Flow struct {
 	list      *widget.List
 }
 
-type wrapData struct {
-	dims layout.Dimensions
-	call op.CallOp
-}
+//type wrapData struct {
+//	dims layout.Dimensions
+//	call op.CallOp
+//}
 
 func (g *Flow) Layout(gtx layout.Context, num int, el FlowElement) layout.Dimensions {
 	if g.Num == 0 {

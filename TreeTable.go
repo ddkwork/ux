@@ -15,6 +15,9 @@ import (
 	"sync"
 	"time"
 
+	colors2 "github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/icons"
+
 	"gioui.org/gesture"
 	"gioui.org/io/key"
 
@@ -31,7 +34,6 @@ import (
 	"github.com/ddkwork/golibrary/stream/align"
 	"github.com/ddkwork/golibrary/stream/deepcopy"
 	"github.com/ddkwork/golibrary/stream/uuid"
-	"github.com/ddkwork/ux/icon"
 	"github.com/ddkwork/ux/widget/material"
 )
 
@@ -88,33 +90,6 @@ type (
 		sortAscending      bool         // 升序还是降序
 		contextMenu        *ContextMenu // 右键菜单，实现复制列数据到剪贴板
 	}
-
-	//func Layout(gtx layout.Context, icon any, color color.NRGBA, size unit.Dp) layout.Dimensions {
-	//	sizeDp := gtx.Dp(size)
-	//	if icon != nil {
-	//		gtx.Constraints.Min = image.Point{X: sizeDp}
-	//		switch v := icon.(type) {
-	//		case *giosvg.Icon:
-	//			v.Layout(gtx)
-	//		case *widget.Icon:
-	//			v.Layout(gtx, color)
-	//		case *widget.Image:
-	//			v.Layout(gtx)
-	//		case image.Image:
-	//			icon := &widget.Image{
-	//				Src:      paint.NewImageOp(v),
-	//				Fit:      widget.Unscaled,
-	//				Position: layout.Center,
-	//				Scale:    1.0, // todo 测试按钮图标和层级图标
-	//			}
-	//			icon.Layout(gtx)
-	//		}
-	//	}
-	//	return layout.Dimensions{
-	//		Size: image.Point{X: sizeDp, Y: sizeDp},
-	//	}
-	//}
-
 	CellData struct {
 		Text             string      // 单元格文本
 		Tooltip          string      // 单元格提示信息
@@ -127,6 +102,36 @@ type (
 		widget.Clickable             // todo 单元格点击事件,如果换成编辑框，那么编辑框需要支持单机事件和双击编辑回车事件,以及RichText高亮单元格
 		RichText                     // todo 单元格富文本
 	}
+
+	tableDrag struct {
+		drag           gesture.Drag
+		hover          gesture.Hover
+		startPos       float32
+		shrinkNeighbor bool
+	}
+)
+
+type (
+	sortOrder uint8
+	// cellFn    func(gtx layout.Context, row, col int) layout.Dimensions
+	rowFn func(gtx layout.Context, row int) layout.Dimensions
+)
+
+const (
+	sortNone sortOrder = iota
+	sortAscending
+	sortDescending
+)
+
+const (
+	defaultDividerWidth                   unit.Dp = 1
+	defaultDividerMargin                  unit.Dp = 1
+	defaultDividerHandleMinVerticalMargin unit.Dp = 2
+	defaultDividerHandleMaxHeight         unit.Dp = 12
+	defaultDividerHandleWidth             unit.Dp = 3
+	defaultDividerHandleRadius            unit.Dp = 2
+	defaultHeaderPadding                  unit.Dp = 5
+	defaultHeaderBorder                   unit.Dp = 1
 )
 
 // NewTreeTable 原理:通过flex+适当的上下文控制既可以完美绘制一个树形表格
@@ -208,7 +213,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		t.SizeColumnsToFit(gtx)
 	})
 	t.rootRows = t.Root.Children // 增删改查不一定去计算列宽导致有些节点已经删除，是空指针导致panic，所有这里需要刷新一下rootRows，不知道这里是否会内存泄漏
-	//list := material.List(th, &t.List)
+	// list := material.List(th, &t.List)
 	if t.contextMenu == nil {
 		t.contextMenu = NewContextMenu(len(t.rootRows), nil)
 	}
@@ -216,10 +221,10 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return t.HeaderFrame(gtx) // 渲染表头
-			//t.inLayoutHeader = true
-			//return t.layoutDrag(gtx, func(gtx layout.Context, row int) layout.Dimensions {
-			//	return t.HeaderFrame(gtx) // 渲染表头
-			//})
+			t.inLayoutHeader = true
+			return t.layoutDrag(gtx, func(gtx layout.Context, row int) layout.Dimensions {
+				return t.HeaderFrame(gtx) // 渲染表头
+			})
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			var rootRows []layout.Widget
@@ -232,7 +237,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case CopyRowType:
 								item = ContextMenuItem{
 									Title:     "",
-									Icon:      SvgIconCopy,
+									Icon:      icons.SvgIconCopy,
 									Can:       func() bool { return true },
 									Do:        func() { t.SelectedNode.CopyRow(gtx, t.maxColumnTextWidths) },
 									Clickable: widget.Clickable{},
@@ -240,7 +245,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case ConvertToContainerType:
 								item = ContextMenuItem{
 									Title: "",
-									Icon:  SvgIconConvertToContainer,
+									Icon:  icons.SvgIconConvertToContainer,
 									Can:   func() bool { return !n.Container() }, // n是当前渲染的行
 									Do: func() {
 										t.SelectedNode.SetType("ConvertToContainer" + ContainerKeyPostfix) //? todo bug：这里是失败的，导致再次点击这里转换的节点后ConvertToNonContainer没有弹出来
@@ -254,7 +259,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case ConvertToNonContainerType:
 								item = ContextMenuItem{
 									Title: "",
-									Icon:  SvgIconConvertToNonContainer,
+									Icon:  icons.SvgIconConvertToNonContainer,
 									Can:   func() bool { return n.Container() }, // n是当前渲染的行
 									Do: func() {
 										t.SelectedNode.SetType("")
@@ -272,7 +277,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case NewType:
 								item = ContextMenuItem{
 									Title: "",
-									Icon:  SvgIconCircledAdd,
+									Icon:  icons.SvgIconCircledAdd,
 									Can:   func() bool { return true },
 									Do: func() {
 										var zero T
@@ -283,7 +288,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case NewContainerType:
 								item = ContextMenuItem{
 									Title: "",
-									Icon:  SvgIconCircledVerticalEllipsis,
+									Icon:  icons.SvgIconCircledVerticalEllipsis,
 									Can:   func() bool { return true },
 									Do: func() {
 										var zero T // todo edit type?
@@ -294,7 +299,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case DeleteType:
 								item = ContextMenuItem{
 									Title:     "",
-									Icon:      SvgIconTrash,
+									Icon:      icons.SvgIconTrash,
 									Can:       func() bool { return true },
 									Do:        func() { t.Remove(gtx) },
 									Clickable: widget.Clickable{},
@@ -302,7 +307,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case DuplicateType:
 								item = ContextMenuItem{
 									Title: "",
-									Icon:  SvgIconDuplicate,
+									Icon:  icons.SvgIconDuplicate,
 									Can:   func() bool { return true },
 									Do: func() {
 										t.InsertAfter(gtx, t.SelectedNode.Clone())
@@ -312,7 +317,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case EditType:
 								item = ContextMenuItem{
 									Title:         "",
-									Icon:          SvgIconEdit,
+									Icon:          icons.SvgIconEdit,
 									Can:           func() bool { return true },
 									Do:            func() { t.Edit(gtx) },
 									AppendDivider: true,
@@ -321,7 +326,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case OpenAllType:
 								item = ContextMenuItem{
 									Title:     "",
-									Icon:      SvgIconHierarchy,
+									Icon:      icons.SvgIconHierarchy,
 									Can:       func() bool { return true },
 									Do:        func() { t.Root.OpenAll() },
 									Clickable: widget.Clickable{},
@@ -329,7 +334,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case CloseAllType:
 								item = ContextMenuItem{
 									Title:     "",
-									Icon:      SvgIconCircledVerticalEllipsis,
+									Icon:      icons.SvgIconCircledVerticalEllipsis,
 									Can:       func() bool { return true },
 									Do:        func() { t.Root.CloseAll() },
 									Clickable: widget.Clickable{},
@@ -337,7 +342,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case SaveDataType:
 								item = ContextMenuItem{
 									Title:     "",
-									Icon:      SvgIconSaveContent,
+									Icon:      icons.SvgIconSaveContent,
 									Can:       func() bool { return true },
 									Do:        func() { t.SaveDate() },
 									Clickable: widget.Clickable{},
@@ -374,6 +379,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		}),
 	)
 }
+
 func (t *TreeTable[T]) RowFrame2(gtx layout.Context, n *Node[T], rowIndex int) layout.Dimensions {
 	n.rowCells = t.MarshalRowCells(n)
 	for i := range n.rowCells {
@@ -409,9 +415,9 @@ func (t *TreeTable[T]) RowFrame2(gtx layout.Context, n *Node[T], rowIndex int) l
 					})
 				}
 				return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					svg := SvgIconCircledChevronRight
+					svg := icons.SvgIconCircledChevronRight
 					if n.isOpen {
-						svg = SvgIconCircledChevronDown
+						svg = icons.SvgIconCircledChevronDown
 					}
 					return iconButtonSmall(new(widget.Clickable), svg, "").Layout(gtx)
 					// return NewButton("", nil).SetRectIcon(true).SetIcon(svg).Layout(gtx)
@@ -487,7 +493,6 @@ func (t *TreeTable[T]) RowFrame2(gtx layout.Context, n *Node[T], rowIndex int) l
 				gtx.Constraints.Max.Y = gtx.Dp(defaultRowHeight) // 限制行高以避免列分割线呈现虚线视觉
 				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx, rowCells...)
 			})
-
 		}),
 	}
 	if n.CanHaveChildren() && n.isOpen { // 如果是容器节点则递归填充孩子节点形成多行
@@ -538,9 +543,9 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 					})
 				}
 				return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					svg := SvgIconCircledChevronRight
+					svg := icons.SvgIconCircledChevronRight
 					if n.isOpen {
-						svg = SvgIconCircledChevronDown
+						svg = icons.SvgIconCircledChevronDown
 					}
 
 					return iconButtonSmall(new(widget.Clickable), svg, "").Layout(gtx)
@@ -722,7 +727,7 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData, width unit.D
 	DrawColumnDivider(gtx, data.columID) // 为每列绘制列分隔条
 
 	if data.FgColor == (color.NRGBA{}) {
-		data.FgColor = White
+		data.FgColor = colors2.White
 	}
 	//richText := NewRichText()
 	//richText.AddSpan(richtext.SpanStyle{
@@ -755,7 +760,7 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData, width unit.D
 				Left:   leftPadding,
 				Right:  0,
 			}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return icon.Layout(gtx, data.Icon, color.NRGBA{}, defaultHierarchyColumnIconSize)
+				return icons.Layout(gtx, data.Icon, color.NRGBA{}, defaultHierarchyColumnIconSize)
 			})
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -832,16 +837,16 @@ const (
 	hierarchyColumnID = 0
 	leftPadding       = unit.Dp(4) // 单元格左侧填充，和列分割线的间距
 	// rightPadding          = unit.Dp(4)   // 单元格右侧填充，和列分割线的间距
-	topPadding                     = unit.Dp(4)   // 单元格上侧填充，似单元格间文本居中
-	bottomPadding                  = unit.Dp(4)   // 单元格下侧填充，似单元格间文本居中
-	minColumnWidth                 = unit.Dp(100) // 最小列宽
-	defaultHierarchyIconSize       = unit.Dp(12)  // 层级图标默认大小
-	defaultHierarchyColumnIconSize = unit.Dp(16)  // 层级列图标默认大小
-	HierarchyIndent                = unit.Dp(16)  // 层级缩进
-	defaultRowHeight               = unit.Dp(22)  // 行高
-	defaultHeaderHeight            = unit.Dp(24)  // 表头行高
-	defaultHeaderFontSize          = unit.Sp(12)  // 表头字体大小
-	defaultRowFontSize             = unit.Sp(12)  // 行字体大小
+	topPadding = unit.Dp(4) // 单元格上侧填充，似单元格间文本居中
+	// bottomPadding                  = unit.Dp(4)   // 单元格下侧填充，似单元格间文本居中
+	// minColumnWidth                 = unit.Dp(100) // 最小列宽
+	defaultHierarchyIconSize       = unit.Dp(12) // 层级图标默认大小
+	defaultHierarchyColumnIconSize = unit.Dp(16) // 层级列图标默认大小
+	HierarchyIndent                = unit.Dp(16) // 层级缩进
+	defaultRowHeight               = unit.Dp(22) // 行高
+	// defaultHeaderHeight            = unit.Dp(24)  // 表头行高
+	// defaultHeaderFontSize          = unit.Sp(12)  // 表头字体大小
+	// defaultRowFontSize             = unit.Sp(12)  // 行字体大小
 )
 
 func (t *TreeTable[T]) SaveDate() { // todo 支持apk数据目录 app.dataDir()
@@ -882,7 +887,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 		t.header.contextMenu = NewContextMenu(1, nil)
 		t.header.contextMenu.AddItem(ContextMenuItem{
 			Title:         "CopyColumn",
-			Icon:          SvgIconCopy,
+			Icon:          icons.SvgIconCopy,
 			Can:           func() bool { return true },
 			Do:            func() { t.CopyColumn(gtx) },
 			AppendDivider: true,
@@ -957,7 +962,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 				}
 			}
 			cols = append(cols, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return Background{Color: ColorHeaderFg}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return Background{Color: colors2.ColorHeaderFg}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					return material.Clickable(gtx, clickable, func(gtx layout.Context) layout.Dimensions {
 						cellFrame := t.CellFrame(gtx, t.header.columnCells[i], t.maxColumnCellWidths[i], true, layout.Inset{
 							Top:    8,
@@ -1007,7 +1012,7 @@ func DrawColumnDivider(gtx layout.Context, col int) {
 	if col > 0 { // 层级列不要绘制分隔线
 		tallestHeight := gtx.Dp(unit.Dp(gtx.Constraints.Max.Y))
 		stack3 := clip.Rect{Max: image.Pt(int(DividerWidth), tallestHeight)}.Push(gtx.Ops)
-		paint.Fill(gtx.Ops, DividerFg)
+		paint.Fill(gtx.Ops, colors2.DividerFg)
 		stack3.Pop()
 	}
 }
@@ -1125,7 +1130,7 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w rowFn) layout.Dimensions
 			//if width < width.autoWidth { // 如果当前列宽度小于其最小宽度
 			//	width = width.autoWidth // 更新列的最小宽度为当前宽度
 			//}
-			width = max(width, minWidth) // 确保列的宽度不小于最小宽度
+			//width = max(width, minWidth) // 确保列的宽度不小于最小宽度
 
 			var total unit.Dp             // 初始化总宽度
 			for _, col := range columns { // 遍历所有列计算总宽度
@@ -1234,8 +1239,8 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w rowFn) layout.Dimensions
 					handleRight := handleShape
 					handleRight.Rect = handleRight.Rect.Add(image.Pt(dividerWidth+dividerMargin, 0)) // 为右边形状添加偏移
 
-					paint.FillShape(gtx.Ops, Red200, handleLeft.Op(gtx.Ops))     // 填充左侧形状
-					paint.FillShape(gtx.Ops, Yellow100, handleRight.Op(gtx.Ops)) // 填充右侧形状
+					paint.FillShape(gtx.Ops, colors2.Red200, handleLeft.Op(gtx.Ops))     // 填充左侧形状
+					paint.FillShape(gtx.Ops, colors2.Yellow100, handleRight.Op(gtx.Ops)) // 填充右侧形状
 				}
 
 				// Draw the vertical bar
@@ -1245,7 +1250,7 @@ func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w rowFn) layout.Dimensions
 			}
 			// 为表头和每列绘制列分隔条
 			stack3 := clip.Rect{Max: image.Pt(dividerWidth, tallestHeight)}.Push(gtx.Ops) // 绘制分隔条的矩形区域
-			paint.Fill(gtx.Ops, DividerFg)                                                // 填充分隔条的颜色
+			paint.Fill(gtx.Ops, colors2.DividerFg)                                        // 填充分隔条的颜色
 			stack3.Pop()                                                                  // 弹出分隔条的绘制堆栈
 
 			dividerStart += dividerWidth // 更新分隔符的起始位置

@@ -1,6 +1,10 @@
 package main
 
 import (
+	"image"
+	"image/color"
+	"os"
+
 	"gioui.org/app"
 	"gioui.org/io/event"
 	"gioui.org/layout"
@@ -10,9 +14,6 @@ import (
 	"gioui.org/widget"
 	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/widget/material"
-	"image"
-	"image/color"
-	"os"
 )
 
 func main() {
@@ -106,7 +107,7 @@ func (p *Page) Layout(gtx layout.Context) layout.Dimensions {
 
 	// main page
 	{
-		//gtx := gtx // copy
+		// gtx := gtx // copy
 		gtx.Constraints.Max.X /= 2
 		gtx.Constraints.Min = gtx.Constraints.Max
 
@@ -131,7 +132,7 @@ func (p *Page) Layout(gtx layout.Context) layout.Dimensions {
 						return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							gtx.Constraints.Min.Y = 0
 							paint.ColorOp{Color: color.NRGBA{0, 0, 0, 255}}.Add(gtx.Ops)
-							//return widget.Label{}.Layout(gtx, shaper, text.Font{}, 14, "Open Dialog")
+							// return widget.Label{}.Layout(gtx, shaper, text.Font{}, 14, "Open Dialog")
 							return material.Button(th, &p.submit, "Open Dialog").Layout(gtx)
 						})
 					})

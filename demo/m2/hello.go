@@ -8,6 +8,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/ddkwork/ux/resources/icons"
+
 	"gioui.org/widget"
 	"github.com/ddkwork/ux"
 
@@ -36,12 +38,12 @@ func loop(w *app.Window) error {
 	}, ux.ModalOption{
 		Text:   "close",
 		Button: widget.Clickable{},
-		Icon:   ux.NavigationCloseIcon,
+		Icon:   icons.NavigationCloseIcon,
 	},
 		ux.ModalOption{
 			Text:   "submit",
 			Button: widget.Clickable{},
-			Icon:   ux.NavigationSubdirectoryArrowRightIcon,
+			Icon:   icons.NavigationSubdirectoryArrowRightIcon,
 		},
 	)
 	modal.Show()

@@ -185,7 +185,7 @@ func (r *ContextArea) Layout(gtx C, w layout.Widget) D {
 				r.position.Y = float32(newY)
 			}
 		}
-		//log.Println(r.position)
+		// log.Println(r.position)
 
 		// Lay out the contextual widget itself.
 		pos := image.Point{

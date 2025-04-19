@@ -41,7 +41,6 @@ const (
 )
 
 func (ed *EditorApp) run() error {
-
 	var ops op.Ops
 	for {
 		e := ed.window.Event()
@@ -112,7 +111,6 @@ func (ed *EditorApp) layout(gtx C, th *material.Theme) D {
 			return lb.Layout(gtx)
 		}),
 	)
-
 }
 
 func main() {
@@ -132,7 +130,7 @@ func main() {
 		gvcode.WrapLine(true),
 	)
 
-	var quotePairs = map[rune]rune{
+	quotePairs := map[rune]rune{
 		'\'': '\'',
 		'"':  '"',
 		'`':  '`',
@@ -140,7 +138,7 @@ func main() {
 	}
 
 	// Bracket pairs
-	var bracketPairs = map[rune]rune{
+	bracketPairs := map[rune]rune{
 		'(': ')',
 		'{': '}',
 		'[': ']',
@@ -190,7 +188,6 @@ func main() {
 	}()
 
 	app.Main()
-
 }
 
 func HightlightTextByPattern(text string, pattern string) []*gvcode.TextStyle {
@@ -233,8 +230,7 @@ var golangKeywords = []string{
 	"continue", "for", "import", "return", "var",
 }
 
-type goCompletor struct {
-}
+type goCompletor struct{}
 
 func (c *goCompletor) Suggest(ctx gvcode.CompletionContext) []gvcode.CompletionCandicate {
 	candicates := make([]gvcode.CompletionCandicate, 0)

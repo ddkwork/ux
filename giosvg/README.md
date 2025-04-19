@@ -22,7 +22,7 @@ if err != nil {
 icon := giosvg.NewIcon(vector)
 
 func someWidget(gtx layout.Context) layout.Dimensions {
-	// Render your icon anywhere:
+	// Render your icons anywhere:
 	return icon.Layout(gtx)
 }
 ```
@@ -33,7 +33,7 @@ If your icon use `currentColor`, you can use `paint.ColorOp`:
 
 ```go
 func someWidget(gtx layout.Context) layout.Dimensions {
-    	// Render your icon anywhere, with custom color:
+    	// Render your icons anywhere, with custom color:
 	paint.ColorOp{Color: color.NRGBA{B: 255, A: 255}}.Add(gtx.Ops)
 	return icon.Layout(gtx)
 }

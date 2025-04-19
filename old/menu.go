@@ -6,13 +6,14 @@
  * @desc   menu.go
  */
 
-package ux
+package main
 
 import (
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
+	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/widget/material"
 )
 
@@ -115,7 +116,7 @@ func (m *MenuItem) layout(gtx layout.Context, parent *Menu, haasLine bool) layou
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				if haasLine {
 					return layout.Inset{Top: unit.Dp(5), Bottom: unit.Dp(5)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						return NewLine().Color(th.Color.DefaultLineColor).Line(gtx, f32.Pt(0, 0), f32.Pt(float32(gtx.Constraints.Max.X), 0)).Layout(gtx)
+						return ux.NewLine().Color(th.Color.DefaultLineColor).Line(gtx, f32.Pt(0, 0), f32.Pt(float32(gtx.Constraints.Max.X), 0)).Layout(gtx)
 					})
 				} else {
 					return layout.Dimensions{}

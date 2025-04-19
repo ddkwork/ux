@@ -365,7 +365,7 @@ func SwapPairs(p material.Palette) material.Palette {
 
 // Layout renders the app bar. It will span all available horizontal
 // space (gtx.Constraints.Max.X), but has a fixed height. The navDesc
-// is an accessibility description for the navigation icon button, and
+// is an accessibility description for the navigation icons button, and
 // the overflowDesc is an accessibility description for the overflow
 // action button.
 func (a *AppBar) Layout(gtx layout.Context, theme *material.Theme, navDesc, overflowDesc string) layout.Dimensions {
@@ -444,7 +444,7 @@ type AppBarEvent interface {
 	AppBarEvent()
 }
 
-// AppBarNavigationClicked indicates that the navigation icon was clicked
+// AppBarNavigationClicked indicates that the navigation icons was clicked
 // during the last frame.
 type AppBarNavigationClicked struct{}
 

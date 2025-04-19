@@ -3,6 +3,8 @@ package ux
 import (
 	"strings"
 
+	"github.com/ddkwork/ux/resources/icons"
+
 	"gioui.org/io/key"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -79,15 +81,15 @@ func (c *SearchDropDown) onSearch(query string) {
 	for _, item := range results {
 		switch item.Item.Kind {
 		case KindEnv:
-			item.Icon = NavigationMenuIcon
+			item.Icon = icons.NavigationMenuIcon
 		case KindRequest:
-			item.Icon = ActionSwapHorizIcon
+			item.Icon = icons.ActionSwapHorizIcon
 		case KindWorkspace:
-			item.Icon = NavigationAppsIcon
+			item.Icon = icons.NavigationAppsIcon
 		case KindProtoFile:
-			item.Icon = FileFolderIcon
+			item.Icon = icons.FileFolderIcon
 		case KindCollection:
-			item.Icon = NavigationChevronRightIcon
+			item.Icon = icons.NavigationChevronRightIcon
 		}
 	}
 

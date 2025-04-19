@@ -34,9 +34,9 @@ var mdicons = flag.String("mdicons", "", "The directory on the local file system
 // IconVG graphic, regardless of the size of the input SVG.
 const outSize = 48
 
-// errSkip deliberately skips generating an icon.
+// errSkip deliberately skips generating an icons.
 //
-// When manually debugging one particular icon, it can be useful to add
+// When manually debugging one particular icons, it can be useful to add
 // something like:
 //
 //	if baseName != "check_box" { return errSkip }

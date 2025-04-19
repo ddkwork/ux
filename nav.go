@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/ddkwork/ux/resources/icons"
+
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/component"
 
@@ -19,15 +21,15 @@ func Nav(gtx layout.Context) layout.Dimensions {
 	nav := component.NewNav("Hello", "--subtitle")
 	nav.AddNavItem(component.NavItem{
 		Name: "aaaaaaaaa",
-		Icon: ContentAddIcon,
+		Icon: icons.ContentAddIcon,
 	})
 	nav.AddNavItem(component.NavItem{
 		Name: "bbbb",
-		Icon: ContentAddIcon,
+		Icon: icons.ContentAddIcon,
 	})
 	nav.AddNavItem(component.NavItem{
 		Name: "cccc",
-		Icon: ContentAddIcon,
+		Icon: icons.ContentAddIcon,
 	})
 	resize := component.Resize{
 		Axis:  layout.Horizontal,

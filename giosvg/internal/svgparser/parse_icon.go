@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"slices"
 	"strings"
 
 	"github.com/ddkwork/ux/giosvg/internal/svgparser/simplexml"
-	"slices"
 )
 
 type (

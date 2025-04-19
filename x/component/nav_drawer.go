@@ -28,11 +28,11 @@ type NavItem struct {
 	Tag  any
 	Name string
 
-	// Icon, if set, renders the provided icon to the left of the
+	// Icon, if set, renders the provided icons to the left of the
 	// item's name. Material specifies that either all navigation
-	// items should have an icon, or none should. As such, if this
+	// items should have an icons, or none should. As such, if this
 	// field is nil, the Name will be aligned all the way to the
-	// left. A mixture of icon and non-icon items will be misaligned.
+	// left. A mixture of icons and non-icons items will be misaligned.
 	// Users should either set icons for all elements or none.
 	Icon *widget.Icon
 }

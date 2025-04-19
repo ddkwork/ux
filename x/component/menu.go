@@ -6,7 +6,8 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/ddkwork/ux/icon"
+	"github.com/ddkwork/ux/resources/icons"
+
 	"github.com/ddkwork/ux/widget/material"
 
 	"gioui.org/layout"
@@ -124,7 +125,7 @@ func (d DividerStyle) Layout(gtx C) D {
 }
 
 // MenuItemStyle defines the presentation of a Menu element that has a label
-// and optionally an icon and a hint text.
+// and optionally an icons and a hint text.
 type MenuItemStyle struct {
 	State      *widget.Clickable
 	HoverColor color.NRGBA
@@ -192,7 +193,7 @@ func (m MenuItemStyle) Layout(gtx C) D {
 						return m.IconInset.Layout(gtx, func(gtx C) D {
 							iconSize := gtx.Dp(m.IconSize)
 							gtx.Constraints = layout.Exact(image.Point{X: iconSize, Y: iconSize})
-							return icon.Layout(gtx, m.Icon, m.IconColor, m.IconSize)
+							return icons.Layout(gtx, m.Icon, m.IconColor, m.IconSize)
 						})
 					}),
 					outlay.Rigid(func(gtx C) D {

@@ -2,7 +2,8 @@ package ux
 
 import (
 	"image"
-	"image/color"
+
+	"github.com/ddkwork/ux/resources/icons"
 
 	"github.com/ddkwork/ux/widget/material"
 
@@ -22,7 +23,7 @@ type TextField struct {
 	size image.Point
 
 	onTextChange func(text string)
-	borderColor  color.NRGBA
+	// borderColor  color.NRGBA
 
 	OnKeyPress func(gtx layout.Context, k key.Name)
 }
@@ -32,7 +33,7 @@ func NewTextField(text, placeholder string) *TextField {
 		textEditor:  widget.Editor{},
 		Text:        text,
 		Placeholder: placeholder,
-		Icon:        ActionSearchIcon,
+		Icon:        icons.ActionSearchIcon,
 	}
 
 	t.textEditor.SetText(text)
