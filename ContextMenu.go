@@ -72,8 +72,8 @@ func (m *ContextMenu) OnClicked(gtx C) {
 	}
 }
 
-func (m *ContextMenu) drawRowDefault(gtx layout.Context, rowClicks *widget.Clickable, index int) layout.Dimensions {
-	if event, b := gtx.Event(pointer.Filter{Target: rowClicks, Kinds: pointer.Press | pointer.Release}); b {
+func (m *ContextMenu) drawRowDefault(gtx layout.Context, rowClick *widget.Clickable, index int) layout.Dimensions {
+	if event, b := gtx.Event(pointer.Filter{Target: rowClick, Kinds: pointer.Press | pointer.Release}); b {
 		if e, ok := event.(pointer.Event); ok {
 			if e.Kind == pointer.Press {
 				switch {
@@ -85,7 +85,7 @@ func (m *ContextMenu) drawRowDefault(gtx layout.Context, rowClicks *widget.Click
 			}
 		}
 	}
-	buttonStyle := material.Button(th, rowClicks, "item"+fmt.Sprintf("%d", index))
+	buttonStyle := material.Button(th, rowClick, "item"+fmt.Sprintf("%d", index))
 	buttonStyle.Color = RowColor(index)
 	return buttonStyle.Layout(gtx)
 }
@@ -96,8 +96,19 @@ func (m *ContextMenu) LayoutRow(gtx layout.Context, index int) layout.Dimensions
 			rowClick := &m.RowClicks[index]
 			return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Min.X = gtx.Constraints.Max.X
-				if rowClick.Clicked(gtx) {
-					m.ClickedRowindex = index
+				if event, b := gtx.Event(pointer.Filter{Target: rowClick, Kinds: pointer.Press | pointer.Release}); b {
+					if e, ok := event.(pointer.Event); ok {
+						if e.Kind == pointer.Press {
+							switch {
+							case e.Buttons.Contain(pointer.ButtonPrimary):
+								m.ClickedRowindex = index
+								println("Row selected (left click) " + strconv.Itoa(index))
+							case e.Buttons.Contain(pointer.ButtonSecondary):
+								m.ClickedRowindex = index
+								println("Row selected (right click)" + strconv.Itoa(index))
+							}
+						}
+					}
 				}
 				return m.DrawRow(gtx, index)
 			})
@@ -117,11 +128,24 @@ func (m *ContextMenu) LayoutOld(gtx layout.Context) layout.Dimensions {
 	return material.List(th, &m.List).Layout(gtx, len(m.RowClicks), func(gtx layout.Context, index int) layout.Dimensions {
 		return layout.Stack{}.Layout(gtx,
 			layout.Stacked(func(gtx C) D {
+				m.OnClicked(gtx)
+
 				rowClick := &m.RowClicks[index]
 				return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = gtx.Constraints.Max.X
-					if rowClick.Clicked(gtx) {
-						m.ClickedRowindex = index
+					if event, b := gtx.Event(pointer.Filter{Target: rowClick, Kinds: pointer.Press | pointer.Release}); b {
+						if e, ok := event.(pointer.Event); ok {
+							if e.Kind == pointer.Press {
+								switch {
+								case e.Buttons.Contain(pointer.ButtonPrimary):
+									m.ClickedRowindex = index
+									println("Row selected (left click) " + strconv.Itoa(index))
+								case e.Buttons.Contain(pointer.ButtonSecondary):
+									m.ClickedRowindex = index
+									println("Row selected (right click)" + strconv.Itoa(index))
+								}
+							}
+						}
 					}
 					if m.DrawRow == nil {
 						return m.drawRowDefault(gtx, rowClick, index)
@@ -132,7 +156,6 @@ func (m *ContextMenu) LayoutOld(gtx layout.Context) layout.Dimensions {
 			layout.Expanded(func(gtx C) D {
 				return m.ContextArea.Layout(gtx, func(gtx C) D {
 					gtx.Constraints.Min = image.Point{}
-					m.OnClicked(gtx)
 					return m.drawContextArea(gtx, th)
 					return component.Menu(th, &m.MenuState).Layout(gtx) //所有行的item公用一个popup菜单而不是每行popup一个
 				})
@@ -149,8 +172,19 @@ func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
 				rowClick := &m.RowClicks[index] //todo 这个不在DrawRow回调内似乎无法取到右击了第几行
 				return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = gtx.Constraints.Max.X
-					if rowClick.Clicked(gtx) {
-						m.ClickedRowindex = index
+					if event, b := gtx.Event(pointer.Filter{Target: rowClick, Kinds: pointer.Press | pointer.Release}); b {
+						if e, ok := event.(pointer.Event); ok {
+							if e.Kind == pointer.Press {
+								switch {
+								case e.Buttons.Contain(pointer.ButtonPrimary):
+									m.ClickedRowindex = index
+									println("Row selected (left click) " + strconv.Itoa(index))
+								case e.Buttons.Contain(pointer.ButtonSecondary):
+									m.ClickedRowindex = index
+									println("Row selected (right click)" + strconv.Itoa(index))
+								}
+							}
+						}
 					}
 					if m.DrawRow == nil {
 						return m.drawRowDefault(gtx, rowClick, index)
