@@ -31,54 +31,7 @@ type (
 
 func NewTree(nodes []*TreeNode) *Tree {
 	m := ux.NewContextMenu(len(nodes), nil)
-	m.AddItem(ux.ContextMenuItem{
-		Title:         "Red",
-		Icon:          nil,
-		Can:           func() bool { return false },
-		Do:            func() { mylog.Info(m.ClickedRowindex, "red item clicked") },
-		AppendDivider: false,
-		Clickable:     widget.Clickable{},
-	})
-	m.AddItem(ux.ContextMenuItem{
-		Title:         "Green",
-		Icon:          nil,
-		Can:           func() bool { return false },
-		Do:            func() { mylog.Info(m.ClickedRowindex, "Green item clicked") },
-		AppendDivider: false,
-		Clickable:     widget.Clickable{},
-	})
-	m.AddItem(ux.ContextMenuItem{
-		Title:         "Blue",
-		Icon:          nil,
-		Can:           func() bool { return false },
-		Do:            func() { mylog.Info(m.ClickedRowindex, "Blue item clicked") },
-		AppendDivider: false,
-		Clickable:     widget.Clickable{},
-	})
-	m.AddItem(ux.ContextMenuItem{
-		Title:         "Balance",
-		Icon:          icons.ActionAccountBalanceIcon,
-		Can:           func() bool { return false },
-		Do:            func() { mylog.Info(m.ClickedRowindex, "Balance item clicked") },
-		AppendDivider: false,
-		Clickable:     widget.Clickable{},
-	})
-	m.AddItem(ux.ContextMenuItem{
-		Title:         "Account",
-		Icon:          icons.ActionAccountBoxIcon,
-		Can:           func() bool { return false },
-		Do:            func() { mylog.Info(m.ClickedRowindex, "Account item clicked") },
-		AppendDivider: false,
-		Clickable:     widget.Clickable{},
-	})
-	m.AddItem(ux.ContextMenuItem{
-		Title:         "Cart",
-		Icon:          icons.ActionAddShoppingCartIcon,
-		Can:           func() bool { return false },
-		Do:            func() { mylog.Info(m.ClickedRowindex, "Cart item clicked") },
-		AppendDivider: false,
-		Clickable:     widget.Clickable{},
-	})
+
 	return &Tree{
 		nodes:       nodes,
 		width:       unit.Dp(200),

@@ -2,6 +2,8 @@ package ux
 
 import (
 	"fmt"
+	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/ux/resources/icons"
 	"image"
 	"image/color"
 	"strconv"
@@ -65,7 +67,7 @@ func (m *ContextMenu) AddItem(item ContextMenuItem) {
 	m.Items = append(m.Items, &item)
 }
 
-func (m *ContextMenu) OnClicked(gtx C) {
+func (m *ContextMenu) OnClicked(gtx layout.Context) {
 	for _, item := range m.Items {
 		if item.Clicked(gtx) {
 			if item.Do != nil {
@@ -75,8 +77,58 @@ func (m *ContextMenu) OnClicked(gtx C) {
 	}
 }
 
-// 测试用例，现在不需要了
+// 测试用例，现在不需要了  todo 移动其他菜单实例化到这里  type C D
 func (m *ContextMenu) drawRowDefault(gtx layout.Context, rowClick *widget.Clickable, index int) layout.Dimensions {
+	m.Once.Do(func() {
+		m.AddItem(ContextMenuItem{
+			Title:         "Red",
+			Icon:          nil,
+			Can:           func() bool { return false },
+			Do:            func() { mylog.Info(m.ClickedRowindex, "red item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		})
+		m.AddItem(ContextMenuItem{
+			Title:         "Green",
+			Icon:          nil,
+			Can:           func() bool { return false },
+			Do:            func() { mylog.Info(m.ClickedRowindex, "Green item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		})
+		m.AddItem(ContextMenuItem{
+			Title:         "Blue",
+			Icon:          nil,
+			Can:           func() bool { return false },
+			Do:            func() { mylog.Info(m.ClickedRowindex, "Blue item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		})
+		m.AddItem(ContextMenuItem{
+			Title:         "Balance",
+			Icon:          icons.ActionAccountBalanceIcon,
+			Can:           func() bool { return false },
+			Do:            func() { mylog.Info(m.ClickedRowindex, "Balance item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		})
+		m.AddItem(ContextMenuItem{
+			Title:         "Account",
+			Icon:          icons.ActionAccountBoxIcon,
+			Can:           func() bool { return false },
+			Do:            func() { mylog.Info(m.ClickedRowindex, "Account item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		})
+		m.AddItem(ContextMenuItem{
+			Title:         "Cart",
+			Icon:          icons.ActionAddShoppingCartIcon,
+			Can:           func() bool { return false },
+			Do:            func() { mylog.Info(m.ClickedRowindex, "Cart item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		})
+	})
 	if event, b := gtx.Event(pointer.Filter{Target: rowClick, Kinds: pointer.Press | pointer.Release}); b {
 		if e, ok := event.(pointer.Event); ok {
 			if e.Kind == pointer.Press {
@@ -95,40 +147,40 @@ func (m *ContextMenu) drawRowDefault(gtx layout.Context, rowClick *widget.Clicka
 }
 
 // LayoutRow 对先行表格不感兴趣，不过在demo/other/hashicon/example/main.go下已经通过测试，不会去维护官方那个表格，不好用
-// 官方表格控件已经有水平和垂直滚动条,所以不使用list布局，兼用一下
-func (m *ContextMenu) LayoutRow(gtx layout.Context, index int) layout.Dimensions {
-	return layout.Stack{}.Layout(gtx,
-		layout.Stacked(func(gtx C) D {
-			rowClick := &m.RowClicks[index]
-			return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
-				gtx.Constraints.Min.X = gtx.Constraints.Max.X
-				if event, b := gtx.Event(pointer.Filter{Target: rowClick, Kinds: pointer.Press | pointer.Release}); b {
-					if e, ok := event.(pointer.Event); ok {
-						if e.Kind == pointer.Press {
-							switch {
-							case e.Buttons.Contain(pointer.ButtonPrimary):
-								m.ClickedRowindex = index
-								println("Row selected (left click) " + strconv.Itoa(index))
-							case e.Buttons.Contain(pointer.ButtonSecondary):
-								m.ClickedRowindex = index
-								println("Row selected (right click)" + strconv.Itoa(index))
-							}
-						}
-					}
-				}
-				return m.DrawRow(gtx, index)
-			})
-		}),
-		layout.Expanded(func(gtx C) D {
-			return m.ContextArea.Layout(gtx, func(gtx C) D {
-				gtx.Constraints.Min = image.Point{}
-				m.OnClicked(gtx)
-				// return m.drawContextArea(gtx, th)
-				return component.Menu(th, &m.MenuState).Layout(gtx) // 所有行的item共用一个popup菜单而不是每行popup一个
-			})
-		}),
-	)
-}
+// 官方表格控件已经有水平和垂直滚动条,所以不使用list布局，兼容一下
+//func (m *ContextMenu) LayoutRow(gtx layout.Context, index int) layout.Dimensions {
+//	return layout.Stack{}.Layout(gtx,
+//		layout.Stacked(func(gtx C) D {
+//			rowClick := &m.RowClicks[index]
+//			return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
+//				gtx.Constraints.Min.X = gtx.Constraints.Max.X
+//				if event, b := gtx.Event(pointer.Filter{Target: rowClick, Kinds: pointer.Press | pointer.Release}); b {
+//					if e, ok := event.(pointer.Event); ok {
+//						if e.Kind == pointer.Press {
+//							switch {
+//							case e.Buttons.Contain(pointer.ButtonPrimary):
+//								m.ClickedRowindex = index
+//								println("Row selected (left click) " + strconv.Itoa(index))
+//							case e.Buttons.Contain(pointer.ButtonSecondary):
+//								m.ClickedRowindex = index
+//								println("Row selected (right click)" + strconv.Itoa(index))
+//							}
+//						}
+//					}
+//				}
+//				return m.DrawRow(gtx, index)
+//			})
+//		}),
+//		layout.Expanded(func(gtx C) D {
+//			return m.ContextArea.Layout(gtx, func(gtx C) D {
+//				gtx.Constraints.Min = image.Point{}
+//				m.OnClicked(gtx)
+//				// return m.drawContextArea(gtx, th)
+//				return component.Menu(th, &m.MenuState).Layout(gtx) // 所有行的item共用一个popup菜单而不是每行popup一个
+//			})
+//		}),
+//	)
+//}
 
 // Layout 线性的list，表格以及非线性的树形表格(核心:直接rootRow当做线性表格即可，顶层调用menu布局。转不过弯来一直去处理容器节点是否渲染menu布局的问题)均通过测试
 func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
@@ -163,15 +215,15 @@ func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
 			return m.ContextArea.Layout(gtx, func(gtx C) D {
 				gtx.Constraints.Min = image.Point{}
 				m.OnClicked(gtx)
-				return drawContextArea(gtx, m.MenuState)
+				return m.drawContextArea(gtx)
 				return component.Menu(th, &m.MenuState).Layout(gtx) // 所有行的item共用一个popup菜单而不是每行popup一个
 			})
 		}),
 	)
 }
 
-func drawContextArea(gtx C, menuState component.MenuState) D { // popup区域的背景色，位置，四角弧度
-	menuStyle := component.Menu(th, &menuState)
+func (m *ContextMenu) drawContextArea(gtx C) D { // popup区域的背景色，位置，四角弧度
+	menuStyle := component.Menu(th, &m.MenuState)
 	menuStyle.SurfaceStyle = component.SurfaceStyle{
 		Theme: th,
 		ShadowStyle: component.ShadowStyle{
