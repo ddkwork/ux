@@ -9,7 +9,6 @@ import (
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/component"
 
-	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
@@ -121,8 +120,7 @@ type Table struct {
 
 	Tabler
 
-	cellsAreas []*component.ContextArea
-	menu       *ux.ContextMenu
+	menu *ux.ContextMenu
 }
 
 func NewTable(table Tabler) *Table {
@@ -159,7 +157,6 @@ func NewTable(table Tabler) *Table {
 		rowIdx:                   -1,
 		colIdx:                   -1,
 		Tabler:                   table,
-		cellsAreas:               nil,
 		menu:                     nil,
 	}
 }
@@ -193,9 +190,6 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 		m.cells = make([]*widget.Clickable, m.Size()*m.GetColumnCount())
 	}
 	mylog.CheckNil(m.menu) // todo，把增删改查，节点转换，复制行列设置为默认菜单，并添加每个菜单子项目的回调字段
-	if len(m.cellsAreas) != m.Size()*m.GetColumnCount() {
-		m.cellsAreas = make([]*component.ContextArea, m.Size()*m.GetColumnCount())
-	}
 	return component.Table(th, &m.GridState).Layout(gtx, m.Size(), m.GetColumnCount(),
 		/*单元格动态尺寸计算，适应可见区域，支持不同轴方向 dimensioner outlay.Dimensioner*/ func(axis layout.Axis, index, constraint int) int {
 			used := float32(0)
@@ -306,66 +300,27 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 				}
 			}
 			return material.Clickable(gtx, cell, func(gtx layout.Context) layout.Dimensions {
-				cellMenu := m.cellsAreas[idx]
-				if cellMenu == nil {
-					cellMenu = &component.ContextArea{
-						Activation:   pointer.ButtonSecondary,
-						PositionHint: 0,
-					}
-					m.cellsAreas[idx] = cellMenu
-				}
-
-				return layout.Stack{}.Layout(gtx,
-					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-						return layout.UniformInset(0).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-							cellText := material.Body1(th, txt)
-							cellText.Color = th.Color.DefaultTextWhiteColor
-							if m.rowIdx == row {
-								if m.colIdx == col {
-									cellText.Color = color.NRGBA{R: 0, G: 0, B: 255, A: 255}
-								} else {
-									cellText.Color = color.NRGBA{R: 0, G: 0, B: 180, A: 255}
-									HighlightRow(gtx) // IsRowSelected
-								}
+				m.menu.AppendRootRows(func(gtx layout.Context) layout.Dimensions {
+					return layout.UniformInset(0).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						cellText := material.Body1(th, txt)
+						cellText.Color = th.Color.DefaultTextWhiteColor
+						if m.rowIdx == row {
+							if m.colIdx == col {
+								cellText.Color = color.NRGBA{R: 0, G: 0, B: 255, A: 255}
+							} else {
+								cellText.Color = color.NRGBA{R: 0, G: 0, B: 180, A: 255}
+								HighlightRow(gtx) // IsRowSelected
 							}
-							cellText.MaxLines = 1
-							cellText.Truncator = "..."
-							return layout.Center.Layout(gtx, cellText.Layout)
-						})
-					}),
-					layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-						m.menu.OnClicked(gtx) // callback
-						return cellMenu.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-							m.rowIdx = row
-							m.colIdx = col
-							gtx.Constraints.Max.X = 500
-							gtx.Constraints.Max.Y = 1400
-							return m.drawContextArea(gtx)
-						})
-					}),
-				)
+						}
+						cellText.MaxLines = 1
+						cellText.Truncator = "..."
+						return layout.Center.Layout(gtx, cellText.Layout)
+					})
+				})
+				return m.menu.Layout(gtx)
 			})
 		},
 	)
-}
-
-func (m *Table) drawContextArea(gtx layout.Context) layout.Dimensions {
-	return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
-		// mylog.Struct("todo",gtx.Constraints)
-		menuStyle := component.Menu(th, &m.menu.MenuState)
-		menuStyle.SurfaceStyle = component.SurfaceStyle{
-			Theme: th,
-			ShadowStyle: component.ShadowStyle{
-				CornerRadius: 18, // 弹出菜单的椭圆角度
-				Elevation:    0,
-				// AmbientColor:  color.NRGBA(colornames.Blue400),
-				// PenumbraColor: color.NRGBA(colornames.Blue400),
-				// UmbraColor:    color.NRGBA(colornames.Blue400),
-			},
-			Fill: color.NRGBA{R: 50, G: 50, B: 50, A: 255}, // 弹出菜单的背景色
-		}
-		return menuStyle.Layout(gtx)
-	})
 }
 
 //func drawColumnDivider(gtx C, col int, color color.NRGBA) { //绘制列分隔条,todo最后一列没绘制到
