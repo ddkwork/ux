@@ -72,6 +72,7 @@ type Button struct {
 	Focused   bool
 	Disabled  bool
 	Loading   bool
+	Show      bool
 	Flex      bool
 
 	animClickable    *widget.Clickable
@@ -161,6 +162,9 @@ func (btn *Button) Clicked(gtx layout.Context) bool {
 }
 
 func (btn *Button) Layout(gtx layout.Context) layout.Dimensions {
+	if btn.Show {
+		return layout.Dimensions{} //todo test
+	}
 	if btn.Clicked(gtx) {
 		if btn.do != nil {
 			btn.do(gtx)

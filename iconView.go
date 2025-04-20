@@ -12,7 +12,6 @@ import (
 )
 
 type IconView struct {
-	//clickMap    *safemap.M[string, *animationButton.Button]
 	filterInput *Input // todo 调用appBar的搜索输入框
 	keyWords    string
 	filterMap   []layout.Widget
@@ -22,7 +21,6 @@ type IconView struct {
 
 func NewIconView() *IconView {
 	v := &IconView{
-		//clickMap:    new(safemap.M[string, *animationButton.Button]),
 		filterInput: NewInput("请输入搜索关键字..."),
 		keyWords:    "Edi",
 		filterMap:   make([]layout.Widget, 0, icons.IconMap.Len()),
@@ -34,9 +32,6 @@ func NewIconView() *IconView {
 		v.keyWords = v.filterInput.GetText()
 	})
 	for i, name := range icons.IconMap.Keys() {
-		//v.clickMap.Set(name, NewButtonAnimation(&v.clickables[i], icons.IconMap.GetMust(name), name, func() {
-		//	gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(name))})
-		//}))
 		v.flow.AppendElem(i, FlowElemButton{
 			Title: name,
 			Icon:  icons.IconMap.GetMust(name),
@@ -75,20 +70,21 @@ func NewIconView() *IconView {
 }
 
 func (v *IconView) Layout(gtx layout.Context) layout.Dimensions {
-
-	v.filter()
-	if v.filterMap != nil {
-		//return layout.UniformInset(4).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		//	return v.filterMap[i](gtx)
-		//})
-	}
+	//v.filter()//todo need layout filterInput
 	return v.flow.Layout(gtx)
 }
 
 func (v *IconView) filter() {
+	i := 0
 	for name := range icons.IconMap.Range() {
-		if v.keyWords == "" || strings.Contains(strings.ToLower(name), strings.ToLower(v.keyWords)) {
-			//v.filterMap = append(v.filterMap, v.clickMap.GetMust(name).Layout)
+		i++
+		if i > len(v.buttons)-1 {
+			break
 		}
+		if v.keyWords == "" || strings.Contains(strings.ToLower(name), strings.ToLower(v.keyWords)) {
+			v.flow.buttons[i].Show = true //todo set
+			continue
+		}
+		v.flow.buttons[i].Show = false
 	}
 }
