@@ -1,6 +1,9 @@
 package ux
 
 import (
+	"fmt"
+	"gioui.org/layout"
+	"github.com/ddkwork/ux/widget/material"
 	"os"
 	"testing"
 
@@ -30,9 +33,18 @@ func TestTreeTable_ContextMenuItem(t1 *testing.T) {
 }
 
 func TestNewPopupMenu(t *testing.T) {
-	//t.Skip("finished")
+	// t.Skip("finished")
 	w := new(app.Window)
-	p := NewContextMenu()
+	m := NewContextMenu()
+	for i := range 100 {
+		m.AppendRootRows(func(gtx layout.Context) layout.Dimensions {
+			rowClick := &m.rowClicks[i]
+			buttonStyle := material.Button(th, rowClick, "item"+fmt.Sprintf("%d", i))
+			buttonStyle.Color = RowColor(i)
+			return buttonStyle.Layout(gtx)
+		})
+	}
+
 	var ops op.Ops
 	for {
 		switch e := w.Event().(type) {
@@ -42,7 +54,7 @@ func TestNewPopupMenu(t *testing.T) {
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
 			BackgroundDark(gtx)
-			p.LayoutTest(gtx)
+			m.LayoutTest(gtx)
 			e.Frame(gtx.Ops)
 		}
 	}

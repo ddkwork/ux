@@ -1,12 +1,13 @@
 package ux
 
 import (
-	"gioui.org/op/paint"
 	"image"
 	"image/color"
 	"io"
 	"slices"
 	"strings"
+
+	"gioui.org/op/paint"
 
 	"github.com/ddkwork/ux/resources/icons"
 

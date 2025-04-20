@@ -2,10 +2,11 @@ package icons
 
 import (
 	"embed"
+	"strings"
+
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/ux/giosvg"
-	"strings"
 )
 
 func Svg2Icon(b []byte) *giosvg.Icon {
@@ -14,7 +15,7 @@ func Svg2Icon(b []byte) *giosvg.Icon {
 
 func svgCallback(value []byte) []byte {
 	if strings.Contains(string(value), "fill=\"none\"") {
-		//return []byte(strings.Replace(string(value), "fill=\"none\"", "fill=\"white\"", 1))
+		// return []byte(strings.Replace(string(value), "fill=\"none\"", "fill=\"white\"", 1))
 	}
 	return []byte(strings.Replace(string(value), "<path", "<path fill=\"white\"", 1))
 }
@@ -24,6 +25,7 @@ func svgCallback(value []byte) []byte {
 //
 //go:embed images/*.svg
 var images embed.FS
+
 var (
 	svgEmbedFileMap                = stream.ReadEmbedFileMap(images, "images")
 	SvgIconBookmark                = Svg2Icon(svgEmbedFileMap.GetMustCallback("Bookmark.svg", svgCallback))

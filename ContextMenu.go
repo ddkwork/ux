@@ -1,13 +1,13 @@
 package ux
 
 import (
-	"fmt"
-	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/ux/resources/icons"
 	"image"
 	"image/color"
 	"strconv"
 	"sync"
+
+	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/ux/resources/icons"
 
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -110,7 +110,7 @@ func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
 				}
 				if len(m.rowClicks) != len(m.rootRows) {
 					m.rowClicks = make([]widget.Clickable, len(m.rootRows))
-					//mylog.Warning("remake row clicks")//todo 树形表格调用这个太频繁，得查一下原因
+					// mylog.Warning("remake row clicks")//todo 树形表格调用这个太频繁，得查一下原因
 				}
 				rowClick := &m.rowClicks[index]
 				return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
@@ -160,8 +160,7 @@ func (m *ContextMenu) drawContextArea(gtx layout.Context) layout.Dimensions { //
 	return menuStyle.Layout(gtx)
 }
 
-// LayoutTest 测试用例，现在不需要了
-func (m *ContextMenu) InitTestMenuItems() {
+func (m *ContextMenu) LayoutTest(gtx layout.Context) layout.Dimensions {
 	m.InitMenuItems(
 		ContextMenuItem{
 			Title:         "Red",
@@ -212,18 +211,6 @@ func (m *ContextMenu) InitTestMenuItems() {
 			Clickable:     widget.Clickable{},
 		},
 	)
-}
-func (m *ContextMenu) LayoutTest(gtx layout.Context) layout.Dimensions {
-	m.rowClicks = make([]widget.Clickable, 100)
-	m.InitTestMenuItems()
-	for i := range 100 {
-		m.AppendRootRows(func(gtx layout.Context) layout.Dimensions {
-			rowClick := &m.rowClicks[i]
-			buttonStyle := material.Button(th, rowClick, "item"+fmt.Sprintf("%d", i))
-			buttonStyle.Color = RowColor(i)
-			return buttonStyle.Layout(gtx)
-		})
-	}
 	return m.Layout(gtx)
 }
 

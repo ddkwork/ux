@@ -10,8 +10,7 @@ import (
 type DemoType uint8
 
 const (
-	ContextMenuType DemoType = iota
-	TreeTableType
+	TreeTableType DemoType = iota
 	AnimationButtonType
 	ColorPickerType
 	ScreenshotType
@@ -91,7 +90,7 @@ const (
 )
 
 func (t DemoType) Valid() bool {
-	return t >= ContextMenuType && t <= DarkThemeType
+	return t >= TreeTableType && t <= DarkThemeType
 }
 
 func DemoTypeBy[T stream.Integer](v T) DemoType {
@@ -110,8 +109,6 @@ func (t DemoType) AssertBy(name string) DemoType {
 
 func (t DemoType) String() string {
 	switch t {
-	case ContextMenuType:
-		return "ContextMenu"
 	case TreeTableType:
 		return "TreeTable"
 	case AnimationButtonType:
@@ -273,8 +270,6 @@ func (t DemoType) String() string {
 
 func (t DemoType) Tooltip() string {
 	switch t {
-	case ContextMenuType:
-		return "ContextMenu"
 	case TreeTableType:
 		return "treeTable"
 	case AnimationButtonType:
@@ -436,7 +431,6 @@ func (t DemoType) Tooltip() string {
 
 func (t DemoType) Names() []string {
 	return []string{
-		"ContextMenu",
 		"TreeTable",
 		"AnimationButton",
 		"ColorPicker",
@@ -519,7 +513,6 @@ func (t DemoType) Names() []string {
 
 func (t DemoType) EnumTypes() []DemoType {
 	return []DemoType{
-		ContextMenuType,
 		TreeTableType,
 		AnimationButtonType,
 		ColorPickerType,

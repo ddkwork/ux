@@ -16,11 +16,11 @@ func TestUpLib(t *testing.T) {
 
 func TestName(t *testing.T) {
 	m := safemap.NewOrdered[string, string](func(yield func(string, string) bool) {
-		//yield("ContextMenu", "ContextMenu")
+		// yield("ContextMenu", "ContextMenu")
 		yield("treeTable", "treeTable")
-		//yield("tree", "tree")
-		//yield("table2", "table2")
-		//yield("table", "table")
+		// yield("tree", "tree")
+		// yield("table2", "table2")
+		// yield("table", "table")
 		yield("AnimationButton", "AnimationButton")
 		yield("colorPicker", "colorPicker")
 		yield("screenshot", "screenshot")
