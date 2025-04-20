@@ -2,6 +2,9 @@ package ux
 
 import (
 	_ "embed"
+	"gioui.org/op/clip"
+	"gioui.org/op/paint"
+	"github.com/ddkwork/ux/resources/colors"
 	"image"
 	"image/color"
 	_ "image/jpeg"
@@ -71,4 +74,26 @@ func rgb(c uint32) color.NRGBA {
 
 func argb(c uint32) color.NRGBA {
 	return color.NRGBA{A: uint8(c >> 24), R: uint8(c >> 16), G: uint8(c >> 8), B: uint8(c)}
+}
+
+func drawColumnDivider(gtx layout.Context, col int, color color.NRGBA) { //绘制列分隔条,todo最后一列没绘制到
+	if col > 0 {
+		dividerWidth := 1
+		tallestHeight := gtx.Constraints.Min.Y
+		stack3 := clip.Rect{Max: image.Pt(dividerWidth, tallestHeight)}.Push(gtx.Ops)
+		paint.Fill(gtx.Ops, color)
+		stack3.Pop()
+	}
+}
+
+func HighlightRow(gtx layout.Context) { // 高亮选中行为蓝色
+	paint.FillShape(gtx.Ops, color.NRGBA(colors.Blue400), clip.Rect{Max: gtx.Constraints.Max}.Op())
+}
+
+func DrawCrosswalk(gtx layout.Context, row int) { // 绘制斑马线
+	if row%2 == 0 {
+		paint.FillShape(gtx.Ops, rowWhiteColor, clip.Rect{Max: gtx.Constraints.Max}.Op())
+	} else {
+		paint.FillShape(gtx.Ops, rowBlackColor, clip.Rect{Max: gtx.Constraints.Max}.Op())
+	}
 }

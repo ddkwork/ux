@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/resources/icons"
 	"log"
@@ -59,27 +58,13 @@ func loop(w *app.Window) error {
 		"wwwwww",
 	}
 	tagClickables := make([]widget.Clickable, len(selectedAccTags))
+	menus := make([]*ux.ContextMenu, len(selectedAccTags))
 
 	flow := ux.Flow{
 		Num:       5,
 		Axis:      layout.Horizontal,
 		Alignment: layout.Middle,
 	}
-
-	m := ux.NewContextMenuWithRootRows(func(gtx layout.Context) layout.Dimensions {
-		return flow.Layout(gtx, len(selectedAccTags), func(gtx layout.Context, i int) layout.Dimensions {
-			return layout.UniformInset(2).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				//gtx.Constraints.Min.X = 200 //todo into flow
-				//gtx.Constraints.Max.X = 200
-				return tagClickables[i].Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					if tagClickables[i].Clicked(gtx) {
-						println("clicked", selectedAccTags[i])
-					}
-					return ux.Button(&tagClickables[i], stream.RandomAny(icons.IconMap.Values()), selectedAccTags[i]).Layout(gtx)
-				})
-			})
-		})
-	})
 
 	var ops op.Ops
 	for {
@@ -89,7 +74,22 @@ func loop(w *app.Window) error {
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
 			ux.BackgroundDark(gtx)
-			m.LayoutTest(gtx)
+
+			flow.Layout(gtx, len(selectedAccTags), func(gtx layout.Context, i int) layout.Dimensions {
+				return layout.UniformInset(2).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					gtx.Constraints.Min.X = 200 //todo into flow
+					gtx.Constraints.Max.X = 200
+					return tagClickables[i].Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						if tagClickables[i].Clicked(gtx) {
+							println("clicked", selectedAccTags[i])
+						}
+						menus[i] = ux.NewContextMenuWithRootRows(func(gtx layout.Context) layout.Dimensions {
+							return ux.Button(&tagClickables[i], icons.IconMap.Values()[i], selectedAccTags[i]).Layout(gtx)
+						})
+						return menus[i].LayoutTest(gtx)
+					})
+				})
+			})
 			e.Frame(gtx.Ops)
 		}
 	}

@@ -19,9 +19,8 @@ import (
 	"github.com/ddkwork/ux/resources/icons"
 
 	"gioui.org/gesture"
-	"gioui.org/io/key"
-
 	"gioui.org/io/clipboard"
+	"gioui.org/io/key"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"

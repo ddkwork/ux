@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"image"
 
-	"github.com/ddkwork/ux"
-	"github.com/ddkwork/ux/resources/colors"
-
 	"gioui.org/gesture"
 	"gioui.org/io/key"
 	"gioui.org/io/pointer"
@@ -18,6 +15,8 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/ux"
+	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/widget/material"
 )
 
