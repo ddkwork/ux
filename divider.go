@@ -23,21 +23,21 @@ type DividerStyle struct {
 func (d *DividerStyle) Layout(gtx layout.Context) layout.Dimensions {
 	if (d.Axis == layout.Horizontal && gtx.Constraints.Min.X == 0) ||
 		(d.Axis == layout.Vertical && gtx.Constraints.Min.Y == 0) {
-		return D{}
+		return layout.Dimensions{}
 	}
 
 	if d.Fill == (color.NRGBA{}) {
 		d.Fill = colors.DividerFg
 	}
 
-	return d.Inset.Layout(gtx, func(gtx C) D {
+	return d.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		weight := gtx.Dp(d.Thickness)
 		line := image.Rectangle{Max: image.Pt(weight, gtx.Constraints.Min.Y)}
 		if d.Axis == layout.Horizontal {
 			line = image.Rectangle{Max: image.Pt(gtx.Constraints.Min.X, weight)}
 		}
 		paint.FillShape(gtx.Ops, d.Fill, clip.Rect(line).Op())
-		return D{Size: line.Max}
+		return layout.Dimensions{Size: line.Max}
 	})
 }
 

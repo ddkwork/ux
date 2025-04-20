@@ -58,7 +58,7 @@ func (r *ContextArea) Activate(p f32.Point) {
 // Update performs event processing for the context area but does not lay it out.
 // It is automatically invoked by Layout() if it has not already been called during
 // a given frame.
-func (r *ContextArea) Update(gtx C) {
+func (r *ContextArea) Update(gtx layout.Context) {
 	if gtx.Now == r.lastUpdate {
 		return
 	}

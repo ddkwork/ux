@@ -75,7 +75,7 @@ func Modal(th *material.Theme, modal *ModalState) ModalStyle {
 // Layout the scrim and content. The content is only laid out once
 // the scrim is fully animated in, and is hidden on the first frame
 // of the scrim's fade-out animation.
-func (m ModalStyle) Layout(gtx C) D {
+func (m ModalStyle) Layout(gtx layout.Context) layout.Dimensions {
 	if m.content == nil || !m.Visible() {
 		return D{}
 	}
@@ -85,10 +85,10 @@ func (m ModalStyle) Layout(gtx C) D {
 	macro := op.Record(gtx.Ops)
 	dims := layout.Stack{}.Layout(
 		gtx,
-		layout.Expanded(func(gtx C) D {
+		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 			return m.Scrim.Layout(gtx)
 		}),
-		layout.Expanded(func(gtx C) D {
+		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 			if m.Scrim.Visible() && !m.Scrim.Animating() {
 				return m.content(gtx)
 			}

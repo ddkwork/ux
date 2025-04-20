@@ -20,7 +20,7 @@ type Rect struct {
 	Radii int
 }
 
-func (r Rect) Layout(gtx C) D {
+func (r Rect) Layout(gtx layout.Context) layout.Dimensions {
 	paint.FillShape(
 		gtx.Ops,
 		r.Color,

@@ -203,7 +203,7 @@ func (in *TextField) Update(gtx C, th *material.Theme, hint string) {
 	in.label.Smallest = layout.Inset{
 		Left:  spacing,
 		Right: spacing,
-	}.Layout(gtx, func(gtx C) D {
+	}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return material.Label(th, textSmall, hint).Layout(gtx)
 	})
 	macro.Stop()
@@ -222,11 +222,11 @@ func (in *TextField) Layout(gtx C, th *material.Theme, hint string) D {
 	defer op.Offset(image.Pt(0, in.label.Smallest.Size.Y/2)).Push(gtx.Ops).Pop()
 	in.label.Inset.Layout(
 		gtx,
-		func(gtx C) D {
+		func(gtx layout.Context) layout.Dimensions {
 			return layout.Inset{
 				Left:  unit.Dp(4),
 				Right: unit.Dp(4),
-			}.Layout(gtx, func(gtx C) D {
+			}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				label := material.Label(th, unit.Sp(in.label.TextSize), hint)
 				label.Color = in.border.Color
 				return label.Layout(gtx)
@@ -237,12 +237,12 @@ func (in *TextField) Layout(gtx C, th *material.Theme, hint string) D {
 		Axis: layout.Vertical,
 	}.Layout(
 		gtx,
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return layout.Stack{}.Layout(
 				gtx,
-				layout.Expanded(func(gtx C) D {
+				layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 					cornerRadius := unit.Dp(4)
-					dimsFunc := func(gtx C) D {
+					dimsFunc := func(gtx layout.Context) layout.Dimensions {
 						return D{Size: image.Point{
 							X: gtx.Constraints.Max.X,
 							Y: gtx.Constraints.Min.Y,
@@ -292,26 +292,26 @@ func (in *TextField) Layout(gtx C, th *material.Theme, hint string) D {
 					}
 					return border.Layout(gtx, dimsFunc)
 				}),
-				layout.Stacked(func(gtx C) D {
+				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 					return layout.UniformInset(unit.Dp(12)).Layout(
 						gtx,
-						func(gtx C) D {
+						func(gtx layout.Context) layout.Dimensions {
 							gtx.Constraints.Min.X = gtx.Constraints.Max.X
 							return layout.Flex{
 								Axis:      layout.Horizontal,
 								Alignment: layout.Middle,
 							}.Layout(
 								gtx,
-								layout.Rigid(func(gtx C) D {
+								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									if in.IsActive() && in.Prefix != nil {
 										return in.Prefix(gtx)
 									}
 									return D{}
 								}),
-								layout.Flexed(1, func(gtx C) D {
+								layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 									return material.Editor(th, &in.Editor, "").Layout(gtx)
 								}),
-								layout.Rigid(func(gtx C) D {
+								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									if in.IsActive() && in.Suffix != nil {
 										return in.Suffix(gtx)
 									}
@@ -321,7 +321,7 @@ func (in *TextField) Layout(gtx C, th *material.Theme, hint string) D {
 						},
 					)
 				}),
-				layout.Expanded(func(gtx C) D {
+				layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 					defer pointer.PassOp{}.Push(gtx.Ops).Pop()
 					defer clip.Rect(image.Rectangle{
 						Max: gtx.Constraints.Min,
@@ -331,14 +331,14 @@ func (in *TextField) Layout(gtx C, th *material.Theme, hint string) D {
 				}),
 			)
 		}),
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return layout.Flex{
 				Axis:      layout.Horizontal,
 				Alignment: layout.Middle,
 				Spacing:   layout.SpaceBetween,
 			}.Layout(
 				gtx,
-				layout.Rigid(func(gtx C) D {
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					if in.helper.Text == "" {
 						return D{}
 					}
@@ -347,14 +347,14 @@ func (in *TextField) Layout(gtx C, th *material.Theme, hint string) D {
 						Left: unit.Dp(10),
 					}.Layout(
 						gtx,
-						func(gtx C) D {
+						func(gtx layout.Context) layout.Dimensions {
 							helper := material.Label(th, unit.Sp(12), in.helper.Text)
 							helper.Color = in.helper.Color
 							return helper.Layout(gtx)
 						},
 					)
 				}),
-				layout.Rigid(func(gtx C) D {
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					if in.CharLimit == 0 {
 						return D{}
 					}
@@ -363,7 +363,7 @@ func (in *TextField) Layout(gtx C, th *material.Theme, hint string) D {
 						Right: unit.Dp(10),
 					}.Layout(
 						gtx,
-						func(gtx C) D {
+						func(gtx layout.Context) layout.Dimensions {
 							count := material.Label(
 								th,
 								unit.Sp(12),

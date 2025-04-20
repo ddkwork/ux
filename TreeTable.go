@@ -364,7 +364,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 					return t.RowFrame2(gtx, n, i)
 				})
 			}
-			t.contextMenu.DrawRow = func(gtx C, i int) D {
+			t.contextMenu.DrawRow = func(gtx layout.Context, i int) layout.Dimensions {
 				return rootRows[i](gtx)
 			}
 			return t.contextMenu.Layout(gtx)

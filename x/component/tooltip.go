@@ -68,9 +68,9 @@ func DesktopTooltip(th *material.Theme, text string) Tooltip {
 }
 
 // Layout renders the tooltip.
-func (t Tooltip) Layout(gtx C) D {
+func (t Tooltip) Layout(gtx layout.Context) layout.Dimensions {
 	return layout.Stack{}.Layout(gtx,
-		layout.Expanded(func(gtx C) D {
+		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 			radius := gtx.Dp(t.CornerRadius)
 			paint.FillShape(gtx.Ops, t.Bg, clip.RRect{
 				Rect: image.Rectangle{
@@ -83,7 +83,7 @@ func (t Tooltip) Layout(gtx C) D {
 			}.Op(gtx.Ops))
 			return D{}
 		}),
-		layout.Stacked(func(gtx C) D {
+		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 			return t.Inset.Layout(gtx, t.Text.Layout)
 		}),
 	)
@@ -110,7 +110,7 @@ func (i *InvalidateDeadline) SetTarget(t time.Time) {
 // Process checks the current frame time and either requests a future invalidation
 // or does nothing. It returns whether the current frame is the frame requested
 // by the last call to SetTarget.
-func (i *InvalidateDeadline) Process(gtx C) bool {
+func (i *InvalidateDeadline) Process(gtx layout.Context) bool {
 	if !i.Active {
 		return false
 	}
@@ -215,7 +215,7 @@ func (t *TipArea) Layout(gtx C, tip Tooltip, w layout.Widget) D {
 	}
 	return layout.Stack{}.Layout(gtx,
 		layout.Stacked(w),
-		layout.Expanded(func(gtx C) D {
+		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 			defer pointer.PassOp{}.Push(gtx.Ops).Pop()
 			defer clip.Rect(image.Rectangle{Max: gtx.Constraints.Min}).Push(gtx.Ops).Pop()
 			event.Op(gtx.Ops, t)
@@ -258,6 +258,6 @@ func TipIconButton(th *material.Theme, area *TipArea, button *widget.Clickable, 
 }
 
 // Layout renders the TipIconButton.
-func (t TipIconButtonStyle) Layout(gtx C) D {
+func (t TipIconButtonStyle) Layout(gtx layout.Context) layout.Dimensions {
 	return t.State.Layout(gtx, t.Tooltip, t.IconButtonStyle.Layout)
 }

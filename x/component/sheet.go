@@ -149,7 +149,7 @@ func (s *ModalSheet) LayoutModal(contents func(gtx layout.Context, th *material.
 		defer pr.Push(gtx.Ops).Pop()
 		event.Op(gtx.Ops, s)
 		// lay out widget
-		dims := s.Sheet.Layout(gtx, th, anim, func(gtx C) D {
+		dims := s.Sheet.Layout(gtx, th, anim, func(gtx layout.Context) layout.Dimensions {
 			return contents(gtx, th, anim)
 		})
 

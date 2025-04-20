@@ -58,7 +58,7 @@ func NewContextMenu(length int, drawRow func(gtx layout.Context, index int) layo
 func (m *ContextMenu) AddItem(item ContextMenuItem) {
 	menuItem := component.MenuItem(th, &item.Clickable, item.Title)
 	menuItem.Icon = item.Icon
-	m.Options = append(m.Options, func(gtx C) D {
+	m.Options = append(m.Options, func(gtx layout.Context) layout.Dimensions {
 		return menuItem.Layout(gtx)
 	})
 	if item.AppendDivider {
@@ -77,7 +77,7 @@ func (m *ContextMenu) OnClicked(gtx layout.Context) {
 	}
 }
 
-// 测试用例，现在不需要了  todo 移动其他菜单实例化到这里  type C D
+// 测试用例，现在不需要了
 func (m *ContextMenu) drawRowDefault(gtx layout.Context, rowClick *widget.Clickable, index int) layout.Dimensions {
 	m.Once.Do(func() {
 		m.AddItem(ContextMenuItem{
@@ -150,7 +150,7 @@ func (m *ContextMenu) drawRowDefault(gtx layout.Context, rowClick *widget.Clicka
 // 官方表格控件已经有水平和垂直滚动条,所以不使用list布局，兼容一下
 //func (m *ContextMenu) LayoutRow(gtx layout.Context, index int) layout.Dimensions {
 //	return layout.Stack{}.Layout(gtx,
-//		layout.Stacked(func(gtx C) D {
+//		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 //			rowClick := &m.RowClicks[index]
 //			return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
 //				gtx.Constraints.Min.X = gtx.Constraints.Max.X
@@ -171,8 +171,8 @@ func (m *ContextMenu) drawRowDefault(gtx layout.Context, rowClick *widget.Clicka
 //				return m.DrawRow(gtx, index)
 //			})
 //		}),
-//		layout.Expanded(func(gtx C) D {
-//			return m.ContextArea.Layout(gtx, func(gtx C) D {
+//		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+//			return m.ContextArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 //				gtx.Constraints.Min = image.Point{}
 //				m.OnClicked(gtx)
 //				// return m.drawContextArea(gtx, th)
@@ -185,7 +185,7 @@ func (m *ContextMenu) drawRowDefault(gtx layout.Context, rowClick *widget.Clicka
 // Layout 线性的list，表格以及非线性的树形表格(核心:直接rootRow当做线性表格即可，顶层调用menu布局。转不过弯来一直去处理容器节点是否渲染menu布局的问题)均通过测试
 func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
 	return layout.Stack{}.Layout(gtx,
-		layout.Stacked(func(gtx C) D {
+		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 			return material.List(th, &m.List).Layout(gtx, len(m.RowClicks), func(gtx layout.Context, index int) layout.Dimensions {
 				rowClick := &m.RowClicks[index]
 				return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
@@ -211,8 +211,8 @@ func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
 				})
 			})
 		}),
-		layout.Expanded(func(gtx C) D {
-			return m.ContextArea.Layout(gtx, func(gtx C) D {
+		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+			return m.ContextArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Min = image.Point{}
 				m.OnClicked(gtx)
 				return m.drawContextArea(gtx)
@@ -222,7 +222,7 @@ func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
 	)
 }
 
-func (m *ContextMenu) drawContextArea(gtx C) D { // popup区域的背景色，位置，四角弧度
+func (m *ContextMenu) drawContextArea(gtx layout.Context) layout.Dimensions { // popup区域的背景色，位置，四角弧度
 	menuStyle := component.Menu(th, &m.MenuState)
 	menuStyle.SurfaceStyle = component.SurfaceStyle{
 		Theme: th,

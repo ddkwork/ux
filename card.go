@@ -39,7 +39,7 @@ type (
 	}
 )
 
-func (c *Card) LayCard(gtx C) D {
+func (c *Card) LayCard(gtx layout.Context) layout.Dimensions {
 	size := image.Pt(gtx.Dp(unit.Dp(float32(200))), gtx.Dp(unit.Dp(float32(250))))
 
 	c.container.Theme = th
@@ -68,7 +68,7 @@ func (c *Card) LayCard(gtx C) D {
 		item = component.MenuItem(th, btn, lbl)
 
 		c.menu = component.MenuState{
-			Options: []func(gtx C) D{
+			Options: []func(gtx layout.Context) layout.Dimensions{
 				item.Layout,
 				component.MenuItem(th, &c.copyToClipBtn, "Copy as JSON").Layout,
 			},
@@ -93,20 +93,20 @@ func (c *Card) LayCard(gtx C) D {
 	}
 
 	return layout.Stack{}.Layout(gtx,
-		layout.Stacked(func(gtx C) D {
+		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 			c.container.ShadowStyle = c.shadow
 
-			return c.container.Layout(gtx, func(gtx C) D {
-				return material.Clickable(gtx, &c.btn, func(gtx C) D {
+			return c.container.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return material.Clickable(gtx, &c.btn, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints = layout.Exact(gtx.Constraints.Constrain(size))
-					return layout.UniformInset(unit.Dp(10)).Layout(gtx, func(gtx C) D {
+					return layout.UniformInset(unit.Dp(10)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return layout.Flex{Axis: layout.Vertical, Spacing: layout.SpaceEvenly}.Layout(gtx,
 
 							// country name
-							layout.Rigid(func(gtx C) D {
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 								return layout.Flex{}.Layout(gtx,
-									layout.Flexed(1, func(gtx C) D {
-										return layout.Center.Layout(gtx, func(gtx C) D {
+									layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+										return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 											return material.Body2(th, c.Name).Layout(gtx)
 										})
 									}),
@@ -114,11 +114,11 @@ func (c *Card) LayCard(gtx C) D {
 							}),
 
 							// country flag
-							layout.Rigid(func(gtx C) D {
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 								return layout.Flex{}.Layout(gtx,
-									layout.Flexed(1, func(gtx C) D {
-										return layout.Center.Layout(gtx, func(gtx C) D {
-											var flag D
+									layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+										return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+											var flag layout.Dimensions
 											if c.Flag == nil {
 												flag = material.Loader(th).Layout(gtx)
 											} else {
@@ -135,8 +135,8 @@ func (c *Card) LayCard(gtx C) D {
 				})
 			})
 		}),
-		layout.Expanded(func(gtx C) D {
-			return c.ctxArea.Layout(gtx, func(gtx C) D {
+		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+			return c.ctxArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Min = image.Point{}
 				return component.Menu(th, &c.menu).Layout(gtx)
 			})

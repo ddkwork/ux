@@ -113,7 +113,7 @@ func (t *TabItem) Update(gtx layout.Context) bool {
 	return clicked
 }
 
-func (t *TabItem) LayoutTitle(gtx C) D {
+func (t *TabItem) LayoutTitle(gtx layout.Context) layout.Dimensions {
 	t.Update(gtx)
 
 	macro := op.Record(gtx.Ops)
@@ -131,9 +131,9 @@ func (t *TabItem) LayoutTitle(gtx C) D {
 	return dims
 }
 
-func (t *TabItem) layoutTitle(gtx C) D {
-	return t.Inset.Layout(gtx, func(gtx C) D {
-		return t.direction.Layout(gtx, func(gtx C) D {
+func (t *TabItem) layoutTitle(gtx layout.Context) layout.Dimensions {
+	return t.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return t.direction.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			if t.btn.Clicked(gtx) {
 				if t.onSelectedChange != nil {
 					go t.onSelectedChange(t.index)
@@ -152,7 +152,7 @@ func (t *TabItem) layoutTitle(gtx C) D {
 
 			var tabWidth int
 			return layout.Stack{Alignment: layout.S}.Layout(gtx,
-				layout.Stacked(func(gtx C) D {
+				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 					var dims layout.Dimensions
 					if t.closable {
 						dims = material.Clickable(gtx, &t.btn, func(gtx layout.Context) layout.Dimensions {
@@ -220,7 +220,7 @@ func (t *TabItem) layoutTitle(gtx C) D {
 					tabWidth = dims.Size.X
 					return dims
 				}),
-				layout.Stacked(func(gtx C) D {
+				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 					if !t.selected {
 						return layout.Dimensions{}
 					}
@@ -236,13 +236,13 @@ func (t *TabItem) layoutTitle(gtx C) D {
 	})
 }
 
-func (t *TabItem) Layout(gtx C) D {
+func (t *TabItem) Layout(gtx layout.Context) layout.Dimensions {
 	return layout.Inset{Top: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return t.Content(gtx)
 	})
 }
 
-func (v *TabView) Layout(gtx C) D {
+func (v *TabView) Layout(gtx layout.Context) layout.Dimensions {
 	v.Update(gtx)
 
 	if len(v.tabItems) <= 0 {
@@ -265,11 +265,11 @@ func (v *TabView) Layout(gtx C) D {
 	}
 
 	return flex.Layout(gtx,
-		layout.Rigid(func(gtx C) D {
-			return direction.Layout(gtx, func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return direction.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				v.list.Axis = v.Axis
 				v.list.Alignment = layout.Start
-				listDims := v.list.Layout(gtx, len(v.tabItems), func(gtx C, index int) D {
+				listDims := v.list.Layout(gtx, len(v.tabItems), func(gtx layout.Context, index int) layout.Dimensions {
 					item := v.tabItems[index]
 					item.direction = tabAlign
 
@@ -278,11 +278,11 @@ func (v *TabView) Layout(gtx C) D {
 					}
 
 					if v.Axis == layout.Horizontal {
-						return horizontalInset.Layout(gtx, func(gtx C) D {
+						return horizontalInset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							return item.LayoutTitle(gtx)
 						})
 					} else {
-						return verticalInset.Layout(gtx, func(gtx C) D {
+						return verticalInset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							return item.LayoutTitle(gtx)
 						})
 					}
@@ -297,7 +297,7 @@ func (v *TabView) Layout(gtx C) D {
 			})
 		}),
 
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			if v.Axis == layout.Horizontal {
 				gtx.Constraints.Min.X = v.headerLength
 			} else {
@@ -306,13 +306,13 @@ func (v *TabView) Layout(gtx C) D {
 			return Divider(v.Axis, unit.Dp(0.5)).Layout(gtx)
 		}),
 
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return v.tabItems[v.index].Layout(gtx)
 		}),
 	)
 }
 
-func (v *TabView) Update(gtx C) {
+func (v *TabView) Update(gtx layout.Context) {
 	for idx, item := range v.tabItems {
 		if item.Update(gtx) {
 			// unselect last item

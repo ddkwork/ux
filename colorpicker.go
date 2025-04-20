@@ -70,7 +70,7 @@ func (c *ColorPicker) Layout(gtx layout.Context) layout.Dimensions {
 				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 					size := gtx.Constraints.Max
 					paint.FillShape(gtx.Ops, c.background, clip.Rect(image.Rectangle{Max: size}).Op())
-					return D{Size: size}
+					return layout.Dimensions{Size: size}
 				}),
 			)
 		}),

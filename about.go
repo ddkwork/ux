@@ -284,11 +284,11 @@ func About(w *app.Window, data string) error {
 			// ---------- LIST WITHIN MARGINS ----------
 			// 1) First the margins ...
 			margins.Layout(gtx,
-				func(gtx C) D {
+				func(gtx layout.Context) layout.Dimensions {
 					// 2) ... then the list inside those margins ...
 					return vizList.Layout(gtx, len(paragraphList),
 						// 3) ... where each paragraph is a separate item
-						func(gtx C, index int) D {
+						func(gtx layout.Context, index int) layout.Dimensions {
 							// One label per paragraph
 							paragraph := material.Label(th, unit.Sp(fontSize), paragraphList[index])
 							// The text is centered

@@ -245,18 +245,13 @@ func DataDir() string {
 	}
 }
 
-type (
-	C = layout.Context
-	D = layout.Dimensions
-)
-
 type Rect struct {
 	Color color.NRGBA
 	Size  image.Point
 	Radii int
 }
 
-func (r Rect) Layout(gtx C) D {
+func (r Rect) Layout(gtx layout.Context) layout.Dimensions {
 	paint.FillShape(
 		gtx.Ops,
 		r.Color,

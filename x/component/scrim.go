@@ -21,7 +21,7 @@ type Scrim struct {
 // Layout draws the scrim using the provided animation. If the animation indicates
 // that the scrim is not visible, this is a no-op.
 func (s *Scrim) Layout(gtx layout.Context, th *material.Theme, anim *VisibilityAnimation) layout.Dimensions {
-	return s.Clickable.Layout(gtx, func(gtx C) D {
+	return s.Clickable.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		if !anim.Visible() {
 			return layout.Dimensions{}
 		}
@@ -62,8 +62,8 @@ func NewScrim(th *material.Theme, scrim *ScrimState, alpha uint8) ScrimStyle {
 	}
 }
 
-func (scrim ScrimStyle) Layout(gtx C) D {
-	return scrim.Clickable.Layout(gtx, func(gtx C) D {
+func (scrim ScrimStyle) Layout(gtx layout.Context) layout.Dimensions {
+	return scrim.Clickable.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		if !scrim.Visible() {
 			return D{}
 		}

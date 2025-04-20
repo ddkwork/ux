@@ -25,7 +25,7 @@ type DiscloserState struct {
 }
 
 // Layout updates the state of the Discloser.
-func (d *DiscloserState) Layout(gtx C) D {
+func (d *DiscloserState) Layout(gtx layout.Context) layout.Dimensions {
 	if d.Duration == time.Duration(0) {
 		d.Duration = time.Millisecond * 100
 		d.State = Invisible
@@ -80,20 +80,20 @@ func (d DiscloserStyle) Layout(gtx C, control, summary, detail layout.Widget) D 
 	return layout.Flex{
 		Axis: layout.Vertical,
 	}.Layout(gtx,
-		layout.Rigid(func(gtx C) D {
-			controlWidget := func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			controlWidget := func(gtx layout.Context) layout.Dimensions {
 				return d.Clickable.Layout(gtx, control)
 			}
 			return layout.Flex{
 				Alignment: d.Alignment,
 			}.Layout(gtx,
-				layout.Rigid(func(gtx C) D {
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					if d.ControlSide == Left {
 						return controlWidget(gtx)
 					}
 					return summary(gtx)
 				}),
-				layout.Rigid(func(gtx C) D {
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					if d.ControlSide == Left {
 						return summary(gtx)
 					}
@@ -101,7 +101,7 @@ func (d DiscloserStyle) Layout(gtx C, control, summary, detail layout.Widget) D 
 				}),
 			)
 		}),
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			if !d.Visible() {
 				return D{}
 			}
@@ -166,8 +166,8 @@ func (d DiscloserArrowStyle) DetailInset() layout.Inset {
 const halfPi float32 = math.Pi * .5
 
 // Layout the arrow.
-func (d DiscloserArrowStyle) Layout(gtx C) D {
-	return d.Margin.Layout(gtx, func(gtx C) D {
+func (d DiscloserArrowStyle) Layout(gtx layout.Context) layout.Dimensions {
+	return d.Margin.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		// Draw a triangle.
 		path := clip.Path{}
 		path.Begin(gtx.Ops)
@@ -223,7 +223,7 @@ func SimpleDiscloser(th *material.Theme, state *DiscloserState) SimpleDiscloserS
 
 // Layout the discloser with the provided summary and detail widget content.
 func (sd SimpleDiscloserStyle) Layout(gtx C, summary, details layout.Widget) D {
-	return sd.DiscloserStyle.Layout(gtx, sd.DiscloserArrowStyle.Layout, summary, func(gtx C) D {
+	return sd.DiscloserStyle.Layout(gtx, sd.DiscloserArrowStyle.Layout, summary, func(gtx layout.Context) layout.Dimensions {
 		return sd.DiscloserArrowStyle.DetailInset().Layout(gtx, details)
 	})
 }

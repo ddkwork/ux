@@ -14,7 +14,7 @@ import (
 )
 
 // Split thx to github.com/vsariola/sointu
-// C:\Users\Admin\Downloads\sointu-master\tracker\gioui\split.go
+// sointu-master\tracker\gioui\split.go
 type Split struct {
 	// Ratio keeps the current DefaultDraw.
 	// 0 is center, -1 completely to the left, 1 completely to the right.

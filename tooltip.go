@@ -41,14 +41,14 @@ func NewTooltipButton(icon *widget.Icon, tip string, callback func()) *TipIconBu
 	return b
 }
 
-func (t *TipIconButton) Layout(gtx C) D {
+func (t *TipIconButton) Layout(gtx layout.Context) layout.Dimensions {
 	if t.Clickable.Clicked(gtx) {
 		if t.callback != nil {
 			t.callback()
 		}
 	}
 	// return t.TipArea.Layout(gtx, t.Tooltip, t.IconButtonStyle.Layout)
-	return layout.Inset{Top: 4}.Layout(gtx, func(gtx C) D {
+	return layout.Inset{Top: 4}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return t.TipArea.Layout(gtx, t.Tooltip, t.IconButtonStyle.Layout)
 	})
 }

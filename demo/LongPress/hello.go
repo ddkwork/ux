@@ -41,14 +41,14 @@ func loop(w *app.Window) error {
 	var tagSearchBtn widget.Clickable
 	var tagRemoveBtn widget.Clickable
 	tagCtxMenu := component.MenuState{
-		Options: []func(gtx C) D{
-			func(gtx C) D {
+		Options: []func(gtx layout.Context) layout.Dimensions{
+			func(gtx layout.Context) layout.Dimensions {
 				item := component.MenuItem(th, &tagSearchBtn, "Search")
 				item.Icon = icons.ActionVisibilityIcon
 				item.Hint = component.MenuHintText(th, "")
 				return item.Layout(gtx)
 			},
-			func(gtx C) D {
+			func(gtx layout.Context) layout.Dimensions {
 				item := component.MenuItem(th, &tagRemoveBtn, "Remove")
 				item.Icon = icons.ContentCreateIcon
 				item.Hint = component.MenuHintText(th, "")
@@ -100,9 +100,9 @@ func loop(w *app.Window) error {
 				state := &tagCtxAreas[i]
 
 				return layout.Stack{}.Layout(gtx,
-					layout.Stacked(func(gtx C) D {
-						return layout.UniformInset(unit.Dp(2)).Layout(gtx, func(gtx C) D {
-							return tagClickables[i].Layout(gtx, func(gtx C) D {
+					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+						return layout.UniformInset(unit.Dp(2)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+							return tagClickables[i].Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 								if tagClickables[i].Clicked(gtx) {
 									println("clicked", selectedAccTags[i])
 								}
@@ -110,8 +110,8 @@ func loop(w *app.Window) error {
 							})
 						})
 					}),
-					layout.Expanded(func(gtx C) D {
-						return state.Layout(gtx, func(gtx C) D {
+					layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+						return state.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							gtx.Constraints.Min.X = 0
 							return component.Menu(th, &tagCtxMenu).Layout(gtx)
 						})
@@ -122,8 +122,3 @@ func loop(w *app.Window) error {
 		}
 	}
 }
-
-type (
-	C = layout.Context
-	D = layout.Dimensions
-)

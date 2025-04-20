@@ -44,7 +44,7 @@ func Surface(th *material.Theme) SurfaceStyle {
 // gtx.Constraints.Min.
 func (c SurfaceStyle) Layout(gtx C, w layout.Widget) D {
 	return layout.Stack{}.Layout(gtx,
-		layout.Expanded(func(gtx C) D {
+		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 			c.ShadowStyle.Layout(gtx)
 			surface := clip.UniformRRect(image.Rectangle{Max: gtx.Constraints.Min}, gtx.Dp(c.ShadowStyle.CornerRadius))
 			var fill color.NRGBA
@@ -102,20 +102,20 @@ func SubheadingDivider(th *material.Theme, subheading string) DividerStyle {
 
 // Layout renders the divider. If gtx.Constraints.Min.X is zero, it will
 // have zero size and render nothing.
-func (d DividerStyle) Layout(gtx C) D {
+func (d DividerStyle) Layout(gtx layout.Context) layout.Dimensions {
 	if gtx.Constraints.Min.X == 0 {
 		return D{}
 	}
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-		layout.Rigid(func(gtx C) D {
-			return d.Inset.Layout(gtx, func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return d.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				weight := gtx.Dp(d.Thickness)
 				line := image.Rectangle{Max: image.Pt(gtx.Constraints.Min.X, weight)}
 				paint.FillShape(gtx.Ops, d.Fill, clip.Rect(line).Op())
 				return D{Size: line.Max}
 			})
 		}),
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			if d.Subheading == (material.LabelStyle{}) {
 				return D{}
 			}
@@ -167,12 +167,12 @@ func MenuItem(th *material.Theme, state *widget.Clickable, label string) MenuIte
 
 // Layout renders the MenuItemStyle. If gtx.Constraints.Min.X is zero, it will render
 // itself to be as compact as possible horizontally.
-func (m MenuItemStyle) Layout(gtx C) D {
+func (m MenuItemStyle) Layout(gtx layout.Context) layout.Dimensions {
 	min := gtx.Constraints.Min.X
 	compact := min == 0
-	return material.Clickable(gtx, m.State, func(gtx C) D {
+	return material.Clickable(gtx, m.State, func(gtx layout.Context) layout.Dimensions {
 		return layout.Stack{}.Layout(gtx,
-			layout.Expanded(func(gtx C) D {
+			layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 				area := image.Rectangle{
 					Max: gtx.Constraints.Min,
 				}
@@ -181,37 +181,37 @@ func (m MenuItemStyle) Layout(gtx C) D {
 				}
 				return D{Size: area.Max}
 			}),
-			layout.Stacked(func(gtx C) D {
+			layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Min.X = min
 				return outlay.Flex{
 					Alignment: layout.Middle,
 				}.Layout(gtx,
-					outlay.Rigid(func(gtx C) D {
+					outlay.Rigid(func(gtx layout.Context) layout.Dimensions {
 						if m.Icon == nil {
 							return D{}
 						}
-						return m.IconInset.Layout(gtx, func(gtx C) D {
+						return m.IconInset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							iconSize := gtx.Dp(m.IconSize)
 							gtx.Constraints = layout.Exact(image.Point{X: iconSize, Y: iconSize})
 							return icons.Layout(gtx, m.Icon, m.IconColor, m.IconSize)
 						})
 					}),
-					outlay.Rigid(func(gtx C) D {
-						return m.LabelInset.Layout(gtx, func(gtx C) D {
+					outlay.Rigid(func(gtx layout.Context) layout.Dimensions {
+						return m.LabelInset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							return m.Label.Layout(gtx)
 						})
 					}),
-					outlay.Flexed(1, func(gtx C) D {
+					outlay.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 						if compact {
 							return D{}
 						}
 						return D{Size: gtx.Constraints.Min}
 					}),
-					outlay.Rigid(func(gtx C) D {
+					outlay.Rigid(func(gtx layout.Context) layout.Dimensions {
 						if empty := (material.LabelStyle{}); m.Hint == empty {
 							return D{}
 						}
-						return m.HintInset.Layout(gtx, func(gtx C) D {
+						return m.HintInset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							return m.Hint.Layout(gtx)
 						})
 					}),
@@ -241,7 +241,7 @@ func DividerSubheadingText(th *material.Theme, label string) material.LabelStyle
 // across frames.
 type MenuState struct {
 	OptionList layout.List
-	Options    []func(gtx C) D
+	Options    []func(gtx layout.Context) layout.Dimensions
 }
 
 // MenuStyle defines the presentation of a material design menu component.
@@ -270,7 +270,7 @@ func Menu(th *material.Theme, state *MenuState) MenuStyle {
 }
 
 // Layout renders the menu.
-func (m MenuStyle) Layout(gtx C) D {
+func (m MenuStyle) Layout(gtx layout.Context) layout.Dimensions {
 	var fakeOps op.Ops
 	originalOps := gtx.Ops
 	gtx.Ops = &fakeOps
@@ -282,8 +282,8 @@ func (m MenuStyle) Layout(gtx C) D {
 		}
 	}
 	gtx.Ops = originalOps
-	return m.SurfaceStyle.Layout(gtx, func(gtx C) D {
-		return m.Inset.Layout(gtx, func(gtx C) D {
+	return m.SurfaceStyle.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return m.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return m.OptionList.Layout(gtx, len(m.Options), func(gtx C, index int) D {
 				gtx.Constraints.Min.X = maxWidth
 				gtx.Constraints.Max.X = maxWidth

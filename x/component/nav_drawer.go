@@ -47,7 +47,7 @@ type renderNavItem struct {
 	*AlphaPalette
 }
 
-func (n *renderNavItem) Clicked(gtx C) bool {
+func (n *renderNavItem) Clicked(gtx layout.Context) bool {
 	return n.Clickable.Clicked(gtx)
 }
 
@@ -80,11 +80,11 @@ func (n *renderNavItem) Layout(gtx layout.Context, th *material.Theme) layout.Di
 		Bottom: unit.Dp(4),
 		Left:   unit.Dp(8),
 		Right:  unit.Dp(8),
-	}.Layout(gtx, func(gtx C) D {
-		return material.Clickable(gtx, &n.Clickable, func(gtx C) D {
+	}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return material.Clickable(gtx, &n.Clickable, func(gtx layout.Context) layout.Dimensions {
 			return layout.Stack{}.Layout(gtx,
-				layout.Expanded(func(gtx C) D { return n.layoutBackground(gtx, th) }),
-				layout.Stacked(func(gtx C) D { return n.layoutContent(gtx, th) }),
+				layout.Expanded(func(gtx layout.Context) layout.Dimensions { return n.layoutBackground(gtx, th) }),
+				layout.Stacked(func(gtx layout.Context) layout.Dimensions { return n.layoutContent(gtx, th) }),
 			)
 		})
 	})
@@ -99,20 +99,20 @@ func (n *renderNavItem) layoutContent(gtx layout.Context, th *material.Theme) la
 	return layout.Inset{
 		Left:  unit.Dp(8),
 		Right: unit.Dp(8),
-	}.Layout(gtx, func(gtx C) D {
+	}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return layout.Flex{Alignment: layout.Middle}.Layout(gtx,
-			layout.Rigid(func(gtx C) D {
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				if n.NavItem.Icon == nil {
 					return layout.Dimensions{}
 				}
 				return layout.Inset{Right: unit.Dp(40)}.Layout(gtx,
-					func(gtx C) D {
+					func(gtx layout.Context) layout.Dimensions {
 						iconSize := gtx.Dp(unit.Dp(24))
 						gtx.Constraints = layout.Exact(image.Pt(iconSize, iconSize))
 						return n.NavItem.Icon.Layout(gtx, contentColor)
 					})
 			}),
-			layout.Rigid(func(gtx C) D {
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				label := material.Label(th, unit.Sp(14), n.Name)
 				label.Color = contentColor
 				label.Font.Weight = font.Bold
@@ -193,7 +193,7 @@ func (m *NavDrawer) AddNavItem(item NavItem) {
 
 func (m *NavDrawer) Layout(gtx layout.Context, th *material.Theme, anim *VisibilityAnimation) layout.Dimensions {
 	sheet := NewSheet()
-	return sheet.Layout(gtx, th, anim, func(gtx C) D {
+	return sheet.Layout(gtx, th, anim, func(gtx layout.Context) layout.Dimensions {
 		return m.LayoutContents(gtx, th, anim)
 	})
 }
@@ -211,20 +211,20 @@ func (m *NavDrawer) LayoutContents(gtx layout.Context, th *material.Theme, anim 
 		Spacing: spacing,
 		Axis:    layout.Vertical,
 	}.Layout(gtx,
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return layout.Inset{
 				Left:   unit.Dp(16),
 				Bottom: unit.Dp(18),
-			}.Layout(gtx, func(gtx C) D {
+			}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-					layout.Rigid(func(gtx C) D {
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 						gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(36))
 						gtx.Constraints.Min = gtx.Constraints.Max
 						title := material.Label(th, unit.Sp(18), m.Title)
 						title.Font.Weight = font.Bold
 						return layout.SW.Layout(gtx, title.Layout)
 					}),
-					layout.Rigid(func(gtx C) D {
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 						gtx.Constraints.Max.Y = gtx.Dp(unit.Dp(20))
 						gtx.Constraints.Min = gtx.Constraints.Max
 						return layout.SW.Layout(gtx, material.Label(th, unit.Sp(12), m.Subtitle).Layout)
@@ -232,7 +232,7 @@ func (m *NavDrawer) LayoutContents(gtx layout.Context, th *material.Theme, anim 
 				)
 			})
 		}),
-		layout.Flexed(1, func(gtx C) D {
+		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 			return m.layoutNavList(gtx, th, anim)
 		}),
 	)

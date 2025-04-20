@@ -19,7 +19,7 @@ type Icon struct {
 	Size  unit.Dp
 }
 
-func (i Icon) Layout(gtx C) D {
+func (i Icon) Layout(gtx layout.Context) layout.Dimensions {
 	if i.Size <= 0 {
 		i.Size = unit.Dp(18)
 	}

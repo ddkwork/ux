@@ -89,15 +89,15 @@ func (m MuxStyle) Layout(gtx layout.Context) layout.Dimensions {
 	gtx.Constraints.Min.Y = 0
 	var children []layout.FlexChild
 	inset := layout.UniformInset(unit.Dp(2))
-	children = append(children, layout.Rigid(func(gtx C) D {
-		return inset.Layout(gtx, func(gtx C) D {
+	children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+		return inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return material.Body1(m.Theme, m.Label).Layout(gtx)
 		})
 	}))
 	for i := range m.OrderedOptions {
 		opt := m.OrderedOptions[i]
-		children = append(children, layout.Rigid(func(gtx C) D {
-			return inset.Layout(gtx, func(gtx C) D {
+		children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return m.layoutOption(gtx, opt)
 			})
 		}))
@@ -107,11 +107,11 @@ func (m MuxStyle) Layout(gtx layout.Context) layout.Dimensions {
 
 func (m MuxStyle) layoutOption(gtx C, option string) D {
 	return layout.Flex{Alignment: layout.Middle}.Layout(gtx,
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return material.RadioButton(m.Theme, &m.Enum, option, option).Layout(gtx)
 		}),
-		layout.Flexed(1, func(gtx C) D {
-			return layout.Inset{Left: unit.Dp(8)}.Layout(gtx, func(gtx C) D {
+		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+			return layout.Inset{Left: unit.Dp(8)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				color := m.Options[option]
 				if color == nil {
 					return D{}
@@ -286,7 +286,7 @@ func (p PickerStyle) Layout(gtx layout.Context) layout.Dimensions {
 	}
 }
 
-func (p PickerStyle) layoutLeftPane(gtx C) D {
+func (p PickerStyle) layoutLeftPane(gtx layout.Context) layout.Dimensions {
 	monospaceFace := p.MonospaceFace
 	if len(p.MonospaceFace) == 0 {
 		monospaceFace = "monospace"
@@ -294,26 +294,26 @@ func (p PickerStyle) layoutLeftPane(gtx C) D {
 	gtx.Constraints.Min.X = 0
 	inset := layout.UniformInset(unit.Dp(4))
 	dims := layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-		layout.Rigid(func(gtx C) D {
-			return inset.Layout(gtx, func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return material.Body1(p.Theme, p.Label).Layout(gtx)
 			})
 		}),
-		layout.Rigid(func(gtx C) D {
-			return inset.Layout(gtx, func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return layout.Stack{}.Layout(gtx,
-					layout.Expanded(func(gtx C) D {
+					layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 						return rectAbs(gtx, gtx.Constraints.Min.X, gtx.Constraints.Min.Y, color.NRGBA{R: 230, G: 230, B: 230, A: 255})
 					}),
-					layout.Stacked(func(gtx C) D {
-						return layout.UniformInset(unit.Dp(2)).Layout(gtx, func(gtx C) D {
+					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+						return layout.UniformInset(unit.Dp(2)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							return layout.Flex{Alignment: layout.Baseline}.Layout(gtx,
-								layout.Rigid(func(gtx C) D {
+								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									label := material.Body1(p.Theme, "#")
 									label.Font.Typeface = monospaceFace
 									return label.Layout(gtx)
 								}),
-								layout.Rigid(func(gtx C) D {
+								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									editor := material.Editor(p.Theme, &p.Editor, "rrggbb")
 									editor.Font.Typeface = monospaceFace
 									return editor.Layout(gtx)
@@ -328,18 +328,18 @@ func (p PickerStyle) layoutLeftPane(gtx C) D {
 	return dims
 }
 
-func (p PickerStyle) layoutSliders(gtx C) D {
+func (p PickerStyle) layoutSliders(gtx layout.Context) layout.Dimensions {
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return p.layoutSlider(gtx, &p.R, "R:", valueString(p.Red()))
 		}),
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return p.layoutSlider(gtx, &p.G, "G:", valueString(p.Green()))
 		}),
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return p.layoutSlider(gtx, &p.B, "B:", valueString(p.Blue()))
 		}),
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return p.layoutSlider(gtx, &p.A, "A:", valueString(p.Alpha()))
 		}),
 	)
@@ -361,19 +361,19 @@ func (p PickerStyle) layoutSlider(gtx C, value *widget.Float, label, valueStr st
 	}
 	inset := layout.UniformInset(unit.Dp(2))
 	layoutDims := layout.Flex{Alignment: layout.Middle}.Layout(gtx,
-		layout.Rigid(func(gtx C) D {
-			return inset.Layout(gtx, func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				label := material.Body1(p.Theme, label)
 				label.Font.Typeface = monospaceFace
 				return label.Layout(gtx)
 			})
 		}),
-		layout.Flexed(1, func(gtx C) D {
+		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 			sliderDims := inset.Layout(gtx, material.Slider(p.Theme, value).Layout)
 			return sliderDims
 		}),
-		layout.Rigid(func(gtx C) D {
-			return inset.Layout(gtx, func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				label := material.Body1(p.Theme, valueStr)
 				label.Font.Typeface = monospaceFace
 				return label.Layout(gtx)

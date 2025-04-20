@@ -18,7 +18,7 @@ type (
 	}
 )
 
-func (gr *CardFlowWrap) Layout(gtx C) D {
+func (gr *CardFlowWrap) Layout(gtx layout.Context) layout.Dimensions {
 	if !gr.Loaded {
 		gr.Wrap.Alignment = layout.Middle
 		gr.List.Axis = layout.Vertical
@@ -47,11 +47,11 @@ func (gr *CardFlowWrap) Layout(gtx C) D {
 		gr.Loaded = true
 	}
 
-	return material.List(th, &gr.List).Layout(gtx, 1, func(gtx C, _ int) D {
+	return material.List(th, &gr.List).Layout(gtx, 1, func(gtx layout.Context, _ int) layout.Dimensions {
 		return layout.Flex{Spacing: layout.SpaceSides}.Layout(gtx,
-			layout.Flexed(1, func(gtx C) D {
-				return gr.Wrap.Layout(gtx, len(gr.Cards), func(gtx C, i int) D {
-					var content D
+			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+				return gr.Wrap.Layout(gtx, len(gr.Cards), func(gtx layout.Context, i int) layout.Dimensions {
+					var content layout.Dimensions
 
 					// copy only this specific card
 					if gr.Cards[i].copyToClipBtn.Clicked(gtx) {
@@ -82,7 +82,7 @@ func (gr *CardFlowWrap) Layout(gtx C) D {
 						Bottom: unit.Dp(15),
 						Left:   unit.Dp(25),
 						Right:  unit.Dp(25),
-					}.Layout(gtx, func(gtx C) D {
+					}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return gr.Cards[i].LayCard(gtx)
 					})
 					//}

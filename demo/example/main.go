@@ -24,11 +24,6 @@ import (
 	wg "github.com/oligo/gvcode/widget"
 )
 
-type (
-	C = layout.Context
-	D = layout.Dimensions
-)
-
 type EditorApp struct {
 	window *app.Window
 	th     *material.Theme
@@ -50,7 +45,7 @@ func (ed *EditorApp) run() error {
 			return e.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
-			layout.UniformInset(unit.Dp(8)).Layout(gtx, func(gtx C) D {
+			layout.UniformInset(unit.Dp(8)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return ed.layout(gtx, ed.th)
 			})
 			e.Frame(gtx.Ops)
@@ -58,7 +53,7 @@ func (ed *EditorApp) run() error {
 	}
 }
 
-func (ed *EditorApp) layout(gtx C, th *material.Theme) D {
+func (ed *EditorApp) layout(gtx layout.Context, th *material.Theme) layout.Dimensions {
 	for {
 		evt, ok := ed.state.Update(gtx)
 		if !ok {
@@ -75,18 +70,18 @@ func (ed *EditorApp) layout(gtx C, th *material.Theme) D {
 	return layout.Flex{
 		Axis: layout.Vertical,
 	}.Layout(gtx,
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			lb := material.Label(th, th.TextSize, "gvcode editor")
 			lb.Alignment = text.Middle
 			return lb.Layout(gtx)
 		}),
 		layout.Rigid(layout.Spacer{Height: unit.Dp(6)}.Layout),
-		layout.Flexed(1, func(gtx C) D {
+		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 			borderColor := th.Fg
 			borderColor.A = 0xb6
 			return widget.Border{
 				Color: borderColor, Width: unit.Dp(1),
-			}.Layout(gtx, func(gtx C) D {
+			}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return layout.Inset{
 					Top:    unit.Dp(6),
 					Bottom: unit.Dp(6),
@@ -104,7 +99,7 @@ func (ed *EditorApp) layout(gtx C, th *material.Theme) D {
 				})
 			})
 		}),
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			line, col := ed.state.CaretPos()
 			lb := material.Label(th, th.TextSize*0.8, fmt.Sprintf("Line:%d, Col:%d", line+1, col+1))
 			lb.Alignment = text.End

@@ -227,13 +227,13 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 				return gtx.Dp(unit.Dp(27)) // 行高
 			}
 		},
-		/*表头绘制 headingFunc DefaultDraw.ListElement*/ func(gtx ux.C, col int) ux.D {
+		/*表头绘制 headingFunc DefaultDraw.ListElement*/ func(gtx layout.Context, col int) layout.Dimensions {
 			ux.DrawColumnDivider(gtx, col)                                                           // 为表头绘制列分隔条
 			paint.FillShape(gtx.Ops, colors.ColorHeaderFg, clip.Rect{Max: gtx.Constraints.Max}.Op()) // 表头背景色
 			//return component.Resize{}.Layout(gtx, func(gtx DefaultDraw.Context) DefaultDraw.Dimensions {
 			//
 			//})
-			return m.headerBorder.Layout(gtx, func(gtx ux.C) ux.D {
+			return m.headerBorder.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				column := m.GetColumn(col)
 				click := m.headers[col]
 				if click == nil {
@@ -251,8 +251,8 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 				// button := material.Button(th, RowSelectedCallback, m.GetTitle(col))
 				// button.Background = color.NRGBA(colornames.Grey500)
 				// return DefaultDraw.Center.Layout(gtx, button.Layout)
-				return material.Clickable(gtx, click, func(gtx ux.C) ux.D {
-					return layout.UniformInset(0).Layout(gtx, func(gtx ux.C) ux.D {
+				return material.Clickable(gtx, click, func(gtx layout.Context) layout.Dimensions {
+					return layout.UniformInset(0).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						ux.DrawColumnDivider(gtx, col) // 为每列绘制列分隔条
 						body1 := material.Body1(th, m.GetTitle(col))
 						body1.MaxLines = 1
@@ -263,7 +263,7 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 				})
 			})
 		},
-		/*渲染body单元格 cellFunc outlay.Cell*/ func(gtx ux.C, row, col int) ux.D {
+		/*渲染body单元格 cellFunc outlay.Cell*/ func(gtx layout.Context, row, col int) layout.Dimensions {
 			DrawCrosswalk(gtx, row)         // 绘制斑马线
 			ux.DrawColumnDivider(gtx, col)  // 为每列绘制列分隔条
 			if m.creatCellCallback != nil { // todo remove ? 看看是的呀着色会不会用到
@@ -305,7 +305,7 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 					}
 				}
 			}
-			return material.Clickable(gtx, cell, func(gtx ux.C) ux.D {
+			return material.Clickable(gtx, cell, func(gtx layout.Context) layout.Dimensions {
 				cellMenu := m.cellsAreas[idx]
 				if cellMenu == nil {
 					cellMenu = &component.ContextArea{
@@ -316,8 +316,8 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 				}
 
 				return layout.Stack{}.Layout(gtx,
-					layout.Stacked(func(gtx ux.C) ux.D {
-						return layout.UniformInset(0).Layout(gtx, func(gtx ux.C) ux.D {
+					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+						return layout.UniformInset(0).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							cellText := material.Body1(th, txt)
 							cellText.Color = th.Color.DefaultTextWhiteColor
 							if m.rowIdx == row {
@@ -333,9 +333,9 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 							return layout.Center.Layout(gtx, cellText.Layout)
 						})
 					}),
-					layout.Expanded(func(gtx ux.C) ux.D {
+					layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 						m.menu.OnClicked(gtx) // callback
-						return cellMenu.Layout(gtx, func(gtx ux.C) ux.D {
+						return cellMenu.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							m.rowIdx = row
 							m.colIdx = col
 							gtx.Constraints.Max.X = 500
@@ -349,8 +349,8 @@ func (m *Table) Layout(gtx layout.Context) layout.Dimensions {
 	)
 }
 
-func (m *Table) drawContextArea(gtx ux.C) ux.D {
-	return layout.Center.Layout(gtx, func(gtx ux.C) ux.D { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
+func (m *Table) drawContextArea(gtx layout.Context) layout.Dimensions {
+	return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions { // 重置min x y 到0，并根据max x y 计算弹出菜单的合适大小
 		// mylog.Struct("todo",gtx.Constraints)
 		menuStyle := component.Menu(th, &m.menu.MenuState)
 		menuStyle.SurfaceStyle = component.SurfaceStyle{
@@ -378,11 +378,11 @@ func (m *Table) drawContextArea(gtx ux.C) ux.D {
 //	}
 //}
 
-func HighlightRow(gtx ux.C) { // 高亮选中行为蓝色
+func HighlightRow(gtx layout.Context) { // 高亮选中行为蓝色
 	paint.FillShape(gtx.Ops, color.NRGBA(colornames.Blue400), clip.Rect{Max: gtx.Constraints.Max}.Op())
 }
 
-func DrawCrosswalk(gtx ux.C, row int) { // 绘制斑马线
+func DrawCrosswalk(gtx layout.Context, row int) { // 绘制斑马线
 	if row%2 == 0 {
 		paint.FillShape(gtx.Ops, rowWhiteColor, clip.Rect{Max: gtx.Constraints.Max}.Op())
 	} else {

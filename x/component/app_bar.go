@@ -105,12 +105,12 @@ func (a *actionGroup) layout(gtx C, th *material.Theme, overflowBtn *widget.Clic
 				anim.Appear(gtx.Now)
 			}
 		}
-		actions = append(actions, layout.Rigid(func(gtx C) D {
+		actions = append(actions, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return action.layout(th.Palette.Bg, th.Palette.Fg, anim, gtx)
 		}))
 	}
 	if len(a.overflow)+overflowedActions > 0 {
-		actions = append(actions, layout.Rigid(func(gtx C) D {
+		actions = append(actions, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			gtx.Constraints.Min.Y = gtx.Constraints.Max.Y
 			btn := material.IconButton(th, overflowBtn, moreIcon, overflowDesc)
 			btn.Size = unit.Dp(24)
@@ -166,22 +166,22 @@ func (o *overflowMenu) configureOverflow(gtx C, th *material.Theme, barPos Verti
 		menuMacro := op.Record(gtx.Ops)
 		gtx.Constraints.Min.Y = 0
 		dims := layout.Stack{}.Layout(gtx,
-			layout.Expanded(func(gtx C) D {
+			layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Min.X = width
 				paintRect(gtx, gtx.Constraints.Min, th.Palette.Bg)
 				return layout.Dimensions{Size: gtx.Constraints.Min}
 			}),
-			layout.Stacked(func(gtx C) D {
+			layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 				dims := o.list.Layout(gtx, o.overflowLen(actions), func(gtx C, index int) D {
 					action := o.actionForIndex(index, actions)
 					state := &actions.overflowState[index]
-					return material.Clickable(gtx, state, func(gtx C) D {
+					return material.Clickable(gtx, state, func(gtx layout.Context) layout.Dimensions {
 						gtx.Constraints.Min.X = width
 						return layout.Inset{
 							Top:    unit.Dp(4),
 							Bottom: unit.Dp(4),
 							Left:   unit.Dp(8),
-						}.Layout(gtx, func(gtx C) D {
+						}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							label := material.Label(th, unit.Sp(18), action.Name)
 							label.MaxLines = 1
 							return label.Layout(gtx)
@@ -305,7 +305,7 @@ func (a AppBarAction) layout(bg, fg color.NRGBA, anim *VisibilityAnimation, gtx 
 	if !animating {
 		return a.Layout(gtx, bg, fg)
 	}
-	dims := actionButtonInset.Layout(gtx, func(gtx C) D {
+	dims := actionButtonInset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return a.Layout(gtx, bg, fg)
 	})
 	btnOp := macro.Stop()
@@ -396,7 +396,7 @@ func (a *AppBar) Layout(gtx layout.Context, theme *material.Theme, navDesc, over
 	layout.Flex{
 		Alignment: layout.Middle,
 	}.Layout(gtx,
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			if a.NavigationIcon == nil {
 				return layout.Dimensions{}
 			}
@@ -411,8 +411,8 @@ func (a *AppBar) Layout(gtx layout.Context, theme *material.Theme, navDesc, over
 			button.Inset = layout.UniformInset(unit.Dp(16))
 			return button.Layout(gtx)
 		}),
-		layout.Rigid(func(gtx C) D {
-			return layout.Inset{Left: unit.Dp(16)}.Layout(gtx, func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return layout.Inset{Left: unit.Dp(16)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				titleText := a.Title
 				if a.contextualAnim.Visible() {
 					titleText = a.ContextualTitle
@@ -422,9 +422,9 @@ func (a *AppBar) Layout(gtx layout.Context, theme *material.Theme, navDesc, over
 				return title.Layout(gtx)
 			})
 		}),
-		layout.Flexed(1, func(gtx C) D {
+		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 			gtx.Constraints.Min.Y = gtx.Constraints.Max.Y
-			return layout.E.Layout(gtx, func(gtx C) D {
+			return layout.E.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return actionSet.layout(gtx, &th, &a.overflowMenu.Clickable, overflowDesc)
 			})
 		}),

@@ -74,14 +74,14 @@ func LogView() Widget {
 	return logView
 }
 
-func LayoutErrorLabel(gtx C, e error) D {
+func LayoutErrorLabel(gtx layout.Context, e error) layout.Dimensions {
 	if e != nil {
 		return layout.Inset{
 			Top:    10,
 			Bottom: 10,
 			Left:   15,
 			Right:  15,
-		}.Layout(gtx, func(gtx C) D {
+		}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			label := material.Label(th, th.TextSize*0.8, e.Error())
 			label.Color = color.NRGBA{R: 255, A: 255}
 			label.Alignment = text.Middle
