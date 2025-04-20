@@ -11,7 +11,7 @@ type DemoType uint8
 
 const (
 	TreeTableType DemoType = iota
-	AnimationButtonType
+	FlowType
 	ColorPickerType
 	ScreenshotType
 	CardType
@@ -111,8 +111,8 @@ func (t DemoType) String() string {
 	switch t {
 	case TreeTableType:
 		return "TreeTable"
-	case AnimationButtonType:
-		return "AnimationButton"
+	case FlowType:
+		return "Flow"
 	case ColorPickerType:
 		return "ColorPicker"
 	case ScreenshotType:
@@ -272,8 +272,8 @@ func (t DemoType) Tooltip() string {
 	switch t {
 	case TreeTableType:
 		return "treeTable"
-	case AnimationButtonType:
-		return "AnimationButton"
+	case FlowType:
+		return "Flow"
 	case ColorPickerType:
 		return "colorPicker"
 	case ScreenshotType:
@@ -432,7 +432,7 @@ func (t DemoType) Tooltip() string {
 func (t DemoType) Names() []string {
 	return []string{
 		"TreeTable",
-		"AnimationButton",
+		"Flow",
 		"ColorPicker",
 		"Screenshot",
 		"Card",
@@ -514,7 +514,7 @@ func (t DemoType) Names() []string {
 func (t DemoType) EnumTypes() []DemoType {
 	return []DemoType{
 		TreeTableType,
-		AnimationButtonType,
+		FlowType,
 		ColorPickerType,
 		ScreenshotType,
 		CardType,

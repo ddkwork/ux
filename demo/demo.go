@@ -511,7 +511,69 @@ func main() {
 			m.Set(SplitViewType, sp)
 		case ListViewType:
 		case JsonTreeType:
-		case AnimationButtonType:
+		case FlowType:
+			keys := []string{
+				"xxxxxx",
+				"yyyyyy",
+				"zzzzzz",
+				"aaaaaa",
+				"bbbbb",
+				"ccccc",
+				"ddddd",
+				"eeeee",
+				"ffffff",
+				"gggggg",
+				"hhhhhh",
+				"iiiiii",
+				"jjjjjj",
+				"kkkkkk",
+				"llllll",
+				"mmmmmm",
+				"nnnnnn",
+				"oooooo",
+				"pppppp",
+				"qqqqqq",
+				"rrrrrr",
+				"ssssss",
+				"tttttt",
+				"vvvvvv",
+				"wwwwww",
+			}
+			flow := ux.NewFlow(5)
+			for i, key := range keys {
+				flow.AppendElem(i, ux.FlowElemButton{
+					Title: key,
+					Icon:  icons.IconMap.Values()[i],
+					Do:    func(gtx layout.Context) { mylog.Info(key + " pressed") }, //run exe
+					ContextMenuItems: []ux.ContextMenuItem{
+						{
+							Title:         "Balance",
+							Icon:          icons.ActionAccountBalanceIcon,
+							Can:           func() bool { return true },
+							Do:            func() { mylog.Info("Balance item clicked") },
+							AppendDivider: false,
+							Clickable:     widget.Clickable{},
+						},
+						{
+							Title:         "Account",
+							Icon:          icons.ActionAccountBoxIcon,
+							Can:           func() bool { return true },
+							Do:            func() { mylog.Info("Account item clicked") },
+							AppendDivider: false,
+							Clickable:     widget.Clickable{},
+						},
+						{
+							Title:         "Cart",
+							Icon:          icons.ActionAddShoppingCartIcon,
+							Can:           func() bool { return true },
+							Do:            func() { mylog.Info("Cart item clicked") },
+							AppendDivider: false,
+							Clickable:     widget.Clickable{},
+						},
+					},
+				})
+			}
+			m.Set(FlowType, flow)
 		case TerminalType: // todo 控制台被接管了
 			if mylog.IsWindows() {
 				continue // todo bug

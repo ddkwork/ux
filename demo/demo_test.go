@@ -21,7 +21,7 @@ func TestName(t *testing.T) {
 		// yield("tree", "tree")
 		// yield("table2", "table2")
 		// yield("table", "table")
-		yield("AnimationButton", "AnimationButton")
+		yield("Flow", "Flow")
 		yield("colorPicker", "colorPicker")
 		yield("screenshot", "screenshot")
 		yield("card", "card")
