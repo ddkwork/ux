@@ -189,9 +189,9 @@ func max(a, b int) int {
 
 func axisPoint(a layout.Axis, main, cross int) image.Point {
 	if a == layout.Horizontal {
-		return image.Point{main, cross}
+		return image.Point{X: main, Y: cross}
 	} else {
-		return image.Point{cross, main}
+		return image.Point{X: cross, Y: main}
 	}
 }
 

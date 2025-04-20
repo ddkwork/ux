@@ -78,8 +78,8 @@ func Console(screen *Screen, settings *ConsoleSettings) layout.Widget {
 					// scrollbar area
 					offset := gtx.Dp(8)
 					area := image.Rectangle{
-						Min: image.Point{gtx.Constraints.Max.X - int(float32(offset)*1.7), offset},
-						Max: image.Point{gtx.Constraints.Max.X - offset, gtx.Constraints.Max.Y - offset},
+						Min: image.Point{X: gtx.Constraints.Max.X - int(float32(offset)*1.7), Y: offset},
+						Max: image.Point{X: gtx.Constraints.Max.X - offset, Y: gtx.Constraints.Max.Y - offset},
 					}
 
 					l := float32(screen.Size.Y) / float32(screen.top+screen.Size.Y)
@@ -111,7 +111,7 @@ func Console(screen *Screen, settings *ConsoleSettings) layout.Widget {
 					}
 
 					return layout.Dimensions{
-						Size:     image.Point{0, 0},
+						Size:     image.Point{},
 						Baseline: 0,
 					}
 				}),

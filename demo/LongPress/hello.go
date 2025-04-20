@@ -1,22 +1,17 @@
 package main
 
 import (
+	"github.com/ddkwork/golibrary/stream"
+	"github.com/ddkwork/ux"
+	"github.com/ddkwork/ux/resources/icons"
 	"log"
 	"os"
 
-	"github.com/ddkwork/ux/resources/icons"
-
+	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/op"
-	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/x/outlay"
-	"github.com/ddkwork/ux/widget/material"
-	"github.com/ddkwork/ux/x/component"
-
-	"gioui.org/app"
-	"gioui.org/font/gofont"
 )
 
 // https://github.com/hkontrol/hkapp
@@ -35,27 +30,6 @@ func main() {
 }
 
 func loop(w *app.Window) error {
-	th := material.NewTheme()
-	th.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
-
-	var tagSearchBtn widget.Clickable
-	var tagRemoveBtn widget.Clickable
-	tagCtxMenu := component.MenuState{
-		Options: []func(gtx layout.Context) layout.Dimensions{
-			func(gtx layout.Context) layout.Dimensions {
-				item := component.MenuItem(th, &tagSearchBtn, "Search")
-				item.Icon = icons.ActionVisibilityIcon
-				item.Hint = component.MenuHintText(th, "")
-				return item.Layout(gtx)
-			},
-			func(gtx layout.Context) layout.Dimensions {
-				item := component.MenuItem(th, &tagRemoveBtn, "Remove")
-				item.Icon = icons.ContentCreateIcon
-				item.Hint = component.MenuHintText(th, "")
-				return item.Layout(gtx)
-			},
-		},
-	}
 
 	selectedAccTags := []string{
 		"xxxxxx",
@@ -85,7 +59,28 @@ func loop(w *app.Window) error {
 		"wwwwww",
 	}
 	tagClickables := make([]widget.Clickable, len(selectedAccTags))
-	tagCtxAreas := make([]component.ContextArea, len(selectedAccTags))
+
+	flow := ux.Flow{
+		Num:       5,
+		Axis:      layout.Horizontal,
+		Alignment: layout.Middle,
+	}
+
+	m := ux.NewContextMenuWithRootRows(func(gtx layout.Context) layout.Dimensions {
+		return flow.Layout(gtx, len(selectedAccTags), func(gtx layout.Context, i int) layout.Dimensions {
+			return layout.UniformInset(2).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				gtx.Constraints.Min.X = 200 //todo into flow
+				gtx.Constraints.Max.X = 200
+				return tagClickables[i].Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					if tagClickables[i].Clicked(gtx) {
+						println("clicked", selectedAccTags[i])
+					}
+					return ux.Button(&tagClickables[i], stream.RandomAny(icons.IconMap.Values()), selectedAccTags[i]).Layout(gtx)
+				})
+			})
+		})
+	})
+
 	var ops op.Ops
 	for {
 		switch e := w.Event().(type) {
@@ -93,31 +88,8 @@ func loop(w *app.Window) error {
 			return e.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
-			outlay.FlowWrap{
-				Axis:      0,
-				Alignment: 0,
-			}.Layout(gtx, len(selectedAccTags), func(gtx layout.Context, i int) layout.Dimensions {
-				state := &tagCtxAreas[i]
-
-				return layout.Stack{}.Layout(gtx,
-					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-						return layout.UniformInset(unit.Dp(2)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-							return tagClickables[i].Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-								if tagClickables[i].Clicked(gtx) {
-									println("clicked", selectedAccTags[i])
-								}
-								return material.Button(th, &tagClickables[i], selectedAccTags[i]).Layout(gtx)
-							})
-						})
-					}),
-					layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-						return state.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-							gtx.Constraints.Min.X = 0
-							return component.Menu(th, &tagCtxMenu).Layout(gtx)
-						})
-					}),
-				)
-			})
+			ux.BackgroundDark(gtx)
+			m.LayoutTest(gtx)
 			e.Frame(gtx.Ops)
 		}
 	}

@@ -66,7 +66,7 @@ func (p *Page) Layout(gtx layout.Context) layout.Dimensions {
 			gtx.Constraints.Min = gtx.Constraints.Max
 			return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Min.Y = 0
-				paint.ColorOp{Color: color.NRGBA{0, 0, 0, 255}}.Add(gtx.Ops)
+				paint.ColorOp{Color: color.NRGBA{A: 255}}.Add(gtx.Ops)
 				return material.Button(th, &p.content, "Text on dialog").Layout(gtx)
 			})
 		}
@@ -88,7 +88,7 @@ func (p *Page) Layout(gtx layout.Context) layout.Dimensions {
 		overlay := op.Record(gtx.Ops)
 
 		p.dialogCover.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			paint.ColorOp{Color: color.NRGBA{0, 0, 0, 128}}.Add(gtx.Ops)
+			paint.ColorOp{Color: color.NRGBA{A: 128}}.Add(gtx.Ops)
 			paint.PaintOp{}.Add(gtx.Ops)
 			return layout.Dimensions{Size: gtx.Constraints.Max}
 		})
@@ -126,12 +126,12 @@ func (p *Page) Layout(gtx layout.Context) layout.Dimensions {
 						gtx.Constraints.Min.Y = gtx.Constraints.Max.Y
 
 						defer clip.Rect{Max: gtx.Constraints.Max}.Push(gtx.Ops).Pop()
-						paint.ColorOp{Color: color.NRGBA{255, 0, 0, 255}}.Add(gtx.Ops)
+						paint.ColorOp{Color: color.NRGBA{R: 255, A: 255}}.Add(gtx.Ops)
 						paint.PaintOp{}.Add(gtx.Ops)
 
 						return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							gtx.Constraints.Min.Y = 0
-							paint.ColorOp{Color: color.NRGBA{0, 0, 0, 255}}.Add(gtx.Ops)
+							paint.ColorOp{Color: color.NRGBA{A: 255}}.Add(gtx.Ops)
 							// return widget.Label{}.Layout(gtx, shaper, text.Font{}, 14, "Open Dialog")
 							return material.Button(th, &p.submit, "Open Dialog").Layout(gtx)
 						})

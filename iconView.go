@@ -19,7 +19,7 @@ type IconView struct {
 	filterInput *Input // todo 调用appBar的搜索输入框
 	keyWords    string
 	filterMap   []layout.Widget
-	flow        *Flow
+	flow        Flow
 }
 
 func NewIconView() *IconView {
@@ -28,11 +28,11 @@ func NewIconView() *IconView {
 		filterInput: NewInput("请输入搜索关键字..."),
 		keyWords:    "Edi",
 		filterMap:   make([]layout.Widget, 0, icons.IconMap.Len()),
-		flow: &Flow{
+		flow: Flow{
 			Num:       5,
 			Axis:      layout.Horizontal,
 			Alignment: layout.Middle,
-			list: &widget.List{
+			list: widget.List{
 				Scrollbar: widget.Scrollbar{},
 				List:      layout.List{},
 			},
