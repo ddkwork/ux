@@ -343,8 +343,6 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 				})
 			}
 			return t.contextMenu.Layout(gtx)
-
-			//return list.Layout(gtx, len(t.rootRows), func(gtx layout.Context, index int) layout.Dimensions {
 			//////////////////////////
 			//t.inLayoutHeader = false
 			//return t.layoutDrag(gtx, func(gtx layout.Context, row int) layout.Dimensions {
@@ -408,24 +406,6 @@ func (t *TreeTable[T]) RowFrame2(gtx layout.Context, n *Node[T], rowIndex int) l
 						Right:  0,
 					})
 				})
-				//DrawColumnDivider(gtx, cell.columID) // 这里绘制的列分割线才没有虚线,gtx被破坏了? 永远不要移动这个位置
-				//return layout.Stack{Alignment: layout.Center}.Layout(gtx,//似乎会影响层级列文本布局
-				//	layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-				//		if len(cell.Text) > 80 {
-				//			cell.Text = cell.Text[:len(cell.Text)/2] + "..."
-				//			// todo 更好的办法是让富文本编辑器做这个事情，对 maxline 。。。 看看代码编辑器扩建是如何实现这个的
-				//			// 然后双击编辑行的时候从富文本取出完整行并换行显示，structView需要好好设计一下这个
-				//			// 这个在抓包场景很那个，url列一般都长
-				//		}
-				//		return t.CellFrame(gtx, cell, t.maxColumnCellWidths[hierarchyColumnID], false, layout.Inset{
-				//			Top:    topPadding, // 层级列文本不知道什么原因往上飘了，top: 0的样子，所以往下挪一下让它居中
-				//			Bottom: 0,
-				//			Left:   leftPadding, // 绘制层级列文本,和层级图标聚拢在一起--------------------------------------
-				//			Right:  0,
-				//		})
-				//	}),
-				//	//t.drawContextMenu(n, hierarchyColumnID), //todo bug
-				//)
 			}),
 		)
 	}
@@ -537,24 +517,6 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 						Right:  0,
 					})
 				})
-				//DrawColumnDivider(gtx, cell.columID) // 这里绘制的列分割线才没有虚线,gtx被破坏了? 永远不要移动这个位置
-				//return layout.Stack{Alignment: layout.Center}.Layout(gtx,//似乎会影响层级列文本布局
-				//	layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-				//		if len(cell.Text) > 80 {
-				//			cell.Text = cell.Text[:len(cell.Text)/2] + "..."
-				//			// todo 更好的办法是让富文本编辑器做这个事情，对 maxline 。。。 看看代码编辑器扩建是如何实现这个的
-				//			// 然后双击编辑行的时候从富文本取出完整行并换行显示，structView需要好好设计一下这个
-				//			// 这个在抓包场景很那个，url列一般都长
-				//		}
-				//		return t.CellFrame(gtx, cell, t.maxColumnCellWidths[hierarchyColumnID], false, layout.Inset{
-				//			Top:    topPadding, // 层级列文本不知道什么原因往上飘了，top: 0的样子，所以往下挪一下让它居中
-				//			Bottom: 0,
-				//			Left:   leftPadding, // 绘制层级列文本,和层级图标聚拢在一起--------------------------------------
-				//			Right:  0,
-				//		})
-				//	}),
-				//	//t.drawContextMenu(n, hierarchyColumnID), //todo bug
-				//)
 			}),
 		)
 	}
@@ -955,16 +917,6 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 		})
 	}
 	return t.header.contextMenu.Layout(gtx)
-
-	//return layout.Stack{}.Layout(gtx,
-	//	layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-	//		return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle, WeightSum: 0}.Layout(gtx, cols...)
-	//	}),
-	//	layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-	//		resizeWidget = NewResizeWidget(layout.Horizontal, elems...)
-	//		return resizeWidget.Layout(gtx)
-	//	}),
-	//)
 }
 
 var (
