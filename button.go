@@ -22,7 +22,7 @@ import (
 	"gioui.org/widget"
 )
 
-func NewButtonAnimation(text string, icon *widget.Icon, callBack func(gtx layout.Context)) *animationButton.Button {
+func NewButtonAnimation(button *widget.Clickable, icon any, text string, do func(gtx layout.Context)) *animationButton.Button {
 	style := animationButton.ButtonStyle{
 		Rounded:  animationButton.UniformRounded(unit.Dp(12)),
 		TextSize: unit.Sp(12),
@@ -48,7 +48,7 @@ func NewButtonAnimation(text string, icon *widget.Icon, callBack func(gtx layout
 	if icon == nil {
 		style.Border.CornerRadius = 13
 	}
-	return animationButton.NewButton(style, th, text, callBack)
+	return animationButton.NewButton(style, button, th, text, do)
 }
 
 func NewButtonAnimationDefault() animationButton.ButtonAnimation {

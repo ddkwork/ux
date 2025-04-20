@@ -1,12 +1,12 @@
 package ux
 
 import (
-	"image"
-
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/widget"
+	"github.com/ddkwork/ux/animationButton"
 	"github.com/ddkwork/ux/widget/material"
+	"image"
 )
 
 // inf is an infinite axis constraint.
@@ -15,19 +15,53 @@ const inf = 1e6
 // FlowElement lays out the ith element of a Grid.
 type FlowElement func(gtx layout.Context, i int) layout.Dimensions
 
-// Flow lays out at most Num filterMap along the main axis.
-// The number of cross axis filterMap depend on the total number of filterMap.
-type Flow struct {
-	Num       int
-	axis      layout.Axis
-	alignment layout.Alignment
-	list      widget.List
+type FlowElemButton struct {
+	Title            string
+	Icon             any
+	Do               func(gtx layout.Context)
+	ContextMenuItems []ContextMenuItem
 }
 
-func (g *Flow) Layout(gtx layout.Context, num int, el FlowElement) layout.Dimensions {
-	if g.Num == 0 {
-		g.Num = 5
-		//return layout.Dimensions{Size: gtx.Constraints.Min}
+// Flow lays out at most rowElemCount filterMap along the main axis.
+// The number of cross axis filterMap depend on the total number of filterMap.
+type Flow struct {
+	rowElemCount int
+	axis         layout.Axis
+	alignment    layout.Alignment
+	list         widget.List
+	menus        []*ContextMenu
+	clickables   []widget.Clickable
+	buttons      []*animationButton.Button
+}
+
+func NewFlow(rowElemCount int) *Flow {
+	if rowElemCount == 0 {
+		rowElemCount = 5
+	}
+	return &Flow{
+		rowElemCount: rowElemCount,
+		axis:         layout.Horizontal,
+		alignment:    layout.Middle,
+		list:         widget.List{},
+		menus:        make([]*ContextMenu, 0),
+		clickables:   make([]widget.Clickable, 0),
+	}
+}
+
+func (g *Flow) AppendElem(i int, elem FlowElemButton) {
+	g.clickables = append(g.clickables, widget.Clickable{})
+	g.buttons = append(g.buttons, NewButtonAnimation(&g.clickables[i], elem.Icon, elem.Title, elem.Do))
+	g.menus = append(g.menus, NewContextMenuWithRootRows(func(gtx layout.Context) layout.Dimensions {
+		return layout.UniformInset(2).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return g.buttons[i].Layout(gtx)
+		})
+	}))
+	g.menus[i].InitMenuItems(elem.ContextMenuItems...)
+}
+
+func (g *Flow) Layout(gtx layout.Context) layout.Dimensions {
+	if g.rowElemCount == 0 {
+		return layout.Dimensions{Size: gtx.Constraints.Min}
 	}
 	if g.axis == g.list.Axis {
 		if g.axis == layout.Horizontal {
@@ -38,7 +72,8 @@ func (g *Flow) Layout(gtx layout.Context, num int, el FlowElement) layout.Dimens
 		g.list.Alignment = g.alignment
 	}
 	csMax := gtx.Constraints.Max
-	return material.List(th, &g.list).Layout(gtx, (num+g.Num-1)/g.Num, func(gtx layout.Context, index int) layout.Dimensions {
+	sum := len(g.clickables)
+	return material.List(th, &g.list).Layout(gtx, (sum+g.rowElemCount-1)/g.rowElemCount, func(gtx layout.Context, index int) layout.Dimensions {
 		if g.axis == layout.Horizontal {
 			gtx.Constraints.Max.Y = inf
 		} else {
@@ -47,12 +82,12 @@ func (g *Flow) Layout(gtx layout.Context, num int, el FlowElement) layout.Dimens
 		gtx.Constraints.Min = image.Point{}
 		var mainMax, crossMax int
 		left := axisMain(g.axis, csMax)
-		i := index * g.Num
-		n := min(num, i+g.Num)
+		i := index * g.rowElemCount
+		n := min(sum, i+g.rowElemCount)
 		for ; i < n; i++ {
 			gtx.Constraints.Min.X = 300
 			gtx.Constraints.Max.X = gtx.Constraints.Min.X
-			dims := el(gtx, i)
+			dims := g.menus[i].Layout(gtx)
 			main := axisMain(g.axis, dims.Size)
 			crossMax = max(crossMax, axisCross(g.axis, dims.Size))
 			left -= main

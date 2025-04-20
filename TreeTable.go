@@ -878,6 +878,8 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 							if e.Kind == pointer.Press {
 								t.header.clickedColumnIndex = i
 							}
+						default:
+							panic("unhandled default case")
 						}
 					}
 				}

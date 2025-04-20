@@ -1,6 +1,7 @@
 package animationButton
 
 import (
+	"github.com/ddkwork/ux/resources/icons"
 	"image"
 	"image/color"
 
@@ -55,7 +56,7 @@ type ButtonStyle struct {
 	TextSize    unit.Sp
 	Inset       layout.Inset
 	Font        font.Font
-	Icon        *widget.Icon
+	Icon        any
 	IconGap     unit.Dp
 	Animation   ButtonAnimation
 	Border      widget.Border
@@ -76,8 +77,8 @@ type Button struct {
 	animClickable    *widget.Clickable
 	hoverSwitchState bool
 
-	th       *material.Theme
-	callback func(gtx layout.Context)
+	th *material.Theme
+	do func(gtx layout.Context)
 }
 
 func NewButtonAnimationDefault() ButtonAnimation {
@@ -123,11 +124,11 @@ func NewButtonAnimationScale(v float32) ButtonAnimation {
 	}
 }
 
-func NewButton(style ButtonStyle, th *material.Theme, text string, callback func(gtx layout.Context)) *Button {
+func NewButton(style ButtonStyle, button *widget.Clickable, th *material.Theme, text string, do func(gtx layout.Context)) *Button {
 	return &Button{
 		Text:             text,
 		Style:            style,
-		Clickable:        new(widget.Clickable),
+		Clickable:        button,
 		Label:            new(widget.Label),
 		Focused:          false,
 		Disabled:         false,
@@ -136,7 +137,7 @@ func NewButton(style ButtonStyle, th *material.Theme, text string, callback func
 		animClickable:    new(widget.Clickable),
 		hoverSwitchState: false,
 		th:               th,
-		callback:         callback,
+		do:               do,
 	}
 }
 
@@ -156,14 +157,13 @@ func (btn *Button) Clicked(gtx layout.Context) bool {
 	if btn.Disabled {
 		return false
 	}
-
 	return btn.Clickable.Clicked(gtx)
 }
 
 func (btn *Button) Layout(gtx layout.Context) layout.Dimensions {
 	if btn.Clicked(gtx) {
-		if btn.callback != nil {
-			btn.callback(gtx)
+		if btn.do != nil {
+			btn.do(gtx)
 		}
 	}
 
@@ -273,20 +273,19 @@ func (btn *Button) Layout(gtx layout.Context) layout.Dimensions {
 					var iconWidget layout.Widget
 					if style.Icon != nil {
 						iconWidget = func(gtx layout.Context) layout.Dimensions {
-							icon := style.Icon
-
-							if style.LoadingIcon != nil && btn.Loading {
-								icon = style.LoadingIcon
-							}
+							//icon := style.Icon
+							//if style.LoadingIcon != nil && btn.Loading {
+							//	icon = style.LoadingIcon
+							//}
 
 							var dims layout.Dimensions
 							r := op.Record(gtx.Ops)
 							if btn.Flex {
 								dims = layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-									return style.Icon.Layout(gtx, textColor)
+									return icons.Layout(gtx, style.Icon, textColor, 18)
 								})
 							} else {
-								dims = icon.Layout(gtx, textColor)
+								dims = icons.Layout(gtx, style.Icon, textColor, 18) //todo test
 							}
 							c := r.Stop()
 

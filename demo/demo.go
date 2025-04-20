@@ -512,10 +512,6 @@ func main() {
 		case ListViewType:
 		case JsonTreeType:
 		case AnimationButtonType:
-			newButtonAnimation := ux.NewButtonAnimation("animation button", icons.NavigationArrowBackIcon, func(gtx layout.Context) {
-				mylog.Info("animation button clicked")
-			})
-			m.Set(AnimationButtonType, newButtonAnimation) // todo bug
 		case TerminalType: // todo 控制台被接管了
 			if mylog.IsWindows() {
 				continue // todo bug

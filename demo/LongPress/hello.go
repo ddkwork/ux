@@ -1,16 +1,17 @@
 package main
 
 import (
+	"gioui.org/layout"
+	"gioui.org/widget"
+	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/resources/icons"
 	"log"
 	"os"
 
 	"gioui.org/app"
-	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/unit"
-	"gioui.org/widget"
 )
 
 // https://github.com/hkontrol/hkapp
@@ -57,16 +58,39 @@ func loop(w *app.Window) error {
 		"vvvvvv",
 		"wwwwww",
 	}
-	clickables := make([]widget.Clickable, len(keys))
-	menus := make([]*ux.ContextMenu, len(keys))
-	for i, clickable := range clickables {
-		menus[i] = ux.NewContextMenuWithRootRows(func(gtx layout.Context) layout.Dimensions {
-			return ux.Button(&clickable, icons.IconMap.Values()[i], keys[i]).Layout(gtx)
+	flow := ux.NewFlow(5)
+	for i, key := range keys {
+		flow.AppendElem(i, ux.FlowElemButton{
+			Title: key,
+			Icon:  icons.IconMap.Values()[i],
+			Do:    func(gtx layout.Context) { mylog.Info(key + " pressed") }, //run exe
+			ContextMenuItems: []ux.ContextMenuItem{
+				{
+					Title:         "Balance",
+					Icon:          icons.ActionAccountBalanceIcon,
+					Can:           func() bool { return true },
+					Do:            func() { mylog.Info("Balance item clicked") },
+					AppendDivider: false,
+					Clickable:     widget.Clickable{},
+				},
+				{
+					Title:         "Account",
+					Icon:          icons.ActionAccountBoxIcon,
+					Can:           func() bool { return true },
+					Do:            func() { mylog.Info("Account item clicked") },
+					AppendDivider: false,
+					Clickable:     widget.Clickable{},
+				},
+				{
+					Title:         "Cart",
+					Icon:          icons.ActionAddShoppingCartIcon,
+					Can:           func() bool { return true },
+					Do:            func() { mylog.Info("Cart item clicked") },
+					AppendDivider: false,
+					Clickable:     widget.Clickable{},
+				},
+			},
 		})
-	}
-
-	flow := ux.Flow{
-		Num: 5,
 	}
 
 	var ops op.Ops
@@ -77,17 +101,7 @@ func loop(w *app.Window) error {
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
 			ux.BackgroundDark(gtx)
-
-			flow.Layout(gtx, len(keys), func(gtx layout.Context, i int) layout.Dimensions {
-				return layout.UniformInset(2).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return clickables[i].Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						if clickables[i].Clicked(gtx) {
-							println("clicked", keys[i])
-						}
-						return menus[i].LayoutTest(gtx)
-					})
-				})
-			})
+			flow.Layout(gtx)
 			e.Frame(gtx.Ops)
 		}
 	}
