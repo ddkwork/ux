@@ -6,7 +6,6 @@ import (
 
 	"gioui.org/app"
 	"gioui.org/op"
-	"gioui.org/widget"
 	"github.com/ddkwork/golibrary/mylog"
 
 	"github.com/ddkwork/golibrary/safemap"
@@ -31,24 +30,9 @@ func TestTreeTable_ContextMenuItem(t1 *testing.T) {
 }
 
 func TestNewPopupMenu(t *testing.T) {
-	t.Skip("finished")
+	//t.Skip("finished")
 	w := new(app.Window)
-	p := NewContextMenu(100, nil)
-	p.AddItem(ContextMenuItem{
-		Title:         "item1",
-		Icon:          nil,
-		Can:           func() bool { return false },
-		Do:            func() { mylog.Info("item1 clicked") },
-		AppendDivider: false,
-		Clickable:     widget.Clickable{},
-	})
-	p.AddItem(ContextMenuItem{
-		Title: "item2",
-		Icon:  nil,
-		Can:   func() bool { return true },
-		Do:    func() { mylog.Info("item2 clicked") },
-	})
-
+	p := NewContextMenu()
 	var ops op.Ops
 	for {
 		switch e := w.Event().(type) {
@@ -58,7 +42,7 @@ func TestNewPopupMenu(t *testing.T) {
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
 			BackgroundDark(gtx)
-			p.Layout(gtx)
+			p.LayoutTest(gtx)
 			e.Frame(gtx.Ops)
 		}
 	}

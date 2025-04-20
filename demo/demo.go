@@ -66,8 +66,6 @@ func main() {
 	m := new(safemap.M[DemoType, ux.Widget])
 	for _, Type := range TreeTableType.EnumTypes() {
 		switch Type {
-		case ContextMenuType:
-			m.Set(ContextMenuType, ux.NewContextMenu(100, nil))
 		case TreeTableType:
 			type packet struct {
 				Scheme        string        // 请求协议

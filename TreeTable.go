@@ -153,7 +153,7 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 		rootRows:                     nil,
 		filteredRows:                 nil,
 		SelectedNode:                 nil,
-		contextMenu:                  nil,
+		contextMenu:                  NewContextMenu(),
 		columnCount:                  columnCount,
 		maxDepth:                     0,
 		maxColumnCellWidths:          nil,
@@ -214,10 +214,6 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 	})
 	t.rootRows = t.Root.Children // 增删改查不一定去计算列宽导致有些节点已经删除，是空指针导致panic，所有这里需要刷新一下rootRows，不知道这里是否会内存泄漏
 	// list := material.List(th, &t.List)
-	if t.contextMenu == nil {
-		t.contextMenu = NewContextMenu(len(t.rootRows), nil)
-	}
-
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return t.HeaderFrame(gtx) // 渲染表头
@@ -227,9 +223,8 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 			})
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			var rootRows []layout.Widget
 			for i, n := range t.rootRows {
-				rootRows = append(rootRows, func(gtx layout.Context) layout.Dimensions {
+				t.contextMenu.AppendRootRows(func(gtx layout.Context) layout.Dimensions {
 					t.contextMenu.Once.Do(func() {
 						item := ContextMenuItem{}
 						for _, kind := range CopyRowType.EnumTypes() {
@@ -363,9 +358,6 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 					})
 					return t.RowFrame2(gtx, n, i)
 				})
-			}
-			t.contextMenu.DrawRow = func(gtx layout.Context, i int) layout.Dimensions {
-				return rootRows[i](gtx)
 			}
 			return t.contextMenu.Layout(gtx)
 
@@ -884,7 +876,92 @@ func TransposeMatrix[T any](rows [][]T) (columns [][]T) {
 func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 	// 实现右键复制列到剪切板功能
 	if t.header.contextMenu == nil {
-		t.header.contextMenu = NewContextMenu(1, nil)
+		t.header.contextMenu = NewContextMenuWithRootRows(func(gtx layout.Context) layout.Dimensions {
+			var cols []layout.FlexChild
+			elems := make([]*Resizable, 0)
+			for i, cell := range t.header.columnCells {
+				if cell.Disabled {
+					continue
+				}
+				clickable := &t.header.columnCells[i].Clickable
+				if clickable.Clicked(gtx) {
+					t.header.clickedColumnIndex = i
+					if t.header.sortedBy == t.header.clickedColumnIndex {
+						t.header.sortAscending = !t.header.sortAscending // 切换升序/降序
+
+						switch t.header.sortOrder {
+						case sortNone:
+							t.header.sortOrder = sortAscending
+						case sortAscending:
+							t.header.sortOrder = sortDescending
+						case sortDescending:
+							t.header.sortOrder = sortAscending
+						}
+
+					} else {
+						t.header.sortedBy = t.header.clickedColumnIndex // 更新排序列
+						t.header.sortAscending = true                   // 设为升序
+						t.header.sortOrder = sortAscending
+					}
+
+					mylog.Info("clickedColumnIndex", t.header.clickedColumnIndex)
+					// mylog.Info(t.header.columnCells[i].Text, LabelWidth(gtx, t.header.columnCells[i].Text))
+					if t.header.clickedColumnIndex > -1 && t.header.sortedBy > -1 {
+						for i := range t.header.columnCells {
+							t.header.columnCells[i].Text = strings.TrimSuffix(t.header.columnCells[i].Text, " ⇩")
+							t.header.columnCells[i].Text = strings.TrimSuffix(t.header.columnCells[i].Text, " ⇧")
+						}
+						switch t.header.sortOrder {
+						case sortNone:
+						case sortAscending:
+							t.header.columnCells[i].Text += " ⇧"
+						case sortDescending:
+							t.header.columnCells[i].Text += " ⇩"
+						}
+						t.Sort()
+						// t.header.clickedColumnIndex = -1 //重置点击列索引
+					}
+				}
+				// 拦截右击事件并在事件中赋值命中的列id
+				evt, ok := gtx.Source.Event(pointer.Filter{
+					Target: clickable,
+					Kinds:  pointer.Press | pointer.Release,
+				})
+				if ok {
+					e, ok := evt.(pointer.Event)
+					if ok {
+						if e.Kind == pointer.Press || e.Source == pointer.Touch {
+							t.header.clickedColumnIndex = i
+						}
+
+						switch e.Buttons {
+						case pointer.ButtonPrimary:
+						case pointer.ButtonSecondary:
+							if e.Kind == pointer.Press {
+								t.header.clickedColumnIndex = i
+							}
+						}
+					}
+				}
+				cols = append(cols, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					return Background{Color: colors.ColorHeaderFg}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return material.Clickable(gtx, clickable, func(gtx layout.Context) layout.Dimensions {
+							cellFrame := t.CellFrame(gtx, t.header.columnCells[i], t.maxColumnCellWidths[i], true, layout.Inset{
+								Top:    8,
+								Bottom: 8,
+								Left:   leftPadding,
+								// Right:  rightPadding,
+							})
+							elems = append(elems, &Resizable{Widget: func(gtx layout.Context) layout.Dimensions {
+								return cellFrame
+							}})
+							return cellFrame
+						})
+					})
+				}))
+			}
+			return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle, WeightSum: 0}.Layout(gtx, cols...)
+		})
 		t.header.contextMenu.AddItem(ContextMenuItem{
 			Title:         "CopyColumn",
 			Icon:          icons.SvgIconCopy,
@@ -893,92 +970,6 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 			AppendDivider: true,
 			Clickable:     widget.Clickable{},
 		})
-	}
-	t.header.contextMenu.DrawRow = func(gtx layout.Context, index int) layout.Dimensions {
-		var cols []layout.FlexChild
-		elems := make([]*Resizable, 0)
-		for i, cell := range t.header.columnCells {
-			if cell.Disabled {
-				continue
-			}
-			clickable := &t.header.columnCells[i].Clickable
-			if clickable.Clicked(gtx) {
-				t.header.clickedColumnIndex = i
-				if t.header.sortedBy == t.header.clickedColumnIndex {
-					t.header.sortAscending = !t.header.sortAscending // 切换升序/降序
-
-					switch t.header.sortOrder {
-					case sortNone:
-						t.header.sortOrder = sortAscending
-					case sortAscending:
-						t.header.sortOrder = sortDescending
-					case sortDescending:
-						t.header.sortOrder = sortAscending
-					}
-
-				} else {
-					t.header.sortedBy = t.header.clickedColumnIndex // 更新排序列
-					t.header.sortAscending = true                   // 设为升序
-					t.header.sortOrder = sortAscending
-				}
-
-				mylog.Info("clickedColumnIndex", t.header.clickedColumnIndex)
-				// mylog.Info(t.header.columnCells[i].Text, LabelWidth(gtx, t.header.columnCells[i].Text))
-				if t.header.clickedColumnIndex > -1 && t.header.sortedBy > -1 {
-					for i := range t.header.columnCells {
-						t.header.columnCells[i].Text = strings.TrimSuffix(t.header.columnCells[i].Text, " ⇩")
-						t.header.columnCells[i].Text = strings.TrimSuffix(t.header.columnCells[i].Text, " ⇧")
-					}
-					switch t.header.sortOrder {
-					case sortNone:
-					case sortAscending:
-						t.header.columnCells[i].Text += " ⇧"
-					case sortDescending:
-						t.header.columnCells[i].Text += " ⇩"
-					}
-					t.Sort()
-					// t.header.clickedColumnIndex = -1 //重置点击列索引
-				}
-			}
-			// 拦截右击事件并在事件中赋值命中的列id
-			evt, ok := gtx.Source.Event(pointer.Filter{
-				Target: clickable,
-				Kinds:  pointer.Press | pointer.Release,
-			})
-			if ok {
-				e, ok := evt.(pointer.Event)
-				if ok {
-					if e.Kind == pointer.Press || e.Source == pointer.Touch {
-						t.header.clickedColumnIndex = i
-					}
-
-					switch e.Buttons {
-					case pointer.ButtonPrimary:
-					case pointer.ButtonSecondary:
-						if e.Kind == pointer.Press {
-							t.header.clickedColumnIndex = i
-						}
-					}
-				}
-			}
-			cols = append(cols, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return Background{Color: colors.ColorHeaderFg}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return material.Clickable(gtx, clickable, func(gtx layout.Context) layout.Dimensions {
-						cellFrame := t.CellFrame(gtx, t.header.columnCells[i], t.maxColumnCellWidths[i], true, layout.Inset{
-							Top:    8,
-							Bottom: 8,
-							Left:   leftPadding,
-							// Right:  rightPadding,
-						})
-						elems = append(elems, &Resizable{Widget: func(gtx layout.Context) layout.Dimensions {
-							return cellFrame
-						}})
-						return cellFrame
-					})
-				})
-			}))
-		}
-		return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle, WeightSum: 0}.Layout(gtx, cols...)
 	}
 	return t.header.contextMenu.Layout(gtx)
 
@@ -1798,7 +1789,7 @@ func (t *TreeTable[T]) maxColumnCellTextWidth() unit.Dp {
 func (t *TreeTable[T]) Format() *stream.Buffer {
 	buf := t.FormatHeader(t.maxColumnTextWidths)
 	t.FormatChildren(buf, t.rootRows) // 传入子节点打印函数
-	// mylog.Json("RootRows", buf.String())
+	// mylog.Json("DrawRowCallback", buf.String())
 	return buf
 }
 

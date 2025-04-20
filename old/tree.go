@@ -30,14 +30,12 @@ type (
 )
 
 func NewTree(nodes []*TreeNode) *Tree {
-	m := ux.NewContextMenu(len(nodes), nil)
-
 	return &Tree{
 		nodes:       nodes,
 		width:       unit.Dp(200),
 		clickedNode: nil,
 		click:       nil,
-		ContextMenu: m,
+		ContextMenu: nil,
 	}
 }
 
@@ -159,12 +157,8 @@ func (t *Tree) Layout(gtx layout.Context) layout.Dimensions {
 			return layout.Dimensions{}
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			t.ContextMenu.DrawRow = func(gtx layout.Context, index int) layout.Dimensions {
-				rootRows := t.RootRows(gtx, t.nodes)
-				return rootRows[index](gtx)
-			}
+			t.ContextMenu = ux.NewContextMenuWithRootRows(t.RootRows(gtx, t.nodes)...)
 			return t.ContextMenu.Layout(gtx)
-			// return layout.Flex{Axis: layout.Vertical}.Layout(gtx, t.renderTree(gtx, t.nodes)...)
 		}),
 	)
 }

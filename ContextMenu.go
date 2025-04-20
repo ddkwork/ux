@@ -26,22 +26,32 @@ type ContextMenuItem struct {
 }
 
 type ContextMenu struct {
-	Items []*ContextMenuItem
-	component.ContextArea
-	component.MenuState
-	widget.List
-	RowClicks       []widget.Clickable
-	DrawRow         func(gtx layout.Context, index int) layout.Dimensions
+	Items           []*ContextMenuItem
+	area            component.ContextArea
+	state           component.MenuState
+	list            widget.List
+	rowClicks       []widget.Clickable
+	rootRows        []layout.Widget
 	ClickedRowindex int
 	sync.Once
 }
 
-func NewContextMenu(length int, drawRow func(gtx layout.Context, index int) layout.Dimensions) *ContextMenu {
+func (m *ContextMenu) AppendRootRows(rootRow layout.Widget) {
+	m.rootRows = append(m.rootRows, rootRow)
+}
+
+func NewContextMenuWithRootRows(rootRows ...layout.Widget) *ContextMenu {
+	m := NewContextMenu()
+	m.rootRows = rootRows
+	return m
+}
+
+func NewContextMenu() *ContextMenu {
 	return &ContextMenu{
-		Items:       nil,
-		ContextArea: component.ContextArea{},
-		MenuState:   component.MenuState{},
-		List: widget.List{
+		Items: nil,
+		area:  component.ContextArea{},
+		state: component.MenuState{},
+		list: widget.List{
 			Scrollbar: widget.Scrollbar{},
 			List: layout.List{
 				Axis:        layout.Vertical,
@@ -50,21 +60,33 @@ func NewContextMenu(length int, drawRow func(gtx layout.Context, index int) layo
 				Position:    layout.Position{},
 			},
 		},
-		RowClicks: make([]widget.Clickable, length),
-		DrawRow:   drawRow,
+		rowClicks:       nil,
+		rootRows:        make([]layout.Widget, 0),
+		ClickedRowindex: 0,
+		Once:            sync.Once{},
 	}
 }
 
 func (m *ContextMenu) AddItem(item ContextMenuItem) {
 	menuItem := component.MenuItem(th, &item.Clickable, item.Title)
 	menuItem.Icon = item.Icon
-	m.Options = append(m.Options, func(gtx layout.Context) layout.Dimensions {
+	m.state.Options = append(m.state.Options, func(gtx layout.Context) layout.Dimensions {
 		return menuItem.Layout(gtx)
 	})
 	if item.AppendDivider {
-		m.Options = append(m.Options, component.Divider(th).Layout)
+		m.state.Options = append(m.state.Options, component.Divider(th).Layout)
 	}
 	m.Items = append(m.Items, &item)
+}
+
+func (m *ContextMenu) InitMenuItems(items ...ContextMenuItem) {
+	m.Once.Do(func() {
+		for _, item := range items {
+			if item.Can() {
+				m.AddItem(item)
+			}
+		}
+	})
 }
 
 func (m *ContextMenu) OnClicked(gtx layout.Context) {
@@ -79,10 +101,18 @@ func (m *ContextMenu) OnClicked(gtx layout.Context) {
 
 // Layout 线性的list，表格以及非线性的树形表格(核心:直接rootRow当做线性表格即可，顶层调用menu布局。转不过弯来一直去处理容器节点是否渲染menu布局的问题)均通过测试
 func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
+	mylog.CheckNil(m.rootRows)
 	return layout.Stack{}.Layout(gtx,
 		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-			return material.List(th, &m.List).Layout(gtx, len(m.RowClicks), func(gtx layout.Context, index int) layout.Dimensions {
-				rowClick := &m.RowClicks[index]
+			return material.List(th, &m.list).Layout(gtx, len(m.rootRows), func(gtx layout.Context, index int) layout.Dimensions {
+				if m.rowClicks == nil {
+					m.rowClicks = make([]widget.Clickable, len(m.rootRows))
+				}
+				if len(m.rowClicks) != len(m.rootRows) {
+					m.rowClicks = make([]widget.Clickable, len(m.rootRows))
+					//mylog.Warning("remake row clicks")//todo 树形表格调用这个太频繁，得查一下原因
+				}
+				rowClick := &m.rowClicks[index]
 				return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = gtx.Constraints.Max.X
 					if event, b := gtx.Event(pointer.Filter{Target: rowClick, Kinds: pointer.Press | pointer.Release}); b {
@@ -99,26 +129,23 @@ func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
 							}
 						}
 					}
-					if m.DrawRow == nil {
-						return m.drawRowDefault(gtx, rowClick, index)
-					}
-					return m.DrawRow(gtx, index)
+					return m.rootRows[index](gtx)
 				})
 			})
 		}),
 		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-			return m.ContextArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return m.area.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Min = image.Point{}
 				m.OnClicked(gtx)
 				return m.drawContextArea(gtx)
-				return component.Menu(th, &m.MenuState).Layout(gtx) // 所有行的item共用一个popup菜单而不是每行popup一个
+				return component.Menu(th, &m.state).Layout(gtx) // 所有行的item共用一个popup菜单而不是每行popup一个
 			})
 		}),
 	)
 }
 
 func (m *ContextMenu) drawContextArea(gtx layout.Context) layout.Dimensions { // popup区域的背景色，位置，四角弧度
-	menuStyle := component.Menu(th, &m.MenuState)
+	menuStyle := component.Menu(th, &m.state)
 	menuStyle.SurfaceStyle = component.SurfaceStyle{
 		Theme: th,
 		ShadowStyle: component.ShadowStyle{
@@ -133,73 +160,71 @@ func (m *ContextMenu) drawContextArea(gtx layout.Context) layout.Dimensions { //
 	return menuStyle.Layout(gtx)
 }
 
-// 测试用例，现在不需要了
-func (m *ContextMenu) drawRowDefault(gtx layout.Context, rowClick *widget.Clickable, index int) layout.Dimensions {
-	m.Once.Do(func() {
-		m.AddItem(ContextMenuItem{
+// LayoutTest 测试用例，现在不需要了
+func (m *ContextMenu) InitTestMenuItems() {
+	m.InitMenuItems(
+		ContextMenuItem{
 			Title:         "Red",
 			Icon:          nil,
-			Can:           func() bool { return false },
+			Can:           func() bool { return true },
 			Do:            func() { mylog.Info(m.ClickedRowindex, "red item clicked") },
 			AppendDivider: false,
 			Clickable:     widget.Clickable{},
-		})
-		m.AddItem(ContextMenuItem{
+		},
+		ContextMenuItem{
 			Title:         "Green",
 			Icon:          nil,
-			Can:           func() bool { return false },
+			Can:           func() bool { return true },
 			Do:            func() { mylog.Info(m.ClickedRowindex, "Green item clicked") },
 			AppendDivider: false,
 			Clickable:     widget.Clickable{},
-		})
-		m.AddItem(ContextMenuItem{
+		},
+		ContextMenuItem{
 			Title:         "Blue",
 			Icon:          nil,
-			Can:           func() bool { return false },
+			Can:           func() bool { return true },
 			Do:            func() { mylog.Info(m.ClickedRowindex, "Blue item clicked") },
 			AppendDivider: false,
 			Clickable:     widget.Clickable{},
-		})
-		m.AddItem(ContextMenuItem{
+		},
+		ContextMenuItem{
 			Title:         "Balance",
 			Icon:          icons.ActionAccountBalanceIcon,
-			Can:           func() bool { return false },
+			Can:           func() bool { return true },
 			Do:            func() { mylog.Info(m.ClickedRowindex, "Balance item clicked") },
 			AppendDivider: false,
 			Clickable:     widget.Clickable{},
-		})
-		m.AddItem(ContextMenuItem{
+		},
+		ContextMenuItem{
 			Title:         "Account",
 			Icon:          icons.ActionAccountBoxIcon,
-			Can:           func() bool { return false },
+			Can:           func() bool { return true },
 			Do:            func() { mylog.Info(m.ClickedRowindex, "Account item clicked") },
 			AppendDivider: false,
 			Clickable:     widget.Clickable{},
-		})
-		m.AddItem(ContextMenuItem{
+		},
+		ContextMenuItem{
 			Title:         "Cart",
 			Icon:          icons.ActionAddShoppingCartIcon,
-			Can:           func() bool { return false },
+			Can:           func() bool { return true },
 			Do:            func() { mylog.Info(m.ClickedRowindex, "Cart item clicked") },
 			AppendDivider: false,
 			Clickable:     widget.Clickable{},
+		},
+	)
+}
+func (m *ContextMenu) LayoutTest(gtx layout.Context) layout.Dimensions {
+	m.rowClicks = make([]widget.Clickable, 100)
+	m.InitTestMenuItems()
+	for i := range 100 {
+		m.AppendRootRows(func(gtx layout.Context) layout.Dimensions {
+			rowClick := &m.rowClicks[i]
+			buttonStyle := material.Button(th, rowClick, "item"+fmt.Sprintf("%d", i))
+			buttonStyle.Color = RowColor(i)
+			return buttonStyle.Layout(gtx)
 		})
-	})
-	if event, b := gtx.Event(pointer.Filter{Target: rowClick, Kinds: pointer.Press | pointer.Release}); b {
-		if e, ok := event.(pointer.Event); ok {
-			if e.Kind == pointer.Press {
-				switch {
-				case e.Buttons.Contain(pointer.ButtonPrimary):
-					println("Row selected (left click) " + strconv.Itoa(index))
-				case e.Buttons.Contain(pointer.ButtonSecondary):
-					println("Row selected (right click)" + strconv.Itoa(index))
-				}
-			}
-		}
 	}
-	buttonStyle := material.Button(th, rowClick, "item"+fmt.Sprintf("%d", index))
-	buttonStyle.Color = RowColor(index)
-	return buttonStyle.Layout(gtx)
+	return m.Layout(gtx)
 }
 
 // LayoutRow 对先行表格不感兴趣，不过在demo/other/hashicon/example/main.go下已经通过测试，不会去维护官方那个表格，不好用
@@ -207,7 +232,7 @@ func (m *ContextMenu) drawRowDefault(gtx layout.Context, rowClick *widget.Clicka
 //func (m *ContextMenu) LayoutRow(gtx layout.Context, index int) layout.Dimensions {
 //	return layout.Stack{}.Layout(gtx,
 //		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-//			rowClick := &m.RowClicks[index]
+//			rowClick := &m.rowClicks[index]
 //			return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
 //				gtx.Constraints.Min.X = gtx.Constraints.Max.X
 //				if event, b := gtx.Event(pointer.Filter{Target: rowClick, Kinds: pointer.Press | pointer.Release}); b {
@@ -224,7 +249,7 @@ func (m *ContextMenu) drawRowDefault(gtx layout.Context, rowClick *widget.Clicka
 //						}
 //					}
 //				}
-//				return m.DrawRow(gtx, index)
+//				return m.DrawRowCallback(gtx, index)
 //			})
 //		}),
 //		layout.Expanded(func(gtx layout.Context) layout.Dimensions {

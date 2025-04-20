@@ -1,6 +1,7 @@
 package ux
 
 import (
+	"gioui.org/op/paint"
 	"image"
 	"image/color"
 	"io"
@@ -19,7 +20,6 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
-	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"github.com/ddkwork/ux/widget/material"
@@ -258,7 +258,84 @@ func (i *Input) Layout(gtx layout.Context) layout.Dimensions {
 
 func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 	if i.contextMenu == nil {
-		i.contextMenu = NewContextMenu(1, nil)
+		i.contextMenu = NewContextMenuWithRootRows(func(gtx layout.Context) layout.Dimensions {
+			border := widget.Border{
+				Color:        i.borderColor,
+				Width:        unit.Dp(1),
+				CornerRadius: i.radius,
+			}
+			return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return layout.Background{}.Layout(gtx,
+					func(gtx layout.Context) layout.Dimensions {
+						rr := gtx.Dp(i.radius)
+						defer clip.UniformRRect(image.Rectangle{Max: gtx.Constraints.Min}, rr).Push(gtx.Ops).Pop()
+						paint.Fill(gtx.Ops, i.bgColor)
+						return layout.Dimensions{Size: gtx.Constraints.Min}
+					},
+					func(gtx layout.Context) layout.Dimensions {
+						return i.size.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+							inputLayout := layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+								if i.width > 0 {
+									gtx.Constraints.Max.X = gtx.Dp(i.width)
+								}
+								editor := material.Editor(th, &i.editor, i.hint)
+								editor.HintColor = th.Color.HintTextColor
+								editor.SelectionColor = th.Color.TextSelectionColor
+
+								gtx.Constraints.Min.Y = gtx.Dp(i.size.Height) // 设置最小高度为 100dp
+								gtx.Constraints.Max.Y = gtx.Constraints.Min.Y // 限制最大高度与最小高度相同
+								editor.TextSize = i.size.TextSize
+
+								if i.height > 0 {
+									gtx.Constraints.Min.Y = gtx.Dp(i.height)      // 设置最小高度为 100dp
+									gtx.Constraints.Max.Y = gtx.Constraints.Min.Y // 限制最大高度与最小高度相同
+								}
+								if i.editor.ReadOnly {
+									editor.Color = th.Color.HintTextColor
+								} else {
+									editor.Color = th.Color.DefaultTextWhiteColor
+								}
+								return editor.Layout(gtx)
+							})
+
+							var widgets []layout.FlexChild
+							if i.before != nil {
+								widgets = append(widgets, layout.Rigid(i.before))
+							}
+							widgets = append(widgets, inputLayout)
+							if i.icon != nil {
+								iconLayout := layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+									if i.iconClick.Clicked(gtx) {
+										if i.onIconClick != nil {
+											i.onIconClick(gtx)
+										}
+										if !i.showPassword {
+											i.editor.Mask = 0
+											i.icon = icons.ActionVisibilityIcon
+											i.showPassword = true
+										} else {
+											i.editor.Mask = '*'
+											i.icon = icons.ActionVisibilityOffIcon
+											i.showPassword = false
+										}
+									}
+									return i.iconClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+										return i.icon.Layout(gtx, th.Color.DefaultIconColor)
+									})
+								})
+								// widgets = append(widgets, iconLayout)
+								widgets = slices.Insert(widgets, 0, iconLayout)
+							} else {
+								if i.after != nil {
+									widgets = append(widgets, layout.Rigid(i.after))
+								}
+							}
+							return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle, Spacing: layout.SpaceBetween}.Layout(gtx, widgets...)
+						})
+					},
+				)
+			})
+		})
 		items := []ContextMenuItem{
 			{
 				Title: "copy",
@@ -308,89 +385,7 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 				Clickable:     widget.Clickable{},
 			},
 		}
-		for _, item := range items {
-			if item.Can() {
-				i.contextMenu.AddItem(item)
-			}
-		}
-	}
-	i.contextMenu.DrawRow = func(gtx layout.Context, index int) layout.Dimensions {
-		border := widget.Border{
-			Color:        i.borderColor,
-			Width:        unit.Dp(1),
-			CornerRadius: i.radius,
-		}
-		return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return layout.Background{}.Layout(gtx,
-				func(gtx layout.Context) layout.Dimensions {
-					rr := gtx.Dp(i.radius)
-					defer clip.UniformRRect(image.Rectangle{Max: gtx.Constraints.Min}, rr).Push(gtx.Ops).Pop()
-					paint.Fill(gtx.Ops, i.bgColor)
-					return layout.Dimensions{Size: gtx.Constraints.Min}
-				},
-				func(gtx layout.Context) layout.Dimensions {
-					return i.size.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						inputLayout := layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-							if i.width > 0 {
-								gtx.Constraints.Max.X = gtx.Dp(i.width)
-							}
-							editor := material.Editor(th, &i.editor, i.hint)
-							editor.HintColor = th.Color.HintTextColor
-							editor.SelectionColor = th.Color.TextSelectionColor
-
-							gtx.Constraints.Min.Y = gtx.Dp(i.size.Height) // 设置最小高度为 100dp
-							gtx.Constraints.Max.Y = gtx.Constraints.Min.Y // 限制最大高度与最小高度相同
-							editor.TextSize = i.size.TextSize
-
-							if i.height > 0 {
-								gtx.Constraints.Min.Y = gtx.Dp(i.height)      // 设置最小高度为 100dp
-								gtx.Constraints.Max.Y = gtx.Constraints.Min.Y // 限制最大高度与最小高度相同
-							}
-							if i.editor.ReadOnly {
-								editor.Color = th.Color.HintTextColor
-							} else {
-								editor.Color = th.Color.DefaultTextWhiteColor
-							}
-							return editor.Layout(gtx)
-						})
-
-						var widgets []layout.FlexChild
-						if i.before != nil {
-							widgets = append(widgets, layout.Rigid(i.before))
-						}
-						widgets = append(widgets, inputLayout)
-						if i.icon != nil {
-							iconLayout := layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-								if i.iconClick.Clicked(gtx) {
-									if i.onIconClick != nil {
-										i.onIconClick(gtx)
-									}
-									if !i.showPassword {
-										i.editor.Mask = 0
-										i.icon = icons.ActionVisibilityIcon
-										i.showPassword = true
-									} else {
-										i.editor.Mask = '*'
-										i.icon = icons.ActionVisibilityOffIcon
-										i.showPassword = false
-									}
-								}
-								return i.iconClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-									return i.icon.Layout(gtx, th.Color.DefaultIconColor)
-								})
-							})
-							// widgets = append(widgets, iconLayout)
-							widgets = slices.Insert(widgets, 0, iconLayout)
-						} else {
-							if i.after != nil {
-								widgets = append(widgets, layout.Rigid(i.after))
-							}
-						}
-						return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle, Spacing: layout.SpaceBetween}.Layout(gtx, widgets...)
-					})
-				},
-			)
-		})
+		i.contextMenu.InitMenuItems(items...)
 	}
 	return i.contextMenu.Layout(gtx)
 }
