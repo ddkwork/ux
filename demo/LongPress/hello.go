@@ -69,8 +69,8 @@ func loop(w *app.Window) error {
 	m := ux.NewContextMenuWithRootRows(func(gtx layout.Context) layout.Dimensions {
 		return flow.Layout(gtx, len(selectedAccTags), func(gtx layout.Context, i int) layout.Dimensions {
 			return layout.UniformInset(2).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				gtx.Constraints.Min.X = 200 //todo into flow
-				gtx.Constraints.Max.X = 200
+				//gtx.Constraints.Min.X = 200 //todo into flow
+				//gtx.Constraints.Max.X = 200
 				return tagClickables[i].Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					if tagClickables[i].Clicked(gtx) {
 						println("clicked", selectedAccTags[i])

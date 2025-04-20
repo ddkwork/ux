@@ -22,6 +22,7 @@ type Flow struct {
 	Axis      layout.Axis
 	Alignment layout.Alignment
 	list      widget.List
+	ContextMenu
 }
 
 func (g *Flow) Layout(gtx layout.Context, num int, el FlowElement) layout.Dimensions {
