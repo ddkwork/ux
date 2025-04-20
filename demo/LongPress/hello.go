@@ -66,9 +66,7 @@ func loop(w *app.Window) error {
 	}
 
 	flow := ux.Flow{
-		Num:       5,
-		Axis:      layout.Horizontal,
-		Alignment: layout.Middle,
+		Num: 5,
 	}
 
 	var ops op.Ops
@@ -82,8 +80,6 @@ func loop(w *app.Window) error {
 
 			flow.Layout(gtx, len(keys), func(gtx layout.Context, i int) layout.Dimensions {
 				return layout.UniformInset(2).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					gtx.Constraints.Min.X = 200 //todo into flow
-					gtx.Constraints.Max.X = 200
 					return clickables[i].Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						if clickables[i].Clicked(gtx) {
 							println("clicked", keys[i])

@@ -30,8 +30,8 @@ func NewIconView() *IconView {
 		filterMap:   make([]layout.Widget, 0, icons.IconMap.Len()),
 		flow: Flow{
 			Num:       5,
-			Axis:      layout.Horizontal,
-			Alignment: layout.Middle,
+			axis:      layout.Horizontal,
+			alignment: layout.Middle,
 			list: widget.List{
 				Scrollbar: widget.Scrollbar{},
 				List:      layout.List{},
@@ -52,8 +52,6 @@ func NewIconView() *IconView {
 
 func (v *IconView) Layout(gtx layout.Context) layout.Dimensions {
 	return v.flow.Layout(gtx, v.clickMap.Len(), func(gtx layout.Context, i int) layout.Dimensions {
-		gtx.Constraints.Min.X = 400
-		gtx.Constraints.Max.X = 400
 		v.filter()
 		if v.filterMap != nil {
 			return layout.UniformInset(4).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
