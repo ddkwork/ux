@@ -30,7 +30,7 @@ func main() {
 
 func loop(w *app.Window) error {
 
-	selectedAccTags := []string{
+	keys := []string{
 		"xxxxxx",
 		"yyyyyy",
 		"zzzzzz",
@@ -57,8 +57,13 @@ func loop(w *app.Window) error {
 		"vvvvvv",
 		"wwwwww",
 	}
-	tagClickables := make([]widget.Clickable, len(selectedAccTags))
-	menus := make([]*ux.ContextMenu, len(selectedAccTags))
+	clickables := make([]widget.Clickable, len(keys))
+	menus := make([]*ux.ContextMenu, len(keys))
+	for i, clickable := range clickables {
+		menus[i] = ux.NewContextMenuWithRootRows(func(gtx layout.Context) layout.Dimensions {
+			return ux.Button(&clickable, icons.IconMap.Values()[i], keys[i]).Layout(gtx)
+		})
+	}
 
 	flow := ux.Flow{
 		Num:       5,
@@ -75,17 +80,14 @@ func loop(w *app.Window) error {
 			gtx := app.NewContext(&ops, e)
 			ux.BackgroundDark(gtx)
 
-			flow.Layout(gtx, len(selectedAccTags), func(gtx layout.Context, i int) layout.Dimensions {
+			flow.Layout(gtx, len(keys), func(gtx layout.Context, i int) layout.Dimensions {
 				return layout.UniformInset(2).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = 200 //todo into flow
 					gtx.Constraints.Max.X = 200
-					return tagClickables[i].Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						if tagClickables[i].Clicked(gtx) {
-							println("clicked", selectedAccTags[i])
+					return clickables[i].Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						if clickables[i].Clicked(gtx) {
+							println("clicked", keys[i])
 						}
-						menus[i] = ux.NewContextMenuWithRootRows(func(gtx layout.Context) layout.Dimensions {
-							return ux.Button(&tagClickables[i], icons.IconMap.Values()[i], selectedAccTags[i]).Layout(gtx)
-						})
 						return menus[i].LayoutTest(gtx)
 					})
 				})
