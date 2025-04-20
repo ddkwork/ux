@@ -12,6 +12,24 @@ import (
 	"github.com/ddkwork/ux/giosvg"
 )
 
+type Type interface {
+	*widget.Icon | *widget.Image | *giosvg.Icon |
+		*Ico | *Gif | *Png | *Jpg | *Bmp
+}
+
+type (
+	Ico struct {
+	}
+	Gif struct {
+	}
+	Png struct {
+	}
+	Jpg struct {
+	}
+	Bmp struct {
+	}
+)
+
 func Layout(gtx layout.Context, icon any, color color.NRGBA, size unit.Dp) layout.Dimensions {
 	sizeDp := gtx.Dp(size)
 	if icon != nil {
