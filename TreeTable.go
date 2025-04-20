@@ -52,22 +52,18 @@ type (
 		maxColumnTextWidths          []unit.Dp      // 最宽的列文本宽度for tui
 		maxHierarchyColumnWidthCache unit.Dp
 		// rows                    [][]CellData        // 矩阵置换参数，行转为列，增删改节点后重新生成它
-		columns                 [][]CellData        // CopyColumn
-		DragRemovedRowsCallback func(n *Node[T])    // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
-		DropOccurredCallback    func(n *Node[T])    // Called whenever a drop occurs that modifies the model.
-		inLayoutHeader          bool                // for drag
-		columnResizeStart       unit.Dp             //
-		columnResizeBase        unit.Dp             //
-		columnResizeOverhead    unit.Dp             //
-		preventUserColumnResize bool                //
-		awaitingSyncToModel     bool                //
-		wasDragged              bool                //
-		dividerDrag             bool                //
-		LongPressCallback       func(node *Node[T]) `json:"-"` // 长按回调
-		pressStarted            time.Time           // 按压开始时间
-		longPressed             bool                // 是否已经触发长按事件
-		widget.List                                 // 为rootRows渲染列表和滚动条
-		once                    sync.Once           // 自动计算列宽一次
+		columns                 [][]CellData     // CopyColumn
+		DragRemovedRowsCallback func(n *Node[T]) // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
+		DropOccurredCallback    func(n *Node[T]) // Called whenever a drop occurs that modifies the model.
+		inLayoutHeader          bool             // for drag
+		columnResizeStart       unit.Dp          //
+		columnResizeBase        unit.Dp          //
+		columnResizeOverhead    unit.Dp          //
+		preventUserColumnResize bool             //
+		awaitingSyncToModel     bool             //
+		wasDragged              bool             //
+		dividerDrag             bool             //
+		once                    sync.Once        // 自动计算列宽一次
 	}
 	TableContext[T any] struct {
 		ContextMenuItems       func(gtx layout.Context, n *Node[T]) (items []ContextMenuItem) // 通过SelectedNode传递给菜单的do取出元数据，比如删除文件,但是菜单是否绘制取决于当前渲染的行，所以要传递n给can
@@ -170,19 +166,7 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 		awaitingSyncToModel:          false,
 		wasDragged:                   false,
 		dividerDrag:                  false,
-		LongPressCallback:            nil,
-		pressStarted:                 time.Time{},
-		longPressed:                  false,
-		List: widget.List{
-			Scrollbar: widget.Scrollbar{},
-			List: layout.List{
-				Axis:        layout.Vertical,
-				ScrollToEnd: false,
-				Alignment:   0,
-				Position:    layout.Position{},
-			},
-		},
-		once: sync.Once{},
+		once:                         sync.Once{},
 	}
 }
 
@@ -213,7 +197,6 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		t.SizeColumnsToFit(gtx)
 	})
 	t.rootRows = t.Root.Children // 增删改查不一定去计算列宽导致有些节点已经删除，是空指针导致panic，所有这里需要刷新一下rootRows，不知道这里是否会内存泄漏
-	// list := material.List(th, &t.List)
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return t.HeaderFrame(gtx) // 渲染表头
@@ -1260,7 +1243,7 @@ type Point struct {
 }
 
 func (t *TreeTable[T]) ScrollRowIntoView(row int) {
-	t.List.ScrollTo(row)
+	t.contextMenu.list.ScrollTo(row)
 }
 
 const LongPressDuration = 500 * time.Millisecond // 自定义长按持续时间
