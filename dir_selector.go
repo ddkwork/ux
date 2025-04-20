@@ -3,7 +3,7 @@ package ux
 import (
 	"fmt"
 
-	"github.com/ddkwork/ux/resources/icons"
+	"github.com/ddkwork/ux/resources/images"
 
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/ux/dlgs"
@@ -105,14 +105,14 @@ func (b *DirSelector) updateIcon() {
 		b.input.SetAfter(func(gtx layout.Context) layout.Dimensions {
 			return b.actionClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Max.X = gtx.Dp(th.Size.DefaultIconSize)
-				return icons.ActionDeleteIcon.Layout(gtx, th.Color.DefaultIconColor)
+				return images.Layout(gtx, images.ActionDeleteIcon, th.Color.DefaultIconColor, 0)
 			})
 		})
 	} else {
 		b.input.SetAfter(func(gtx layout.Context) layout.Dimensions {
 			return b.actionClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Max.X = gtx.Dp(th.Size.DefaultIconSize)
-				return icons.FileFileUploadIcon.Layout(gtx, th.Color.DefaultIconColor)
+				return images.Layout(gtx, images.FileFileUploadIcon, th.Color.DefaultIconColor, 0)
 			})
 		})
 	}

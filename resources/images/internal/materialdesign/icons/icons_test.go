@@ -30,7 +30,7 @@ func encodePNG(dstFilename string, src image.Image) error {
 
 func TestManualInspection(t *testing.T) {
 	// Set this to a non-empty string such as "/tmp/mdicons" to manually
-	// inspect the icons.
+	// inspect the images.
 	const tmpDir = ""
 
 	if tmpDir == "" {

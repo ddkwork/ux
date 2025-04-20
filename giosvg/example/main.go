@@ -22,7 +22,7 @@ func init() {
 	// os.Setenv("GIORENDERER", "forcecompute")
 }
 
-// Thanks to Freepik from Flaticon Licensed by Creative Commons 3.0 for the example icons shown below.
+// Thanks to Freepik from Flaticon Licensed by Creative Commons 3.0 for the example images shown below.
 
 //go:embed  school-bus.svg
 var bus []byte

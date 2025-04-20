@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/ddkwork/ux/resources/colors"
-	"github.com/ddkwork/ux/resources/icons"
+	"github.com/ddkwork/ux/resources/images"
 
 	"gioui.org/layout"
 	"gioui.org/unit"
@@ -45,17 +45,17 @@ func main() {
 	panel.AddChild(hPanel)
 
 	tipIconButtons := []*ux.TipIconButton{
-		ux.NewTooltipButton(icons.NavigationArrowBackIcon, "action code", nil),
-		ux.NewTooltipButton(icons.ActionFavoriteIcon, "action code", nil),
-		ux.NewTooltipButton(icons.ActionDoneIcon, "action bug report", nil),
-		ux.NewTooltipButton(icons.ActionDeleteIcon, "action build", nil),
-		ux.NewTooltipButton(icons.NavigationCloseIcon, "action build", nil),
-		ux.NewTooltipButton(icons.NavigationArrowDropDownIcon, "action build", nil),
-		ux.NewTooltipButton(icons.NavigationChevronLeftIcon, "action build", nil),
-		ux.NewTooltipButton(icons.NavigationChevronRightIcon, "action build", nil),
-		ux.NewTooltipButton(icons.FileFolderIcon, "action build", nil),
-		ux.NewTooltipButton(icons.FileFileUploadIcon, "action build", nil),
-		ux.NewTooltipButton(icons.FileFileDownloadIcon, "action build", nil),
+		ux.NewTooltipButton(images.NavigationArrowBackIcon, "action code", nil),
+		ux.NewTooltipButton(images.ActionFavoriteIcon, "action code", nil),
+		ux.NewTooltipButton(images.ActionDoneIcon, "action bug report", nil),
+		ux.NewTooltipButton(images.ActionDeleteIcon, "action build", nil),
+		ux.NewTooltipButton(images.NavigationCloseIcon, "action build", nil),
+		ux.NewTooltipButton(images.NavigationArrowDropDownIcon, "action build", nil),
+		ux.NewTooltipButton(images.NavigationChevronLeftIcon, "action build", nil),
+		ux.NewTooltipButton(images.NavigationChevronRightIcon, "action build", nil),
+		ux.NewTooltipButton(images.FileFolderIcon, "action build", nil),
+		ux.NewTooltipButton(images.FileFileUploadIcon, "action build", nil),
+		ux.NewTooltipButton(images.FileFileDownloadIcon, "action build", nil),
 	}
 
 	appBar = ux.InitAppBar(hPanel, tipIconButtons, speechTxt)
@@ -85,7 +85,7 @@ func main() {
 					return []ux.ContextMenuItem{
 						{
 							Title: "delete file",
-							Icon:  icons.SvgIconTrash,
+							Icon:  images.SvgIconTrash,
 							Can:   func() bool { return stream.IsFilePath(n.Data.Path) }, // n是当前渲染的行,它的元数据是路径才显示
 							Do: func() {
 								mylog.Check(os.Remove(t.SelectedNode.Data.Path))
@@ -96,7 +96,7 @@ func main() {
 						},
 						{
 							Title: "delete directory",
-							Icon:  icons.SvgIconTrash,
+							Icon:  images.SvgIconTrash,
 							Can:   func() bool { return stream.IsDir(n.Data.Path) }, // n是当前渲染的行,它的元数据是目录才显示
 							Do: func() {
 								mylog.Check(os.RemoveAll(t.SelectedNode.Data.Path))
@@ -108,11 +108,11 @@ func main() {
 					}
 				},
 				MarshalRowCells: func(n *ux.Node[packet]) (cells []ux.CellData) {
-					icon := icons.SvgIconGcsTemplate
+					icon := images.SvgIconGcsTemplate
 					if n.Container() {
-						icon = icons.SvgIconOpenFolder
+						icon = images.SvgIconOpenFolder
 						if !n.IsOpen() {
-							icon = icons.SvgIconClosedFolder
+							icon = images.SvgIconClosedFolder
 						}
 						n.Data.Scheme = n.SumChildren()
 						sumBytes := 0
@@ -239,17 +239,17 @@ func main() {
 					{
 						Identifier: "",
 						Title:      "aa",
-						Kind:       "", // todo add icons and callback
+						Kind:       "", // todo add images and callback
 					},
 					{
 						Identifier: "",
 						Title:      "bb",
-						Kind:       "", // todo add icons
+						Kind:       "", // todo add images
 					},
 					{
 						Identifier: "",
 						Title:      "cc",
-						Kind:       "", // todo add icons
+						Kind:       "", // todo add images
 					},
 				}
 			})
@@ -492,7 +492,7 @@ func main() {
 			// resizer.Layout(gtx, cust4.Layout, nil)
 		case MobileType:
 		case SvgButtonType:
-			m.Set(SvgButtonType, ux.Button(new(widget.Clickable), icons.SvgIconCircledChevronRight, ""))
+			m.Set(SvgButtonType, ux.Button(new(widget.Clickable), images.SvgIconCircledChevronRight, ""))
 		case CodeEditorType:
 			m.Set(CodeEditorType, ux.NewCodeEditor(tabGo, ux.CodeLanguageGolang))
 		case AsmViewType:
@@ -543,12 +543,12 @@ func main() {
 			for i, key := range keys {
 				flow.AppendElem(i, ux.FlowElemButton{
 					Title: key,
-					Icon:  icons.IconMap.Values()[i],
+					Icon:  images.IconMap.Values()[i],
 					Do:    func(gtx layout.Context) { mylog.Info(key + " pressed") }, //run exe
 					ContextMenuItems: []ux.ContextMenuItem{
 						{
 							Title:         "Balance",
-							Icon:          icons.ActionAccountBalanceIcon,
+							Icon:          images.ActionAccountBalanceIcon,
 							Can:           func() bool { return true },
 							Do:            func() { mylog.Info("Balance item clicked") },
 							AppendDivider: false,
@@ -556,7 +556,7 @@ func main() {
 						},
 						{
 							Title:         "Account",
-							Icon:          icons.ActionAccountBoxIcon,
+							Icon:          images.ActionAccountBoxIcon,
 							Can:           func() bool { return true },
 							Do:            func() { mylog.Info("Account item clicked") },
 							AppendDivider: false,
@@ -564,7 +564,7 @@ func main() {
 						},
 						{
 							Title:         "Cart",
-							Icon:          icons.ActionAddShoppingCartIcon,
+							Icon:          images.ActionAddShoppingCartIcon,
 							Can:           func() bool { return true },
 							Do:            func() { mylog.Info("Cart item clicked") },
 							AppendDivider: false,
@@ -679,7 +679,7 @@ var speechTxt string
 // D:\workspace\workspace\branch\gui\packaging
 /*
 ```go
-    import "github.com/gio-eui/md3-icons/icons/toggle/check_box"
+    import "github.com/gio-eui/md3-images/images/toggle/check_box"
 
     var CheckBox *widget.Icon
     CheckBox, _ = widget.NewIcon(mdiToggleCheckBox.Ivg)

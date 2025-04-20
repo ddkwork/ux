@@ -19,7 +19,7 @@ type SearchResult struct {
 	Item  Item
 	Score float64
 
-	Icon      *widget.Icon
+	Icon      []byte
 	Clickable widget.Clickable
 }
 

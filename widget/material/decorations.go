@@ -119,7 +119,7 @@ const (
 	winIconStroke = unit.Dp(2)
 )
 
-// minimizeWindows draws a line icons representing the minimize action.
+// minimizeWindows draws a line images representing the minimize action.
 func minimizeWindow(gtx layout.Context) layout.Dimensions {
 	size := gtx.Dp(winIconSize)
 	size32 := float32(size)

@@ -22,7 +22,7 @@ import (
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/golibrary/safemap"
 	"github.com/ddkwork/ux/resources/colors"
-	"github.com/ddkwork/ux/resources/icons"
+	"github.com/ddkwork/ux/resources/images"
 	"github.com/ddkwork/ux/widget/material"
 )
 
@@ -106,14 +106,14 @@ type AppBar struct {
 }
 
 func InitAppBar(panel *Panel, toolBars []*TipIconButton, speechTxt string) *AppBar {
-	search := NewInput("请输入搜索关键字...").SetIcon(icons.ActionSearchIcon).SetRadius(16)
+	search := NewInput("请输入搜索关键字...").SetIcon(images.ActionSearchIcon).SetRadius(16)
 	panel.AddChildFlexed(1, search) // todo 太多之后apk需要管理溢出
 
 	for _, toolbar := range toolBars {
 		panel.AddChild(toolbar)
 	}
 
-	about := NewTooltipButton(icons.AlertErrorIcon, "about", func() { // todo ico make
+	about := NewTooltipButton(images.AlertErrorIcon, "about", func() { // todo ico make
 		if mylog.IsAndroid() {
 			mylog.Info("android not support about window")
 			return

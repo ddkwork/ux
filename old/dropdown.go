@@ -5,7 +5,7 @@ import (
 	"image/color"
 
 	"github.com/ddkwork/ux/resources/colors"
-	"github.com/ddkwork/ux/resources/icons"
+	"github.com/ddkwork/ux/resources/images"
 
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/component"
@@ -44,7 +44,7 @@ type DropDownOption struct {
 	Identifier string
 	clickable  widget.Clickable
 
-	Icon      *widget.Icon
+	Icon      []byte
 	IconColor color.NRGBA
 	IconSize  unit.Dp
 
@@ -75,7 +75,7 @@ func (o *DropDownOption) WithValue(value string) *DropDownOption {
 	return o
 }
 
-func (o *DropDownOption) WithIcon(icon *widget.Icon, color color.NRGBA, size unit.Dp) *DropDownOption {
+func (o *DropDownOption) WithIcon(icon []byte, color color.NRGBA, size unit.Dp) *DropDownOption {
 	o.Icon = icon
 	o.IconColor = color
 	o.IconSize = size
@@ -225,7 +225,7 @@ func (c *DropDown) box(gtx layout.Context, text string, maxWidth unit.Dp) layout
 	c.size.X = gtx.Dp(maxWidth)
 
 	return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		// calculate the minimum width of the box, considering icons and padding
+		// calculate the minimum width of the box, considering images and padding
 		gtx.Constraints.Min.X = gtx.Dp(maxWidth) - gtx.Dp(8)
 		return layout.Inset{
 			Top:    4,
@@ -241,7 +241,7 @@ func (c *DropDown) box(gtx layout.Context, text string, maxWidth unit.Dp) layout
 				}),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = gtx.Dp(16)
-					return icons.NavigationExpandMoreIcon.Layout(gtx, th.Fg)
+					return images.Layout(gtx, images.NavigationExpandMoreIcon, th.Fg, 0)
 				}),
 			)
 		})

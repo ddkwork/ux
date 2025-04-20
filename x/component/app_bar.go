@@ -18,16 +18,6 @@ import (
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
-var moreIcon *widget.Icon = func() *widget.Icon {
-	icon, _ := widget.NewIcon(icons.NavigationMoreVert)
-	return icon
-}()
-
-var cancelIcon *widget.Icon = func() *widget.Icon {
-	icon, _ := widget.NewIcon(icons.ContentClear)
-	return icon
-}()
-
 // VerticalAnchorPosition indicates the anchor position for the content
 // of a component. Conventionally, this is use by AppBars and NavDrawers
 // to decide how to allocate internal spacing and in which direction to
@@ -49,7 +39,7 @@ type AppBar struct {
 	init sync.Once
 
 	NavigationButton       widget.Clickable
-	NavigationIcon         *widget.Icon
+	NavigationIcon         []byte
 	Title, ContextualTitle string
 	// The modal layer is used to lay out the overflow menu. The nav
 	// bar is not functional if this field is not supplied.
@@ -112,7 +102,7 @@ func (a *actionGroup) layout(gtx C, th *material.Theme, overflowBtn *widget.Clic
 	if len(a.overflow)+overflowedActions > 0 {
 		actions = append(actions, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			gtx.Constraints.Min.Y = gtx.Constraints.Max.Y
-			btn := material.IconButton(th, overflowBtn, moreIcon, overflowDesc)
+			btn := material.IconButton(th, overflowBtn, icons.NavigationMoreVert, overflowDesc)
 			btn.Size = unit.Dp(24)
 			btn.Background = th.Palette.Bg
 			btn.Color = th.Palette.Fg
@@ -259,7 +249,7 @@ type AppBarAction struct {
 // SimpleIconAction configures an AppBarAction that functions as a simple
 // IconButton. To receive events from the button, use the standard methods
 // on the provided state parameter.
-func SimpleIconAction(state *widget.Clickable, icon *widget.Icon, overflow OverflowAction) AppBarAction {
+func SimpleIconAction(state *widget.Clickable, icon []byte, overflow OverflowAction) AppBarAction {
 	a := AppBarAction{
 		OverflowAction: overflow,
 		Layout: func(gtx C, bg, fg color.NRGBA) D {
@@ -272,7 +262,7 @@ func SimpleIconAction(state *widget.Clickable, icon *widget.Icon, overflow Overf
 
 // SimpleIconButton creates an IconButtonStyle that is pre-configured to
 // be the right size for use as an AppBarAction
-func SimpleIconButton(bg, fg color.NRGBA, state *widget.Clickable, icon *widget.Icon) material.IconButtonStyle {
+func SimpleIconButton(bg, fg color.NRGBA, state *widget.Clickable, icon []byte) material.IconButtonStyle {
 	return material.IconButtonStyle{
 		Background: bg,
 		Color:      fg,
@@ -365,7 +355,7 @@ func SwapPairs(p material.Palette) material.Palette {
 
 // Layout renders the app bar. It will span all available horizontal
 // space (gtx.Constraints.Max.X), but has a fixed height. The navDesc
-// is an accessibility description for the navigation icons button, and
+// is an accessibility description for the navigation images button, and
 // the overflowDesc is an accessibility description for the overflow
 // action button.
 func (a *AppBar) Layout(gtx layout.Context, theme *material.Theme, navDesc, overflowDesc string) layout.Dimensions {
@@ -402,7 +392,7 @@ func (a *AppBar) Layout(gtx layout.Context, theme *material.Theme, navDesc, over
 			}
 			icon := a.NavigationIcon
 			if a.contextualAnim.Visible() {
-				icon = cancelIcon
+				icon = icons.ContentClear
 			}
 			button := material.IconButton(&th, &a.NavigationButton, icon, navDesc)
 			button.Size = unit.Dp(24)
@@ -444,7 +434,7 @@ type AppBarEvent interface {
 	AppBarEvent()
 }
 
-// AppBarNavigationClicked indicates that the navigation icons was clicked
+// AppBarNavigationClicked indicates that the navigation images was clicked
 // during the last frame.
 type AppBarNavigationClicked struct{}
 

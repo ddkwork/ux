@@ -7,7 +7,7 @@ import (
 	"image/color"
 	"math"
 
-	"github.com/ddkwork/ux/resources/icons"
+	"github.com/ddkwork/ux/resources/images"
 
 	"gioui.org/font"
 	"github.com/ddkwork/ux/f32color"
@@ -43,10 +43,10 @@ type ButtonLayoutStyle struct {
 
 type IconButtonStyle struct {
 	Background color.NRGBA
-	// Color is the icons color.
+	// Color is the images color.
 	Color color.NRGBA
-	Icon  any
-	// Size is the icons size.
+	Icon  []byte
+	// Size is the images size.
 	Size        unit.Dp
 	Inset       layout.Inset
 	Button      *widget.Clickable
@@ -79,7 +79,7 @@ func ButtonLayout(th *Theme, button *widget.Clickable) ButtonLayoutStyle {
 	}
 }
 
-func IconButton(th *Theme, button *widget.Clickable, icon any, description string) IconButtonStyle {
+func IconButton(th *Theme, button *widget.Clickable, icon []byte, description string) IconButtonStyle {
 	return IconButtonStyle{
 		Background:  th.Palette.ContrastBg,
 		Color:       th.Palette.ContrastFg,
@@ -181,7 +181,7 @@ func (b IconButtonStyle) Layout(gtx layout.Context) layout.Dimensions {
 			},
 			func(gtx layout.Context) layout.Dimensions {
 				return b.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return icons.Layout(gtx, b.Icon, b.Color, b.Size)
+					return images.Layout(gtx, b.Icon, b.Color, b.Size)
 				})
 			},
 		)

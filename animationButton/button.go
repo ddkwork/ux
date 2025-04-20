@@ -1,7 +1,7 @@
 package animationButton
 
 import (
-	"github.com/ddkwork/ux/resources/icons"
+	"github.com/ddkwork/ux/resources/images"
 	"image"
 	"image/color"
 
@@ -56,7 +56,7 @@ type ButtonStyle struct {
 	TextSize    unit.Sp
 	Inset       layout.Inset
 	Font        font.Font
-	Icon        any
+	Icon        []byte
 	IconGap     unit.Dp
 	Animation   ButtonAnimation
 	Border      widget.Border
@@ -286,10 +286,10 @@ func (btn *Button) Layout(gtx layout.Context) layout.Dimensions {
 							r := op.Record(gtx.Ops)
 							if btn.Flex {
 								dims = layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-									return icons.Layout(gtx, style.Icon, textColor, 18)
+									return images.Layout(gtx, style.Icon, textColor, 18)
 								})
 							} else {
-								dims = icons.Layout(gtx, style.Icon, textColor, 18) //todo test
+								dims = images.Layout(gtx, style.Icon, textColor, 18)
 							}
 							c := r.Stop()
 

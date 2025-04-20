@@ -1,4 +1,4 @@
-package icons
+package images
 
 import (
 	"strconv"
@@ -10,19 +10,14 @@ import (
 func TestName(t *testing.T) {
 	g := stream.NewGeneratedFile()
 	g.P(`
-package icons
+package images
 
 import (
 	"embed"
-	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/golibrary/stream"
-	"github.com/ddkwork/ux/giosvg"
 	"strings"
 )
 
-func Svg2Icon(b []byte) *giosvg.Icon {
-	return giosvg.NewIcon(mylog.Check2(giosvg.NewVector(b)))
-}
 
 func svgCallback(value []byte) []byte {
 	if strings.Contains(string(value), "fill=\"none\"") {
@@ -35,14 +30,14 @@ func svgCallback(value []byte) []byte {
 // https://products.eptimize.app/zh/color-convert/rgb-to-rgba
 //
 //go:embed images/*.svg
-var images embed.FS
+var svgFs embed.FS
 var (
-	svgEmbedFileMap                = stream.ReadEmbedFileMap(images, "images")
+	svgEmbedFileMap                = stream.ReadEmbedFileMap(svgFs, "images")
 `)
 
 	for k := range svgEmbedFileMap.Range() {
 		name := "SvgIcon" + stream.ToCamelUpper(stream.TrimExtension(k))
-		g.P(name, "=Svg2Icon(svgEmbedFileMap.GetMustCallback(", strconv.Quote(k), ",svgCallback))")
+		g.P(name, "= svgEmbedFileMap.GetMustCallback(", strconv.Quote(k), ",svgCallback)")
 	}
 	g.P(")")
 	stream.WriteGoFile("svgIcons_gen.go", g.Bytes())

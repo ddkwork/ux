@@ -1,13 +1,13 @@
 package ux
 
 import (
-	"embed"
-	"image"
-
+	"bytes"
 	"gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/widget"
-	"github.com/ddkwork/golibrary/stream"
+	"github.com/ddkwork/golibrary/mylog"
+	_ "github.com/ddkwork/ux/resources/images/ico"
+	"image"
 )
 
 type Image struct {
@@ -17,15 +17,10 @@ type Image struct {
 
 // NewImage 任务管理器或者音速启动,可以编码为任何图片格式，对于加载进gio，只需要它返回的image.Image接口就可以了
 // img, e := gowin32.ExtractPrivateExtractIcons(filename, 128, 128)
-func NewImage(image image.Image) *Image {
+func NewImage(b []byte) *Image {
+	img, _ := mylog.Check3(image.Decode(bytes.NewReader(b))) //_ "github.com/ddkwork/ux/resources/images/ico" 通过init注册ico解码器
 	return &Image{
-		imageOp: paint.NewImageOp(image),
-	}
-}
-
-func NewImageFs(fileName string, fs embed.FS) *Image {
-	return &Image{
-		imageOp: paint.NewImageOp(stream.LoadImage(fileName, fs)),
+		imageOp: paint.NewImageOp(img),
 	}
 }
 

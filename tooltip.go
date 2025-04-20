@@ -20,7 +20,7 @@ type (
 	}
 )
 
-func NewTooltipButton(icon *widget.Icon, tip string, callback func()) *TipIconButton {
+func NewTooltipButton(icon []byte, tip string, callback func()) *TipIconButton {
 	t := component.PlatformTooltip(th, tip)
 	t.Bg = colors.Yellow100
 	t.Text.Color = th.Color.ButtonTextBlackColor

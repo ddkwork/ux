@@ -5,7 +5,7 @@ import (
 	"unicode"
 
 	"github.com/ddkwork/ux/resources/colors"
-	"github.com/ddkwork/ux/resources/icons"
+	"github.com/ddkwork/ux/resources/images"
 
 	"github.com/ddkwork/ux/widget/material"
 
@@ -183,7 +183,7 @@ func (t *TabItem) layoutTitle(gtx layout.Context) layout.Dimensions {
 									if t.isDataChanged {
 										// yellow
 										// iconColor = color.NRGBA{R: 0xff, G: 0xff, B: 0x00, A: 0xff}
-										icons.NavigationCloseIcon = icons.ImageLensIcon
+										images.NavigationCloseIcon = images.ImageLensIcon
 										// iconSize = unit.Dp(10)
 										padding = unit.Dp(8)
 									}
@@ -198,7 +198,7 @@ func (t *TabItem) layoutTitle(gtx layout.Context) layout.Dimensions {
 									//}
 									return layout.UniformInset(padding).Layout(gtx,
 										func(gtx layout.Context) layout.Dimensions {
-											return Button(&t.CloseClickable, icons.NavigationCloseIcon, "").Layout(gtx)
+											return Button(&t.CloseClickable, images.NavigationCloseIcon, "").Layout(gtx)
 										},
 									)
 								}),

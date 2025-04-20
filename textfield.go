@@ -14,7 +14,7 @@ import (
 
 type TextFieldFuzz struct {
 	textEditor widget.Editor
-	Icon       *widget.Icon
+	Icon       []byte
 	iconClick  widget.Clickable
 
 	iconPositionStart bool
@@ -49,7 +49,7 @@ func (t *TextFieldFuzz) SetText(text string) {
 	t.textEditor.SetText(text)
 }
 
-func (t *TextFieldFuzz) SetIcon(icon *widget.Icon, iconPositionStart bool) {
+func (t *TextFieldFuzz) SetIcon(icon []byte, iconPositionStart bool) {
 	t.Icon = icon
 	t.iconPositionStart = iconPositionStart
 }

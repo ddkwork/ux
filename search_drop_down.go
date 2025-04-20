@@ -3,7 +3,7 @@ package ux
 import (
 	"strings"
 
-	"github.com/ddkwork/ux/resources/icons"
+	"github.com/ddkwork/ux/resources/images"
 
 	"gioui.org/io/key"
 	"gioui.org/io/pointer"
@@ -81,15 +81,15 @@ func (c *SearchDropDown) onSearch(query string) {
 	for _, item := range results {
 		switch item.Item.Kind {
 		case KindEnv:
-			item.Icon = icons.NavigationMenuIcon
+			item.Icon = images.NavigationMenuIcon
 		case KindRequest:
-			item.Icon = icons.ActionSwapHorizIcon
+			item.Icon = images.ActionSwapHorizIcon
 		case KindWorkspace:
-			item.Icon = icons.NavigationAppsIcon
+			item.Icon = images.NavigationAppsIcon
 		case KindProtoFile:
-			item.Icon = icons.FileFolderIcon
+			item.Icon = images.FileFolderIcon
 		case KindCollection:
-			item.Icon = icons.NavigationChevronRightIcon
+			item.Icon = images.NavigationChevronRightIcon
 		}
 	}
 
@@ -118,7 +118,7 @@ func (c *SearchDropDown) resultItemLayout(gtx layout.Context, item *SearchResult
 			return layout.Flex{}.Layout(gtx,
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Max.X = gtx.Dp(18)
-					return item.Icon.Layout(gtx, th.ContrastFg)
+					return images.Layout(gtx, item.Icon, th.ContrastFg, 0)
 				}),
 				layout.Rigid(layout.Spacer{Width: unit.Dp(8)}.Layout),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {

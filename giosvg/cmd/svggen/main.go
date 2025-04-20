@@ -25,7 +25,7 @@ var (
 )
 
 func main() {
-	flag.StringVar(&input, "i", "", "folder containing svg icons or the path of svg file")
+	flag.StringVar(&input, "i", "", "folder containing svg images or the path of svg file")
 	flag.StringVar(&output, "o", "", "file path to save the go code")
 	flag.StringVar(&pkg, "pkg", "", "package name")
 	flag.Parse()

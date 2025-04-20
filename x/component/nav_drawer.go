@@ -1,6 +1,7 @@
 package component
 
 import (
+	"github.com/ddkwork/ux/resources/images"
 	"image"
 	"image/color"
 	"time"
@@ -28,13 +29,13 @@ type NavItem struct {
 	Tag  any
 	Name string
 
-	// Icon, if set, renders the provided icons to the left of the
+	// Icon, if set, renders the provided images to the left of the
 	// item's name. Material specifies that either all navigation
-	// items should have an icons, or none should. As such, if this
+	// items should have an images, or none should. As such, if this
 	// field is nil, the Name will be aligned all the way to the
-	// left. A mixture of icons and non-icons items will be misaligned.
-	// Users should either set icons for all elements or none.
-	Icon *widget.Icon
+	// left. A mixture of images and non-images items will be misaligned.
+	// Users should either set images for all elements or none.
+	Icon []byte
 }
 
 // renderNavItem holds both basic nav item state and the interaction
@@ -109,7 +110,7 @@ func (n *renderNavItem) layoutContent(gtx layout.Context, th *material.Theme) la
 					func(gtx layout.Context) layout.Dimensions {
 						iconSize := gtx.Dp(unit.Dp(24))
 						gtx.Constraints = layout.Exact(image.Pt(iconSize, iconSize))
-						return n.NavItem.Icon.Layout(gtx, contentColor)
+						return images.Layout(gtx, n.NavItem.Icon, contentColor, 0)
 					})
 			}),
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {

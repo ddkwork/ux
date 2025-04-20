@@ -6,7 +6,7 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/ddkwork/ux/resources/icons"
+	"github.com/ddkwork/ux/resources/images"
 
 	"github.com/ddkwork/ux/widget/material"
 
@@ -125,7 +125,7 @@ func (d DividerStyle) Layout(gtx layout.Context) layout.Dimensions {
 }
 
 // MenuItemStyle defines the presentation of a Menu element that has a label
-// and optionally an icons and a hint text.
+// and optionally an images and a hint text.
 type MenuItemStyle struct {
 	State      *widget.Clickable
 	HoverColor color.NRGBA
@@ -133,7 +133,7 @@ type MenuItemStyle struct {
 	LabelInset outlay.Inset
 	Label      material.LabelStyle
 
-	Icon      any
+	Icon      []byte
 	IconSize  unit.Dp
 	IconInset outlay.Inset
 	IconColor color.NRGBA
@@ -193,7 +193,7 @@ func (m MenuItemStyle) Layout(gtx layout.Context) layout.Dimensions {
 						return m.IconInset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 							iconSize := gtx.Dp(m.IconSize)
 							gtx.Constraints = layout.Exact(image.Point{X: iconSize, Y: iconSize})
-							return icons.Layout(gtx, m.Icon, m.IconColor, m.IconSize)
+							return images.Layout(gtx, m.Icon, m.IconColor, m.IconSize)
 						})
 					}),
 					outlay.Rigid(func(gtx layout.Context) layout.Dimensions {

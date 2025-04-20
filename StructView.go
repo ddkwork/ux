@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/ddkwork/ux/resources/colors"
-	"github.com/ddkwork/ux/resources/icons"
+	"github.com/ddkwork/ux/resources/images"
 
 	"gioui.org/text"
 
@@ -208,11 +208,11 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 			return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 				outlay.EmptyRigidHorizontal(300), // 标签站位
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					return Button(&s.closeBtn, icons.NavigationCloseIcon, "Close").Layout(gtx)
+					return Button(&s.closeBtn, images.NavigationCloseIcon, "Close").Layout(gtx)
 				}),
 				outlay.EmptyRigidHorizontal(20), // 按钮间距
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					return Button(&s.applyBtn, icons.ActionAssignmentTurnedInIcon, "Apply").Layout(gtx)
+					return Button(&s.applyBtn, images.ActionAssignmentTurnedInIcon, "Apply").Layout(gtx)
 				}),
 				outlay.EmptyRigidHorizontal(10),
 			)

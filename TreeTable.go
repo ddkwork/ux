@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/ddkwork/ux/resources/colors"
-	"github.com/ddkwork/ux/resources/icons"
+	"github.com/ddkwork/ux/resources/images"
 
 	"gioui.org/gesture"
 	"gioui.org/io/clipboard"
@@ -88,7 +88,7 @@ type (
 	CellData struct {
 		Text             string      // 单元格文本
 		Tooltip          string      // 单元格提示信息
-		Icon             any         // 单元格图标，格式支持：*giosvg.Icon, *widget.Icon, *widget.Image, image.Image
+		Icon             []byte      // 单元格图标，格式支持：*giosvg.Icon, *widget.Icon, *widget.Image, image.Image
 		FgColor          color.NRGBA // 单元格前景色,着色渲染单元格
 		IsNasm           bool        // 是否是nasm汇编代码,为表头提供不同的着色渲染样式
 		Disabled         bool        // 是否显示表头或者body单元格，或者禁止编辑节点时候使用
@@ -214,7 +214,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case CopyRowType:
 								item = ContextMenuItem{
 									Title:     "",
-									Icon:      icons.SvgIconCopy,
+									Icon:      images.SvgIconCopy,
 									Can:       func() bool { return true },
 									Do:        func() { t.SelectedNode.CopyRow(gtx, t.maxColumnTextWidths) },
 									Clickable: widget.Clickable{},
@@ -222,7 +222,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case ConvertToContainerType:
 								item = ContextMenuItem{
 									Title: "",
-									Icon:  icons.SvgIconConvertToContainer,
+									Icon:  images.SvgIconConvertToContainer,
 									Can:   func() bool { return !n.Container() }, // n是当前渲染的行
 									Do: func() {
 										t.SelectedNode.SetType("ConvertToContainer" + ContainerKeyPostfix) //? todo bug：这里是失败的，导致再次点击这里转换的节点后ConvertToNonContainer没有弹出来
@@ -236,7 +236,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case ConvertToNonContainerType:
 								item = ContextMenuItem{
 									Title: "",
-									Icon:  icons.SvgIconConvertToNonContainer,
+									Icon:  images.SvgIconConvertToNonContainer,
 									Can:   func() bool { return n.Container() }, // n是当前渲染的行
 									Do: func() {
 										t.SelectedNode.SetType("")
@@ -254,7 +254,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case NewType:
 								item = ContextMenuItem{
 									Title: "",
-									Icon:  icons.SvgIconCircledAdd,
+									Icon:  images.SvgIconCircledAdd,
 									Can:   func() bool { return true },
 									Do: func() {
 										var zero T
@@ -265,7 +265,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case NewContainerType:
 								item = ContextMenuItem{
 									Title: "",
-									Icon:  icons.SvgIconCircledVerticalEllipsis,
+									Icon:  images.SvgIconCircledVerticalEllipsis,
 									Can:   func() bool { return true },
 									Do: func() {
 										var zero T // todo edit type?
@@ -276,7 +276,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case DeleteType:
 								item = ContextMenuItem{
 									Title:     "",
-									Icon:      icons.SvgIconTrash,
+									Icon:      images.SvgIconTrash,
 									Can:       func() bool { return true },
 									Do:        func() { t.Remove(gtx) },
 									Clickable: widget.Clickable{},
@@ -284,7 +284,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case DuplicateType:
 								item = ContextMenuItem{
 									Title: "",
-									Icon:  icons.SvgIconDuplicate,
+									Icon:  images.SvgIconDuplicate,
 									Can:   func() bool { return true },
 									Do: func() {
 										t.InsertAfter(gtx, t.SelectedNode.Clone())
@@ -294,7 +294,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case EditType:
 								item = ContextMenuItem{
 									Title:         "",
-									Icon:          icons.SvgIconEdit,
+									Icon:          images.SvgIconEdit,
 									Can:           func() bool { return true },
 									Do:            func() { t.Edit(gtx) },
 									AppendDivider: true,
@@ -303,7 +303,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case OpenAllType:
 								item = ContextMenuItem{
 									Title:     "",
-									Icon:      icons.SvgIconHierarchy,
+									Icon:      images.SvgIconHierarchy,
 									Can:       func() bool { return true },
 									Do:        func() { t.Root.OpenAll() },
 									Clickable: widget.Clickable{},
@@ -311,7 +311,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case CloseAllType:
 								item = ContextMenuItem{
 									Title:     "",
-									Icon:      icons.SvgIconCircledVerticalEllipsis,
+									Icon:      images.SvgIconCircledVerticalEllipsis,
 									Can:       func() bool { return true },
 									Do:        func() { t.Root.CloseAll() },
 									Clickable: widget.Clickable{},
@@ -319,7 +319,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							case SaveDataType:
 								item = ContextMenuItem{
 									Title:     "",
-									Icon:      icons.SvgIconSaveContent,
+									Icon:      images.SvgIconSaveContent,
 									Can:       func() bool { return true },
 									Do:        func() { t.SaveDate() },
 									Clickable: widget.Clickable{},
@@ -387,9 +387,9 @@ func (t *TreeTable[T]) RowFrame2(gtx layout.Context, n *Node[T], rowIndex int) l
 					})
 				}
 				return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					svg := icons.SvgIconCircledChevronRight
+					svg := images.SvgIconCircledChevronRight
 					if n.isOpen {
-						svg = icons.SvgIconCircledChevronDown
+						svg = images.SvgIconCircledChevronDown
 					}
 					return iconButtonSmall(new(widget.Clickable), svg, "").Layout(gtx)
 					// return NewButton("", nil).SetRectIcon(true).SetIcon(svg).Layout(gtx)
@@ -497,9 +497,9 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 					})
 				}
 				return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					svg := icons.SvgIconCircledChevronRight
+					svg := images.SvgIconCircledChevronRight
 					if n.isOpen {
-						svg = icons.SvgIconCircledChevronDown
+						svg = images.SvgIconCircledChevronDown
 					}
 
 					return iconButtonSmall(new(widget.Clickable), svg, "").Layout(gtx)
@@ -688,7 +688,7 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData, width unit.D
 				Left:   leftPadding,
 				Right:  0,
 			}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				return icons.Layout(gtx, data.Icon, color.NRGBA{}, defaultHierarchyColumnIconSize)
+				return images.Layout(gtx, data.Icon, color.NRGBA{}, defaultHierarchyColumnIconSize)
 			})
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -904,7 +904,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 		})
 		t.header.contextMenu.AddItem(ContextMenuItem{
 			Title:         "CopyColumn",
-			Icon:          icons.SvgIconCopy,
+			Icon:          images.SvgIconCopy,
 			Can:           func() bool { return true },
 			Do:            func() { t.CopyColumn(gtx) },
 			AppendDivider: true,

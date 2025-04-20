@@ -9,7 +9,7 @@ import (
 
 	"gioui.org/op/paint"
 
-	"github.com/ddkwork/ux/resources/icons"
+	"github.com/ddkwork/ux/resources/images"
 
 	"gioui.org/gesture"
 	"gioui.org/io/clipboard"
@@ -42,7 +42,7 @@ type (
 		height    unit.Dp
 		before    layout.Widget
 		after     layout.Widget
-		icon      *widget.Icon
+		icon      []byte
 		iconClick widget.Clickable
 
 		click       gesture.Click
@@ -125,13 +125,13 @@ func (i *Input) SetOnChanged(f func(text string)) *Input {
 
 func (i *Input) Password() *Input {
 	i.editor.Mask = '*'
-	i.icon = icons.ActionVisibilityOffIcon
+	i.icon = images.ActionVisibilityOffIcon
 	// t.IconPositionEnd = IconPositionEnd
 	i.showPassword = false
 	return i
 }
 
-func (i *Input) SetIcon(icon *widget.Icon) *Input {
+func (i *Input) SetIcon(icon []byte) *Input {
 	i.icon = icon
 	return i
 }
@@ -312,16 +312,16 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 										}
 										if !i.showPassword {
 											i.editor.Mask = 0
-											i.icon = icons.ActionVisibilityIcon
+											i.icon = images.ActionVisibilityIcon
 											i.showPassword = true
 										} else {
 											i.editor.Mask = '*'
-											i.icon = icons.ActionVisibilityOffIcon
+											i.icon = images.ActionVisibilityOffIcon
 											i.showPassword = false
 										}
 									}
 									return i.iconClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-										return i.icon.Layout(gtx, th.Color.DefaultIconColor)
+										return images.Layout(gtx, i.icon, th.Color.DefaultIconColor, 0)
 									})
 								})
 								// widgets = append(widgets, iconLayout)
@@ -340,7 +340,7 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 		items := []ContextMenuItem{
 			{
 				Title: "copy",
-				Icon:  icons.SvgIconCopy,
+				Icon:  images.SvgIconCopy,
 				Can:   func() bool { return true },
 				Do: func() {
 					// i.editor.SelectedText()
@@ -354,7 +354,7 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 			},
 			{
 				Title: "paste",
-				Icon:  icons.SvgIconContentPasteTwotone,
+				Icon:  images.SvgIconContentPasteTwotone,
 				Can:   func() bool { return true },
 				Do: func() {
 					for {
@@ -379,7 +379,7 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 			},
 			{
 				Title:         "clean",
-				Icon:          icons.SvgIconTrash,
+				Icon:          images.SvgIconTrash,
 				Can:           func() bool { return true },
 				Do:            func() { i.editor.SetText("") },
 				AppendDivider: false,

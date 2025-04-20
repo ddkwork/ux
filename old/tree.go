@@ -5,7 +5,7 @@ import (
 	"image"
 
 	"github.com/ddkwork/ux"
-	"github.com/ddkwork/ux/resources/icons"
+	"github.com/ddkwork/ux/resources/images"
 
 	"github.com/ddkwork/ux/widget/material"
 
@@ -204,9 +204,9 @@ func (t *Tree) renderNode(gtx layout.Context, node *TreeNode, depth int, isParen
 			return node.clickable.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return layout.Inset{Top: unit.Dp(1)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Max.X = gtx.Dp(th.Size.DefaultIconSize)
-					svg := icons.SvgIconCircledChevronRight
+					svg := images.SvgIconCircledChevronRight
 					if node.Expanded {
-						svg = icons.SvgIconCircledChevronDown
+						svg = images.SvgIconCircledChevronDown
 					}
 					return iconButtonSmall(new(widget.Clickable), svg, "").Layout(gtx)
 				})
@@ -288,7 +288,7 @@ func (t *Tree) OpenAll(gtx layout.Context, nodes []*TreeNode) {
 	gtx.Execute(op.InvalidateCmd{})
 }
 
-func iconButtonSmall(button *widget.Clickable, icon any, txt string) material.IconButtonStyle {
+func iconButtonSmall(button *widget.Clickable, icon []byte, txt string) material.IconButtonStyle {
 	style := material.IconButton(th, button, icon, txt)
 	style.Inset = layout.Inset{}
 	// style.IconSize = defaultHierarchyIconSize

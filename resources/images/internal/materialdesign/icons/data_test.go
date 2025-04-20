@@ -12,27 +12,25 @@ import (
 func TestName(t *testing.T) {
 	g := stream.NewGeneratedFile()
 	g.P(`
-package icons
+package images
 
 import (
-	"gioui.org/widget"
-	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/golibrary/safemap"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 `)
 
 	g.P("var (")
-	g.P("IconMap = safemap.NewOrdered[string, *widget.Icon](func(yield func(string, *widget.Icon) bool) {")
+	g.P("IconMap = safemap.NewOrdered[string, []byte](func(yield func(string, []byte) bool) {")
 	for _, s := range list {
-		g.P("yield(", strconv.Quote(s.name+"Icon"), ",", s.name, "Icon)")
+		g.P("yield(", strconv.Quote(s.name+"Icon"), ",icons.", s.name, ")")
 	}
 	g.P("})")
 	g.P(")")
 
 	g.P("var (")
 	for _, s := range list {
-		g.P(s.name, "Icon", " = mylog.Check2(widget.NewIcon(icons.", s.name, "))")
+		g.P(s.name, "Icon", " = icons.", s.name)
 	}
 	g.P(")")
 

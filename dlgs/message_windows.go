@@ -3,7 +3,7 @@
 
 package dlgs
 
-// MessageBox displays message box and ok button without icons.
+// MessageBox displays message box and ok button without images.
 func MessageBox(title, text string) (bool, error) {
 	ret := messageBox(title, text, mbOk)
 	return ret == idOk, nil

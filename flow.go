@@ -17,7 +17,7 @@ type FlowElement func(gtx layout.Context, i int) layout.Dimensions
 
 type FlowElemButton struct {
 	Title            string
-	Icon             any
+	Icon             []byte
 	Do               func(gtx layout.Context)
 	ContextMenuItems []ContextMenuItem
 }

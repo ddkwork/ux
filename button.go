@@ -6,7 +6,7 @@ import (
 	"math"
 
 	"github.com/ddkwork/ux/resources/colors"
-	"github.com/ddkwork/ux/resources/icons"
+	"github.com/ddkwork/ux/resources/images"
 
 	"github.com/ddkwork/ux/animationButton"
 	"github.com/ddkwork/ux/widget/material"
@@ -22,7 +22,7 @@ import (
 	"gioui.org/widget"
 )
 
-func NewButtonAnimation(button *widget.Clickable, icon any, text string, do func(gtx layout.Context)) *animationButton.Button {
+func NewButtonAnimation(button *widget.Clickable, icon []byte, text string, do func(gtx layout.Context)) *animationButton.Button {
 	style := animationButton.ButtonStyle{
 		Rounded:  animationButton.UniformRounded(unit.Dp(12)),
 		TextSize: unit.Sp(12),
@@ -63,7 +63,7 @@ func NewButtonAnimationScale(v float32) animationButton.ButtonAnimation {
 
 type ButtonStyle struct {
 	Text            string
-	Icon            any
+	Icon            []byte
 	IconPositionEnd bool
 	// Color is the text color.
 	color        color.NRGBA
@@ -86,17 +86,17 @@ type ButtonLayoutStyle struct {
 
 type IconButtonStyle struct {
 	Background color.NRGBA
-	// Color is the icons color.
+	// Color is the images color.
 	Color color.NRGBA
 	Icon  *widget.Icon
-	// Size is the icons size.
+	// Size is the images size.
 	Size        unit.Dp
 	Inset       layout.Inset
 	Button      *widget.Clickable
 	Description string
 }
 
-func iconButtonSmall(button *widget.Clickable, icon any, txt string) ButtonStyle {
+func iconButtonSmall(button *widget.Clickable, icon []byte, txt string) ButtonStyle {
 	style := Button(button, icon, txt)
 	style.Inset = layout.Inset{}
 	style.IconSize = defaultHierarchyIconSize
@@ -104,7 +104,7 @@ func iconButtonSmall(button *widget.Clickable, icon any, txt string) ButtonStyle
 	return style
 }
 
-func Button(button *widget.Clickable, icon any, text string) ButtonStyle {
+func Button(button *widget.Clickable, icon []byte, text string) ButtonStyle {
 	b := ButtonStyle{
 		Text:            text,
 		Icon:            icon,
@@ -139,7 +139,7 @@ func (b ButtonStyle) Layout(gtx layout.Context) layout.Dimensions {
 				return layout.Inset{Right: unit.Dp(0)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					gtx.Constraints.Min.X = gtx.Dp(b.IconSize)
 					gtx.Constraints.Max.X = gtx.Dp(b.IconSize)
-					return icons.Layout(gtx, b.Icon, b.color, b.IconSize)
+					return images.Layout(gtx, b.Icon, b.color, b.IconSize)
 				})
 			}
 			return layout.Dimensions{}

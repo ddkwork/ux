@@ -4,7 +4,7 @@
 
 //go:generate go run gen.go -mdicons=/path/to/the/material-design-icons
 
-// Package icons contains the Material Design icons set, in the IconVG vector
+// Package images contains the Material Design images set, in the IconVG vector
 // graphic format.
 //
 // See https://design.google.com/icons/ and
