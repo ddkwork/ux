@@ -188,7 +188,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		//			mylog.Info("dropped file", files[0])
 		//			table.ResetChildren()
 		//			b := stream.NewBuffer(files[0])
-		//			mylog.Check(json.Unmarshal(b.Bytes(), table)) // todo test need a zero table?
+		//			mylog.Check(json.Unmarshal(b.Bytes(), table))
 		//			fnUpdate() t.SizeColumnsToFit(gtx, false)
 		//		}
 		//		mylog.Struct("todo", files)
@@ -545,23 +545,18 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					return material.Clickable(gtx, &n.rowCells[i].Clickable, func(gtx layout.Context) layout.Dimensions {
 						DrawColumnDivider(gtx, cell.columID) // 这里绘制的列分割线才没有虚线,gtx被破坏了? 永远不要移动这个位置
-						return layout.Stack{Alignment: layout.Center}.Layout(gtx,
-							layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-								if len(cell.Text) > 80 {
-									cell.Text = cell.Text[:len(cell.Text)/2] + "..."
-									// todo 更好的办法是让富文本编辑器做这个事情，对 maxline 。。。 看看代码编辑器扩建是如何实现这个的
-									// 然后双击编辑行的时候从富文本取出完整行并换行显示，structView需要好好设计一下这个
-									// 这个在抓包场景很那个，url列一般都长
-								}
-								return t.CellFrame(gtx, cell, t.maxColumnCellWidths[i], false, layout.Inset{
-									Top:    0,
-									Bottom: 0,
-									Left:   leftPadding,
-									// Right:  rightPadding,
-								})
-							}),
-							// t.drawContextMenu(n, i),//todo
-						)
+						if len(cell.Text) > 80 {
+							cell.Text = cell.Text[:len(cell.Text)/2] + "..."
+							// todo 更好的办法是让富文本编辑器做这个事情，对 maxline 。。。 看看代码编辑器扩建是如何实现这个的
+							// 然后双击编辑行的时候从富文本取出完整行并换行显示，structView需要好好设计一下这个
+							// 这个在抓包场景很那个，url列一般都长
+						}
+						return t.CellFrame(gtx, cell, t.maxColumnCellWidths[i], false, layout.Inset{
+							Top:    0,
+							Bottom: 0,
+							Left:   leftPadding,
+							// Right:  rightPadding,
+						})
 					})
 				})
 			},
@@ -612,7 +607,7 @@ func (t *TreeTable[T]) processEvent(gtx layout.Context, n *Node[T], rowIndex int
 			case e.Kind == pointer.Press: // 左键，右键，双击
 				t.SelectedNode = n
 				// bgColor = Orange300
-			case e.Source == pointer.Touch: // todo检查是否长按并测试apk
+			case e.Source == pointer.Touch:
 				t.SelectedNode = n
 			}
 		}
@@ -623,9 +618,6 @@ func (t *TreeTable[T]) processEvent(gtx layout.Context, n *Node[T], rowIndex int
 		switch click.NumClicks {
 		case 1:
 			n.isOpen = !n.isOpen // 切换展开状态
-			//if n.cellClickedCallback != nil {
-			//	n.cellClickedCallback(n) // 单元格点击回调
-			//}
 			if t.RowSelectedCallback != nil {
 				t.RowSelectedCallback() // 行选中回调
 			}
@@ -787,17 +779,19 @@ const (
 )
 
 func (t *TreeTable[T]) SaveDate() { // todo 支持apk数据目录 app.dataDir()
-	t.JsonName = strings.TrimSuffix(t.JsonName, ".json")
-	stream.MarshalJsonToFile(t.Root, filepath.Join("cache", t.JsonName+".json"))
-	stream.WriteTruncate(filepath.Join("cache", t.JsonName+".txt"), t.Document()) // 调用t.Format()
-	if t.IsDocument {
-		b := stream.NewBuffer("")
-		b.WriteStringLn("# " + t.JsonName + " document table")
-		b.WriteStringLn("```text")
-		b.WriteStringLn(t.Document())
-		b.WriteStringLn("```")
-		stream.WriteTruncate("README2.md", b.String())
-	}
+	go func() {
+		t.JsonName = strings.TrimSuffix(t.JsonName, ".json")
+		stream.MarshalJsonToFile(t.Root, filepath.Join("cache", t.JsonName+".json"))
+		stream.WriteTruncate(filepath.Join("cache", t.JsonName+".txt"), t.Document()) // 调用t.Format()
+		if t.IsDocument {
+			b := stream.NewBuffer("")
+			b.WriteStringLn("# " + t.JsonName + " document table")
+			b.WriteStringLn("```text")
+			b.WriteStringLn(t.Document())
+			b.WriteStringLn("```")
+			stream.WriteTruncate("README2.md", b.String())
+		}
+	}()
 }
 
 // TransposeMatrix 把行切片矩阵置换为列切片,用于计算最大列宽的参数
@@ -1271,16 +1265,14 @@ func (t *TreeTable[T]) Sort() {
 //---------------------------------------泛型n叉树实现------------------------------------------
 
 type Node[T any] struct {
-	ID       uuid.ID    // 节点唯一标识符
-	Type     string     // 容器节点类型，用于区分不同类型的容器节点
-	Data     T          // 元数据
-	Children []*Node[T] // 子节点,json只保存以上四个导出的字段
-	parent   *Node[T]   // 父节点
-	isOpen   bool       // 是否展开
-	rowCells []CellData // 行单元格数据
-	// rowSelected         bool                     // 行是否被选中
-	rowClick widget.Clickable // 行点击按钮绘制,每个节点或者每个单元格对应一个 todo删除，因为popup已经有了
-	// cellClickedCallback func(n *Node[T])         // 单元格点击回调，todo 删除?
+	ID       uuid.ID          // 节点唯一标识符
+	Type     string           // 容器节点类型，用于区分不同类型的容器节点
+	Data     T                // 元数据
+	Children []*Node[T]       // 子节点,json只保存以上四个导出的字段
+	parent   *Node[T]         // 父节点
+	isOpen   bool             // 是否展开
+	rowCells []CellData       // 行单元格数据
+	rowClick widget.Clickable // 行点击按钮绘制,每个节点对应一个
 }
 
 const ContainerKeyPostfix = "_container"
@@ -1487,7 +1479,7 @@ func (t *TreeTable[T]) Remove(gtx layout.Context) {
 func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大深度有影响
 	defer t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
 	ModalCallbacks.Reset()
-	editor := NewStructView("edit row", t.SelectedNode.Data, // todo merge StructView
+	editor := NewStructView("edit row", t.SelectedNode.Data,
 		func(a any) []string {
 			rowCells := t.MarshalRowCells(t.SelectedNode)
 			var rows []string
@@ -1512,7 +1504,7 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 			editor.Layout(gtx)
 		}
 	})
-	// todo 其实泽丽不用更新 t.updateMaxHierarchyColumnCellWidth()
+	// todo 其实不用更新 t.updateMaxHierarchyColumnCellWidth()
 	// 但如果编辑的时候把层级列的单元格文本变长就需要，递归一下maxDepth应该不会牺牲多大的性能
 	// 如果编辑节点点击应用更新出现卡顿的话，判断下层级列是否被编辑来跳过执行updateMaxHierarchyColumnCellWidth提高性能
 }
@@ -1604,7 +1596,7 @@ func (n *Node[T]) WalkContainer() iter.Seq2[int, *Node[T]] {
 	}
 }
 
-//func (n *Node[T]) WalkQueue() iter.Seq[*Node[T]] { // todo 删除，性能应该不行，和Walk结果一样的，理论上
+//func (n *Node[T]) WalkQueue() iter.Seq[*Node[T]] { // 性能应该不行
 //	return func(yield func(*Node[T]) bool) {
 //		queue := []*Node[T]{n}
 //		for len(queue) > 0 {
@@ -1625,7 +1617,7 @@ func (n *Node[T]) WalkContainer() iter.Seq2[int, *Node[T]] {
 //	}
 //}
 
-func (n *Node[T]) MaxDepth() unit.Dp { // todo 对root进行10万行的压力测试
+func (n *Node[T]) MaxDepth() unit.Dp {
 	maxDepth := unit.Dp(0)
 	for _, node := range n.Walk() {
 		childDepth := node.Depth()

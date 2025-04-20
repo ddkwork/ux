@@ -109,8 +109,8 @@ func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
 					m.rowClicks = make([]widget.Clickable, len(m.rootRows))
 				}
 				if len(m.rowClicks) != len(m.rootRows) {
-					m.rowClicks = make([]widget.Clickable, len(m.rootRows))
-					// mylog.Warning("remake row clicks")//todo 树形表格调用这个太频繁，得查一下原因
+					//m.rowClicks = make([]widget.Clickable, len(m.rootRows))
+					// mylog.Warning("remake row clicks")//todo 树形表格调用这个下原因
 				}
 				rowClick := &m.rowClicks[index]
 				return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
