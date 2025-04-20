@@ -77,6 +77,62 @@ func (m *ContextMenu) OnClicked(gtx layout.Context) {
 	}
 }
 
+// Layout 线性的list，表格以及非线性的树形表格(核心:直接rootRow当做线性表格即可，顶层调用menu布局。转不过弯来一直去处理容器节点是否渲染menu布局的问题)均通过测试
+func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
+	return layout.Stack{}.Layout(gtx,
+		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+			return material.List(th, &m.List).Layout(gtx, len(m.RowClicks), func(gtx layout.Context, index int) layout.Dimensions {
+				rowClick := &m.RowClicks[index]
+				return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
+					gtx.Constraints.Min.X = gtx.Constraints.Max.X
+					if event, b := gtx.Event(pointer.Filter{Target: rowClick, Kinds: pointer.Press | pointer.Release}); b {
+						if e, ok := event.(pointer.Event); ok {
+							if e.Kind == pointer.Press {
+								switch {
+								case e.Buttons.Contain(pointer.ButtonPrimary):
+									m.ClickedRowindex = index // todo 移除树形表格的这个意思的字段?
+									println("Row selected (left click) " + strconv.Itoa(index))
+								case e.Buttons.Contain(pointer.ButtonSecondary):
+									m.ClickedRowindex = index
+									println("Row selected (right click)" + strconv.Itoa(index))
+								}
+							}
+						}
+					}
+					if m.DrawRow == nil {
+						return m.drawRowDefault(gtx, rowClick, index)
+					}
+					return m.DrawRow(gtx, index)
+				})
+			})
+		}),
+		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+			return m.ContextArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				gtx.Constraints.Min = image.Point{}
+				m.OnClicked(gtx)
+				return m.drawContextArea(gtx)
+				return component.Menu(th, &m.MenuState).Layout(gtx) // 所有行的item共用一个popup菜单而不是每行popup一个
+			})
+		}),
+	)
+}
+
+func (m *ContextMenu) drawContextArea(gtx layout.Context) layout.Dimensions { // popup区域的背景色，位置，四角弧度
+	menuStyle := component.Menu(th, &m.MenuState)
+	menuStyle.SurfaceStyle = component.SurfaceStyle{
+		Theme: th,
+		ShadowStyle: component.ShadowStyle{
+			CornerRadius: 18,
+			// Elevation:     0,//todo test elevation
+			// AmbientColor:  color.NRGBA{},//todo test ambient color
+			// PenumbraColor: color.NRGBA{},
+			// UmbraColor:    color.NRGBA{},
+		},
+		Fill: color.NRGBA{R: 50, G: 50, B: 50, A: 255},
+	}
+	return menuStyle.Layout(gtx)
+}
+
 // 测试用例，现在不需要了
 func (m *ContextMenu) drawRowDefault(gtx layout.Context, rowClick *widget.Clickable, index int) layout.Dimensions {
 	m.Once.Do(func() {
@@ -181,59 +237,3 @@ func (m *ContextMenu) drawRowDefault(gtx layout.Context, rowClick *widget.Clicka
 //		}),
 //	)
 //}
-
-// Layout 线性的list，表格以及非线性的树形表格(核心:直接rootRow当做线性表格即可，顶层调用menu布局。转不过弯来一直去处理容器节点是否渲染menu布局的问题)均通过测试
-func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
-	return layout.Stack{}.Layout(gtx,
-		layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-			return material.List(th, &m.List).Layout(gtx, len(m.RowClicks), func(gtx layout.Context, index int) layout.Dimensions {
-				rowClick := &m.RowClicks[index]
-				return material.Clickable(gtx, rowClick, func(gtx layout.Context) layout.Dimensions {
-					gtx.Constraints.Min.X = gtx.Constraints.Max.X
-					if event, b := gtx.Event(pointer.Filter{Target: rowClick, Kinds: pointer.Press | pointer.Release}); b {
-						if e, ok := event.(pointer.Event); ok {
-							if e.Kind == pointer.Press {
-								switch {
-								case e.Buttons.Contain(pointer.ButtonPrimary):
-									m.ClickedRowindex = index // todo 移除树形表格的这个意思的字段?
-									println("Row selected (left click) " + strconv.Itoa(index))
-								case e.Buttons.Contain(pointer.ButtonSecondary):
-									m.ClickedRowindex = index
-									println("Row selected (right click)" + strconv.Itoa(index))
-								}
-							}
-						}
-					}
-					if m.DrawRow == nil {
-						return m.drawRowDefault(gtx, rowClick, index)
-					}
-					return m.DrawRow(gtx, index)
-				})
-			})
-		}),
-		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-			return m.ContextArea.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				gtx.Constraints.Min = image.Point{}
-				m.OnClicked(gtx)
-				return m.drawContextArea(gtx)
-				return component.Menu(th, &m.MenuState).Layout(gtx) // 所有行的item共用一个popup菜单而不是每行popup一个
-			})
-		}),
-	)
-}
-
-func (m *ContextMenu) drawContextArea(gtx layout.Context) layout.Dimensions { // popup区域的背景色，位置，四角弧度
-	menuStyle := component.Menu(th, &m.MenuState)
-	menuStyle.SurfaceStyle = component.SurfaceStyle{
-		Theme: th,
-		ShadowStyle: component.ShadowStyle{
-			CornerRadius: 18,
-			// Elevation:     0,//todo test elevation
-			// AmbientColor:  color.NRGBA{},//todo test ambient color
-			// PenumbraColor: color.NRGBA{},
-			// UmbraColor:    color.NRGBA{},
-		},
-		Fill: color.NRGBA{R: 50, G: 50, B: 50, A: 255},
-	}
-	return menuStyle.Layout(gtx)
-}
