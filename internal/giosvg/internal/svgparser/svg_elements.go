@@ -2,10 +2,10 @@ package svgparser
 
 import (
 	"errors"
+	"github.com/ddkwork/ux/internal/giosvg/internal/svgparser/simplexml"
 	"strings"
 
 	"gioui.org/f32"
-	"github.com/ddkwork/ux/giosvg/internal/svgparser/simplexml"
 )
 
 func init() {

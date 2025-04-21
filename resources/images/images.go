@@ -7,7 +7,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/ux/giosvg"
+	"github.com/ddkwork/ux/internal/giosvg"
 	_ "github.com/ddkwork/ux/resources/images/ico"
 	"image"
 	"image/color"

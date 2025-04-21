@@ -1,12 +1,11 @@
 package svgparser
 
 import (
+	"github.com/ddkwork/ux/internal/giosvg/internal/svgparser/simplexml"
 	"image/color"
 	"slices"
 	"strconv"
 	"strings"
-
-	"github.com/ddkwork/ux/giosvg/internal/svgparser/simplexml"
 
 	"golang.org/x/image/colornames"
 	"golang.org/x/image/math/fixed"

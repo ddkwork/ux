@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"github.com/ddkwork/ux/internal/giosvg/internal/svgparser"
 	"go/format"
 	"io"
 	"math"
@@ -14,8 +15,6 @@ import (
 	"golang.org/x/text/language"
 
 	"golang.org/x/text/cases"
-
-	"github.com/ddkwork/ux/giosvg/internal/svgparser"
 )
 
 var (

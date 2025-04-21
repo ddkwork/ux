@@ -3,12 +3,11 @@ package svgparser
 import (
 	"errors"
 	"fmt"
+	"github.com/ddkwork/ux/internal/giosvg/internal/svgparser/simplexml"
 	"log"
 	"math"
 	"slices"
 	"strings"
-
-	"github.com/ddkwork/ux/giosvg/internal/svgparser/simplexml"
 )
 
 type (

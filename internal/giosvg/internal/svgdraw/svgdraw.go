@@ -1,13 +1,13 @@
 package svgdraw
 
 import (
+	"github.com/ddkwork/ux/internal/giosvg/internal/svgparser"
 	"math"
 
 	"gioui.org/f32"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
-	"github.com/ddkwork/ux/giosvg/internal/svgparser"
 )
 
 type Driver struct {

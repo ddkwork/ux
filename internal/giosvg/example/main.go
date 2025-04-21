@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"github.com/ddkwork/ux/internal/giosvg"
 	"image"
 	"os"
 
@@ -13,7 +14,6 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/text"
-	"github.com/ddkwork/ux/giosvg"
 )
 
 //go:generate go run github.com/ddkwork/ux/giosvg/cmd/svggen -i "." -o "./school-bus.go" -pkg "main"
