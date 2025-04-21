@@ -3,6 +3,7 @@
 package material
 
 import (
+	"github.com/ddkwork/ux/internal/f32color"
 	"image"
 	"image/color"
 	"math"
@@ -10,8 +11,6 @@ import (
 	"github.com/ddkwork/ux/resources/images"
 
 	"gioui.org/font"
-	"github.com/ddkwork/ux/f32color"
-
 	"gioui.org/io/semantic"
 	"gioui.org/layout"
 	"gioui.org/op"
