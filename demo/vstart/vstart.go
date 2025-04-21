@@ -4,35 +4,34 @@ import (
 	_ "embed"
 	"gioui.org/app"
 	"gioui.org/layout"
-	"gioui.org/op"
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/golibrary/stream/desktop"
 	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/resources/images"
 	"io/fs"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-//go:embed VStart.png
-var VStartPng []byte
+var (
+
+	//go:embed appicon.png
+	VStartPng []byte
+
+	//go:embed  installer.png
+	installerJpg []byte
+)
 
 func main() {
-	go func() {
-		w := new(app.Window)
-		if err := loop(w); err != nil {
-			log.Fatal(err)
-		}
-		os.Exit(0)
-	}()
-	app.Main()
-}
+	w := new(app.Window)
+	w.Option(app.Title("VStart"))
 
-func loop(w *app.Window) error {
-	flow := ux.NewFlow(5)
+	panel := ux.NewPanel(w)
+	flow := ux.NewFlow(8)
+	panel.AddChild(flow)
+
 	i := 0
 	mylog.Check(filepath.WalkDir("d:\\app", func(path string, info fs.DirEntry, err error) error {
 		switch {
@@ -43,13 +42,16 @@ func loop(w *app.Window) error {
 		}
 		ext := filepath.Ext(path)
 		switch ext {
-		case ".exe":
+		case ".exe": //msi invalid argument , not support
 			if stream.IsWindows() {
 				path = filepath.ToSlash(path)
-				png := ExtractIcon2Png(path)
-				if png == nil {
-					png = VStartPng
+
+				oldPng := path[:len(path)-len(filepath.Ext(path))] + ".png"
+				if stream.IsFilePath(oldPng) {
+					mylog.Check(os.Remove(oldPng))
 				}
+
+				png := ExtractIcon2Png(path)
 				flow.AppendElem(i, ux.FlowElemButton{
 					Title: stream.AlignString(stream.BaseName(path), 5),
 					Icon:  png,
@@ -74,16 +76,5 @@ func loop(w *app.Window) error {
 		return err
 	}))
 
-	var ops op.Ops
-	for {
-		switch e := w.Event().(type) {
-		case app.DestroyEvent:
-			return e.Err
-		case app.FrameEvent:
-			gtx := app.NewContext(&ops, e)
-			ux.BackgroundDark(gtx)
-			flow.Layout(gtx)
-			e.Frame(gtx.Ops)
-		}
-	}
+	ux.Run(panel)
 }
