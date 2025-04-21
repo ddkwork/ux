@@ -8,7 +8,7 @@ require (
 	gioui.org/cmd v0.8.1-0.20250321120711-01ffdf788daa
 	gioui.org/example v0.8.2-0.20250227093625-76286d538a44
 	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
-	github.com/ddkwork/golibrary v0.1.2-0.20250419111928-41a591a7eb76
+	github.com/ddkwork/golibrary v0.1.2-0.20250420164730-327e968015fe
 	github.com/ddkwork/ux v0.0.0-20250419073258-70c9c9ce457e
 	github.com/go-vgo/robotgo v0.110.5
 	github.com/gorpher/gowin32 v0.0.11
@@ -16,7 +16,7 @@ require (
 	github.com/oligo/gvcode v0.2.1-0.20250410165334-c3e76c32a80c
 	github.com/robotn/gohook v0.42.0
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/crypto v0.37.0
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	golang.org/x/sys v0.32.0
 )
 
