@@ -1,6 +1,7 @@
 package ux
 
 import (
+	"github.com/ddkwork/ux/internal/keys"
 	"strings"
 
 	"github.com/ddkwork/ux/resources/images"
@@ -10,7 +11,6 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"github.com/ddkwork/ux/keys"
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/component"
 )

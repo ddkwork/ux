@@ -22,7 +22,6 @@ import (
 	"github.com/ddkwork/golibrary/safemap"
 	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/ux"
-	"github.com/ddkwork/ux/terminal"
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/kbinani/screenshot"
 )
@@ -575,13 +574,13 @@ func main() {
 			}
 			m.Set(FlowType, flow)
 		case TerminalType: // todo 控制台被接管了
-			if mylog.IsWindows() {
-				continue // todo bug
-			}
-			screen, settings := terminal.Demo()
-			m.Set(TerminalType, ux.NewTabItem("Tab 5", func(gtx layout.Context) layout.Dimensions {
-				return terminal.Console(screen, settings)(gtx)
-			}))
+			//if mylog.IsWindows() {
+			//	continue // todo bug
+			//}
+			//screen, settings := terminal.Demo()
+			//m.Set(TerminalType, ux.NewTabItem("Tab 5", func(gtx layout.Context) layout.Dimensions {
+			//	return terminal.Console(screen, settings)(gtx)
+			//}))
 		case StackViewType: // todo stackview
 		case DockViewType: // todo dockview
 		case Gif123Type: // todo gif123

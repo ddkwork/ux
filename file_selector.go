@@ -5,7 +5,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/ux/dlgs"
+	"github.com/ddkwork/ux/internal/dlgs"
 	"github.com/ddkwork/ux/resources/images"
 )
 

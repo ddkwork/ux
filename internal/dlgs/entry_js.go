@@ -3,10 +3,6 @@
 
 package dlgs
 
-import (
-// "github.com/gopherjs/gopherjs/js"
-)
-
 // Entry displays input dialog, returning the entered value and a bool for success.
 func Entry(title, text, defaultText string) (out string, ret bool, err error) {
 	defer func() {

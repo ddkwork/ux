@@ -3,10 +3,6 @@
 
 package dlgs
 
-import (
-// "github.com/gopherjs/gopherjs/js"
-)
-
 // MessageBox displays message box and ok button without images.
 func MessageBox(title, text string) (bool, error) {
 	return alertDialog(title, text, "")

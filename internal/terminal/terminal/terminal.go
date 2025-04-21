@@ -2,14 +2,12 @@ package main
 
 import (
 	"fmt"
+	terminal2 "github.com/ddkwork/ux/internal/terminal"
+	"github.com/ddkwork/ux/internal/terminal/tint"
 	"io"
 	"log/slog"
 	"math/rand"
 	"os"
-
-	"github.com/ddkwork/ux/terminal/tint"
-
-	"github.com/ddkwork/ux/terminal"
 
 	"gioui.org/app"
 	"gioui.org/io/system"
@@ -21,7 +19,7 @@ import (
 
 type TerminalWindow struct {
 	Screen         *os.File
-	screen         *terminal.Screen
+	screen         *terminal2.Screen
 	quitChannel    chan any
 	updatedChannel chan any
 }
@@ -37,7 +35,7 @@ func (l TerminalWindow) Open() error {
 	var ops op.Ops
 
 	button := new(widget.Clickable)
-	settings := terminal.NewConsoleSettings(terminal.MaxSize(100, 30))
+	settings := terminal2.NewConsoleSettings(terminal2.MaxSize(100, 30))
 
 	go func() {
 		w.Option(app.Size(unit.Dp(670), unit.Dp(524)))
@@ -53,7 +51,7 @@ func (l TerminalWindow) Open() error {
 				if button.Clicked(gtx) {
 					w.Perform(system.ActionClose)
 				}
-				terminal.Console(l.screen, settings)(gtx)
+				terminal2.Console(l.screen, settings)(gtx)
 				e.Frame(gtx.Ops)
 			}
 		}
@@ -73,9 +71,9 @@ func (l TerminalWindow) Open() error {
 	}
 }
 
-func NewTerminalWindow(size terminal.Point) *TerminalWindow {
+func NewTerminalWindow(size terminal2.Point) *TerminalWindow {
 	updatedChannel := make(chan any)
-	screen := terminal.NewScreen(size, updatedChannel)
+	screen := terminal2.NewScreen(size, updatedChannel)
 
 	r, w := mylog.Check3(os.Pipe())
 
@@ -92,7 +90,7 @@ func NewTerminalWindow(size terminal.Point) *TerminalWindow {
 }
 
 func main() {
-	w := NewTerminalWindow(terminal.Point{
+	w := NewTerminalWindow(terminal2.Point{
 		X: 80,
 		Y: 20,
 	})
