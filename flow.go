@@ -4,7 +4,6 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/widget"
-	"github.com/ddkwork/ux/animationButton"
 	"github.com/ddkwork/ux/widget/material"
 	"image"
 )
@@ -31,7 +30,7 @@ type Flow struct {
 	list         widget.List
 	menus        []*ContextMenu
 	clickables   []widget.Clickable
-	buttons      []*animationButton.Button
+	buttons      []*ButtonAnimation
 }
 
 func NewFlow(rowElemCount int) *Flow {

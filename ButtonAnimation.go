@@ -1,9 +1,10 @@
-package animationButton
+package ux
 
 import (
 	"github.com/ddkwork/ux/internal/animation"
 	"github.com/ddkwork/ux/internal/animation/gween"
 	"github.com/ddkwork/ux/internal/animation/gween/ease"
+	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/resources/images"
 	"image"
 	"image/color"
@@ -20,7 +21,7 @@ import (
 	"github.com/ddkwork/ux/widget/material"
 )
 
-type ButtonAnimation struct {
+type ButtonAnimationOption struct {
 	animationEnter   *animation.Animation
 	transformEnter   animation.TransformFunc
 	animationLeave   *animation.Animation
@@ -51,22 +52,51 @@ func UniformRounded(r unit.Dp) Rounded {
 	}
 }
 
-type ButtonStyle struct {
+type ButtonAnimationStyle struct {
 	Rounded     Rounded
 	TextSize    unit.Sp
 	Inset       layout.Inset
 	Font        font.Font
 	Icon        []byte
 	IconGap     unit.Dp
-	Animation   ButtonAnimation
+	Animation   ButtonAnimationOption
 	Border      widget.Border
 	LoadingIcon *widget.Icon
 	Colors      ButtonColors
 }
 
-type Button struct {
+func NewButtonAnimation(button *widget.Clickable, icon []byte, text string, do func(gtx layout.Context)) *ButtonAnimation {
+	style := ButtonAnimationStyle{
+		Rounded:  UniformRounded(unit.Dp(12)),
+		TextSize: unit.Sp(12),
+		Inset:    layout.UniformInset(unit.Dp(8)),
+		// Font:        font.Font{},
+		Icon:      icon,
+		IconGap:   unit.Dp(1),
+		Animation: NewButtonAnimationScale(.98),
+		Border: widget.Border{
+			Color:        colors.Grey200,
+			CornerRadius: 16,
+			Width:        0.5,
+		},
+		LoadingIcon: nil,
+		Colors: ButtonColors{
+			TextColor:            th.Color.DefaultTextWhiteColor,
+			BackgroundColor:      th.Color.InputFocusedBgColor,
+			HoverBackgroundColor: &th.ContrastFg,
+			HoverTextColor:       &th.Color.HoveredBorderBlueColor,
+			BorderColor:          colors.White,
+		},
+	}
+	if icon == nil {
+		style.Border.CornerRadius = 13
+	}
+	return NewButton(style, button, th, text, do)
+}
+
+type ButtonAnimation struct {
 	Text      string
-	Style     ButtonStyle
+	Style     ButtonAnimationStyle
 	Clickable *widget.Clickable
 	Label     *widget.Label
 	Focused   bool
@@ -82,11 +112,7 @@ type Button struct {
 	do func(gtx layout.Context)
 }
 
-func NewButtonAnimationDefault() ButtonAnimation {
-	return NewButtonAnimationScale(.98)
-}
-
-func NewButtonAnimationScale(v float32) ButtonAnimation {
+func NewButtonAnimationScale(v float32) ButtonAnimationOption {
 	animationEnter := animation.NewAnimation(false,
 		gween.NewSequence(
 			gween.New(1, v, .1, ease.Linear),
@@ -113,7 +139,7 @@ func NewButtonAnimationScale(v float32) ButtonAnimation {
 	)
 	animationLoading.Sequence.SetLoop(-1)
 
-	return ButtonAnimation{
+	return ButtonAnimationOption{
 		animationEnter:   animationEnter,
 		transformEnter:   animation.TransformScaleCenter,
 		animationLeave:   animationLeave,
@@ -125,8 +151,8 @@ func NewButtonAnimationScale(v float32) ButtonAnimation {
 	}
 }
 
-func NewButton(style ButtonStyle, button *widget.Clickable, th *material.Theme, text string, do func(gtx layout.Context)) *Button {
-	return &Button{
+func NewButton(style ButtonAnimationStyle, button *widget.Clickable, th *material.Theme, text string, do func(gtx layout.Context)) *ButtonAnimation {
+	return &ButtonAnimation{
 		Text:             text,
 		Style:            style,
 		Clickable:        button,
@@ -134,6 +160,7 @@ func NewButton(style ButtonStyle, button *widget.Clickable, th *material.Theme, 
 		Focused:          false,
 		Disabled:         false,
 		Loading:          false,
+		Show:             false,
 		Flex:             false,
 		animClickable:    new(widget.Clickable),
 		hoverSwitchState: false,
@@ -142,7 +169,7 @@ func NewButton(style ButtonStyle, button *widget.Clickable, th *material.Theme, 
 	}
 }
 
-func (btn *Button) SetLoading(loading bool) {
+func (btn *ButtonAnimation) SetLoading(loading bool) {
 	btn.Loading = loading
 	btn.Disabled = loading
 
@@ -154,14 +181,14 @@ func (btn *Button) SetLoading(loading bool) {
 	}
 }
 
-func (btn *Button) Clicked(gtx layout.Context) bool {
+func (btn *ButtonAnimation) Clicked(gtx layout.Context) bool {
 	if btn.Disabled {
 		return false
 	}
 	return btn.Clickable.Clicked(gtx)
 }
 
-func (btn *Button) Layout(gtx layout.Context) layout.Dimensions {
+func (btn *ButtonAnimation) Layout(gtx layout.Context) layout.Dimensions {
 	if btn.Show {
 		return layout.Dimensions{} //todo test
 	}

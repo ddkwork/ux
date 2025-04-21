@@ -8,7 +8,6 @@ import (
 	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/resources/images"
 
-	"github.com/ddkwork/ux/animationButton"
 	"github.com/ddkwork/ux/widget/material"
 
 	"gioui.org/font"
@@ -21,45 +20,6 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 )
-
-func NewButtonAnimation(button *widget.Clickable, icon []byte, text string, do func(gtx layout.Context)) *animationButton.Button {
-	style := animationButton.ButtonStyle{
-		Rounded:  animationButton.UniformRounded(unit.Dp(12)),
-		TextSize: unit.Sp(12),
-		Inset:    layout.UniformInset(unit.Dp(8)),
-		// Font:        font.Font{},
-		Icon:      icon,
-		IconGap:   unit.Dp(1),
-		Animation: animationButton.NewButtonAnimationDefault(),
-		Border: widget.Border{
-			Color:        colors.Grey200,
-			CornerRadius: 16,
-			Width:        0.5,
-		},
-		LoadingIcon: nil,
-		Colors: animationButton.ButtonColors{
-			TextColor:            th.Color.DefaultTextWhiteColor,
-			BackgroundColor:      th.Color.InputFocusedBgColor,
-			HoverBackgroundColor: &th.ContrastFg,
-			HoverTextColor:       &th.Color.HoveredBorderBlueColor,
-			BorderColor:          colors.White,
-		},
-	}
-	if icon == nil {
-		style.Border.CornerRadius = 13
-	}
-	return animationButton.NewButton(style, button, th, text, do)
-}
-
-func NewButtonAnimationDefault() animationButton.ButtonAnimation {
-	return NewButtonAnimationScale(.98)
-}
-
-func NewButtonAnimationScale(v float32) animationButton.ButtonAnimation {
-	return animationButton.NewButtonAnimationScale(v)
-}
-
-///////////////////////////////////////////////////////////////////////////////
 
 type ButtonStyle struct {
 	Text            string
@@ -184,7 +144,7 @@ func (b ButtonLayoutStyle) Layout(gtx layout.Context, w layout.Widget) layout.Di
 				//switch {
 				//case !gtx.Enabled():
 				//	background = Disabled(b.Background)
-				//case b.Button.Hovered() || gtx.Focused(b.Button):
+				//case b.ButtonAnimation.Hovered() || gtx.Focused(b.ButtonAnimation):
 				//	background = Hovered(b.Background)
 				//}
 				//paint.Fill(gtx.Ops, background)
