@@ -49,7 +49,7 @@ func NewFlow(rowElemCount int) *Flow {
 
 func (g *Flow) AppendElem(i int, elem FlowElemButton) {
 	g.clickables = append(g.clickables, widget.Clickable{})
-	g.buttons = append(g.buttons, NewButtonAnimation(&g.clickables[i], elem.Icon, elem.Title, elem.Do))
+	g.buttons = append(g.buttons, NewButton(&g.clickables[i], elem.Icon, elem.Title, elem.Do))
 	g.menus = append(g.menus, NewContextMenuWithRootRows(func(gtx layout.Context) layout.Dimensions {
 		return layout.UniformInset(2).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return g.buttons[i].Layout(gtx)

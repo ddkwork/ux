@@ -21,79 +21,6 @@ import (
 	"github.com/ddkwork/ux/widget/material"
 )
 
-type ButtonAnimationOption struct {
-	animationEnter   *animation.Animation
-	transformEnter   animation.TransformFunc
-	animationLeave   *animation.Animation
-	transformLeave   animation.TransformFunc
-	animationClick   *animation.Animation
-	transformClick   animation.TransformFunc
-	animationLoading *animation.Animation
-	transformLoading animation.TransformFunc
-}
-
-type ButtonColors struct {
-	TextColor            color.NRGBA
-	BackgroundColor      color.NRGBA
-	HoverBackgroundColor *color.NRGBA
-	HoverTextColor       *color.NRGBA
-	BorderColor          color.NRGBA
-}
-type Rounded struct {
-	NW unit.Dp
-	NE unit.Dp
-	SW unit.Dp
-	SE unit.Dp
-}
-
-func UniformRounded(r unit.Dp) Rounded {
-	return Rounded{
-		NW: r, NE: r, SW: r, SE: r,
-	}
-}
-
-type ButtonAnimationStyle struct {
-	Rounded     Rounded
-	TextSize    unit.Sp
-	Inset       layout.Inset
-	Font        font.Font
-	Icon        []byte
-	IconGap     unit.Dp
-	Animation   ButtonAnimationOption
-	Border      widget.Border
-	LoadingIcon *widget.Icon
-	Colors      ButtonColors
-}
-
-func NewButtonAnimation(button *widget.Clickable, icon []byte, text string, do func(gtx layout.Context)) *ButtonAnimation {
-	style := ButtonAnimationStyle{
-		Rounded:  UniformRounded(unit.Dp(12)),
-		TextSize: unit.Sp(12),
-		Inset:    layout.UniformInset(unit.Dp(8)),
-		// Font:        font.Font{},
-		Icon:      icon,
-		IconGap:   unit.Dp(1),
-		Animation: NewButtonAnimationScale(.98),
-		Border: widget.Border{
-			Color:        colors.Grey200,
-			CornerRadius: 16,
-			Width:        0.5,
-		},
-		LoadingIcon: nil,
-		Colors: ButtonColors{
-			TextColor:            th.Color.DefaultTextWhiteColor,
-			BackgroundColor:      th.Color.InputFocusedBgColor,
-			HoverBackgroundColor: &th.ContrastFg,
-			HoverTextColor:       &th.Color.HoveredBorderBlueColor,
-			BorderColor:          colors.White,
-		},
-	}
-	if icon == nil {
-		style.Border.CornerRadius = 13
-	}
-	return NewButton(style, button, th, text, do)
-}
-
 type ButtonAnimation struct {
 	Text      string
 	Style     ButtonAnimationStyle
@@ -112,7 +39,63 @@ type ButtonAnimation struct {
 	do func(gtx layout.Context)
 }
 
-func NewButtonAnimationScale(v float32) ButtonAnimationOption {
+type ButtonAnimationStyle struct {
+	Rounded     rounded
+	TextSize    unit.Sp
+	Inset       layout.Inset
+	Font        font.Font
+	Icon        []byte
+	IconGap     unit.Dp
+	Animation   buttonAnimationOption
+	Border      widget.Border
+	LoadingIcon *widget.Icon
+	Colors      buttonColors
+}
+
+func NewButton(button *widget.Clickable, icon []byte, text string, do func(gtx layout.Context)) *ButtonAnimation {
+	radius := unit.Dp(16)
+	if icon == nil {
+		radius = 13
+	}
+	return &ButtonAnimation{
+		Text: text,
+		Style: ButtonAnimationStyle{
+			Rounded:  uniformRounded(unit.Dp(12)),
+			TextSize: unit.Sp(12),
+			Inset:    layout.UniformInset(unit.Dp(8)),
+			// Font:        font.Font{},
+			Icon:      icon,
+			IconGap:   unit.Dp(1),
+			Animation: newButtonAnimationScale(.98),
+			Border: widget.Border{
+				Color:        colors.Grey200,
+				CornerRadius: radius,
+				Width:        0.5,
+			},
+			LoadingIcon: nil,
+			Colors: buttonColors{
+				TextColor:            th.Color.DefaultTextWhiteColor,
+				BackgroundColor:      th.Color.InputFocusedBgColor,
+				HoverBackgroundColor: &th.ContrastFg,
+				HoverTextColor:       &th.Color.HoveredBorderBlueColor,
+				BorderColor:          colors.White,
+			},
+		},
+		Clickable:        button,
+		Label:            new(widget.Label),
+		Focused:          false,
+		Disabled:         false,
+		Loading:          false,
+		Show:             true,
+		Flex:             false,
+		animClickable:    new(widget.Clickable),
+		hoverSwitchState: false,
+		th:               th,
+		do:               do,
+	}
+}
+
+func newButtonAnimationScale(v float32) buttonAnimationOption {
 	animationEnter := animation.NewAnimation(false,
 		gween.NewSequence(
 			gween.New(1, v, .1, ease.Linear),
@@ -139,7 +122,7 @@ func NewButtonAnimationScale(v float32) ButtonAnimationOption {
 	)
 	animationLoading.Sequence.SetLoop(-1)
 
-	return ButtonAnimationOption{
+	return buttonAnimationOption{
 		animationEnter:   animationEnter,
 		transformEnter:   animation.TransformScaleCenter,
 		animationLeave:   animationLeave,
@@ -148,24 +131,6 @@ func NewButtonAnimationScale(v float32) ButtonAnimationOption {
 		transformClick:   animation.TransformScaleCenter,
 		animationLoading: animationLoading,
 		transformLoading: animation.TransformRotate,
-	}
-}
-
-func NewButton(style ButtonAnimationStyle, button *widget.Clickable, th *material.Theme, text string, do func(gtx layout.Context)) *ButtonAnimation {
-	return &ButtonAnimation{
-		Text:             text,
-		Style:            style,
-		Clickable:        button,
-		Label:            new(widget.Label),
-		Focused:          false,
-		Disabled:         false,
-		Loading:          false,
-		Show:             false,
-		Flex:             false,
-		animClickable:    new(widget.Clickable),
-		hoverSwitchState: false,
-		th:               th,
-		do:               do,
 	}
 }
 
@@ -189,7 +154,7 @@ func (btn *ButtonAnimation) Clicked(gtx layout.Context) bool {
 }
 
 func (btn *ButtonAnimation) Layout(gtx layout.Context) layout.Dimensions {
-	if btn.Show {
+	if !btn.Show {
 		return layout.Dimensions{} //todo test
 	}
 	if btn.Clicked(gtx) {
@@ -384,4 +349,37 @@ func (btn *ButtonAnimation) Layout(gtx layout.Context) layout.Dimensions {
 			return dims
 		})
 	})
+}
+
+///////////////////////////////////////
+
+type buttonAnimationOption struct {
+	animationEnter   *animation.Animation
+	transformEnter   animation.TransformFunc
+	animationLeave   *animation.Animation
+	transformLeave   animation.TransformFunc
+	animationClick   *animation.Animation
+	transformClick   animation.TransformFunc
+	animationLoading *animation.Animation
+	transformLoading animation.TransformFunc
+}
+
+type buttonColors struct {
+	TextColor            color.NRGBA
+	BackgroundColor      color.NRGBA
+	HoverBackgroundColor *color.NRGBA
+	HoverTextColor       *color.NRGBA
+	BorderColor          color.NRGBA
+}
+type rounded struct {
+	NW unit.Dp
+	NE unit.Dp
+	SW unit.Dp
+	SE unit.Dp
+}
+
+func uniformRounded(r unit.Dp) rounded {
+	return rounded{
+		NW: r, NE: r, SW: r, SE: r,
+	}
 }

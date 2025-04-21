@@ -82,9 +82,9 @@ func (v *IconView) filter() {
 			break
 		}
 		if v.keyWords == "" || strings.Contains(strings.ToLower(name), strings.ToLower(v.keyWords)) {
-			v.flow.buttons[i].Show = true //todo set
+			v.flow.buttons[i].Show = false //todo set
 			continue
 		}
-		v.flow.buttons[i].Show = false
+		v.flow.buttons[i].Show = true //todo set
 	}
 }
