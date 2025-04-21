@@ -1,6 +1,9 @@
 package animationButton
 
 import (
+	"github.com/ddkwork/ux/internal/animation"
+	"github.com/ddkwork/ux/internal/animation/gween"
+	"github.com/ddkwork/ux/internal/animation/gween/ease"
 	"github.com/ddkwork/ux/resources/images"
 	"image"
 	"image/color"
@@ -14,9 +17,6 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"github.com/ddkwork/ux/animation"
-	"github.com/ddkwork/ux/animation/gween"
-	"github.com/ddkwork/ux/animation/gween/ease"
 	"github.com/ddkwork/ux/widget/material"
 )
 

@@ -1,10 +1,10 @@
 package gween
 
 import (
+	"github.com/ddkwork/ux/internal/animation/gween/ease"
 	"testing"
 
 	"github.com/ddkwork/golibrary/assert"
-	"github.com/ddkwork/ux/animation/gween/ease"
 )
 
 func TestSequenceNew(t *testing.T) {

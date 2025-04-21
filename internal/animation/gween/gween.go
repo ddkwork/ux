@@ -3,7 +3,9 @@
 // the easing functions.
 package gween
 
-import "github.com/ddkwork/ux/animation/gween/ease"
+import (
+	"github.com/ddkwork/ux/internal/animation/gween/ease"
+)
 
 type (
 	// Tween encapsulates the easing function along with timing data. This allows

@@ -1,9 +1,8 @@
 package animation
 
 import (
+	"github.com/ddkwork/ux/internal/animation/gween"
 	"time"
-
-	"github.com/ddkwork/ux/animation/gween"
 
 	"gioui.org/layout"
 	"gioui.org/op"
