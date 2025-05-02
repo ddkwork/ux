@@ -157,7 +157,7 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 			func(gtx layout.Context) layout.Dimensions {
 				return layout.Flex{Axis: layout.Horizontal, Spacing: layout.SpaceSides}.Layout(gtx,
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions { // 布局label右对齐文本
-						return RightAlignLabel(gtx, MaxLabelWidth(gtx, s.fields.Keys()), k)
+						return RightAlignLabel(gtx, MaxLabelWidth(gtx, s.Rows), k)
 					}),
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 						gtx.Constraints.Min.X = 700

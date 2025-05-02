@@ -51,7 +51,7 @@ func NewHPanel(w *app.Window) *Panel {
 	return panel
 }
 
-func NewPanel(w *app.Window) *Panel { //90% is Vertical
+func NewPanel(w *app.Window) *Panel { // 90% is Vertical
 	return &Panel{
 		Flex: layout.Flex{
 			Axis:      layout.Vertical,
@@ -157,7 +157,7 @@ func NewWindow(title string) *app.Window {
 	return w
 }
 
-func RunTest(title string,l Widget) {
+func RunTest(title string, l Widget) {
 	w := new(app.Window)
 	w.Option(app.Title(title))
 	panel := NewPanel(w)
@@ -177,10 +177,10 @@ func Run(p *Panel) {
 			m.Explorer.ListenEvents(et)
 		*/
 
-		//var (
+		// var (
 		//	deco  widget.Decorations
 		//	title string
-		//)
+		// )
 
 		var ops op.Ops
 		go func() {
@@ -202,16 +202,16 @@ func Run(p *Panel) {
 						p.Layout(gtx)
 					})
 
-					//p.w.Perform(deco.Update(gtx))
-					//decorationsStyle := material.Decorations(th, &deco, ^system.Action(0), title)
-					//decorationsStyle.Background = color.NRGBA{
+					// p.w.Perform(deco.Update(gtx))
+					// decorationsStyle := material.Decorations(th, &deco, ^system.Action(0), title)
+					// decorationsStyle.Background = color.NRGBA{
 					//	R: 44,
 					//	G: 44,
 					//	B: 44,
 					//	A: 255,
-					//}
-					//decorationsStyle.Foreground = th.Fg
-					//decorationsStyle.Layout(gtx)
+					// }
+					// decorationsStyle.Foreground = th.Fg
+					// decorationsStyle.Layout(gtx)
 
 					e.Frame(gtx.Ops)
 				}
@@ -285,20 +285,20 @@ func WithAlpha(c color.NRGBA, a uint8) color.NRGBA {
 func LabelWidth(gtx layout.Context, text string) unit.Dp {
 	// fmt.Printf("Calculating text dragWidth for: %s\n", text)
 	// fmt.Printf("Current Min.X: %v\n", gtx.Constraints.Min.X)
-	//richText := NewRichText()
-	//richText.AddSpan(richtext.SpanStyle{
+	// richText := NewRichText()
+	// richText.AddSpan(richtext.SpanStyle{
 	//	// Font:        font.Font{},
 	//	Size:        unit.Sp(12),
 	//	Color:       White,
 	//	Content:     text,
 	//	Interactive: false,
-	//})
-	//recording := Record(gtx, func(gtx layout.Context) layout.Dimensions {
+	// })
+	// recording := Record(gtx, func(gtx layout.Context) layout.Dimensions {
 	//	gtx.Constraints.Min.X = 0
 	//	return richText.Layout(gtx)
-	//})
-	//// fmt.Printf("Calculated dragWidth: %v\n", unit.Dp(recording.Dimensions.Size.X))
-	//return unit.Dp(recording.Dimensions.Size.X)
+	// })
+	// // fmt.Printf("Calculated dragWidth: %v\n", unit.Dp(recording.Dimensions.Size.X))
+	// return unit.Dp(recording.Dimensions.Size.X)
 	text += "  ⇧" // 为排序图标留位置,不要修改这里，稳定了
 	body := material.Body1(th, text)
 	body.MaxLines = 1
@@ -309,11 +309,11 @@ func LabelWidth(gtx layout.Context, text string) unit.Dp {
 	return unit.Dp(recording.Dimensions.Size.X)
 }
 
-func MaxLabelWidth(gtx layout.Context, keys []string) unit.Dp {
+func MaxLabelWidth(gtx layout.Context, rows []CellData) unit.Dp {
 	// originalConstraints := gtx.Constraints
 	maxWidth := unit.Dp(0)
-	for _, data := range keys {
-		currentWidth := LabelWidth(gtx, data) // 可以使用max []unit.Dp，但是多了一层make []unit.Dp，浪费内存
+	for _, data := range rows {
+		currentWidth := LabelWidth(gtx, data.Key) // 可以使用max []unit.Dp，但是多了一层make []unit.Dp，浪费内存
 		if currentWidth > maxWidth {
 			maxWidth = currentWidth
 		}
