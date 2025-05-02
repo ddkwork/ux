@@ -1,0 +1,29 @@
+log.log
+.idea
+/gh/
+*.zip
+rep
+tr
+/demo/qt/
+/assets2/
+/demo/demo.apk
+/demo/demo.apk.idsig
+/demo/demo.exe
+/demo/ManPiecework/ManPiecework.exe
+/demo/canvas.png
+/go.work.sum
+/go.work
+/update go workspace.cmd
+/vendor/
+/demo/go-color-picker/gohook/
+/demo/go-color-picker/keycode/
+/demo/go-color-picker/robotgo/
+/demo/go-tools-master/
+coverage.txt
+resources/assets/New folder
+/demo/assets2/
+/demo/svg/
+ColorPicker.exe
+/demo/other/
+/demo/todo/
+/demo/xxoo/

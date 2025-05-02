@@ -1,0 +1,71 @@
+
+			//rootNodes := []*old.TreeNode{
+			//	{
+			//		Title:    "Root 0",
+			//		Expanded: true,
+			//	},
+			//	{
+			//		Title:    "Root 1",
+			//		Expanded: true,
+			//		Children: []*old.TreeNode{
+			//			{
+			//				Title:    "Child 1.1",
+			//				Expanded: true,
+			//				Children: []*old.TreeNode{
+			//					{Title: "Grandchild 1.1.1"},
+			//					{Title: "Grandchild 1.1.2"},
+			//				},
+			//				ClickCallback: func(gtx layout.Context) {
+			//					println("clicked")
+			//				},
+			//			},
+			//			{
+			//				Title:    "Child 1.2",
+			//				Expanded: true,
+			//				Children: []*old.TreeNode{
+			//					{Title: "Grandchild 1.2.1"},
+			//				},
+			//			},
+			//		},
+			//	},
+			//
+			//	{
+			//		Title:    "Root 2",
+			//		Expanded: true,
+			//		Children: []*old.TreeNode{
+			//			{
+			//				Title:    "Child 2.1",
+			//				Expanded: true,
+			//				Children: []*old.TreeNode{
+			//					{
+			//						Title:    "Grandchild 2.1.1",
+			//						Expanded: true,
+			//					},
+			//				},
+			//			},
+			//		},
+			//	},
+			//	{
+			//		Title:    "Root 3",
+			//		Expanded: true,
+			//		Children: []*old.TreeNode{
+			//			{
+			//				Title:    "Child 3.1",
+			//				Expanded: true,
+			//				Children: []*old.TreeNode{
+			//					{
+			//						Title:    "Grandchild 3.1.1",
+			//						Expanded: true,
+			//					},
+			//				},
+			//			},
+			//		},
+			//	},
+			//}
+			//
+			//tree := old.NewTree(rootNodes)
+			//// tree.SetNodes(rootNodes)
+			//tree.OnClick(func(gtx layout.Context, node *old.TreeNode) {
+			//	fmt.Println("node:", node.Title, " clicked")
+			//})
+			//m.Set(TreeType, tree)

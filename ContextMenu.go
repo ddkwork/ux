@@ -1,0 +1,185 @@
+package ux
+
+import (
+	"image"
+	"image/color"
+	"sync"
+
+	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/ux/resources/images"
+
+	"gioui.org/layout"
+	"gioui.org/widget"
+	"github.com/ddkwork/ux/widget/material"
+	"github.com/ddkwork/ux/x/component"
+)
+
+type ContextMenuItem struct {
+	Title            string      // 菜单项标题
+	Icon             []byte      // 可选的图标
+	Can              func() bool // 是否绘制取决于当前渲染的行，回调内需要传递当前渲染的节点给回调，说白了这里是绘制条件，下面的do是业务逻辑，回调内传入的形参节点不一样
+	Do               func()      // 调用被选中节点来操作业务逻辑
+	AppendDivider    bool        // 是否添加分割线
+	widget.Clickable             // 可点击的控件
+}
+
+type ContextMenu struct {
+	Items    []*ContextMenuItem
+	area     component.ContextArea
+	state    component.MenuState
+	list     widget.List
+	rootRows []layout.Widget
+	sync.Once
+}
+
+// todo 在准备好所有行遍历之前需要重置它，否则会导致节点无限递增
+func (m *ContextMenu) CreatItem(rootRow layout.Widget) {
+	m.rootRows = append(m.rootRows, rootRow)
+}
+
+func NewContextMenuWithRootRows(rootRows ...layout.Widget) *ContextMenu {
+	m := NewContextMenu()
+	m.rootRows = rootRows
+	return m
+}
+
+func NewContextMenu() *ContextMenu {
+	return &ContextMenu{
+		Items: nil,
+		area:  component.ContextArea{},
+		state: component.MenuState{},
+		list: widget.List{
+			Scrollbar: widget.Scrollbar{},
+			List: layout.List{
+				Axis:        layout.Vertical,
+				ScrollToEnd: false,
+				Alignment:   0,
+				Position:    layout.Position{},
+			},
+		},
+		rootRows: make([]layout.Widget, 0),
+		Once:     sync.Once{},
+	}
+}
+
+func (m *ContextMenu) AddItem(item ContextMenuItem) {
+	menuItem := component.MenuItem(th, &item.Clickable, item.Title)
+	menuItem.Icon = item.Icon
+	m.state.Options = append(m.state.Options, func(gtx layout.Context) layout.Dimensions {
+		return menuItem.Layout(gtx)
+	})
+	if item.AppendDivider {
+		m.state.Options = append(m.state.Options, component.Divider(th).Layout)
+	}
+	m.Items = append(m.Items, &item)
+}
+
+func (m *ContextMenu) InitMenuItems(items ...ContextMenuItem) {
+	m.Once.Do(func() {
+		for _, item := range items {
+			if item.Can() {
+				m.AddItem(item)
+			}
+		}
+	})
+}
+
+func (m *ContextMenu) onClicked(gtx layout.Context) {
+	for _, item := range m.Items {
+		if item.Clicked(gtx) {
+			if item.Do != nil {
+				item.Do()
+			}
+		}
+	}
+}
+
+// Layout 线性的list，表格以及非线性的树形表格(核心:直接rootRow当做线性表格即可，顶层调用menu布局。转不过弯来一直去处理容器节点是否渲染menu布局的问题)均通过测试
+func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
+	mylog.CheckNil(m.rootRows)
+	return layout.Stack{}.Layout(gtx, layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+		return material.List(th, &m.list).Layout(gtx, len(m.rootRows), func(gtx layout.Context, index int) layout.Dimensions {
+			gtx.Constraints.Min.X = gtx.Constraints.Max.X
+			return m.rootRows[index](gtx)
+		})
+	}),
+		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+			return m.area.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				gtx.Constraints.Min = image.Point{}
+				m.onClicked(gtx)
+				return m.drawContextArea(gtx)
+				return component.Menu(th, &m.state).Layout(gtx) // 所有行的item共用一个popup菜单而不是每行popup一个
+			})
+		}),
+	)
+}
+
+func (m *ContextMenu) drawContextArea(gtx layout.Context) layout.Dimensions { // popup区域的背景色，位置，四角弧度
+	menuStyle := component.Menu(th, &m.state)
+	menuStyle.SurfaceStyle = component.SurfaceStyle{
+		Theme: th,
+		ShadowStyle: component.ShadowStyle{
+			CornerRadius: 18,
+			// Elevation:     0,//todo test elevation
+			// AmbientColor:  color.NRGBA{},//todo test ambient color
+			// PenumbraColor: color.NRGBA{},
+			// UmbraColor:    color.NRGBA{},
+		},
+		Fill: color.NRGBA{R: 50, G: 50, B: 50, A: 255},
+	}
+	return menuStyle.Layout(gtx)
+}
+
+func (m *ContextMenu) LayoutTest(gtx layout.Context) layout.Dimensions {
+	m.InitMenuItems(
+		ContextMenuItem{
+			Title:         "Red",
+			Icon:          nil,
+			Can:           func() bool { return true },
+			Do:            func() { mylog.Info("red item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		},
+		ContextMenuItem{
+			Title:         "Green",
+			Icon:          nil,
+			Can:           func() bool { return true },
+			Do:            func() { mylog.Info("Green item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		},
+		ContextMenuItem{
+			Title:         "Blue",
+			Icon:          nil,
+			Can:           func() bool { return true },
+			Do:            func() { mylog.Info("Blue item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		},
+		ContextMenuItem{
+			Title:         "Balance",
+			Icon:          images.ActionAccountBalanceIcon,
+			Can:           func() bool { return true },
+			Do:            func() { mylog.Info("Balance item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		},
+		ContextMenuItem{
+			Title:         "Account",
+			Icon:          images.ActionAccountBoxIcon,
+			Can:           func() bool { return true },
+			Do:            func() { mylog.Info("Account item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		},
+		ContextMenuItem{
+			Title:         "Cart",
+			Icon:          images.ActionAddShoppingCartIcon,
+			Can:           func() bool { return true },
+			Do:            func() { mylog.Info("Cart item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		},
+	)
+	return m.Layout(gtx)
+}
