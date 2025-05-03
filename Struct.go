@@ -69,9 +69,9 @@ func MarshalFields[T any](data T, callback MarshalRowCallback) (fields []CellDat
 			}
 		}
 		vv := fmt.Sprint(v)
-		if vv == "" {
-			vv = strconv.Quote("") // for struct2table
-		}
+		// if vv == "" {
+		// 	vv = strconv.Quote("") // for struct2table
+		// }
 		fields = append(fields, CellData{
 			Key:       field.Name,
 			Value:     vv,
@@ -127,9 +127,9 @@ func UnmarshalFields[T any](fields []CellData, callback UnmarshalRowCallback) T 
 		case reflect.TypeFor[time.Time]().Kind():
 			fieldValue.Set(reflect.ValueOf(mylog.Check2(time.Parse(time.RFC3339, f.Value))))
 		case reflect.String:
-			if f.Value == strconv.Quote("") {
-				f.Value = mylog.Check2(strconv.Unquote(f.Value)) // todo test for struct2table
-			}
+			// if f.Value == strconv.Quote("") {
+			// 	f.Value = mylog.Check2(strconv.Unquote(f.Value)) // todo test for struct2table
+			// }
 			fieldValue.SetString(f.Value)
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			fieldValue.SetInt(mylog.Check2(strconv.ParseInt(f.Value, 10, 64))) // 如果是其他进制和位数呢？这就需要回调函数了
@@ -145,7 +145,7 @@ func UnmarshalFields[T any](fields []CellData, callback UnmarshalRowCallback) T 
 			mylog.Check("unsupported field type: " + field.Type.Kind().String())
 		}
 	}
-	//老外的做法:和返回一个new(T)没区别吧？
+	// 老外的做法:和返回一个new(T)没区别吧？
 	//	reflect.ValueOf(&e.beforeData).Elem().Set(reflect.New(reflect.TypeOf(e.beforeData).Elem()))
 	//	e.beforeData.CopyFrom(target)
 	//
@@ -153,5 +153,3 @@ func UnmarshalFields[T any](fields []CellData, callback UnmarshalRowCallback) T 
 	//	e.editorData.CopyFrom(target)
 	return reflect.Indirect(reflect.ValueOf(data)).Interface().(T)
 }
-
-//  todo 求和也使用反射自动完成，不要在每个表格里面都写相同的逻辑
