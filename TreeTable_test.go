@@ -28,8 +28,6 @@ func TestName(t *testing.T) {
 	mylog.Call(func() {
 		// fakeError.Walk("")
 	})
-	return
-	golibrary.StaticCheck()
 }
 
 func BenchmarkTransposeMatrix(b *testing.B) {
