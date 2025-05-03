@@ -1483,8 +1483,8 @@ func (t *TreeTable[T]) calcCurrentHierarchyColumnWidthAndSafeCheck(gtx layout.Co
 	// 预先计算单元格宽度,todo层级列按需要渲染另外的图标，rootrows深度的左侧还有一个leftPadding没有计算进去，不管了，先这样，反正对齐了
 	currentWidth := leftIndent + leftPadding + defaultHierarchyColumnIconSize + LabelWidth(gtx, cell.Value) + DividerWidth // 预计算body层级列实际宽度,todo 对currentWidth进行渲染单元测试
 	if currentWidth > t.maxColumnCellWidths[HierarchyColumnID] {                                                           // 这个检查是必要的，否则会导致单元格宽度超出限制导致对不齐表头层级列
-		mylog.Todo(currentWidth)
-		mylog.Todo(t.maxColumnCellWidths[HierarchyColumnID])
+		mylog.Todo(fmt.Sprint(currentWidth))
+		mylog.Todo(fmt.Sprint(t.maxColumnCellWidths[HierarchyColumnID]))
 		// mylog.Info("currentWidth", currentWidth)
 		// mylog.Info("t.maxColumnCellWidths[hierarchyColumnID]", t.maxColumnCellWidths[hierarchyColumnID])
 		// panic("预渲染列宽大于限制宽度")//对于更新节点单元格文本变长的情况，不要panic
