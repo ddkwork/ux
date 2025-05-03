@@ -122,6 +122,8 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 			columnCells:        rowCells,
 			clickedColumnIndex: -1,
 			manualWidthSet:     make([]bool, columnCount),
+			sortAscending:      false,
+			contextMenu:        NewContextMenu(),
 		},
 		rootRows:                     nil,
 		filteredRows:                 nil,
@@ -187,8 +189,149 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		t.updateRowNumber(t.Root, 0)
 	})
 
-	t.rootRows = t.Root.Children                        // 增删改查不一定去计算列宽导致有些节点已经删除，是空指针导致panic，所有这里需要刷新一下rootRows，不知道这里是否会内存泄漏
-	t.contextMenu.rootRows = t.contextMenu.rootRows[:0] // 重置rootRows    todo 这里需要重置rootRows，否则会导致节点无限递增
+	t.rootRows = t.Root.Children // 增删改查不一定去计算列宽导致有些节点已经删除，是空指针导致panic，所有这里需要刷新一下rootRows，不知道这里是否会内存泄漏
+
+	rows := make([]layout.Widget, 0, len(t.rootRows))
+	for i, row := range t.rootRows {
+		rows = append(rows, func(gtx layout.Context) layout.Dimensions {
+			return t.RowFrame2(gtx, row, i)
+		})
+	}
+
+	for _, n := range t.rootRows {
+		t.contextMenu.Once.Do(func() {
+			item := ContextMenuItem{}
+			for _, kind := range CopyRowType.EnumTypes() {
+				switch kind {
+				case CopyRowType:
+					item = ContextMenuItem{
+						Title:     "",
+						Icon:      images.SvgIconCopy,
+						Can:       func() bool { return true },
+						Do:        func() { t.SelectedNode.CopyRow(gtx, t.maxColumnTextWidths) },
+						Clickable: widget.Clickable{},
+					}
+				case ConvertToContainerType:
+					item = ContextMenuItem{
+						Title: "",
+						Icon:  images.SvgIconConvertToContainer,
+						Can:   func() bool { return !n.Container() }, // n是当前渲染的行
+						Do: func() {
+							t.SelectedNode.SetType("ConvertToContainer" + ContainerKeyPostfix) // ? todo bug：这里是失败的，导致再次点击这里转换的节点后ConvertToNonContainer没有弹出来
+							t.SelectedNode.ID = newID()
+							t.SelectedNode.SetOpen(true)
+							t.SelectedNode.Children = make([]*Node[T], 0)
+							t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
+						},
+						Clickable: widget.Clickable{},
+					}
+				case ConvertToNonContainerType:
+					item = ContextMenuItem{
+						Title: "",
+						Icon:  images.SvgIconConvertToNonContainer,
+						Can:   func() bool { return n.Container() }, // n是当前渲染的行
+						Do: func() {
+							t.SelectedNode.SetType("")
+							t.SelectedNode.ID = newID()
+							for _, child := range t.SelectedNode.Children {
+								child.parent = t.SelectedNode.parent
+								child.ID = newID()
+							}
+							t.SelectedNode.ResetChildren()
+							t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
+						},
+						AppendDivider: true,
+						Clickable:     widget.Clickable{},
+					}
+				case NewType:
+					item = ContextMenuItem{
+						Title: "",
+						Icon:  images.SvgIconCircledAdd,
+						Can:   func() bool { return true },
+						Do: func() {
+							var zero T
+							t.InsertAfter(gtx, NewNode(zero))
+						},
+						Clickable: widget.Clickable{},
+					}
+				case NewContainerType:
+					item = ContextMenuItem{
+						Title: "",
+						Icon:  images.SvgIconCircledVerticalEllipsis,
+						Can:   func() bool { return true },
+						Do: func() {
+							var zero T // todo edit type?
+							t.InsertAfter(gtx, NewContainerNode("NewContainerNode", zero))
+						},
+						Clickable: widget.Clickable{},
+					}
+				case DeleteType:
+					item = ContextMenuItem{
+						Title:     "",
+						Icon:      images.SvgIconTrash,
+						Can:       func() bool { return true },
+						Do:        func() { t.Remove(gtx) },
+						Clickable: widget.Clickable{},
+					}
+				case DuplicateType:
+					item = ContextMenuItem{
+						Title: "",
+						Icon:  images.SvgIconDuplicate,
+						Can:   func() bool { return true },
+						Do: func() {
+							t.InsertAfter(gtx, t.SelectedNode.Clone())
+						},
+						Clickable: widget.Clickable{},
+					}
+				case EditType:
+					item = ContextMenuItem{
+						Title:         "",
+						Icon:          images.SvgIconEdit,
+						Can:           func() bool { return true },
+						Do:            func() { t.Edit(gtx) },
+						AppendDivider: true,
+						Clickable:     widget.Clickable{},
+					}
+				case OpenAllType:
+					item = ContextMenuItem{
+						Title:     "",
+						Icon:      images.SvgIconHierarchy,
+						Can:       func() bool { return true },
+						Do:        func() { t.Root.OpenAll() },
+						Clickable: widget.Clickable{},
+					}
+				case CloseAllType:
+					item = ContextMenuItem{
+						Title:     "",
+						Icon:      images.SvgIconCircledVerticalEllipsis,
+						Can:       func() bool { return true },
+						Do:        func() { t.Root.CloseAll() },
+						Clickable: widget.Clickable{},
+					}
+				case SaveDataType:
+					item = ContextMenuItem{
+						Title:     "",
+						Icon:      images.SvgIconSaveContent,
+						Can:       func() bool { return true },
+						Do:        func() { t.SaveDate() },
+						Clickable: widget.Clickable{},
+					}
+				}
+				item.Title = kind.String()
+				if item.Can() {
+					t.contextMenu.AddItem(item)
+				}
+			}
+			if items := t.CustomContextMenuItems(gtx, n); items != nil { // gtx用于调整列宽，触发增删改之后，n是正在渲染的节点，用于取出元数据控制菜单是否渲染
+				for item := range items {
+					if item.Can() {
+						t.contextMenu.AddItem(item)
+					}
+				}
+			}
+		})
+
+	}
 
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 		return t.HeaderFrame(gtx) // 渲染表头
@@ -198,143 +341,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		})
 	}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			for i, n := range t.rootRows {
-				t.contextMenu.CreatItem(func(gtx layout.Context) layout.Dimensions {
-					t.contextMenu.Once.Do(func() {
-						item := ContextMenuItem{}
-						for _, kind := range CopyRowType.EnumTypes() {
-							switch kind {
-							case CopyRowType:
-								item = ContextMenuItem{
-									Title:     "",
-									Icon:      images.SvgIconCopy,
-									Can:       func() bool { return true },
-									Do:        func() { t.SelectedNode.CopyRow(gtx, t.maxColumnTextWidths) },
-									Clickable: widget.Clickable{},
-								}
-							case ConvertToContainerType:
-								item = ContextMenuItem{
-									Title: "",
-									Icon:  images.SvgIconConvertToContainer,
-									Can:   func() bool { return !n.Container() }, // n是当前渲染的行
-									Do: func() {
-										t.SelectedNode.SetType("ConvertToContainer" + ContainerKeyPostfix) // ? todo bug：这里是失败的，导致再次点击这里转换的节点后ConvertToNonContainer没有弹出来
-										t.SelectedNode.ID = newID()
-										t.SelectedNode.SetOpen(true)
-										t.SelectedNode.Children = make([]*Node[T], 0)
-										t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
-									},
-									Clickable: widget.Clickable{},
-								}
-							case ConvertToNonContainerType:
-								item = ContextMenuItem{
-									Title: "",
-									Icon:  images.SvgIconConvertToNonContainer,
-									Can:   func() bool { return n.Container() }, // n是当前渲染的行
-									Do: func() {
-										t.SelectedNode.SetType("")
-										t.SelectedNode.ID = newID()
-										for _, child := range t.SelectedNode.Children {
-											child.parent = t.SelectedNode.parent
-											child.ID = newID()
-										}
-										t.SelectedNode.ResetChildren()
-										t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
-									},
-									AppendDivider: true,
-									Clickable:     widget.Clickable{},
-								}
-							case NewType:
-								item = ContextMenuItem{
-									Title: "",
-									Icon:  images.SvgIconCircledAdd,
-									Can:   func() bool { return true },
-									Do: func() {
-										var zero T
-										t.InsertAfter(gtx, NewNode(zero))
-									},
-									Clickable: widget.Clickable{},
-								}
-							case NewContainerType:
-								item = ContextMenuItem{
-									Title: "",
-									Icon:  images.SvgIconCircledVerticalEllipsis,
-									Can:   func() bool { return true },
-									Do: func() {
-										var zero T // todo edit type?
-										t.InsertAfter(gtx, NewContainerNode("NewContainerNode", zero))
-									},
-									Clickable: widget.Clickable{},
-								}
-							case DeleteType:
-								item = ContextMenuItem{
-									Title:     "",
-									Icon:      images.SvgIconTrash,
-									Can:       func() bool { return true },
-									Do:        func() { t.Remove(gtx) },
-									Clickable: widget.Clickable{},
-								}
-							case DuplicateType:
-								item = ContextMenuItem{
-									Title: "",
-									Icon:  images.SvgIconDuplicate,
-									Can:   func() bool { return true },
-									Do: func() {
-										t.InsertAfter(gtx, t.SelectedNode.Clone())
-									},
-									Clickable: widget.Clickable{},
-								}
-							case EditType:
-								item = ContextMenuItem{
-									Title:         "",
-									Icon:          images.SvgIconEdit,
-									Can:           func() bool { return true },
-									Do:            func() { t.Edit(gtx) },
-									AppendDivider: true,
-									Clickable:     widget.Clickable{},
-								}
-							case OpenAllType:
-								item = ContextMenuItem{
-									Title:     "",
-									Icon:      images.SvgIconHierarchy,
-									Can:       func() bool { return true },
-									Do:        func() { t.Root.OpenAll() },
-									Clickable: widget.Clickable{},
-								}
-							case CloseAllType:
-								item = ContextMenuItem{
-									Title:     "",
-									Icon:      images.SvgIconCircledVerticalEllipsis,
-									Can:       func() bool { return true },
-									Do:        func() { t.Root.CloseAll() },
-									Clickable: widget.Clickable{},
-								}
-							case SaveDataType:
-								item = ContextMenuItem{
-									Title:     "",
-									Icon:      images.SvgIconSaveContent,
-									Can:       func() bool { return true },
-									Do:        func() { t.SaveDate() },
-									Clickable: widget.Clickable{},
-								}
-							}
-							item.Title = kind.String()
-							if item.Can() {
-								t.contextMenu.AddItem(item)
-							}
-						}
-						if items := t.CustomContextMenuItems(gtx, n); items != nil { // gtx用于调整列宽，触发增删改之后，n是正在渲染的节点，用于取出元数据控制菜单是否渲染
-							for item := range items {
-								if item.Can() {
-									t.contextMenu.AddItem(item)
-								}
-							}
-						}
-					})
-					return t.RowFrame2(gtx, n, i)
-				})
-			}
-			return t.contextMenu.Layout(gtx)
+			return t.contextMenu.Layout(gtx, rows)
 			// ////////////////////////
 			// t.inLayoutHeader = false
 			// return t.layoutDrag(gtx, func(gtx layout.Context, row int) layout.Dimensions {
@@ -444,7 +451,6 @@ func (t *TreeTable[T]) RowFrame2(gtx layout.Context, n *Node[T], rowIndex int) l
 			})
 		}),
 	}
-	rowIndex++
 	if n.CanHaveChildren() && n.isOpen { // 如果是容器节点则递归填充孩子节点形成多行
 		for _, child := range n.Children {
 			rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -842,8 +848,21 @@ func TransposeMatrix[T any](rootRows [][]T) iter.Seq2[int, T] {
 
 func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 	// 实现右键复制列到剪切板功能
-	if t.header.contextMenu == nil {
-		t.header.contextMenu = NewContextMenuWithRootRows(func(gtx layout.Context) layout.Dimensions {
+	t.header.contextMenu.Once.Do(func() {
+		t.header.contextMenu.AddItem(ContextMenuItem{
+			Title: "CopyColumn",
+			Icon:  images.SvgIconCopy,
+			Can:   func() bool { return true },
+			Do: func() {
+				t.CopyColumn(gtx)
+				t.header.clickedColumnIndex = -1 // 重置点击列索引
+			},
+			AppendDivider: true,
+			Clickable:     widget.Clickable{},
+		})
+	})
+	return t.header.contextMenu.Layout(gtx, []layout.Widget{
+		func(gtx layout.Context) layout.Dimensions {
 			var cols []layout.FlexChild
 			elems := make([]*Resizable, 0)
 			for i, cell := range t.header.columnCells {
@@ -929,20 +948,8 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 				}))
 			}
 			return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle, WeightSum: 0}.Layout(gtx, cols...)
-		})
-		t.header.contextMenu.AddItem(ContextMenuItem{
-			Title: "CopyColumn",
-			Icon:  images.SvgIconCopy,
-			Can:   func() bool { return true },
-			Do: func() {
-				t.CopyColumn(gtx)
-				t.header.clickedColumnIndex = -1 // 重置点击列索引
-			},
-			AppendDivider: true,
-			Clickable:     widget.Clickable{},
-		})
-	}
-	return t.header.contextMenu.Layout(gtx)
+		},
+	})
 }
 
 var (

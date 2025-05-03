@@ -24,23 +24,11 @@ type ContextMenuItem struct {
 }
 
 type ContextMenu struct {
-	Items    []*ContextMenuItem
-	area     component.ContextArea
-	state    component.MenuState
-	list     widget.List
-	rootRows []layout.Widget
+	Items []*ContextMenuItem
+	area  component.ContextArea
+	state component.MenuState
+	list  widget.List
 	sync.Once
-}
-
-// todo 在准备好所有行遍历之前需要重置它，否则会导致节点无限递增
-func (m *ContextMenu) CreatItem(rootRow layout.Widget) {
-	m.rootRows = append(m.rootRows, rootRow)
-}
-
-func NewContextMenuWithRootRows(rootRows ...layout.Widget) *ContextMenu {
-	m := NewContextMenu()
-	m.rootRows = rootRows
-	return m
 }
 
 func NewContextMenu() *ContextMenu {
@@ -57,8 +45,7 @@ func NewContextMenu() *ContextMenu {
 				Position:    layout.Position{},
 			},
 		},
-		rootRows: make([]layout.Widget, 0),
-		Once:     sync.Once{},
+		Once: sync.Once{},
 	}
 }
 
@@ -74,16 +61,6 @@ func (m *ContextMenu) AddItem(item ContextMenuItem) {
 	m.Items = append(m.Items, &item)
 }
 
-func (m *ContextMenu) InitMenuItems(items ...ContextMenuItem) {
-	m.Once.Do(func() {
-		for _, item := range items {
-			if item.Can() {
-				m.AddItem(item)
-			}
-		}
-	})
-}
-
 func (m *ContextMenu) onClicked(gtx layout.Context) {
 	for _, item := range m.Items {
 		if item.Clicked(gtx) {
@@ -95,12 +72,14 @@ func (m *ContextMenu) onClicked(gtx layout.Context) {
 }
 
 // Layout 线性的list，表格以及非线性的树形表格(核心:直接rootRow当做线性表格即可，顶层调用menu布局。转不过弯来一直去处理容器节点是否渲染menu布局的问题)均通过测试
-func (m *ContextMenu) Layout(gtx layout.Context) layout.Dimensions {
-	mylog.CheckNil(m.rootRows)
+func (m *ContextMenu) Layout(gtx layout.Context, rootRows []layout.Widget) layout.Dimensions {
+	if len(rootRows) == 0 {
+		panic("rootRows is nil") // todo ...
+	}
 	return layout.Stack{}.Layout(gtx, layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-		return material.List(th, &m.list).Layout(gtx, len(m.rootRows), func(gtx layout.Context, index int) layout.Dimensions {
+		return material.List(th, &m.list).Layout(gtx, len(rootRows), func(gtx layout.Context, index int) layout.Dimensions {
 			gtx.Constraints.Min.X = gtx.Constraints.Max.X
-			return m.rootRows[index](gtx)
+			return rootRows[index](gtx)
 		})
 	}),
 		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
@@ -130,56 +109,54 @@ func (m *ContextMenu) drawContextArea(gtx layout.Context) layout.Dimensions { //
 	return menuStyle.Layout(gtx)
 }
 
-func (m *ContextMenu) LayoutTest(gtx layout.Context) layout.Dimensions {
-	m.InitMenuItems(
-		ContextMenuItem{
-			Title:         "Red",
-			Icon:          nil,
-			Can:           func() bool { return true },
-			Do:            func() { mylog.Info("red item clicked") },
-			AppendDivider: false,
-			Clickable:     widget.Clickable{},
-		},
-		ContextMenuItem{
-			Title:         "Green",
-			Icon:          nil,
-			Can:           func() bool { return true },
-			Do:            func() { mylog.Info("Green item clicked") },
-			AppendDivider: false,
-			Clickable:     widget.Clickable{},
-		},
-		ContextMenuItem{
-			Title:         "Blue",
-			Icon:          nil,
-			Can:           func() bool { return true },
-			Do:            func() { mylog.Info("Blue item clicked") },
-			AppendDivider: false,
-			Clickable:     widget.Clickable{},
-		},
-		ContextMenuItem{
-			Title:         "Balance",
-			Icon:          images.ActionAccountBalanceIcon,
-			Can:           func() bool { return true },
-			Do:            func() { mylog.Info("Balance item clicked") },
-			AppendDivider: false,
-			Clickable:     widget.Clickable{},
-		},
-		ContextMenuItem{
-			Title:         "Account",
-			Icon:          images.ActionAccountBoxIcon,
-			Can:           func() bool { return true },
-			Do:            func() { mylog.Info("Account item clicked") },
-			AppendDivider: false,
-			Clickable:     widget.Clickable{},
-		},
-		ContextMenuItem{
-			Title:         "Cart",
-			Icon:          images.ActionAddShoppingCartIcon,
-			Can:           func() bool { return true },
-			Do:            func() { mylog.Info("Cart item clicked") },
-			AppendDivider: false,
-			Clickable:     widget.Clickable{},
-		},
-	)
-	return m.Layout(gtx)
+func (m *ContextMenu) LayoutTest(gtx layout.Context, rootRows []layout.Widget) layout.Dimensions {
+	m.AddItem(ContextMenuItem{
+		Title:         "Red",
+		Icon:          nil,
+		Can:           func() bool { return true },
+		Do:            func() { mylog.Info("red item clicked") },
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
+	})
+	m.AddItem(ContextMenuItem{
+		Title:         "Green",
+		Icon:          nil,
+		Can:           func() bool { return true },
+		Do:            func() { mylog.Info("Green item clicked") },
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
+	})
+	m.AddItem(ContextMenuItem{
+		Title:         "Blue",
+		Icon:          nil,
+		Can:           func() bool { return true },
+		Do:            func() { mylog.Info("Blue item clicked") },
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
+	})
+	m.AddItem(ContextMenuItem{
+		Title:         "Balance",
+		Icon:          images.ActionAccountBalanceIcon,
+		Can:           func() bool { return true },
+		Do:            func() { mylog.Info("Balance item clicked") },
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
+	})
+	m.AddItem(ContextMenuItem{
+		Title:         "Account",
+		Icon:          images.ActionAccountBoxIcon,
+		Can:           func() bool { return true },
+		Do:            func() { mylog.Info("Account item clicked") },
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
+	})
+	m.AddItem(ContextMenuItem{
+		Title:         "Cart",
+		Icon:          images.ActionAddShoppingCartIcon,
+		Can:           func() bool { return true },
+		Do:            func() { mylog.Info("Cart item clicked") },
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
+	})
+	return m.Layout(gtx, rootRows)
 }

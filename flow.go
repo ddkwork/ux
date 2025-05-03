@@ -45,18 +45,19 @@ func NewFlow(rowElemCount int) *Flow {
 		list:         widget.List{},
 		menus:        make([]*ContextMenu, 0),
 		clickables:   make([]widget.Clickable, 0),
+		buttons:      nil,
 	}
 }
 
 func (g *Flow) AppendElem(i int, elem FlowElemButton) {
 	g.clickables = append(g.clickables, widget.Clickable{})
 	g.buttons = append(g.buttons, NewButton(&g.clickables[i], elem.Icon, elem.Title, elem.Do))
-	g.menus = append(g.menus, NewContextMenuWithRootRows(func(gtx layout.Context) layout.Dimensions {
-		return layout.UniformInset(2).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return g.buttons[i].Layout(gtx)
+	g.menus = append(g.menus, NewContextMenu())
+	for _, item := range elem.ContextMenuItems {
+		g.menus[i].Once.Do(func() {
+			g.menus[i].AddItem(item)
 		})
-	}))
-	g.menus[i].InitMenuItems(elem.ContextMenuItems...)
+	}
 }
 
 func (g *Flow) Layout(gtx layout.Context) layout.Dimensions {
@@ -87,7 +88,14 @@ func (g *Flow) Layout(gtx layout.Context) layout.Dimensions {
 		for ; i < n; i++ {
 			gtx.Constraints.Min.X = 300
 			gtx.Constraints.Max.X = gtx.Constraints.Min.X
-			dims := g.menus[i].Layout(gtx)
+
+			dims := g.menus[i].Layout(gtx, []layout.Widget{
+				func(gtx layout.Context) layout.Dimensions {
+					return layout.UniformInset(2).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+						return g.buttons[i].Layout(gtx)
+					})
+				},
+			})
 			main := axisMain(g.axis, dims.Size)
 			crossMax = max(crossMax, axisCross(g.axis, dims.Size))
 			left -= main

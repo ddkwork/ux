@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"gioui.org/op/paint"
-
 	"github.com/ddkwork/ux/resources/images"
 
 	"gioui.org/gesture"
@@ -77,8 +76,27 @@ func (i *Input) SetHasBorder(hasBorder bool) *Input {
 
 func NewInput(hint string, text ...string) *Input {
 	t := &Input{
-		editor: widget.Editor{},
-		// maxIndentWidth:  th.Size.DefaultElementWidth,
+		editor:       widget.Editor{},
+		height:       0,
+		before:       nil,
+		after:        nil,
+		icon:         nil,
+		iconClick:    widget.Clickable{},
+		click:        gesture.Click{},
+		state:        0,
+		borderColor:  color.NRGBA{},
+		bgColor:      color.NRGBA{},
+		hint:         "",
+		radius:       0,
+		size:         material.ElementStyle{},
+		width:        0,
+		hasBorder:    false,
+		showPassword: false,
+		onIconClick:  nil,
+		onFocus:      nil,
+		onLostFocus:  nil,
+		onChange:     nil,
+		contextMenu:  NewContextMenu(),
 	}
 	t.size = th.Size.Medium
 	t.hint = hint
@@ -262,8 +280,64 @@ func (i *Input) Layout(gtx layout.Context) layout.Dimensions {
 }
 
 func (i *Input) layout(gtx layout.Context) layout.Dimensions {
-	if i.contextMenu == nil {
-		i.contextMenu = NewContextMenuWithRootRows(func(gtx layout.Context) layout.Dimensions {
+	i.contextMenu.Once.Do(func() {
+		items := []ContextMenuItem{
+			{
+				Title: "copy",
+				Icon:  images.SvgIconCopy,
+				Can:   func() bool { return true },
+				Do: func() {
+					// i.editor.SelectedText()
+					// todo add selectAll api,或者在这里发送按键按下的事件?
+					// e.text.SetCaret(0, e.text.Len())//ctrl +a,复制的同时应该显示选中全部，不然不知道复制的区域
+					// 安卓上应该增加一个全选菜单，以及选中的左右拉伸拓展选中区域的功能
+					gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(i.editor.Text()))})
+				},
+				AppendDivider: false,
+				Clickable:     widget.Clickable{},
+			},
+			{
+				Title: "paste",
+				Icon:  images.SvgIconContentPasteTwotone,
+				Can:   func() bool { return true },
+				Do: func() {
+					for {
+						ke, ok := gtx.Event(transfer.TargetFilter{Target: &i.editor, Type: "application/text"})
+						if !ok {
+							break
+						}
+						switch ke := ke.(type) {
+						case transfer.DataEvent:
+							content, err := io.ReadAll(ke.Open())
+							if err == nil {
+								if i.editor.Insert(string(content)) != 0 {
+									break
+								}
+							}
+						}
+					}
+					gtx.Execute(clipboard.ReadCmd{Tag: &i.editor})
+				},
+				AppendDivider: false,
+				Clickable:     widget.Clickable{},
+			},
+			{
+				Title:         "clean",
+				Icon:          images.SvgIconTrash,
+				Can:           func() bool { return true },
+				Do:            func() { i.editor.SetText("") },
+				AppendDivider: false,
+				Clickable:     widget.Clickable{},
+			},
+		}
+		for _, item := range items {
+			if item.Can() {
+				i.contextMenu.AddItem(item)
+			}
+		}
+	})
+	return i.contextMenu.Layout(gtx, []layout.Widget{
+		func(gtx layout.Context) layout.Dimensions {
 			border := widget.Border{
 				Color:        i.borderColor,
 				Width:        unit.Dp(1),
@@ -340,57 +414,6 @@ func (i *Input) layout(gtx layout.Context) layout.Dimensions {
 					},
 				)
 			})
-		})
-		items := []ContextMenuItem{
-			{
-				Title: "copy",
-				Icon:  images.SvgIconCopy,
-				Can:   func() bool { return true },
-				Do: func() {
-					// i.editor.SelectedText()
-					// todo add selectAll api,或者在这里发送按键按下的事件?
-					// e.text.SetCaret(0, e.text.Len())//ctrl +a,复制的同时应该显示选中全部，不然不知道复制的区域
-					// 安卓上应该增加一个全选菜单，以及选中的左右拉伸拓展选中区域的功能
-					gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(i.editor.Text()))})
-				},
-				AppendDivider: false,
-				Clickable:     widget.Clickable{},
-			},
-			{
-				Title: "paste",
-				Icon:  images.SvgIconContentPasteTwotone,
-				Can:   func() bool { return true },
-				Do: func() {
-					for {
-						ke, ok := gtx.Event(transfer.TargetFilter{Target: &i.editor, Type: "application/text"})
-						if !ok {
-							break
-						}
-						switch ke := ke.(type) {
-						case transfer.DataEvent:
-							content, err := io.ReadAll(ke.Open())
-							if err == nil {
-								if i.editor.Insert(string(content)) != 0 {
-									break
-								}
-							}
-						}
-					}
-					gtx.Execute(clipboard.ReadCmd{Tag: &i.editor})
-				},
-				AppendDivider: false,
-				Clickable:     widget.Clickable{},
-			},
-			{
-				Title:         "clean",
-				Icon:          images.SvgIconTrash,
-				Can:           func() bool { return true },
-				Do:            func() { i.editor.SetText("") },
-				AppendDivider: false,
-				Clickable:     widget.Clickable{},
-			},
-		}
-		i.contextMenu.InitMenuItems(items...)
-	}
-	return i.contextMenu.Layout(gtx)
+		},
+	})
 }

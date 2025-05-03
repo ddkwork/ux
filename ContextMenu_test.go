@@ -38,8 +38,9 @@ func TestNewPopupMenu(t *testing.T) {
 	t.Skip("finished")
 	w := new(app.Window)
 	m := NewContextMenu()
+	rows := make([]layout.Widget, 0)
 	for i := range 100 {
-		m.CreatItem(func(gtx layout.Context) layout.Dimensions {
+		rows = append(rows, func(gtx layout.Context) layout.Dimensions {
 			rowClick := new(widget.Clickable)
 			buttonStyle := material.Button(th, rowClick, "item"+fmt.Sprintf("%d", i))
 			buttonStyle.Color = RowColor(i)
@@ -56,7 +57,7 @@ func TestNewPopupMenu(t *testing.T) {
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
 			BackgroundDark(gtx)
-			m.LayoutTest(gtx)
+			m.LayoutTest(gtx, rows)
 			e.Frame(gtx.Ops)
 		}
 	}
