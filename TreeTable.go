@@ -330,7 +330,6 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 				}
 			}
 		})
-
 	}
 
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
