@@ -3,7 +3,7 @@
 
 package haptic
 
-//#cgo LDFLAGS: -framework AudioToolbox
+// #cgo LDFLAGS: -framework AudioToolbox
 
 /*
 #cgo CFLAGS: -x objective-c -fno-objc-arc -fmodules

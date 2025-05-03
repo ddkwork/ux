@@ -84,7 +84,7 @@ func (a *AxisPosition) update(gtx layout.Context, axis layout.Axis, elements, ma
 	a.normalize(gtx, axis, elements, dimensioner)
 	pixelsUsed := a.computePosition(gtx, axis, elements, maxPx, dimensioner)
 	if pixelsUsed < maxPx {
-		a.Offset -= (maxPx - pixelsUsed)
+		a.Offset -= maxPx - pixelsUsed
 		a.normalize(gtx, axis, elements, dimensioner)
 		_ = a.computePosition(gtx, axis, elements, maxPx, dimensioner)
 	}

@@ -66,7 +66,7 @@ type (
 	}
 )
 
-func (i *Input) Key() string { //为了反序列化的时候能找到对应的对象
+func (i *Input) Key() string { // 为了反序列化的时候能找到对应的对象
 	return i.hint
 }
 

@@ -50,14 +50,14 @@ func Grid(th *material.Theme, state *GridState) GridStyle {
 }
 
 // constrain a value to be between min and max (inclusive).
-//func constrain(value *int, min int, max int) {
+// func constrain(value *int, min int, max int) {
 //	if *value < min {
 //		*value = min
 //	}
 //	if *value > max {
 //		*value = max
 //	}
-//}
+// }
 
 // Layout will draw a table with a heading, using fixed column widths and row height.
 func (t TableStyle) Layout(gtx layout.Context, rows, cols int, dimensioner outlay.Dimensioner, headingFunc layout.ListElement, cellFunc outlay.Cell) layout.Dimensions {

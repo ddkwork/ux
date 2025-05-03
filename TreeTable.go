@@ -146,9 +146,11 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 		once:                         sync.Once{},
 	}
 }
+
 func (t *TreeTable[T]) SetRootRows(rootRows []*Node[T]) {
 	t.rootRows = rootRows
 }
+
 func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 	t.once.Do(func() {
 		if t.SetRootRowsCallBack != nil { // github.com/ddkwork/mitmproxy

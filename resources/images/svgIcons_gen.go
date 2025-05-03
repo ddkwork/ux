@@ -2,13 +2,14 @@ package images
 
 import (
 	"embed"
-	"github.com/ddkwork/golibrary/stream"
 	"strings"
+
+	"github.com/ddkwork/golibrary/stream"
 )
 
 func svgCallback(value []byte) []byte {
 	if strings.Contains(string(value), "fill=\"none\"") {
-		//return []byte(strings.Replace(string(value), "fill=\"none\"", "fill=\"white\"", 1))
+		// return []byte(strings.Replace(string(value), "fill=\"none\"", "fill=\"white\"", 1))
 	}
 	return []byte(strings.Replace(string(value), "<path", "<path fill=\"white\"", 1))
 }
@@ -18,6 +19,7 @@ func svgCallback(value []byte) []byte {
 //
 //go:embed images/*.svg
 var svgFs embed.FS
+
 var (
 	svgEmbedFileMap                = stream.ReadEmbedFileMap(svgFs, "images")
 	SvgIconBookmark                = svgEmbedFileMap.GetMustCallback("Bookmark.svg", svgCallback)

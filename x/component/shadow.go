@@ -272,7 +272,7 @@ func gradientBox(ops *op.Ops, r image.Rectangle, rr, spread int, col color.NRGBA
 	}.Op(ops))
 }
 
-//func imageRect(r image.Rectangle) image.Rectangle {
+// func imageRect(r image.Rectangle) image.Rectangle {
 //	return image.Rectangle{
 //		Min: image.Point{
 //			X: int(math.Round(float64(r.Min.X))),
@@ -283,9 +283,9 @@ func gradientBox(ops *op.Ops, r image.Rectangle, rr, spread int, col color.NRGBA
 //			Y: int(math.Round(float64(r.Max.Y))),
 //		},
 //	}
-//}
+// }
 
-//func round(r image.Rectangle) image.Rectangle {
+// func round(r image.Rectangle) image.Rectangle {
 //	return image.Rectangle{
 //		Min: image.Point{
 //			X: int(math.Round(float64(r.Min.X))),
@@ -296,7 +296,7 @@ func gradientBox(ops *op.Ops, r image.Rectangle, rr, spread int, col color.NRGBA
 //			Y: int(math.Round(float64(r.Max.Y))),
 //		},
 //	}
-//}
+// }
 
 func outset(r image.Rectangle, rr int) image.Rectangle {
 	r.Min.X -= rr

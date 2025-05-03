@@ -1,12 +1,13 @@
 package ux
 
 import (
-	"github.com/ddkwork/golibrary/assert"
-	"github.com/ddkwork/golibrary/mylog"
 	"net/http"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/ddkwork/golibrary/assert"
+	"github.com/ddkwork/golibrary/mylog"
 )
 
 var want = packet{
@@ -24,10 +25,10 @@ var want = packet{
 
 func TestStructCodec(t *testing.T) {
 	cells := MarshalRow(want, func(key string, field any) (value string) {
-		//return ""
+		// return ""
 		switch key {
 		case "ContentLength":
-			return strconv.Itoa(field.(int)) //日了，要断言
+			return strconv.Itoa(field.(int)) // 日了，要断言
 		case "PadTime":
 			return want.PadTime.String()
 		default:
