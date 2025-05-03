@@ -18,7 +18,6 @@ import (
 	"gioui.org/widget"
 	"github.com/ddkwork/golibrary"
 	"github.com/ddkwork/golibrary/assert"
-	"github.com/ddkwork/golibrary/fakeError"
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/ux"
@@ -27,7 +26,7 @@ import (
 
 func TestName(t *testing.T) {
 	mylog.Call(func() {
-		fakeError.Walk("")
+		// fakeError.Walk("")
 	})
 	return
 	golibrary.StaticCheck()

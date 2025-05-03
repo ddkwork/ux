@@ -32,7 +32,7 @@ type MessageModal struct {
 type ModalOption struct {
 	Text   string
 	Button widget.Clickable
-	Icon   *widget.Icon
+	Icon   []byte
 }
 
 type OnModalSubmit func(selectedOption string)
