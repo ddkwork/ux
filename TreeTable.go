@@ -14,11 +14,6 @@ import (
 	"strings"
 	"sync"
 
-	languages2 "github.com/ddkwork/ux/languages"
-	"github.com/ddkwork/ux/resources/colors"
-	"github.com/ddkwork/ux/resources/images"
-	"github.com/ddkwork/ux/x/richtext"
-
 	"gioui.org/gesture"
 	"gioui.org/io/clipboard"
 	"gioui.org/io/key"
@@ -34,7 +29,11 @@ import (
 	"github.com/ddkwork/golibrary/stream/align"
 	"github.com/ddkwork/golibrary/stream/deepcopy"
 	"github.com/ddkwork/golibrary/stream/uuid"
+	"github.com/ddkwork/ux/languages"
+	"github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/images"
 	"github.com/ddkwork/ux/widget/material"
+	"github.com/ddkwork/ux/x/richtext"
 )
 
 type (
@@ -661,7 +660,7 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData, width unit.D
 	richText := NewRichText()
 
 	if data.IsNasm {
-		tokens, style := languages2.GetTokens(stream.NewBuffer(data.Value), languages2.NasmKind)
+		tokens, style := languages.GetTokens(stream.NewBuffer(data.Value), languages.NasmKind)
 		for _, token := range tokens {
 			colour := style.Get(token.Type).Colour
 			color := color.NRGBA{
