@@ -8,6 +8,7 @@ require (
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0
 	github.com/alecthomas/chroma/v2 v2.17.2
 	github.com/ddkwork/golibrary v0.0.0-20250504055225-c75618cc36e5
+	github.com/google/go-cmp v0.7.0
 	github.com/oligo/gvcode v0.2.1-0.20250424030509-8138ffc92f73
 	github.com/yuin/goldmark v1.7.8
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394
@@ -21,7 +22,6 @@ require (
 	gioui.org/shader v1.0.8 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/go-text/typesetting v0.3.0 // indirect
-	github.com/google/go-cmp v0.7.0 // indirect
 	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/sync v0.13.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
