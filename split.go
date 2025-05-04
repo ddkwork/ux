@@ -34,11 +34,6 @@ type Split struct {
 	// firstScroll, secondScroll widget.Scrollbar // 滚动条
 }
 
-func NewSplit(split Split) *Split {
-	s := &split
-	return s
-}
-
 var defaultBarWidth = unit.Dp(10) // 默认的分割条宽度
 
 func (s *Split) Layout(gtx layout.Context) layout.Dimensions {
@@ -177,14 +172,14 @@ func (s *Split) Layout(gtx layout.Context) layout.Dimensions {
 		area.Pop()
 
 		// 添加滚动条
-		//DefaultDraw.Flex{Axis: DefaultDraw.Vertical}.Layout(gtx,
+		// DefaultDraw.Flex{Axis: DefaultDraw.Vertical}.Layout(gtx,
 		//	DefaultDraw.Flexed(1, func(gtx DefaultDraw.Context) DefaultDraw.Dimensions {
 		//		return s.First(gtx)
 		//	}),
 		//	DefaultDraw.Rigid(func(gtx DefaultDraw.Context) DefaultDraw.Dimensions {
 		//		return material.Scrollbar(s.Theme(), &s.firstScroll).Layout(gtx, DefaultDraw.Vertical, 0.5, 0.5)
 		//	}),
-		//)
+		// )
 	}
 
 	{ // 布局第二个组件
@@ -205,14 +200,14 @@ func (s *Split) Layout(gtx layout.Context) layout.Dimensions {
 		transform.Pop()
 
 		// 添加滚动条
-		//DefaultDraw.Flex{Axis: DefaultDraw.Vertical}.Layout(gtx,
+		// DefaultDraw.Flex{Axis: DefaultDraw.Vertical}.Layout(gtx,
 		//	DefaultDraw.Flexed(1, func(gtx DefaultDraw.Context) DefaultDraw.Dimensions {
 		//		return s.Second(gtx)
 		//	}),
 		//	DefaultDraw.Rigid(func(gtx DefaultDraw.Context) DefaultDraw.Dimensions {
 		//		return material.Scrollbar(s.Theme(), &s.secondScroll).Layout(gtx, DefaultDraw.Vertical, 0.5, 0.5)
 		//	}),
-		//)
+		// )
 	}
 	return layout.Dimensions{Size: gtx.Constraints.Max} // 返回布局尺寸
 }
