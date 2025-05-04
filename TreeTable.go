@@ -162,7 +162,7 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 // 排序,无需调整列宽
 func (t *TreeTable[T]) SyncToModel() {
 	t.filteredRows = nil
-	t.rootRowsWidget = make([]layout.Widget, 0, len(t.rootRows))
+	t.rootRowsWidget = make([]layout.Widget, 0, len(t.RootRows()))
 	for i, row := range t.RootRows() {
 		t.rootRowsWidget = append(t.rootRowsWidget, func(gtx layout.Context) layout.Dimensions {
 			return t.RowFrame2(gtx, row, i)
