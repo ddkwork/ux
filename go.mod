@@ -11,7 +11,7 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/oligo/gvcode v0.2.1-0.20250424030509-8138ffc92f73
 	github.com/yuin/goldmark v1.7.11
-	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0
+	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394
 	golang.org/x/exp/shiny v0.0.0-20250408133849-7e4ce0ab07d0
 	golang.org/x/image v0.25.0
 	golang.org/x/net v0.39.0

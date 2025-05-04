@@ -16,10 +16,8 @@ import (
 
 	"gioui.org/gesture"
 	"gioui.org/io/clipboard"
-	"gioui.org/io/key"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
-	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
@@ -52,15 +50,17 @@ type (
 		maxColumnTextWidths          []unit.Dp                // 最宽的列文本宽度for tui
 		maxHierarchyColumnWidthCache unit.Dp                  // 最宽的层级列宽度
 		columns                      iter.Seq2[int, CellData] // CopyColumn
-		inLayoutHeader               bool                     // for drag
-		columnResizeStart            unit.Dp                  //
-		columnResizeBase             unit.Dp                  //
-		columnResizeOverhead         unit.Dp                  //
-		preventUserColumnResize      bool                     //
-		awaitingSyncToModel          bool                     //
-		wasDragged                   bool                     //
-		dividerDrag                  bool                     //
 		once                         sync.Once                // 自动计算列宽一次
+
+		// drag ........
+		// inLayoutHeader               bool                     // for drag
+		// columnResizeStart            unit.Dp                  //
+		// columnResizeBase             unit.Dp                  //
+		// columnResizeOverhead         unit.Dp                  //
+		// preventUserColumnResize      bool                     //
+		// awaitingSyncToModel          bool                     //
+		// wasDragged                   bool                     //
+		// dividerDrag                  bool                     //
 	}
 	TableContext[T any] struct {
 		CustomContextMenuItems func(gtx layout.Context, n *Node[T]) iter.Seq[ContextMenuItem] // 通过SelectedNode传递给菜单的do取出元数据，比如删除文件,但是菜单是否绘制取决于当前渲染的行，所以要传递n给can
@@ -134,14 +134,6 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 		maxColumnTextWidths:          nil,
 		maxHierarchyColumnWidthCache: 0,
 		columns:                      nil,
-		inLayoutHeader:               false,
-		columnResizeStart:            0,
-		columnResizeBase:             0,
-		columnResizeOverhead:         0,
-		preventUserColumnResize:      false,
-		awaitingSyncToModel:          false,
-		wasDragged:                   false,
-		dividerDrag:                  false,
 		once:                         sync.Once{},
 	}
 }
@@ -158,7 +150,7 @@ func (t *TreeTable[T]) SyncToModel() {
 	t.rootRowsWidget = make([]layout.Widget, 0, len(t.RootRows()))
 	for i, row := range t.RootRows() {
 		t.rootRowsWidget = append(t.rootRowsWidget, func(gtx layout.Context) layout.Dimensions {
-			return t.RowFrame2(gtx, row, i)
+			return t.RowFrame(gtx, row, i)
 		})
 	}
 }
@@ -352,11 +344,10 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 	}
 
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-		return t.HeaderFrame(gtx) // 渲染表头
-		t.inLayoutHeader = true
-		return t.layoutDrag(gtx, func(gtx layout.Context, row int) layout.Dimensions {
-			return t.HeaderFrame(gtx) // 渲染表头
-		})
+		return t.HeaderFrame(gtx) // 渲染表头	// t.inLayoutHeader = true
+		// return t.layoutDrag(gtx, func(gtx layout.Context, row int) layout.Dimensions {
+		// 	return t.HeaderFrame(gtx) // 渲染表头
+		// })
 	}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return t.contextMenu.Layout(gtx, t.rootRowsWidget)
@@ -370,7 +361,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 	)
 }
 
-func (t *TreeTable[T]) RowFrame2(gtx layout.Context, n *Node[T], rowIndex int) layout.Dimensions {
+func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) layout.Dimensions {
 	n.rowCells = t.MarshalRowCells(n)
 	for i := range n.rowCells {
 		n.rowCells[i].rowID = rowIndex                          // 行单元格id，暂时想到的应用场景是区域选中
@@ -473,141 +464,10 @@ func (t *TreeTable[T]) RowFrame2(gtx layout.Context, n *Node[T], rowIndex int) l
 		for _, child := range n.Children {
 			rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				rowIndex++
-				return t.RowFrame2(gtx, child, rowIndex)
-			}))
-		}
-	}
-	// 把全部行垂直居中排列，rowClick点击后根据点击状态显示了这里填充了多少行，展开节点后看到的行就是这里来的
-	return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle}.Layout(gtx, rows...)
-}
-
-func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) layout.Dimensions {
-	n.rowCells = t.MarshalRowCells(n)
-	for i := range n.rowCells {
-		n.rowCells[i].rowID = rowIndex                          //
-		n.rowCells[i].columID = t.header.columnCells[i].columID // 列分隔符,更新层级列宽度
-	}
-
-	bgColor := t.processEvent(gtx, n) // 处理鼠标事件
-	rowClick := &n.rowClick
-
-	var rowCells []*Resizable
-
-	layoutHierarchyColumn := func(gtx layout.Context, cell CellData) layout.Dimensions {
-		leftIndent := t.calcCurrentHierarchyColumnLeftIndent(gtx, n, cell)
-		t.calcCurrentHierarchyColumnWidthAndSafeCheck(gtx, cell, leftIndent)
-
-		maxColumnCellWidth := t.maxColumnCellWidths[HierarchyColumnID]
-		gtx.Constraints.Min.X = int(maxColumnCellWidth)
-		gtx.Constraints.Max.X = int(maxColumnCellWidth)
-
-		return layout.Flex{
-			Axis: layout.Horizontal,
-			// Spacing:   0,
-			// Alignment: layout.Start,
-			// WeightSum: 0,
-		}.Layout(gtx, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				// 绘制层级图标-----------------------------------------------------------------------------------------------------------------
-				HierarchyInsert := layout.Inset{Left: leftIndent, Top: -1} // 层级图标居中,行高调整后这里需要下移使得图标居中
-				if !n.Container() {
-					return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						return layout.Dimensions{}
-					})
-				}
-				return HierarchyInsert.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					svg := images.SvgIconCircledChevronRight
-					if n.isOpen {
-						svg = images.SvgIconCircledChevronDown
-					}
-
-					return iconButtonSmall(new(widget.Clickable), svg, "").Layout(gtx)
-					// return NewButton("", nil).SetRectIcon(true).SetIcon(svg).Layout(gtx)
-				})
-			})
-		}),
-			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return t.CellFrame(gtx, cell, t.maxColumnCellWidths[HierarchyColumnID], layout.Inset{
-						Top:    topPadding, // 层级列文本不知道什么原因往上飘了，top: 0的样子，所以往下挪一下让它居中
-						Bottom: 0,
-						Left:   leftPadding, // 绘制层级列文本,和层级图标聚拢在一起--------------------------------------
-						Right:  0,
-					})
-				})
-			}),
-		)
-	}
-
-	rowCells = append(rowCells, &Resizable{
-		ratio: 0,
-		Widget: func(gtx layout.Context) layout.Dimensions {
-			hierarchyColumnCell := n.rowCells[HierarchyColumnID] // 层级列单元格
-			return layoutHierarchyColumn(gtx, hierarchyColumnCell)
-		},
-		DividerHandler: nil,
-		float:          float{},
-		resize:         nil,
-		prev:           nil,
-		next:           nil,
-	})
-
-	// 绘制非层级列-----------------------------------------------------------------------------------------------------------------
-	for i, cell := range n.rowCells {
-		if i == HierarchyColumnID {
-			continue
-		}
-		rowCells = append(rowCells, &Resizable{
-			ratio: 0,
-			Widget: func(gtx layout.Context) layout.Dimensions {
-				return rowClick.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					return material.Clickable(gtx, &n.rowCells[i].Clickable, func(gtx layout.Context) layout.Dimensions {
-						DrawColumnDivider(gtx, cell.columID) // 这里绘制的列分割线才没有虚线,gtx被破坏了? 永远不要移动这个位置
-						if len(cell.Value) > 80 {
-							cell.Value = cell.Value[:len(cell.Value)/2] + "..."
-							// todo 更好的办法是让富文本编辑器做这个事情，对 maxline 。。。 看看代码编辑器扩建是如何实现这个的
-							// 然后双击编辑行的时候从富文本取出完整行并换行显示，structView需要好好设计一下这个
-							// 这个在抓包场景很那个，url列一般都长
-						}
-						return t.CellFrame(gtx, cell, t.maxColumnCellWidths[i], layout.Inset{
-							Top:    0,
-							Bottom: 0,
-							Left:   leftPadding,
-							// Right:  rightPadding,
-						})
-					})
-				})
-			},
-			DividerHandler: nil,
-			float:          float{},
-			resize:         nil,
-			prev:           nil,
-			next:           nil,
-		})
-	}
-
-	rows := []layout.FlexChild{ // 合成层级列和其他列的单元格为一行,并设置该行的背景和行高
-		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return Background{bgColor}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				gtx.Constraints.Min.Y = gtx.Dp(defaultRowHeight) // 主题的字体大小也会影响行高，这里设置最小行高为14dp
-				gtx.Constraints.Max.Y = gtx.Dp(defaultRowHeight) // 限制行高以避免列分割线呈现虚线视觉
-				return NewResizeWidget(layout.Horizontal, func(index int, newWidth int) {
-					fmt.Printf("列 %d 新宽度: %dpx\n", index, newWidth)
-					// 这里可以更新表格列宽或执行其他操作
-					t.maxColumnCellWidths[index] = unit.Dp(newWidth)
-				}, rowCells...).Layout(gtx)
-			})
-		}),
-	}
-	if n.CanHaveChildren() && n.isOpen { // 如果是容器节点则递归填充孩子节点形成多行
-		for _, child := range n.Children {
-			rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				rowIndex++
 				return t.RowFrame(gtx, child, rowIndex)
 			}))
 		}
 	}
-
 	// 把全部行垂直居中排列，rowClick点击后根据点击状态显示了这里填充了多少行，展开节点后看到的行就是这里来的
 	return layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle}.Layout(gtx, rows...)
 }
@@ -803,7 +663,6 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { // 增删改查中
 			}
 		}
 	}
-	// todo 增删改查max一下更新层级列宽度，其他列的话也max一下，小于对应列的最大宽度就不用更新了，这样性能会好一点
 	t.updateMaxHierarchyColumnCellWidth()
 	gtx.Constraints = originalConstraints
 }
@@ -1018,240 +877,6 @@ func (t *TreeTable[T]) CopyColumn(gtx layout.Context) string {
 	g.P("}")
 	gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(g.Format()))})
 	return g.String()
-}
-
-type TableDragData[T any] struct {
-	Table *Node[T]
-	Rows  []*Node[T]
-}
-
-var DefaultTableTheme = TableTheme{
-	HierarchyIndent:   16,
-	MinimumRowHeight:  16,
-	ColumnResizeSlop:  4,
-	ShowRowDivider:    true,
-	ShowColumnDivider: true,
-}
-
-type TableTheme struct {
-	Padding           layout.Inset
-	HierarchyColumnID int
-	HierarchyIndent   unit.Dp
-	MinimumRowHeight  unit.Dp
-	ColumnResizeSlop  unit.Dp
-	ShowRowDivider    bool
-	ShowColumnDivider bool
-}
-
-func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w rowFn) layout.Dimensions {
-	columns := t.maxColumnCellWidths
-	var (
-		cols          = t.columnCount         // 获取列的数量
-		dividers      = cols                  // 列的分隔数
-		tallestHeight = gtx.Constraints.Min.Y // 初始化最高的行高
-
-		dividerWidth                   = gtx.Dp(defaultDividerWidth)                   // 获取分割线的宽度
-		dividerMargin                  = gtx.Dp(defaultDividerMargin)                  // 获取分割线的边距
-		dividerHandleMinVerticalMargin = gtx.Dp(defaultDividerHandleMinVerticalMargin) // 获取分隔处理器的最小垂直边距
-		dividerHandleMaxHeight         = gtx.Dp(defaultDividerHandleMaxHeight)         // 获取分隔处理器的最大高度
-		dividerHandleWidth             = gtx.Dp(defaultDividerHandleWidth)             // 获取分隔处理器的宽度
-		dividerHandleRadius            = gtx.Dp(defaultDividerHandleRadius)            // 获取分隔处理器的圆角半径
-
-		minWidth = unit.Dp(dividerWidth + dividerMargin + dividerHandleWidth) // 计算分隔符的最小宽度
-	)
-	if cols == 0 { // 如果列数为0，直接返回最小约束大小
-		return layout.Dimensions{Size: gtx.Constraints.Min}
-	}
-
-	if len(t.header.drags) < dividers { // 如果拖动数组没有足够的长度
-		t.header.drags = make([]tableDrag, dividers) // 初始化拖动对象数组
-	}
-
-	// OPT(dh): we don't need to do this for each t, only once per table
-	for i := range t.header.drags { // 遍历每个拖动对象
-		drag := &t.header.drags[i]    // 获取当前拖动对象
-		width := columns[i]           // 获取当前列宽度
-		drag.hover.Update(gtx.Source) // 更新当前列的悬停状态
-		// OPT(dh): Events allocates
-		var delta unit.Dp // 初始化偏移量
-
-		for { // 循环处理拖动事件
-			ev, ok := drag.drag.Update(gtx.Metric, gtx.Source, gesture.Horizontal) // 更新拖动状态
-			if !ok {                                                               // 如果事件不合法，退出循环
-				break
-			}
-			switch ev.Kind { // 根据事件类型进行处理
-			case pointer.Press: // 按下事件
-				drag.startPos = ev.Position.X                             // 记录拖动的起始位置
-				drag.shrinkNeighbor = !ev.Modifiers.Contain(key.ModShift) // 判断是否收缩相邻列
-			case pointer.Drag: // 拖动事件
-				t.header.manualWidthSet[i] = true // 在这里标记列宽已手动调整
-				// There may be multiple drag events in a single frame. We mustn't apply all of them or we'll
-				// drag too far. Only react to the final event.
-				delta = unit.Dp(ev.Position.X - drag.startPos) // 计算当前拖动的偏移量
-			}
-		}
-		if delta != 0 { // 如果存在拖动偏移量
-			width += delta                                  // 更新列的宽度
-			if drag.shrinkNeighbor && i != len(columns)-1 { // 如果需要收缩相邻列且不是最后一列
-				nextCol := columns[i+1] // 获取下一个列
-				nextCol -= delta        // 更新下一个列的宽度
-				if width < minWidth {   // 如果当前列宽度小于最小宽度
-					d := minWidth - width // 计算需要增加的宽度
-					width = minWidth      // 将当前列宽度设为最小宽度
-					nextCol -= d          // 更新下一个列的宽度
-				}
-				if nextCol < minWidth { // 如果下一个列宽度小于最小宽度
-					d := minWidth - nextCol // 计算需要增加的宽度
-					nextCol = minWidth      // 将下一个列宽度设为最小宽度
-					width -= d              // 更新当前列宽度
-				}
-			} else {
-				// 如果不需要收缩
-				if width < minWidth { // 如果当前列宽度小于最小宽度
-					width = minWidth // 将当前列宽度设为最小宽度
-				}
-			}
-
-			// if width < width.autoWidth { // 如果当前列宽度小于其最小宽度
-			//	width = width.autoWidth // 更新列的最小宽度为当前宽度
-			// }
-			// width = max(width, minWidth) // 确保列的宽度不小于最小宽度
-
-			var total unit.Dp             // 初始化总宽度
-			for _, col := range columns { // 遍历所有列计算总宽度
-				total += col // 累加当前列的宽度
-			}
-			total += unit.Dp(len(columns) * gtx.Dp(defaultDividerWidth)) // 加上所有分隔符的总宽度
-			if total < unit.Dp(gtx.Constraints.Min.X) {                  // 如果总宽度小于最小约束宽度
-				columns[len(columns)-1] += unit.Dp(gtx.Constraints.Min.X) - total // 调整最后一列的宽度以适应
-			}
-		}
-	}
-
-	for { // 开始绘制列
-		// First draw all columns, leaving gaps for the drag handlers
-		var (
-			start             = 0             // 初始化当前位置
-			origTallestHeight = tallestHeight // 记录最初的高度
-		)
-		r := op.Record(gtx.Ops)  // 记录当前操作集合
-		totalWidth := 0          // 初始化总宽度
-		for i := range columns { // 遍历所有列
-			colWidth := int(columns[i]) // 获取当前列的宽度
-			totalWidth += colWidth      // 更新总宽度
-		}
-		extra := gtx.Constraints.Min.X - len(columns)*gtx.Dp(defaultDividerWidth) - totalWidth // 计算多余宽度
-		colExtra := extra                                                                      // 将多余宽度赋值给列额外宽度
-
-		for i := range columns { // 绘制所有列
-			colWidth := int(columns[i]) // 获取当前列宽度
-			if colExtra > 0 {           // 如果有多余宽度
-				colWidth++ // 当前列宽度加一
-				colExtra-- // 多余宽度减一
-			}
-
-			gtx := gtx                            // 更新 gtx 上下文
-			gtx.Constraints.Min.X = colWidth      // 设置当前列的最小宽度
-			gtx.Constraints.Max.X = colWidth      // 设置当前列的最大宽度
-			gtx.Constraints.Min.Y = tallestHeight // 设置当前列的最小高度
-
-			stack := op.Offset(image.Pt(start, 0)).Push(gtx.Ops) // 设置当前列绘制的偏移量
-
-			dims := w(gtx, i)                                // 绘制当前列，返回所需尺寸
-			dims.Size = gtx.Constraints.Constrain(dims.Size) // 应用约束限制
-			tallestHeight = dims.Size.Y                      // 更新当前行的高度
-			if i == 0 && tallestHeight > origTallestHeight { // 如果当前行的高度大于初始高度
-				origTallestHeight = tallestHeight // 更新初始高度
-			}
-
-			start += colWidth + dividerWidth // 更新绘制起始位置
-			stack.Pop()                      // 弹出当前堆栈
-		}
-		call := r.Stop() // 停止记录操作集合
-
-		if tallestHeight > origTallestHeight { // 如果当前高度大于最初高度
-			continue // 重新绘制当前行
-		}
-
-		call.Add(gtx.Ops) // 将操作添加到上下文中
-
-		// Then draw the drag handlers. The handlers overdraw the columns when hovered.
-		var (
-			dividerHandleHeight    = min(tallestHeight-2*dividerHandleMinVerticalMargin, dividerHandleMaxHeight) // 获取分隔处理器的高度
-			dividerHandleTopMargin = (tallestHeight - dividerHandleHeight) / 2                                   // 计算顶部边距
-			dividerStart           = 0                                                                           // 初始化分隔起始位置
-			dividerExtra           = extra                                                                       // 设置额外宽度
-		)
-		for i := range t.header.drags { // 遍历每个拖动对象
-			var (
-				drag     = &t.header.drags[i] // 获取当前拖动对象
-				colWidth = int(columns[i])    // 获取当前列宽度
-			)
-			dividerStart += colWidth // 更新分隔符的起始位置
-			if dividerExtra > 0 {    // 如果还有多余的宽度
-				dividerStart++ // 分隔符起始位置加一
-				dividerExtra-- // 多余宽度减一
-			}
-
-			// We add the drag handler slightly outside the drawn divider, to make it easier to press.
-			//
-			// We use op.Offset instead of folding dividerStart into the clip.Rect because we want to set the
-			// origin of the drag coordinates.
-			stack := op.Offset(image.Pt(dividerStart, 0)).Push(gtx.Ops) // set origin for drag coordinates
-			stack2 := clip.Rect{
-				Min: image.Pt(-dividerMargin-dividerHandleWidth, 0),                         // 设置分隔符的最小边界
-				Max: image.Pt(dividerWidth+dividerMargin+dividerHandleWidth, tallestHeight), // 设置分隔符的最大边界
-			}.Push(gtx.Ops) // 在上下文中推入分隔符的裁剪矩形
-
-			if t.inLayoutHeader { // 如果当前行是表头 todo test
-				drag.hover.Update(gtx.Source)        // 更新悬停状态
-				drag.drag.Add(gtx.Ops)               // 添加拖动操作到上下文中
-				drag.hover.Add(gtx.Ops)              // 添加悬停操作到上下文中
-				pointer.CursorColResize.Add(gtx.Ops) // 设置拖动光标样式为调整列宽
-
-				// Draw the left and right extensions when hovered.
-				if drag.hover.Update(gtx.Source) || drag.drag.Dragging() { // 如果悬停或者拖动
-					handleShape := clip.UniformRRect(
-						image.Rect(
-							0,
-							dividerHandleTopMargin,
-							dividerHandleWidth,
-							dividerHandleTopMargin+dividerHandleHeight),
-						dividerHandleRadius,
-					) // 设定分隔处理器的形状
-					handleLeft := handleShape
-					handleLeft.Rect = handleShape.Rect.Add(image.Pt(-(dividerMargin + dividerHandleWidth), 0)) // 为左边形状添加偏移
-					handleRight := handleShape
-					handleRight.Rect = handleRight.Rect.Add(image.Pt(dividerWidth+dividerMargin, 0)) // 为右边形状添加偏移
-
-					paint.FillShape(gtx.Ops, colors.Red200, handleLeft.Op(gtx.Ops))     // 填充左侧形状
-					paint.FillShape(gtx.Ops, colors.Yellow100, handleRight.Op(gtx.Ops)) // 填充右侧形状
-				}
-
-				// Draw the vertical bar
-				// stack3 := clip.Rect{Max: image.Pt(dividerWidth, tallestHeight)}.Push(gtx.Ops)
-				// Fill( gtx.Ops, win.Theme.Palette.Table2.Divider) // 如果有需要，在此处可绘制分割线
-				// stack3.Pop()
-			}
-			// 为表头和每列绘制列分隔条
-			stack3 := clip.Rect{Max: image.Pt(dividerWidth, tallestHeight)}.Push(gtx.Ops) // 绘制分隔条的矩形区域
-			paint.Fill(gtx.Ops, colors.DividerFg)                                         // 填充分隔条的颜色
-			stack3.Pop()                                                                  // 弹出分隔条的绘制堆栈
-
-			dividerStart += dividerWidth // 更新分隔符的起始位置
-			stack2.Pop()                 // 弹出分隔符的绘制堆栈
-			stack.Pop()                  // 弹出当前列的绘制堆栈
-		}
-
-		return layout.Dimensions{
-			Size: image.Pt(start, tallestHeight), // 返回绘制完成后的整体宽度和高度
-		}
-	}
-}
-
-type Point struct {
-	X, Y unit.Dp
 }
 
 func (t *TreeTable[T]) ScrollRowIntoView(row int) {
@@ -2013,3 +1638,239 @@ func (t *TreeTable[T]) FormatChildren(b *stream.Buffer, children []*Node[T]) {
 		}
 	}
 }
+
+// -------------------------todo
+
+// type TableDragData[T any] struct {
+// 	Table *Node[T]
+// 	Rows  []*Node[T]
+// }
+
+// var DefaultTableTheme = TableTheme{
+// 	HierarchyIndent:   16,
+// 	MinimumRowHeight:  16,
+// 	ColumnResizeSlop:  4,
+// 	ShowRowDivider:    true,
+// 	ShowColumnDivider: true,
+// }
+//
+// type TableTheme struct {
+// 	Padding           layout.Inset
+// 	HierarchyColumnID int
+// 	HierarchyIndent   unit.Dp
+// 	MinimumRowHeight  unit.Dp
+// 	ColumnResizeSlop  unit.Dp
+// 	ShowRowDivider    bool
+// 	ShowColumnDivider bool
+// }
+
+// type Point struct {
+// 	X, Y unit.Dp
+// }
+
+// func (t *TreeTable[T]) layoutDrag(gtx layout.Context, w rowFn) layout.Dimensions {
+// 	columns := t.maxColumnCellWidths
+// 	var (
+// 		cols          = t.columnCount         // 获取列的数量
+// 		dividers      = cols                  // 列的分隔数
+// 		tallestHeight = gtx.Constraints.Min.Y // 初始化最高的行高
+//
+// 		dividerWidth                   = gtx.Dp(defaultDividerWidth)                   // 获取分割线的宽度
+// 		dividerMargin                  = gtx.Dp(defaultDividerMargin)                  // 获取分割线的边距
+// 		dividerHandleMinVerticalMargin = gtx.Dp(defaultDividerHandleMinVerticalMargin) // 获取分隔处理器的最小垂直边距
+// 		dividerHandleMaxHeight         = gtx.Dp(defaultDividerHandleMaxHeight)         // 获取分隔处理器的最大高度
+// 		dividerHandleWidth             = gtx.Dp(defaultDividerHandleWidth)             // 获取分隔处理器的宽度
+// 		dividerHandleRadius            = gtx.Dp(defaultDividerHandleRadius)            // 获取分隔处理器的圆角半径
+//
+// 		minWidth = unit.Dp(dividerWidth + dividerMargin + dividerHandleWidth) // 计算分隔符的最小宽度
+// 	)
+// 	if cols == 0 { // 如果列数为0，直接返回最小约束大小
+// 		return layout.Dimensions{Size: gtx.Constraints.Min}
+// 	}
+//
+// 	if len(t.header.drags) < dividers { // 如果拖动数组没有足够的长度
+// 		t.header.drags = make([]tableDrag, dividers) // 初始化拖动对象数组
+// 	}
+//
+// 	// OPT(dh): we don't need to do this for each t, only once per table
+// 	for i := range t.header.drags { // 遍历每个拖动对象
+// 		drag := &t.header.drags[i]    // 获取当前拖动对象
+// 		width := columns[i]           // 获取当前列宽度
+// 		drag.hover.Update(gtx.Source) // 更新当前列的悬停状态
+// 		// OPT(dh): Events allocates
+// 		var delta unit.Dp // 初始化偏移量
+//
+// 		for { // 循环处理拖动事件
+// 			ev, ok := drag.drag.Update(gtx.Metric, gtx.Source, gesture.Horizontal) // 更新拖动状态
+// 			if !ok {                                                               // 如果事件不合法，退出循环
+// 				break
+// 			}
+// 			switch ev.Kind { // 根据事件类型进行处理
+// 			case pointer.Press: // 按下事件
+// 				drag.startPos = ev.Position.X                             // 记录拖动的起始位置
+// 				drag.shrinkNeighbor = !ev.Modifiers.Contain(key.ModShift) // 判断是否收缩相邻列
+// 			case pointer.Drag: // 拖动事件
+// 				t.header.manualWidthSet[i] = true // 在这里标记列宽已手动调整
+// 				// There may be multiple drag events in a single frame. We mustn't apply all of them or we'll
+// 				// drag too far. Only react to the final event.
+// 				delta = unit.Dp(ev.Position.X - drag.startPos) // 计算当前拖动的偏移量
+// 			}
+// 		}
+// 		if delta != 0 { // 如果存在拖动偏移量
+// 			width += delta                                  // 更新列的宽度
+// 			if drag.shrinkNeighbor && i != len(columns)-1 { // 如果需要收缩相邻列且不是最后一列
+// 				nextCol := columns[i+1] // 获取下一个列
+// 				nextCol -= delta        // 更新下一个列的宽度
+// 				if width < minWidth {   // 如果当前列宽度小于最小宽度
+// 					d := minWidth - width // 计算需要增加的宽度
+// 					width = minWidth      // 将当前列宽度设为最小宽度
+// 					nextCol -= d          // 更新下一个列的宽度
+// 				}
+// 				if nextCol < minWidth { // 如果下一个列宽度小于最小宽度
+// 					d := minWidth - nextCol // 计算需要增加的宽度
+// 					nextCol = minWidth      // 将下一个列宽度设为最小宽度
+// 					width -= d              // 更新当前列宽度
+// 				}
+// 			} else {
+// 				// 如果不需要收缩
+// 				if width < minWidth { // 如果当前列宽度小于最小宽度
+// 					width = minWidth // 将当前列宽度设为最小宽度
+// 				}
+// 			}
+//
+// 			// if width < width.autoWidth { // 如果当前列宽度小于其最小宽度
+// 			//	width = width.autoWidth // 更新列的最小宽度为当前宽度
+// 			// }
+// 			// width = max(width, minWidth) // 确保列的宽度不小于最小宽度
+//
+// 			var total unit.Dp             // 初始化总宽度
+// 			for _, col := range columns { // 遍历所有列计算总宽度
+// 				total += col // 累加当前列的宽度
+// 			}
+// 			total += unit.Dp(len(columns) * gtx.Dp(defaultDividerWidth)) // 加上所有分隔符的总宽度
+// 			if total < unit.Dp(gtx.Constraints.Min.X) {                  // 如果总宽度小于最小约束宽度
+// 				columns[len(columns)-1] += unit.Dp(gtx.Constraints.Min.X) - total // 调整最后一列的宽度以适应
+// 			}
+// 		}
+// 	}
+//
+// 	for { // 开始绘制列
+// 		// First draw all columns, leaving gaps for the drag handlers
+// 		var (
+// 			start             = 0             // 初始化当前位置
+// 			origTallestHeight = tallestHeight // 记录最初的高度
+// 		)
+// 		r := op.Record(gtx.Ops)  // 记录当前操作集合
+// 		totalWidth := 0          // 初始化总宽度
+// 		for i := range columns { // 遍历所有列
+// 			colWidth := int(columns[i]) // 获取当前列的宽度
+// 			totalWidth += colWidth      // 更新总宽度
+// 		}
+// 		extra := gtx.Constraints.Min.X - len(columns)*gtx.Dp(defaultDividerWidth) - totalWidth // 计算多余宽度
+// 		colExtra := extra                                                                      // 将多余宽度赋值给列额外宽度
+//
+// 		for i := range columns { // 绘制所有列
+// 			colWidth := int(columns[i]) // 获取当前列宽度
+// 			if colExtra > 0 {           // 如果有多余宽度
+// 				colWidth++ // 当前列宽度加一
+// 				colExtra-- // 多余宽度减一
+// 			}
+//
+// 			gtx := gtx                            // 更新 gtx 上下文
+// 			gtx.Constraints.Min.X = colWidth      // 设置当前列的最小宽度
+// 			gtx.Constraints.Max.X = colWidth      // 设置当前列的最大宽度
+// 			gtx.Constraints.Min.Y = tallestHeight // 设置当前列的最小高度
+//
+// 			stack := op.Offset(image.Pt(start, 0)).Push(gtx.Ops) // 设置当前列绘制的偏移量
+//
+// 			dims := w(gtx, i)                                // 绘制当前列，返回所需尺寸
+// 			dims.Size = gtx.Constraints.Constrain(dims.Size) // 应用约束限制
+// 			tallestHeight = dims.Size.Y                      // 更新当前行的高度
+// 			if i == 0 && tallestHeight > origTallestHeight { // 如果当前行的高度大于初始高度
+// 				origTallestHeight = tallestHeight // 更新初始高度
+// 			}
+//
+// 			start += colWidth + dividerWidth // 更新绘制起始位置
+// 			stack.Pop()                      // 弹出当前堆栈
+// 		}
+// 		call := r.Stop() // 停止记录操作集合
+//
+// 		if tallestHeight > origTallestHeight { // 如果当前高度大于最初高度
+// 			continue // 重新绘制当前行
+// 		}
+//
+// 		call.Add(gtx.Ops) // 将操作添加到上下文中
+//
+// 		// Then draw the drag handlers. The handlers overdraw the columns when hovered.
+// 		var (
+// 			dividerHandleHeight    = min(tallestHeight-2*dividerHandleMinVerticalMargin, dividerHandleMaxHeight) // 获取分隔处理器的高度
+// 			dividerHandleTopMargin = (tallestHeight - dividerHandleHeight) / 2                                   // 计算顶部边距
+// 			dividerStart           = 0                                                                           // 初始化分隔起始位置
+// 			dividerExtra           = extra                                                                       // 设置额外宽度
+// 		)
+// 		for i := range t.header.drags { // 遍历每个拖动对象
+// 			var (
+// 				drag     = &t.header.drags[i] // 获取当前拖动对象
+// 				colWidth = int(columns[i])    // 获取当前列宽度
+// 			)
+// 			dividerStart += colWidth // 更新分隔符的起始位置
+// 			if dividerExtra > 0 {    // 如果还有多余的宽度
+// 				dividerStart++ // 分隔符起始位置加一
+// 				dividerExtra-- // 多余宽度减一
+// 			}
+//
+// 			// We add the drag handler slightly outside the drawn divider, to make it easier to press.
+// 			//
+// 			// We use op.Offset instead of folding dividerStart into the clip.Rect because we want to set the
+// 			// origin of the drag coordinates.
+// 			stack := op.Offset(image.Pt(dividerStart, 0)).Push(gtx.Ops) // set origin for drag coordinates
+// 			stack2 := clip.Rect{
+// 				Min: image.Pt(-dividerMargin-dividerHandleWidth, 0),                         // 设置分隔符的最小边界
+// 				Max: image.Pt(dividerWidth+dividerMargin+dividerHandleWidth, tallestHeight), // 设置分隔符的最大边界
+// 			}.Push(gtx.Ops) // 在上下文中推入分隔符的裁剪矩形
+//
+// 			if t.inLayoutHeader { // 如果当前行是表头 todo test
+// 				drag.hover.Update(gtx.Source)        // 更新悬停状态
+// 				drag.drag.Add(gtx.Ops)               // 添加拖动操作到上下文中
+// 				drag.hover.Add(gtx.Ops)              // 添加悬停操作到上下文中
+// 				pointer.CursorColResize.Add(gtx.Ops) // 设置拖动光标样式为调整列宽
+//
+// 				// Draw the left and right extensions when hovered.
+// 				if drag.hover.Update(gtx.Source) || drag.drag.Dragging() { // 如果悬停或者拖动
+// 					handleShape := clip.UniformRRect(
+// 						image.Rect(
+// 							0,
+// 							dividerHandleTopMargin,
+// 							dividerHandleWidth,
+// 							dividerHandleTopMargin+dividerHandleHeight),
+// 						dividerHandleRadius,
+// 					) // 设定分隔处理器的形状
+// 					handleLeft := handleShape
+// 					handleLeft.Rect = handleShape.Rect.Add(image.Pt(-(dividerMargin + dividerHandleWidth), 0)) // 为左边形状添加偏移
+// 					handleRight := handleShape
+// 					handleRight.Rect = handleRight.Rect.Add(image.Pt(dividerWidth+dividerMargin, 0)) // 为右边形状添加偏移
+//
+// 					paint.FillShape(gtx.Ops, colors.Red200, handleLeft.Op(gtx.Ops))     // 填充左侧形状
+// 					paint.FillShape(gtx.Ops, colors.Yellow100, handleRight.Op(gtx.Ops)) // 填充右侧形状
+// 				}
+//
+// 				// Draw the vertical bar
+// 				// stack3 := clip.Rect{Max: image.Pt(dividerWidth, tallestHeight)}.Push(gtx.Ops)
+// 				// Fill( gtx.Ops, win.Theme.Palette.Table2.Divider) // 如果有需要，在此处可绘制分割线
+// 				// stack3.Pop()
+// 			}
+// 			// 为表头和每列绘制列分隔条
+// 			stack3 := clip.Rect{Max: image.Pt(dividerWidth, tallestHeight)}.Push(gtx.Ops) // 绘制分隔条的矩形区域
+// 			paint.Fill(gtx.Ops, colors.DividerFg)                                         // 填充分隔条的颜色
+// 			stack3.Pop()                                                                  // 弹出分隔条的绘制堆栈
+//
+// 			dividerStart += dividerWidth // 更新分隔符的起始位置
+// 			stack2.Pop()                 // 弹出分隔符的绘制堆栈
+// 			stack.Pop()                  // 弹出当前列的绘制堆栈
+// 		}
+//
+// 		return layout.Dimensions{
+// 			Size: image.Pt(start, tallestHeight), // 返回绘制完成后的整体宽度和高度
+// 		}
+// 	}
+// }
