@@ -38,17 +38,18 @@ import (
 
 type (
 	TreeTable[T any] struct {
-		TableContext[T]                             // 实例化时传入的上下文
-		Root                         *Node[T]       // 根节点,保存数据到json只需要调用它即可
-		header                       tableHeader[T] // 表头
-		rootRows                     []*Node[T]     // from root.children
-		filteredRows                 []*Node[T]     // 过滤后的行
-		SelectedNode                 *Node[T]       // 选中的节点,文件管理器外部自定义右键菜单增删改查文件需要通过它取出节点元数据结构体的文件路径字段，所以需要导出
-		contextMenu                  *ContextMenu   // 行右键菜单,rootRows只需要一个
-		columnCount                  int            // 列数
-		maxDepth                     unit.Dp        // 最大层级深度,todo add Cache like maxHierarchyColumnWidthCache
-		maxColumnCellWidths          []unit.Dp      // 最宽的列label文本宽度for单元格
-		maxColumnTextWidths          []unit.Dp      // 最宽的列文本宽度for tui
+		TableContext[T]                              // 实例化时传入的上下文
+		Root                         *Node[T]        // 根节点,保存数据到json只需要调用它即可
+		header                       tableHeader[T]  // 表头
+		rootRows                     []*Node[T]      // from root.children
+		rootRowsWidget               []layout.Widget // from layout
+		filteredRows                 []*Node[T]      // 过滤后的行
+		SelectedNode                 *Node[T]        // 选中的节点,文件管理器外部自定义右键菜单增删改查文件需要通过它取出节点元数据结构体的文件路径字段，所以需要导出
+		contextMenu                  *ContextMenu    // 行右键菜单,rootRows只需要一个
+		columnCount                  int             // 列数
+		maxDepth                     unit.Dp         // 最大层级深度,todo add Cache like maxHierarchyColumnWidthCache
+		maxColumnCellWidths          []unit.Dp       // 最宽的列label文本宽度for单元格
+		maxColumnTextWidths          []unit.Dp       // 最宽的列文本宽度for tui
 		maxHierarchyColumnWidthCache unit.Dp
 		// fields                    [][]CellData        // 矩阵置换参数，行转为列，增删改节点后重新生成它
 		columns                 iter.Seq2[int, CellData] // CopyColumn
@@ -73,6 +74,9 @@ type (
 		SetRootRowsCallBack    func()                                                         // 实例化所有节点回调,必要时调用root节点辅助操作
 		JsonName               string                                                         // 保存序列化树形表格到文件的文件名
 		IsDocument             bool                                                           // 是否生成markdown文档
+
+		//	DragRemovedRowsCallback  func() // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
+		//	DropOccurredCallback     func() // Called whenever a drop occurs that modifies the model.
 	}
 	tableHeader[T any] struct {
 		sortOrder          sortOrder    // 排序方式
@@ -149,8 +153,33 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 	}
 }
 
-func (t *TreeTable[T]) SetRootRows(rootRows []*Node[T]) {
-	t.rootRows = rootRows
+// SyncToModel 通知单元格节点列宽更新事件: all in contextMenu
+// 增 AddChild(实例化阶段，once内那一次就够了), InsertAfter (DuplicateType) SetChildren
+// 删 Remove,需要gtx来重新调整列宽
+// 改 EditType,双击或者右键触发
+// 查 Find,filter 无需调整列宽
+// 过滤,无需调整列宽
+// 排序,无需调整列宽
+func (t *TreeTable[T]) SyncToModel() {
+	t.filteredRows = nil
+	t.rootRowsWidget = make([]layout.Widget, 0, len(t.rootRows))
+	for i, row := range t.RootRows() {
+		t.rootRowsWidget = append(t.rootRowsWidget, func(gtx layout.Context) layout.Dimensions {
+			return t.RowFrame2(gtx, row, i)
+		})
+	}
+}
+
+func (t *TreeTable[T]) RootRows() []*Node[T] {
+	if t.filteredRows != nil {
+		return t.filteredRows
+	}
+	t.rootRows = t.Root.Children
+	return t.rootRows
+}
+
+func (t *TreeTable[T]) RootRowCount() int {
+	return len(t.RootRows())
 }
 
 func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
@@ -189,13 +218,8 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		t.updateRowNumber(t.Root, 0)
 	})
 
-	t.rootRows = t.Root.Children // 增删改查不一定去计算列宽导致有些节点已经删除，是空指针导致panic，所有这里需要刷新一下rootRows，不知道这里是否会内存泄漏
-
-	rows := make([]layout.Widget, 0, len(t.rootRows))
-	for i, row := range t.rootRows {
-		rows = append(rows, func(gtx layout.Context) layout.Dimensions {
-			return t.RowFrame2(gtx, row, i)
-		})
+	if t.rootRowsWidget == nil {
+		t.SyncToModel()
 	}
 
 	for _, n := range t.rootRows {
@@ -222,6 +246,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							t.SelectedNode.SetOpen(true)
 							t.SelectedNode.Children = make([]*Node[T], 0)
 							t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
+							t.SyncToModel()
 						},
 						Clickable: widget.Clickable{},
 					}
@@ -239,6 +264,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 							}
 							t.SelectedNode.ResetChildren()
 							t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
+							t.SyncToModel()
 						},
 						AppendDivider: true,
 						Clickable:     widget.Clickable{},
@@ -297,7 +323,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 						Title:     "",
 						Icon:      images.SvgIconHierarchy,
 						Can:       func() bool { return true },
-						Do:        func() { t.Root.OpenAll() },
+						Do:        func() { t.OpenAll() },
 						Clickable: widget.Clickable{},
 					}
 				case CloseAllType:
@@ -340,7 +366,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		})
 	}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return t.contextMenu.Layout(gtx, rows)
+			return t.contextMenu.Layout(gtx, t.rootRowsWidget)
 			// ////////////////////////
 			// t.inLayoutHeader = false
 			// return t.layoutDrag(gtx, func(gtx layout.Context, row int) layout.Dimensions {
@@ -605,6 +631,16 @@ func (t *TreeTable[T]) updateRowNumber(parent *Node[T], currentRowIndex int) int
 	return currentRowIndex
 }
 
+func CountTableRows[T any](rows []*Node[T]) int {
+	count := len(rows)
+	for _, row := range rows {
+		if row.CanHaveChildren() {
+			count += CountTableRows(row.Children)
+		}
+	}
+	return count
+}
+
 func (t *TreeTable[T]) processEvent(gtx layout.Context, n *Node[T]) color.NRGBA {
 	rowClick := &n.rowClick
 	evt, ok := gtx.Source.Event(pointer.Filter{
@@ -781,7 +817,7 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { // 增删改查中
 }
 
 func (t *TreeTable[T]) updateMaxHierarchyColumnCellWidth() { // 计算层级列最大列单元格宽度,表头成列和body层级列的最大宽度公用这个函数，且计算也统一执行SizeColumnsToFit函数,这样表头和body都调用同一个层级列最大宽度，稳稳的对齐了
-	t.maxDepth = t.Root.MaxDepth() // todo新增容器节点需要刷新
+	t.maxDepth = t.MaxDepth() // todo新增容器节点需要刷新
 	if t.maxHierarchyColumnWidthCache == 0 {
 		t.maxHierarchyColumnWidthCache = t.maxColumnCellWidths[HierarchyColumnID]
 	}
@@ -1231,23 +1267,17 @@ func (t *TreeTable[T]) ScrollRowIntoView(row int) {
 	t.contextMenu.list.ScrollTo(row)
 }
 
-func (t *TreeTable[T]) RootRows() []*Node[T] {
-	if t.filteredRows != nil {
-		return t.filteredRows
-	}
-	return t.rootRows
-}
-
 func newID() uuid.ID { return uuid.New('n') }
 
 func (t *TreeTable[T]) IsFiltered() bool { return t.filteredRows != nil }
 func (t *TreeTable[T]) Filter(text string) {
 	if text == "" {
+		t.filteredRows = nil
 		t.Root.Children = t.rootRows
-		t.Root.OpenAll()
+		t.OpenAll()
 		return
 	}
-	t.filteredRows = make([]*Node[T], 0)
+	t.filteredRows = make([]*Node[T], 0)          // todo root row is not container case handle
 	for _, node := range t.Root.WalkContainer() { // todo bug 需要改回之前的回调模式？需要调试，编辑节点模态窗口bug
 		cells := t.MarshalRowCells(node)
 		for _, cell := range cells {
@@ -1274,10 +1304,57 @@ func (t *TreeTable[T]) Filter(text string) {
 	if len(t.filteredRows) == 0 {
 		return
 	}
-	// todo 检查layout部分是否调用filteredRows以及filteredRows的大小是否是0，清空过滤后恢复原始的rootRows
-	t.Root.Children = t.filteredRows
-	// t.rootRows = t.filteredRows
+	t.OpenAll()
+	/*
+		func (t *Table[T]) ApplyFilter(filter func(row T) bool) {
+			if filter == nil {
+				if t.filteredRows == nil {
+					return
+				}
+				t.filteredRows = nil
+			} else {
+				t.filteredRows = make([]T, 0)
+				for _, row := range t.Model.RootRows() {
+					t.applyFilter(row, filter)
+				}
+			}
+			t.SyncToModel()
+			if t.header != nil && t.header.HasSort() {
+				t.header.ApplySort()
+			}
+		}
+
+		func (t *Table[T]) applyFilter(row T, filter func(row T) bool) {
+			if !filter(row) {
+				t.filteredRows = append(t.filteredRows, row)
+			}
+			if row.CanHaveChildren() {
+				for _, child := range row.Children() {
+					t.applyFilter(child, filter)
+				}
+			}
+		}
+	*/
+}
+
+func (t *TreeTable[T]) OpenAll() {
+	if t.filteredRows != nil {
+		for _, row := range t.filteredRows {
+			row.OpenAll()
+		}
+		return
+	}
 	t.Root.OpenAll()
+}
+
+func (t *TreeTable[T]) CloseAll() {
+	if t.filteredRows != nil {
+		for _, row := range t.filteredRows {
+			row.CloseAll()
+		}
+		return
+	}
+	t.Root.CloseAll()
 }
 
 func (t *TreeTable[T]) Sort() {
@@ -1298,6 +1375,138 @@ func (t *TreeTable[T]) Sort() {
 		}
 		return cellI > cellJ
 	})
+	/*
+
+	   // SortOn adjusts the sort such that the specified header is the primary sort column. If the header was already the
+	   // primary sort column, then its ascending/descending flag will be flipped instead.
+	   func (h *TableHeader[T]) SortOn(header TableColumnHeader[T]) {
+	   	if header.SortState().Sortable {
+	   		headers := make([]TableColumnHeader[T], len(h.ColumnHeaders))
+	   		copy(headers, h.ColumnHeaders)
+	   		sort.Slice(headers, func(i, j int) bool {
+	   			if headers[i] == header {
+	   				return true
+	   			}
+	   			if headers[j] == header {
+	   				return false
+	   			}
+	   			s1 := headers[i].SortState()
+	   			if !s1.Sortable || s1.Order < 0 {
+	   				return false
+	   			}
+	   			s2 := headers[j].SortState()
+	   			if !s2.Sortable || s2.Order < 0 {
+	   				return true
+	   			}
+	   			return s1.Order < s2.Order
+	   		})
+	   		for i, hdr := range headers {
+	   			s := hdr.SortState()
+	   			if s.Sortable {
+	   				if i == 0 {
+	   					if s.Order == 0 {
+	   						s.Ascending = !s.Ascending
+	   					} else {
+	   						s.Order = 0
+	   					}
+	   				} else if s.Order >= 0 {
+	   					s.Order = i
+	   				}
+	   			} else {
+	   				s.Order = -1
+	   			}
+	   			hdr.SetSortState(s)
+	   		}
+	   	}
+	   }
+
+	   type headerWithIndex[T TableRowConstraint[T]] struct {
+	   	header TableColumnHeader[T]
+	   	index  int
+	   }
+
+	   // HasSort returns true if at least one column is marked for sorting.
+	   func (h *TableHeader[T]) HasSort() bool {
+	   	for _, hdr := range h.ColumnHeaders {
+	   		if ss := hdr.SortState(); ss.Sortable && ss.Order >= 0 {
+	   			return true
+	   		}
+	   	}
+	   	return false
+	   }
+
+	   // ApplySort sorts the table according to the current sort criteria.
+	   func (h *TableHeader[T]) ApplySort() {
+	   	headers := make([]*headerWithIndex[T], len(h.ColumnHeaders))
+	   	for i, hdr := range h.ColumnHeaders {
+	   		headers[i] = &headerWithIndex[T]{
+	   			index:  i,
+	   			header: hdr,
+	   		}
+	   	}
+	   	sort.Slice(headers, func(i, j int) bool {
+	   		s1 := headers[i].header.SortState()
+	   		if !s1.Sortable || s1.Order < 0 {
+	   			return false
+	   		}
+	   		s2 := headers[j].header.SortState()
+	   		if !s2.Sortable || s2.Order < 0 {
+	   			return true
+	   		}
+	   		return s1.Order < s2.Order
+	   	})
+	   	for i, hdr := range headers {
+	   		s := hdr.header.SortState()
+	   		if !s.Sortable || s.Order < 0 {
+	   			headers = headers[:i]
+	   			break
+	   		}
+	   	}
+	   	if h.table.filteredRows == nil {
+	   		roots := slices.Clone(h.table.RootRows())
+	   		h.applySort(headers, roots)
+	   		h.table.Model.SetRootRows(roots) // Avoid resetting the selection by directly updating the model
+	   	} else {
+	   		h.applySort(headers, h.table.filteredRows)
+	   	}
+	   	h.table.SyncToModel()
+	   }
+
+	   func (h *TableHeader[T]) applySort(headers []*headerWithIndex[T], rows []T) {
+	   	if len(headers) > 0 && len(rows) > 0 {
+	   		sort.Slice(rows, func(i, j int) bool {
+	   			for _, hdr := range headers {
+	   				d1 := rows[i].CellDataForSort(hdr.index)
+	   				d2 := rows[j].CellDataForSort(hdr.index)
+	   				if d1 != d2 {
+	   					ascending := hdr.header.SortState().Ascending
+	   					less := hdr.header.Less()
+	   					if less == nil {
+	   						less = h.Less
+	   					}
+	   					if less(d1, d2) {
+	   						return ascending
+	   					}
+	   					return !ascending
+	   				}
+	   			}
+	   			return false
+	   		})
+	   		if h.table.filteredRows == nil {
+	   			for _, row := range rows {
+	   				if row.CanHaveChildren() {
+	   					if children := row.Children(); len(children) > 1 {
+	   						children = slices.Clone(children)
+	   						h.applySort(headers, children)
+	   						row.SetChildren(children)
+	   					}
+	   				}
+	   			}
+	   		}
+	   	}
+	   }
+
+	*/
 }
 
 type (
@@ -1425,10 +1634,9 @@ func (n *Node[T]) SetParent(parent *Node[T]) { n.parent = parent }
 //			n.isOpen = false
 //		}
 //	}
-func (n *Node[T]) ResetChildren()                 { n.Children = nil }
-func (n *Node[T]) CanHaveChildren() bool          { return n.HasChildren() }
-func (n *Node[T]) HasChildren() bool              { return n.Container() && len(n.Children) > 0 }
-func (n *Node[T]) CellDataForSort(col int) string { return n.rowCells[col].Value }
+func (n *Node[T]) ResetChildren()        { n.Children = nil }
+func (n *Node[T]) CanHaveChildren() bool { return n.HasChildren() }
+func (n *Node[T]) HasChildren() bool     { return n.Container() && len(n.Children) > 0 }
 func (n *Node[T]) AddChild(child *Node[T]) {
 	child.parent = n
 	n.Children = append(n.Children, child)
@@ -1458,14 +1666,24 @@ func (n *Node[T]) Remove() {
 	}
 }
 
-// 通知单元格节点列宽更新事件:
-// 增 AddChild(实例化阶段，once内那一次就够了), InsertAfter (DuplicateType) SetChildren
-// 删 Remove,需要gtx来重新调整列宽
-// 改 EditType,双击或者右键触发
-// 查 Find,filter 无需调整列宽
-// 过滤,无需调整列宽
-// 排序,无需调整列宽
+/*
+	todo
 
+// CellWidth returns the current width of a given cell.
+
+	func (t *Table[T]) CellWidth(row, col int) float32 {
+		if row < 0 || col < 0 || row >= len(t.rowCache) || col >= len(t.Columns) {
+			return 0
+		}
+		width := t.Columns[col].Current - (t.Padding.Left + t.Padding.Right)
+		if t.Columns[col].ID == t.HierarchyColumnID {
+			if hierarchyIndent := t.CurrentHierarchyIndent(); hierarchyIndent > 0 {
+				width -= hierarchyIndent*float32(t.rowCache[row].depth+1) + t.Padding.Left
+			}
+		}
+		return width
+	}
+*/
 func (t *TreeTable[T]) calcCurrentHierarchyColumnLeftIndent(gtx layout.Context, n *Node[T], cell CellData) unit.Dp {
 	leftIndent := unit.Dp(0)
 	switch { // 按视觉要求渲染
@@ -1528,6 +1746,7 @@ func (t *TreeTable[T]) updateMaxColumnCellWidth(gtx layout.Context, n *Node[T]) 
 func (t *TreeTable[T]) InsertAfter(gtx layout.Context, after *Node[T]) {
 	t.SelectedNode.InsertAfter(after)
 	t.updateMaxColumnCellWidth(gtx, after)
+	t.SyncToModel()
 }
 
 func (t *TreeTable[T]) Remove(gtx layout.Context) {
@@ -1535,6 +1754,7 @@ func (t *TreeTable[T]) Remove(gtx layout.Context) {
 	if t.SelectedNode.Container() {
 		t.updateMaxHierarchyColumnCellWidth()
 	}
+	t.SyncToModel()
 }
 
 // /////////////////////////////////////////////////////////
@@ -1550,8 +1770,8 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 	editor.SetOnApply(func() { // todo bug ,debug it
 		// t.UnmarshalRowCells[T](t.SelectedNode, t.SelectedNode.rowCells)
 		t.UnmarshalRowCells(t.SelectedNode, editor.Rows) // todo test
-		t.rootRows = t.Root.Children
 		t.updateMaxHierarchyColumnCellWidth()
+		t.SyncToModel()
 		mylog.Todo("save json data ?")
 	})
 	ModalCallbacks.Set("node editor", func() {
@@ -1590,16 +1810,6 @@ func (n *Node[T]) CopyRow(gtx layout.Context, widths []unit.Dp) string {
 	g.P("}")
 	gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(g.String()))})
 	return g.String()
-}
-
-func CountTableRows[T any](rows []*Node[T]) int { // 计算整个表的总行数,可用于设计表格虚拟化滚动来提高性能，但是太复杂了，既要考虑rootrows的行数，又要考虑节点展开后的子节点的行数
-	count := len(rows)
-	for _, row := range rows {
-		if row.CanHaveChildren() {
-			count += CountTableRows(row.Children)
-		}
-	}
-	return count
 }
 
 func (n *Node[T]) Walk() iter.Seq2[int, *Node[T]] {
@@ -1672,9 +1882,9 @@ func (n *Node[T]) WalkContainer() iter.Seq2[int, *Node[T]] {
 //	}
 // }
 
-func (n *Node[T]) MaxDepth() unit.Dp {
+func (t *TreeTable[T]) MaxDepth() unit.Dp { // todo cache
 	maxDepth := unit.Dp(0)
-	for _, node := range n.Walk() {
+	for _, node := range t.Root.Walk() {
 		childDepth := node.Depth()
 		if childDepth > maxDepth {
 			maxDepth = childDepth
@@ -1724,7 +1934,7 @@ func (n *Node[T]) CloseAll() {
 }
 
 func (n *Node[T]) Clone() (to *Node[T]) {
-	to = deepcopy.Copy(n)
+	to = deepcopy.Clone(n)
 	to.parent = n.parent
 	to.ID = newID()
 	if n.CanHaveChildren() {
@@ -1766,7 +1976,7 @@ func (t *TreeTable[T]) maxColumnCellTextWidth() unit.Dp {
 	HierarchyIndent := unit.Dp(1)
 	DividerWidth := align.StringWidth[unit.Dp](" │ ")
 	iconWidth := align.StringWidth[unit.Dp](childPrefix)
-	return t.Root.MaxDepth()*HierarchyIndent + // 最大深度的左缩进
+	return t.MaxDepth()*HierarchyIndent + // 最大深度的左缩进
 		iconWidth + // 图标宽度,不管深度是多少，每一行都只会有一个层级图标
 		t.maxColumnTextWidths[0] + 5 + // (8 * 2) + 20 + // 左右padding,20是sort图标的宽度或者容器节点求和的文本宽度
 		DividerWidth // 列分隔条宽度

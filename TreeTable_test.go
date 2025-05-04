@@ -103,7 +103,7 @@ func Benchmark_SizeColumnsToFit(b *testing.B) {
 		Constraints: layout.Exact(size),
 	}
 	mylog.Check(w.Frame(gtx.Ops))
-	t := treeTable()
+	t := tableDemo()
 	for b.Loop() {
 		// 矩阵置换只执行一次
 		// Benchmark_SizeColumnsToFit-8   	  846088	      1685 ns/op  看起来也不差啊
@@ -144,16 +144,16 @@ func BenchmarkLabelWidth(b *testing.B) {
 }
 
 func BenchmarkWalk(b *testing.B) {
-	t := treeTable()
+	t := tableDemo()
 	for b.Loop() {
 		t.Root.Walk() // BenchmarkWalk-8   	46173380	        27.27 ns/op
 	}
 }
 
 func BenchmarkMaxDepth(b *testing.B) {
-	t := treeTable()
+	t := tableDemo()
 	for b.Loop() {
-		t.Root.MaxDepth() // BenchmarkMaxDepth-8   	 8747222	       151.8 ns/op
+		t.MaxDepth() // BenchmarkMaxDepth-8   	 8747222	       151.8 ns/op
 	}
 }
 
@@ -170,7 +170,7 @@ type packet struct {
 	PadTime       time.Duration // 请求到返回耗时
 }
 
-func treeTable() *ux.TreeTable[packet] {
+func tableDemo() *ux.TreeTable[packet] {
 	t := ux.NewTreeTable(packet{})
 	t.TableContext = ux.TableContext[packet]{
 		CustomContextMenuItems: func(gtx layout.Context, n *ux.Node[packet]) iter.Seq[ux.ContextMenuItem] {
@@ -358,11 +358,31 @@ func BenchmarkInsertWithResize(b *testing.B) {
 }
 
 func TestTreeTable_Filter(t1 *testing.T) {
-	t := treeTable()
+	t := tableDemo()
 	t.SetRootRowsCallBack()
 	t.Filter("ok")
 	return
 	assert.True(t1, strings.EqualFold("row96", "Row96"))
 	fmt.Println(strings.EqualFold("GoLang", "golang"))
 	fmt.Println(strings.EqualFold("golang", "GoLang"))
+}
+
+func TestTreeTable_MaxDepth(t1 *testing.T) {
+	demo := tableDemo()
+	assert.Equal(t1, demo.MaxDepth(), 3)
+}
+
+func TestNode_Depth(t *testing.T) {
+	demo := tableDemo()
+	for _, n := range demo.Root.Walk() {
+		if n.Data.Process == "process4-1-1.exe" {
+			assert.Equal(t, n.Depth(), 3)
+		}
+	}
+}
+
+func TestTreeTable_updateRowNumber(t1 *testing.T) {
+	demo := tableDemo()
+	// mylog.Struct(demo.Root.LastChild())
+	assert.Equal(t1, demo.Root.LastChild().RowNumber, ux.CountTableRows(demo.RootRows()))
 }
