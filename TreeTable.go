@@ -48,23 +48,21 @@ type (
 		SelectedNode                 *Node[T]        // 选中的节点,文件管理器外部自定义右键菜单增删改查文件需要通过它取出节点元数据结构体的文件路径字段，所以需要导出
 		contextMenu                  *ContextMenu    // 行右键菜单,rootRows只需要一个
 		columnCount                  int             // 列数
-		maxDepth                     unit.Dp         // 最大层级深度,todo add Cache like maxHierarchyColumnWidthCache
 		maxColumnCellWidths          []unit.Dp       // 最宽的列label文本宽度for单元格
 		maxColumnTextWidths          []unit.Dp       // 最宽的列文本宽度for tui
 		maxHierarchyColumnWidthCache unit.Dp
-		// fields                    [][]CellData        // 矩阵置换参数，行转为列，增删改节点后重新生成它
-		columns                 iter.Seq2[int, CellData] // CopyColumn
-		DragRemovedRowsCallback func(n *Node[T])         // Called whenever a drag removes one or more fields from a model, but only if the source and destination tables were different.
-		DropOccurredCallback    func(n *Node[T])         // Called whenever a drop occurs that modifies the model.
-		inLayoutHeader          bool                     // for drag
-		columnResizeStart       unit.Dp                  //
-		columnResizeBase        unit.Dp                  //
-		columnResizeOverhead    unit.Dp                  //
-		preventUserColumnResize bool                     //
-		awaitingSyncToModel     bool                     //
-		wasDragged              bool                     //
-		dividerDrag             bool                     //
-		once                    sync.Once                // 自动计算列宽一次
+		columns                      iter.Seq2[int, CellData] // CopyColumn
+		DragRemovedRowsCallback      func(n *Node[T])         // Called whenever a drag removes one or more fields from a model, but only if the source and destination tables were different.
+		DropOccurredCallback         func(n *Node[T])         // Called whenever a drop occurs that modifies the model.
+		inLayoutHeader               bool                     // for drag
+		columnResizeStart            unit.Dp                  //
+		columnResizeBase             unit.Dp                  //
+		columnResizeOverhead         unit.Dp                  //
+		preventUserColumnResize      bool                     //
+		awaitingSyncToModel          bool                     //
+		wasDragged                   bool                     //
+		dividerDrag                  bool                     //
+		once                         sync.Once                // 自动计算列宽一次
 	}
 	TableContext[T any] struct {
 		CustomContextMenuItems func(gtx layout.Context, n *Node[T]) iter.Seq[ContextMenuItem] // 通过SelectedNode传递给菜单的do取出元数据，比如删除文件,但是菜单是否绘制取决于当前渲染的行，所以要传递n给can
@@ -135,7 +133,6 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 		SelectedNode:                 nil,
 		contextMenu:                  NewContextMenu(),
 		columnCount:                  columnCount,
-		maxDepth:                     0,
 		maxColumnCellWidths:          nil,
 		maxColumnTextWidths:          nil,
 		maxHierarchyColumnWidthCache: 0,
@@ -817,13 +814,12 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { // 增删改查中
 }
 
 func (t *TreeTable[T]) updateMaxHierarchyColumnCellWidth() { // 计算层级列最大列单元格宽度,表头成列和body层级列的最大宽度公用这个函数，且计算也统一执行SizeColumnsToFit函数,这样表头和body都调用同一个层级列最大宽度，稳稳的对齐了
-	t.maxDepth = t.MaxDepth() // todo新增容器节点需要刷新
 	if t.maxHierarchyColumnWidthCache == 0 {
 		t.maxHierarchyColumnWidthCache = t.maxColumnCellWidths[HierarchyColumnID]
 	}
 
 	// leftPadding //有左填充,rootRows不应该紧靠左边 todo 如果层级列宽度检查失败的话考虑处理这个，加上去就可以了,另外是层级列的图标应按安排两个:层级图标和层级列文本图标，最后是表头单元格的排序svg,如果以后要渲染这个的话
-	maxWidth := t.maxDepth*HierarchyIndent + // 最大深度的左缩进
+	maxWidth := t.MaxDepth()*HierarchyIndent + // 最大深度的左缩进
 		defaultHierarchyIconSize + // 层级图标宽度
 		defaultHierarchyColumnIconSize + // 层级列图标宽度
 		leftPadding + // 左侧padding
@@ -1614,13 +1610,6 @@ func (n *Node[T]) SumChildren() string {
 func (n *Node[T]) UUID() uuid.ID   { return n.ID }
 func (n *Node[T]) Container() bool { return strings.HasSuffix(n.Type, ContainerKeyPostfix) }
 
-// func (n *Node[T]) kind(base string) string {
-//	if n.Container() {
-//		return base + " Container"
-//	}
-//	return base
-// }
-
 func (n *Node[T]) GetType() string           { return n.Type }
 func (n *Node[T]) SetType(typeKey string)    { n.Type = typeKey }
 func (n *Node[T]) IsOpen() bool              { return n.isOpen && n.Container() }
@@ -1628,12 +1617,6 @@ func (n *Node[T]) SetOpen(open bool)         { n.isOpen = open && n.Container() 
 func (n *Node[T]) Parent() *Node[T]          { return n.parent }
 func (n *Node[T]) SetParent(parent *Node[T]) { n.parent = parent }
 
-//	func (n *Node[T]) clearUnusedFields() {
-//		if !n.Container() {
-//			n.Children = nil
-//			n.isOpen = false
-//		}
-//	}
 func (n *Node[T]) ResetChildren()        { n.Children = nil }
 func (n *Node[T]) CanHaveChildren() bool { return n.HasChildren() }
 func (n *Node[T]) HasChildren() bool     { return n.Container() && len(n.Children) > 0 }
@@ -1751,9 +1734,6 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 			editor.Layout(gtx)
 		}
 	})
-	// todo 其实不用更新 t.updateMaxHierarchyColumnCellWidth()
-	// 但如果编辑的时候把层级列的单元格文本变长就需要，递归一下maxDepth应该不会牺牲多大的性能
-	// 如果编辑节点点击应用更新出现卡顿的话，判断下层级列是否被编辑来跳过执行updateMaxHierarchyColumnCellWidth提高性能
 }
 
 func (n *Node[T]) Find() (found *Node[T]) {
@@ -1854,7 +1834,7 @@ func (n *Node[T]) WalkContainer() iter.Seq2[int, *Node[T]] {
 //	}
 // }
 
-func (t *TreeTable[T]) MaxDepth() unit.Dp { // todo cache
+func (t *TreeTable[T]) MaxDepth() unit.Dp {
 	maxDepth := unit.Dp(0)
 	for _, node := range t.Root.Walk() {
 		childDepth := node.Depth()
