@@ -1666,24 +1666,6 @@ func (n *Node[T]) Remove() {
 	}
 }
 
-/*
-	todo
-
-// CellWidth returns the current width of a given cell.
-
-	func (t *Table[T]) CellWidth(row, col int) float32 {
-		if row < 0 || col < 0 || row >= len(t.rowCache) || col >= len(t.Columns) {
-			return 0
-		}
-		width := t.Columns[col].Current - (t.Padding.Left + t.Padding.Right)
-		if t.Columns[col].ID == t.HierarchyColumnID {
-			if hierarchyIndent := t.CurrentHierarchyIndent(); hierarchyIndent > 0 {
-				width -= hierarchyIndent*float32(t.rowCache[row].depth+1) + t.Padding.Left
-			}
-		}
-		return width
-	}
-*/
 func (t *TreeTable[T]) calcCurrentHierarchyColumnLeftIndent(gtx layout.Context, n *Node[T], cell CellData) unit.Dp {
 	leftIndent := unit.Dp(0)
 	switch { // 按视觉要求渲染
@@ -1704,16 +1686,20 @@ func (t *TreeTable[T]) calcCurrentHierarchyColumnLeftIndent(gtx layout.Context, 
 	return leftIndent
 }
 
-// 预绘制层级列并返回宽度,然后检查实际绘制的body层级列宽度是否大于最大限制宽度，如果大于则panic，否则更新最大限制宽度,解决放哪是检查层级列单元格是否绘制了额外的图标或者表头层级列加入了排序图标绘制等问题
 func (t *TreeTable[T]) calcCurrentHierarchyColumnWidthAndSafeCheck(gtx layout.Context, cell CellData, leftIndent unit.Dp) unit.Dp {
-	// 预先计算单元格宽度,todo层级列按需要渲染另外的图标，rootrows深度的左侧还有一个leftPadding没有计算进去，不管了，先这样，反正对齐了
-	currentWidth := leftIndent + leftPadding + defaultHierarchyColumnIconSize + LabelWidth(gtx, cell.Value) + DividerWidth // 预计算body层级列实际宽度,todo 对currentWidth进行渲染单元测试
-	if currentWidth > t.maxColumnCellWidths[HierarchyColumnID] {                                                           // 这个检查是必要的，否则会导致单元格宽度超出限制导致对不齐表头层级列
-		mylog.Todo(fmt.Sprint(currentWidth))
-		mylog.Todo(fmt.Sprint(t.maxColumnCellWidths[HierarchyColumnID]))
-		// mylog.Info("currentWidth", currentWidth)
-		// mylog.Info("t.maxColumnCellWidths[hierarchyColumnID]", t.maxColumnCellWidths[hierarchyColumnID])
-		// panic("预渲染列宽大于限制宽度")//对于更新节点单元格文本变长的情况，不要panic
+	currentWidth := leftIndent + leftPadding + defaultHierarchyColumnIconSize + LabelWidth(gtx, cell.Value) + DividerWidth
+	if currentWidth > t.maxColumnCellWidths[HierarchyColumnID] {
+		type diffHierarchyColumnWidth struct {
+			CurrentWidth unit.Dp
+			MaxWidth     unit.Dp
+			Diff         unit.Dp
+		}
+		mylog.Struct(diffHierarchyColumnWidth{
+			CurrentWidth: currentWidth,
+			MaxWidth:     t.maxColumnCellWidths[HierarchyColumnID],
+			Diff:         currentWidth - t.maxColumnCellWidths[HierarchyColumnID],
+		})
+		mylog.Todo("预渲染列宽大于限制宽度")
 	}
 	return currentWidth
 }
@@ -1725,11 +1711,9 @@ func (t *TreeTable[T]) calcCurrentNonHierarchyColumnWidthAndSafeCheck(gtx layout
 
 // 这避免了重复矩阵置换来提高更新列宽性能，避免增删改查卡顿
 func (t *TreeTable[T]) updateMaxColumnCellWidth(gtx layout.Context, n *Node[T]) { // for InsertAfter and edit node late
-
 	if n.Container() {
 		t.updateMaxHierarchyColumnCellWidth() // 先更新最大深度再更改宽度，否则层级列的调整不正确
 	}
-
 	cells := t.MarshalRowCells(n) // row的cells,取出每个单元格和对应的列max一下确定是否重新调整列宽，这会提高性能
 	for columnID, cell := range cells {
 		switch columnID {
@@ -1756,8 +1740,6 @@ func (t *TreeTable[T]) Remove(gtx layout.Context) {
 	}
 	t.SyncToModel()
 }
-
-// /////////////////////////////////////////////////////////
 
 func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大深度有影响
 	defer t.updateMaxColumnCellWidth(gtx, t.SelectedNode)
