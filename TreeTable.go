@@ -1950,14 +1950,14 @@ func (t *TreeTable[T]) Document() string {
 }
 
 func (t *TreeTable[T]) FormatHeader(maxColumnCellTextWidths []unit.Dp) *stream.Buffer {
-	buf := stream.NewBuffer("")
+	b := stream.NewBuffer("")
 	all := t.maxColumnCellTextWidth()
 	for _, width := range maxColumnCellTextWidths {
 		all += width
 	}
 	all += align.StringWidth[unit.Dp]("│")*unit.Dp(len(maxColumnCellTextWidths)) + 4 // ?
-	buf.WriteStringLn("┌─" + strings.Repeat("─", int(all)))
-	buf.WriteString("│")
+	b.WriteStringLn("┌─" + strings.Repeat("─", int(all)))
+	b.WriteString("│")
 
 	// 计算每个单元格的左边距
 	for i, cell := range t.header.columnCells {
@@ -1965,21 +1965,21 @@ func (t *TreeTable[T]) FormatHeader(maxColumnCellTextWidths []unit.Dp) *stream.B
 
 		// 添加左边距，仅在首列进行处理，依据列宽计算
 		if i == HierarchyColumnID {
-			buf.WriteString(strings.Repeat(" ", int(t.maxColumnCellTextWidth()-maxColumnCellTextWidths[i]-1))) // -1是分隔符的空间
+			b.WriteString(strings.Repeat(" ", int(t.maxColumnCellTextWidth()-maxColumnCellTextWidths[i]-1))) // -1是分隔符的空间
 		}
 
-		buf.WriteString(paddedText)
+		b.WriteString(paddedText)
 		if i < t.columnCount-1 {
-			buf.WriteString(" │ ") // 在每个单元格之间添加分隔符
+			b.WriteString(" │ ") // 在每个单元格之间添加分隔符
 		}
 	}
 
-	buf.NewLine()
-	buf.WriteStringLn("├─" + strings.Repeat("─", int(all)))
-	return buf
+	b.NewLine()
+	b.WriteStringLn("├─" + strings.Repeat("─", int(all)))
+	return b
 }
 
-func (t *TreeTable[T]) FormatChildren(out *stream.Buffer, children []*Node[T]) {
+func (t *TreeTable[T]) FormatChildren(b *stream.Buffer, children []*Node[T]) {
 	for i, child := range children {
 		child.rowCells = t.MarshalRowCells(child)
 		HierarchyColumBuf := stream.NewBuffer("")
@@ -1997,19 +1997,19 @@ func (t *TreeTable[T]) FormatChildren(out *stream.Buffer, children []*Node[T]) {
 					HierarchyColumBuf.WriteString(strings.Repeat(" ", int(t.maxColumnCellTextWidth()-align.StringWidth[unit.Dp](HierarchyColumBuf.String()))))
 				}
 				HierarchyColumBuf.WriteString(" │ ")
-				out.WriteString(HierarchyColumBuf.String())
+				b.WriteString(HierarchyColumBuf.String())
 				HierarchyColumBuf.Reset()
 				continue
 			}
-			out.WriteString(cell.Value)
+			b.WriteString(cell.Value)
 			if align.StringWidth[unit.Dp](cell.Value) < t.maxColumnTextWidths[j] {
-				out.WriteString(strings.Repeat(" ", int(t.maxColumnTextWidths[j]-align.StringWidth[unit.Dp](cell.Value))))
+				b.WriteString(strings.Repeat(" ", int(t.maxColumnTextWidths[j]-align.StringWidth[unit.Dp](cell.Value))))
 			}
-			out.WriteString(" │ ")
+			b.WriteString(" │ ")
 		}
-		out.NewLine()
+		b.NewLine()
 		if len(child.Children) > 0 {
-			t.FormatChildren(out, child.Children)
+			t.FormatChildren(b, child.Children)
 		}
 	}
 }
