@@ -39,21 +39,19 @@ import (
 
 type (
 	TreeTable[T any] struct {
-		TableContext[T]                              // 实例化时传入的上下文
-		Root                         *Node[T]        // 根节点,保存数据到json只需要调用它即可
-		header                       tableHeader[T]  // 表头
-		rootRows                     []*Node[T]      // from root.children
-		rootRowsWidget               []layout.Widget // from layout
-		filteredRows                 []*Node[T]      // 过滤后的行
-		SelectedNode                 *Node[T]        // 选中的节点,文件管理器外部自定义右键菜单增删改查文件需要通过它取出节点元数据结构体的文件路径字段，所以需要导出
-		contextMenu                  *ContextMenu    // 行右键菜单,rootRows只需要一个
-		columnCount                  int             // 列数
-		maxColumnCellWidths          []unit.Dp       // 最宽的列label文本宽度for单元格
-		maxColumnTextWidths          []unit.Dp       // 最宽的列文本宽度for tui
-		maxHierarchyColumnWidthCache unit.Dp
+		TableContext[T]                                       // 实例化时传入的上下文
+		Root                         *Node[T]                 // 根节点,保存数据到json只需要调用它即可
+		header                       tableHeader[T]           // 表头
+		rootRows                     []*Node[T]               // from root.children
+		rootRowsWidget               []layout.Widget          // from layout
+		filteredRows                 []*Node[T]               // 过滤后的行
+		SelectedNode                 *Node[T]                 // 当前选中的节点
+		contextMenu                  *ContextMenu             // 行右键菜单,rootRows只需要一个
+		columnCount                  int                      // 列数
+		maxColumnCellWidths          []unit.Dp                // 最宽的列label文本宽度for单元格
+		maxColumnTextWidths          []unit.Dp                // 最宽的列文本宽度for tui
+		maxHierarchyColumnWidthCache unit.Dp                  // 最宽的层级列宽度
 		columns                      iter.Seq2[int, CellData] // CopyColumn
-		DragRemovedRowsCallback      func(n *Node[T])         // Called whenever a drag removes one or more fields from a model, but only if the source and destination tables were different.
-		DropOccurredCallback         func(n *Node[T])         // Called whenever a drop occurs that modifies the model.
 		inLayoutHeader               bool                     // for drag
 		columnResizeStart            unit.Dp                  //
 		columnResizeBase             unit.Dp                  //
@@ -73,9 +71,8 @@ type (
 		SetRootRowsCallBack    func()                                                         // 实例化所有节点回调,必要时调用root节点辅助操作
 		JsonName               string                                                         // 保存序列化树形表格到文件的文件名
 		IsDocument             bool                                                           // 是否生成markdown文档
-
-		//	DragRemovedRowsCallback  func() // Called whenever a drag removes one or more rows from a model, but only if the source and destination tables were different.
-		//	DropOccurredCallback     func() // Called whenever a drop occurs that modifies the model.
+		//	DragRemovedRowsCallback  func()
+		//	DropOccurredCallback     func()
 	}
 	tableHeader[T any] struct {
 		sortOrder          sortOrder    // 排序方式
@@ -137,8 +134,6 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 		maxColumnTextWidths:          nil,
 		maxHierarchyColumnWidthCache: 0,
 		columns:                      nil,
-		DragRemovedRowsCallback:      nil,
-		DropOccurredCallback:         nil,
 		inLayoutHeader:               false,
 		columnResizeStart:            0,
 		columnResizeBase:             0,
