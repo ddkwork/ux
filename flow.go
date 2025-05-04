@@ -6,21 +6,12 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/widget"
+	"github.com/ddkwork/golibrary/safemap"
 	"github.com/ddkwork/ux/widget/material"
 )
 
 // inf is an infinite axis constraint.
 const inf = 1e6
-
-// FlowElement lays out the ith element of a Grid.
-type FlowElement func(gtx layout.Context, i int) layout.Dimensions
-
-type FlowElemButton struct {
-	Title            string
-	Icon             []byte
-	Do               func(gtx layout.Context)
-	ContextMenuItems []ContextMenuItem
-}
 
 // Flow lays out at most rowElemCount filterMap along the main axis.
 // The number of cross axis filterMap depend on the total number of filterMap.
@@ -29,12 +20,10 @@ type Flow struct {
 	axis         layout.Axis
 	alignment    layout.Alignment
 	list         widget.List
-	menus        []*ContextMenu
-	clickables   []widget.Clickable
-	buttons      []*ButtonAnimation
+	elems        *safemap.M[*ButtonAnimation, *ContextMenu]
 }
 
-func NewFlow(rowElemCount int) *Flow {
+func NewFlow(rowElemCount int, elems *safemap.M[*ButtonAnimation, *ContextMenu]) *Flow {
 	if rowElemCount == 0 {
 		rowElemCount = 5
 	}
@@ -43,20 +32,7 @@ func NewFlow(rowElemCount int) *Flow {
 		axis:         layout.Horizontal,
 		alignment:    layout.Middle,
 		list:         widget.List{},
-		menus:        make([]*ContextMenu, 0),
-		clickables:   make([]widget.Clickable, 0),
-		buttons:      nil,
-	}
-}
-
-func (g *Flow) AppendElem(i int, elem FlowElemButton) {
-	g.clickables = append(g.clickables, widget.Clickable{})
-	g.buttons = append(g.buttons, NewButton(&g.clickables[i], elem.Icon, elem.Title, elem.Do))
-	g.menus = append(g.menus, NewContextMenu())
-	for _, item := range elem.ContextMenuItems {
-		g.menus[i].Once.Do(func() {
-			g.menus[i].AddItem(item)
-		})
+		elems:        elems,
 	}
 }
 
@@ -73,8 +49,7 @@ func (g *Flow) Layout(gtx layout.Context) layout.Dimensions {
 		g.list.Alignment = g.alignment
 	}
 	csMax := gtx.Constraints.Max
-	sum := len(g.clickables)
-	return material.List(th, &g.list).Layout(gtx, (sum+g.rowElemCount-1)/g.rowElemCount, func(gtx layout.Context, index int) layout.Dimensions {
+	return material.List(th, &g.list).Layout(gtx, (g.elems.Len()+g.rowElemCount-1)/g.rowElemCount, func(gtx layout.Context, index int) layout.Dimensions {
 		if g.axis == layout.Horizontal {
 			gtx.Constraints.Max.Y = inf
 		} else {
@@ -84,18 +59,19 @@ func (g *Flow) Layout(gtx layout.Context) layout.Dimensions {
 		var mainMax, crossMax int
 		left := axisMain(g.axis, csMax)
 		i := index * g.rowElemCount
-		n := min(sum, i+g.rowElemCount)
+		n := min(g.elems.Len(), i+g.rowElemCount)
 		for ; i < n; i++ {
 			gtx.Constraints.Min.X = 300
 			gtx.Constraints.Max.X = gtx.Constraints.Min.X
 
-			dims := g.menus[i].Layout(gtx, []layout.Widget{
+			dims := g.elems.Values()[i].Layout(gtx, []layout.Widget{
 				func(gtx layout.Context) layout.Dimensions {
 					return layout.UniformInset(2).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-						return g.buttons[i].Layout(gtx)
+						return g.elems.Keys()[i].Layout(gtx)
 					})
 				},
 			})
+
 			main := axisMain(g.axis, dims.Size)
 			crossMax = max(crossMax, axisCross(g.axis, dims.Size))
 			left -= main
