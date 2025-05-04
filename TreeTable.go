@@ -34,6 +34,7 @@ import (
 	"github.com/ddkwork/ux/resources/images"
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/richtext"
+	cmp2 "github.com/google/go-cmp/cmp"
 )
 
 type (
@@ -1689,17 +1690,7 @@ func (t *TreeTable[T]) calcCurrentHierarchyColumnLeftIndent(gtx layout.Context, 
 func (t *TreeTable[T]) calcCurrentHierarchyColumnWidthAndSafeCheck(gtx layout.Context, cell CellData, leftIndent unit.Dp) unit.Dp {
 	currentWidth := leftIndent + leftPadding + defaultHierarchyColumnIconSize + LabelWidth(gtx, cell.Value) + DividerWidth
 	if currentWidth > t.maxColumnCellWidths[HierarchyColumnID] {
-		type diffHierarchyColumnWidth struct {
-			CurrentWidth unit.Dp
-			MaxWidth     unit.Dp
-			Diff         unit.Dp
-		}
-		mylog.Struct(diffHierarchyColumnWidth{
-			CurrentWidth: currentWidth,
-			MaxWidth:     t.maxColumnCellWidths[HierarchyColumnID],
-			Diff:         currentWidth - t.maxColumnCellWidths[HierarchyColumnID],
-		})
-		mylog.Todo("预渲染列宽大于限制宽度")
+		mylog.Todo(cmp2.Diff(t.maxColumnCellWidths[HierarchyColumnID], currentWidth)) // 预渲染列宽大于限制宽度
 	}
 	return currentWidth
 }
