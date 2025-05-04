@@ -496,8 +496,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 		n.rowCells[i].columID = t.header.columnCells[i].columID // 列分隔符,更新层级列宽度
 	}
 
-	// bgColor := t.processEvent(gtx, n, rowIndex) // 处理鼠标事件
-	bgColor := RowColor(rowIndex)
+	bgColor := t.processEvent(gtx, n) // 处理鼠标事件
 	rowClick := &n.rowClick
 
 	var rowCells []*Resizable
