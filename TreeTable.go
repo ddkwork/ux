@@ -1874,3 +1874,5 @@ func (t *TreeTable[T]) FormatChildren(b *stream.Buffer, children []*Node[T]) {
 // 		}
 // 	}
 // }
+
+// v0.3
