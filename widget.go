@@ -68,9 +68,9 @@ type Widgets interface { // map[string]Widget
 }
 
 func LogView() Widget {
-	logView := NewCodeEditor(mylog.Row(), languages.GoKind)
-	mylog.SetCallBack(func() {
-		logView.AppendText(mylog.Row())
+	logView := NewCodeEditor("", languages.GoKind)
+	mylog.SetCallBack(func(row string) {
+		logView.AppendText(row)
 	})
 	return logView
 }
