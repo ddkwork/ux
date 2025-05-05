@@ -35,8 +35,8 @@ type StructView[T any] struct { // 其实就是一个标题row+list滚动多个r
 	// 填充到这一行的左侧，关闭和应用始终在右下角 layout.N
 	// 这样如果不在list内滚动就不会渲染，不知道是什么原因，总感觉一个整体的widget只能有一个list，先滚动吧
 	// 布局预期视觉样式：多个元素的一行
-	applyBtn widget.Clickable
-	closeBtn widget.Clickable
+	applyBtn *widget.Clickable
+	closeBtn *widget.Clickable
 	onApply  func()
 
 	widget.List // 滚动所有行
@@ -65,8 +65,8 @@ func NewStructView[T any](title string, object T, callback MarshalRowCallback) *
 		Rows:     rows,
 		Title:    title,
 		fields:   FieldRows,
-		applyBtn: widget.Clickable{},
-		closeBtn: widget.Clickable{},
+		applyBtn: &widget.Clickable{},
+		closeBtn: &widget.Clickable{},
 		onApply:  nil, // 用于刷新编辑够的节点元数据
 		List: widget.List{
 			Scrollbar: widget.Scrollbar{},
@@ -185,11 +185,11 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 			return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 				outlay.EmptyRigidHorizontal(300), // 标签站位
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					return Button(&s.closeBtn, images.NavigationCloseIcon, "Close").Layout(gtx)
+					return Button(s.closeBtn, images.NavigationCloseIcon, "Close").Layout(gtx)
 				}),
 				outlay.EmptyRigidHorizontal(20), // 按钮间距
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					return Button(&s.applyBtn, images.ActionAssignmentTurnedInIcon, "Apply").Layout(gtx)
+					return Button(s.applyBtn, images.ActionAssignmentTurnedInIcon, "Apply").Layout(gtx)
 				}),
 				outlay.EmptyRigidHorizontal(10),
 			)

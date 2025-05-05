@@ -143,8 +143,6 @@ func drawImageBackground(gtx layout.Context) {
 
 // //////////////////////////////////
 
-var ModalCallbacks = new(safemap.M[string, func()])
-
 func NewWindow(title string) *app.Window {
 	w := new(app.Window)
 	w.Option(
@@ -220,6 +218,10 @@ func Run(p *Panel) {
 		app.Main()
 	})
 }
+
+var ModalCallbacks = new(safemap.M[string, func()])
+
+// todo add menu callbacks
 
 func SaveScreenshot(callback Widget) {
 	const scale = 1.5
