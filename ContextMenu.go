@@ -5,11 +5,11 @@ import (
 	"image/color"
 	"sync"
 
-	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/ux/resources/images"
-
+	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/widget"
+	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/ux/resources/images"
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/component"
 )
@@ -25,7 +25,7 @@ type ContextMenuItem struct {
 
 type ContextMenu struct {
 	Items []*ContextMenuItem
-	area  component.ContextArea
+	area  *component.ContextArea
 	state component.MenuState
 	list  widget.List
 	sync.Once
@@ -34,7 +34,11 @@ type ContextMenu struct {
 func NewContextMenu() *ContextMenu {
 	return &ContextMenu{
 		Items: nil,
-		area:  component.ContextArea{},
+		area: &component.ContextArea{
+			Activation:       pointer.ButtonSecondary,
+			AbsolutePosition: false,
+			PositionHint:     0,
+		},
 		state: component.MenuState{},
 		list: widget.List{
 			Scrollbar: widget.Scrollbar{},
@@ -83,6 +87,26 @@ func (m *ContextMenu) Layout(gtx layout.Context, rootRows []layout.Widget) layou
 		})
 	}),
 		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+			// skip := false
+			// for {
+			// 	ev, ok := gtx.Event(pointer.Filter{
+			// 		Target: &m.area,
+			// 		Kinds:  pointer.Press,
+			// 	})
+			// 	if !ok {
+			// 		break
+			// 	}
+			// 	e, ok := ev.(pointer.Event)
+			// 	if !ok {
+			// 		continue
+			// 	}
+			// 	if e.Buttons.Contain(pointer.ButtonPrimary) && e.Kind == pointer.Press {
+			// 		skip = true
+			// 	}
+			// }
+			// if skip {
+			// 	return layout.Dimensions{}
+			// }
 			return m.area.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				gtx.Constraints.Min = image.Point{}
 				m.onClicked(gtx)
