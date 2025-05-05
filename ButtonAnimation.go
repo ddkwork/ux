@@ -4,12 +4,6 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/ddkwork/ux/internal/animation"
-	"github.com/ddkwork/ux/internal/animation/gween"
-	"github.com/ddkwork/ux/internal/animation/gween/ease"
-	"github.com/ddkwork/ux/resources/colors"
-	"github.com/ddkwork/ux/resources/images"
-
 	"gioui.org/font"
 	"gioui.org/io/pointer"
 	"gioui.org/io/semantic"
@@ -17,8 +11,14 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
+	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
+	"github.com/ddkwork/ux/internal/animation"
+	"github.com/ddkwork/ux/internal/animation/gween"
+	"github.com/ddkwork/ux/internal/animation/gween/ease"
+	"github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/resources/images"
 	"github.com/ddkwork/ux/widget/material"
 )
 
@@ -258,10 +258,10 @@ func (btn *ButtonAnimation) Layout(gtx layout.Context) layout.Dimensions {
 					}
 				}
 			} // else {
-			//animationLeave.Reset()
-			//animationEnter.Reset()
-			//animationClick.Reset()
-			//}
+			// animationLeave.Reset()
+			// animationEnter.Reset()
+			// animationClick.Reset()
+			// }
 
 			c := op.Record(gtx.Ops)
 			style.Border.Color = colors.BorderColor
@@ -270,10 +270,10 @@ func (btn *ButtonAnimation) Layout(gtx layout.Context) layout.Dimensions {
 					var iconWidget layout.Widget
 					if style.Icon != nil {
 						iconWidget = func(gtx layout.Context) layout.Dimensions {
-							//icon := style.Icon
-							//if style.LoadingIcon != nil && btn.Loading {
+							// icon := style.Icon
+							// if style.LoadingIcon != nil && btn.Loading {
 							//	icon = style.LoadingIcon
-							//}
+							// }
 
 							var dims layout.Dimensions
 							r := op.Record(gtx.Ops)
@@ -315,13 +315,17 @@ func (btn *ButtonAnimation) Layout(gtx layout.Context) layout.Dimensions {
 						childs = append(childs,
 							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 								paint.ColorOp{Color: textColor}.Add(gtx.Ops)
+								label := material.Label(th, style.TextSize, btn.Text)
+								label.Alignment = text.Middle
+								return label.Layout(gtx)
 								return btn.Label.Layout(gtx, btn.th.Shaper, style.Font,
 									style.TextSize, btn.Text, op.CallOp{})
 							}),
 						)
 
 						return layout.Flex{
-							Axis:      layout.Horizontal,
+							// Axis:      layout.Horizontal,//todo support vertical
+							Axis:      layout.Vertical,
 							Alignment: layout.Middle,
 						}.Layout(gtx, childs...)
 					} else {
@@ -352,7 +356,7 @@ func (btn *ButtonAnimation) Layout(gtx layout.Context) layout.Dimensions {
 	})
 }
 
-///////////////////////////////////////
+// /////////////////////////////////////
 
 type buttonAnimationOption struct {
 	animationEnter   *animation.Animation
