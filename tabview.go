@@ -43,13 +43,13 @@ type TabItem struct {
 	// Main part of the tab content.
 	Content Widget
 	// Title padding of the tab item.
-	Inset     layout.Inset
-	direction layout.Direction
-	click     gesture.Click
-	hovering  bool
-	selected  bool
-	btn       widget.Clickable
-	index     int
+	Inset layout.Inset
+	layout.Direction
+	click    gesture.Click
+	hovering bool
+	selected bool
+	btn      widget.Clickable
+	index    int
 	// number of characters to show in the tab title
 	maxTitleWidth    int
 	onSelectedChange func(int)
@@ -133,7 +133,7 @@ func (t *TabItem) LayoutTitle(gtx layout.Context) layout.Dimensions {
 
 func (t *TabItem) layoutTitle(gtx layout.Context) layout.Dimensions {
 	return t.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		return t.direction.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return t.Direction.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			if t.btn.Clicked(gtx) {
 				if t.onSelectedChange != nil {
 					go t.onSelectedChange(t.index)
@@ -188,14 +188,14 @@ func (t *TabItem) layoutTitle(gtx layout.Context) layout.Dimensions {
 										padding = unit.Dp(8)
 									}
 
-									//ib := &IconButton2{//todo
+									// ib := &IconButton2{//todo
 									//	Icon:                 closeIcon,
 									//	Color:                iconColor,
 									//	BackgroundColor:      bkColor,
 									//	BackgroundColorHover: hoveredColor,
 									//	Size:                 iconSize,
 									//	Clickable:            &t.CloseClickable,
-									//}
+									// }
 									return layout.UniformInset(padding).Layout(gtx,
 										func(gtx layout.Context) layout.Dimensions {
 											return Button(&t.CloseClickable, images.NavigationCloseIcon, "").Layout(gtx)
@@ -271,7 +271,7 @@ func (v *TabView) Layout(gtx layout.Context) layout.Dimensions {
 				v.list.Alignment = layout.Start
 				listDims := v.list.Layout(gtx, len(v.tabItems), func(gtx layout.Context, index int) layout.Dimensions {
 					item := v.tabItems[index]
-					item.direction = tabAlign
+					item.Direction = tabAlign
 
 					if index == 0 {
 						return item.LayoutTitle(gtx)
@@ -340,7 +340,7 @@ func NewTabItem(title string, content Widget) *TabItem {
 		title:     title,
 		Content:   content,
 		Inset:     layout.UniformInset(0),
-		direction: 0,
+		Direction: 0,
 		click:     gesture.Click{},
 		hovering:  false,
 		selected:  false,

@@ -324,8 +324,8 @@ func (btn *ButtonAnimation) Layout(gtx layout.Context) layout.Dimensions {
 						)
 
 						return layout.Flex{
-							// Axis:      layout.Horizontal,//todo support vertical
-							Axis:      layout.Vertical,
+							Axis: layout.Horizontal, // todo support vertical
+							// Axis:      layout.Vertical,
 							Alignment: layout.Middle,
 						}.Layout(gtx, childs...)
 					} else {
