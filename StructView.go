@@ -46,8 +46,9 @@ type StructView[T any] struct { // 其实就是一个标题row+list滚动多个r
 	layout.Inset
 }
 
-func (s *StructView[T]) Unmarshal(callback UnmarshalRowCallback) {
+func (s *StructView[T]) Unmarshal(callback UnmarshalRowCallback) T {
 	s.Data = UnmarshalRow[T](s.Rows, callback)
+	return s.Data
 }
 
 func NewStructView[T any](title string, object T, callback MarshalRowCallback) *StructView[T] {
