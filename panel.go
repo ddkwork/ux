@@ -221,8 +221,6 @@ func Run(p *Panel) {
 
 var ModalCallbacks = new(safemap.M[string, func()])
 
-// todo add menu callbacks
-
 func SaveScreenshot(callback Widget) {
 	const scale = 1.5
 	size := image.Point{X: 1200 * scale, Y: 600 * scale}
