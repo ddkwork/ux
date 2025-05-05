@@ -61,7 +61,7 @@ func (g *Flow) Layout(gtx layout.Context) layout.Dimensions {
 		i := index * g.rowElemCount
 		n := min(g.elems.Len(), i+g.rowElemCount)
 		for ; i < n; i++ {
-			gtx.Constraints.Min.X = 300
+			gtx.Constraints.Min.X = 130 // todo 定义常量 导航按钮宽度
 			gtx.Constraints.Max.X = gtx.Constraints.Min.X
 
 			dims := g.elems.Values()[i].Layout(gtx, []layout.Widget{

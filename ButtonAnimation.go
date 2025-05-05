@@ -279,10 +279,10 @@ func (btn *ButtonAnimation) Layout(gtx layout.Context) layout.Dimensions {
 							r := op.Record(gtx.Ops)
 							if btn.Flex {
 								dims = layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-									return images.Layout(gtx, style.Icon, textColor, 18)
+									return images.Layout(gtx, style.Icon, textColor, 24)
 								})
 							} else {
-								dims = images.Layout(gtx, style.Icon, textColor, 18)
+								dims = images.Layout(gtx, style.Icon, textColor, 24)
 							}
 							c := r.Stop()
 

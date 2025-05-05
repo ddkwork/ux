@@ -15,9 +15,9 @@ import (
 	_ "github.com/ddkwork/ux/resources/images/ico"
 )
 
-//type Type interface {
+// type Type interface {
 //	*widget.Icon | *widget.Image | *giosvg.Icon | []byte
-//}
+// }
 
 func Layout(gtx layout.Context, b []byte, color color.NRGBA, size unit.Dp) layout.Dimensions {
 	const defaultIconSize = unit.Dp(24)
@@ -25,8 +25,9 @@ func Layout(gtx layout.Context, b []byte, color color.NRGBA, size unit.Dp) layou
 	if sz == 0 {
 		sz = gtx.Dp(defaultIconSize)
 	}
-	// sizeDp := gtx.Dp(size)
-	sizeDp := gtx.Constraints.Constrain(image.Pt(sz, sz))
+	// sizeDp := image.Pt(int(size), int(size))
+	// sizeDp := gtx.Constraints.Constrain(image.Pt(sz, sz))
+	sizeDp := gtx.Constraints.Constrain(image.Pt(gtx.Dp(size), gtx.Dp(size)))
 	if b == nil {
 		return layout.Dimensions{
 			Size: sizeDp,
@@ -40,7 +41,7 @@ func Layout(gtx layout.Context, b []byte, color color.NRGBA, size unit.Dp) layou
 	if v, err := giosvg.NewVector(b); err == nil {
 		return giosvg.NewIcon(v).Layout(gtx)
 	}
-	img, _ := mylog.Check3(image.Decode(bytes.NewReader(b))) //_ "github.com/ddkwork/ux/resources/images/ico" 通过init注册ico解码器
+	img, _ := mylog.Check3(image.Decode(bytes.NewReader(b))) // _ "github.com/ddkwork/ux/resources/images/ico" 通过init注册ico解码器
 	w := &widget.Image{
 		Src:      paint.NewImageOp(img),
 		Fit:      widget.ScaleDown,
