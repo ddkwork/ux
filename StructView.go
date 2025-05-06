@@ -184,8 +184,12 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 	})
 	rows = append(rows, func(gtx layout.Context) layout.Dimensions {
 		return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			space := outlay.EmptyRigidHorizontal(300)
+			if stream.IsAndroid() {
+				space = outlay.EmptyRigidHorizontal(20)
+			}
 			return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-				outlay.EmptyRigidHorizontal(300), // 标签站位
+				space, // 标签站位
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					return Button(s.closeBtn, images.NavigationCloseIcon, "Close").Layout(gtx)
 				}),
