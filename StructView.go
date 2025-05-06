@@ -186,7 +186,7 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 		return layout.Center.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			space := outlay.EmptyRigidHorizontal(300)
 			if stream.IsAndroid() {
-				space = outlay.EmptyRigidHorizontal(20)
+				space = outlay.EmptyRigidHorizontal(100)
 			}
 			return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 				space, // 标签站位
