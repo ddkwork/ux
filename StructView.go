@@ -10,6 +10,7 @@ import (
 	"gioui.org/widget"
 	"gioui.org/x/outlay"
 	"github.com/ddkwork/golibrary/safemap"
+	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/resources/images"
 	"github.com/ddkwork/ux/widget/material"
@@ -196,7 +197,9 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 			)
 		})
 	})
-
+	if stream.IsAndroid() {
+		s.Inset = layout.Inset{}
+	}
 	return s.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			s.ModalState.Show(gtx.Now, func(gtx layout.Context) layout.Dimensions {

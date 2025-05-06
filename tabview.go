@@ -4,6 +4,7 @@ import (
 	"image"
 	"unicode"
 
+	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/resources/images"
 
@@ -329,6 +330,9 @@ func (v *TabView) Update(gtx layout.Context) {
 }
 
 func NewTabView(axis layout.Axis, item ...*TabItem) *TabView {
+	if stream.IsAndroid() {
+		axis = layout.Horizontal
+	}
 	return &TabView{
 		Axis:     axis,
 		tabItems: item,
