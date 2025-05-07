@@ -9,6 +9,7 @@ import (
 	"iter"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"gioui.org/app"
 	_ "gioui.org/app/permission/networkstate"
@@ -333,9 +334,13 @@ func (r Recording) Layout(gtx layout.Context) layout.Dimensions {
 	return r.Dimensions
 }
 
+var lock = &sync.RWMutex{}
+
 func Record(gtx layout.Context, w layout.Widget) Recording { // 应用场景:计算单元格宽度求平均宽度
 	m := op.Record(gtx.Ops)
+	lock.Lock()
 	dims := w(gtx)
+	lock.Unlock()
 	c := m.Stop()
 	return Recording{c, dims}
 }
