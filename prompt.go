@@ -4,15 +4,13 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/ddkwork/ux/resources/colors"
-
-	"github.com/ddkwork/ux/widget/material"
-
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
+	"github.com/ddkwork/ux/resources/colors"
+	"github.com/ddkwork/ux/widget/material"
 )
 
 // Prompt is a modal dialog that prompts the user for a response.
