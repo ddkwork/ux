@@ -27,11 +27,9 @@ import (
 	"github.com/ddkwork/golibrary/stream/align"
 	"github.com/ddkwork/golibrary/stream/deepcopy"
 	"github.com/ddkwork/golibrary/stream/uuid"
-	"github.com/ddkwork/ux/languages"
 	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/resources/images"
 	"github.com/ddkwork/ux/widget/material"
-	"github.com/ddkwork/ux/x/richtext"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -146,6 +144,7 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 // 过滤,无需调整列宽
 // 排序,无需调整列宽
 func (t *TreeTable[T]) SyncToModel() {
+	t.updateMaxColumnCellWidth(gtx, t.Root)
 	t.filteredRows = nil
 	t.rootRowsWidget = make([]layout.Widget, 0, len(t.RootRows()))
 	for i, row := range t.RootRows() {
@@ -552,37 +551,37 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, data CellData, width unit.D
 	if data.FgColor == (color.NRGBA{}) {
 		data.FgColor = colors.White
 	}
-	richText := NewRichText()
-
-	if data.IsNasm {
-		tokens, style := languages.GetTokens(stream.NewBuffer(data.Value), languages.NasmKind)
-		for _, token := range tokens {
-			colour := style.Get(token.Type).Colour
-			color := color.NRGBA{
-				R: colour.Red(),
-				G: colour.Green(),
-				B: colour.Blue(),
-				A: 255,
-			}
-			richText.AddSpan(richtext.SpanStyle{
-				// Font:        font.Font{},
-				Size:        unit.Sp(12),
-				Color:       color,
-				Content:     data.Value,
-				Interactive: false,
-			})
-		}
-		return inset.Layout(gtx, richText.Layout)
-	}
-	richText.AddSpan(richtext.SpanStyle{
-		// Font:        font.Font{},
-		Size:        unit.Sp(12),
-		Color:       data.FgColor,
-		Content:     data.Value,
-		Interactive: false,
-	})
-
-	return inset.Layout(gtx, richText.Layout)
+	// richText := NewRichText()
+	//
+	// if data.IsNasm {
+	// 	tokens, style := languages.GetTokens(stream.NewBuffer(data.Value), languages.NasmKind)
+	// 	for _, token := range tokens {
+	// 		colour := style.Get(token.Type).Colour
+	// 		color := color.NRGBA{
+	// 			R: colour.Red(),
+	// 			G: colour.Green(),
+	// 			B: colour.Blue(),
+	// 			A: 255,
+	// 		}
+	// 		richText.AddSpan(richtext.SpanStyle{
+	// 			// Font:        font.Font{},
+	// 			Size:        unit.Sp(12),
+	// 			Color:       color,
+	// 			Content:     data.Value,
+	// 			Interactive: false,
+	// 		})
+	// 	}
+	// 	return inset.Layout(gtx, richText.Layout)
+	// }
+	// richText.AddSpan(richtext.SpanStyle{
+	// 	// Font:        font.Font{},
+	// 	Size:        unit.Sp(12),
+	// 	Color:       data.FgColor,
+	// 	Content:     data.Value,
+	// 	Interactive: false,
+	// })
+	//
+	// return inset.Layout(gtx, richText.Layout)
 
 	return layout.Flex{
 		Axis:      layout.Horizontal,
@@ -1201,6 +1200,19 @@ func newNode[T any](typeKey string, isContainer bool, data T) *Node[T] {
 		rowCells: nil,
 	}
 	return n
+}
+
+func (t *TreeTable[T]) AddChildByData(parent *Node[T], data T) {
+	parent.AddChildByData(data)
+	t.SyncToModel()
+}
+func (t *TreeTable[T]) AddChildrenByData(parent *Node[T], data ...T) {
+	parent.AddChildrenByData(data...)
+	t.SyncToModel()
+}
+func (t *TreeTable[T]) AddContainerByData(parent *Node[T], typeKey string, data T) {
+	parent.AddContainerByData(typeKey, data)
+	t.SyncToModel()
 }
 
 func (n *Node[T]) AddChildByData(data T) { n.AddChild(NewNode(data)) }
