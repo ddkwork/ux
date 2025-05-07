@@ -144,7 +144,7 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 // 过滤,无需调整列宽
 // 排序,无需调整列宽
 func (t *TreeTable[T]) SyncToModel() {
-	t.updateMaxColumnCellWidth(gtx, t.Root)
+	// t.updateMaxColumnCellWidth(gtx, t.Root)
 	t.filteredRows = nil
 	t.rootRowsWidget = make([]layout.Widget, 0, len(t.RootRows()))
 	for i, row := range t.RootRows() {
