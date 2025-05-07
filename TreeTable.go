@@ -991,6 +991,7 @@ func (t *TreeTable[T]) Sort() {
 		}
 		return cellI > cellJ
 	})
+	t.SyncToModel()
 	/*
 
 	   // SortOn adjusts the sort such that the specified header is the primary sort column. If the header was already the
