@@ -681,7 +681,7 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { // 增删改查中
 	gtx.Constraints = originalConstraints
 }
 
-func (t *TreeTable[T]) SaveDate() { // todo 支持apk数据目录 app.dataDir()
+func (t *TreeTable[T]) SaveDate() { // todo ux/explorer
 	go func() {
 		t.JsonName = strings.TrimSuffix(t.JsonName, ".json")
 		if stream.IsAndroid() {

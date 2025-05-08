@@ -67,7 +67,7 @@ type Widgets interface { // map[string]Widget
 	Markdown() Widget
 }
 
-func LogView() Widget {
+func LogView() Widget { // todo ux/explorer
 	logView := NewCodeEditor("", languages.GoKind)
 	mylog.SetCallBack(func(row string) {
 		logView.AppendText(row)
