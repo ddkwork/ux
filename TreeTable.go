@@ -136,13 +136,13 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 	}
 }
 
-func (t *TreeTable[T]) syncToModel() {
+func (t *TreeTable[T]) makeRootRowsWidget() {
 	t.filteredRows = nil
 	if t.rootRowsWidget == nil {
 		t.rootRowsWidget = make([]layout.Widget, t.RootRowCount())
 	}
 	if len(t.rootRowsWidget) < t.RootRowCount() {
-		diff := t.RootRowCount() - len(t.rootRowsWidget) // why
+		diff := t.RootRowCount() - len(t.rootRowsWidget)
 		sub := make([]layout.Widget, diff)
 		t.rootRowsWidget = slices.Concat(t.rootRowsWidget, sub)
 	}
@@ -198,7 +198,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		// }
 	})
 	t.SizeColumnsToFit(gtx)
-	t.syncToModel()
+	t.makeRootRowsWidget()
 
 	for _, n := range t.rootRows {
 		t.contextMenu.Once.Do(func() {
@@ -1017,7 +1017,7 @@ func (t *TreeTable[T]) Sort() {
 		return // 如果没有子节点或者列索引无效，直接返回
 	}
 	sort.Slice(t.rootRows, func(i, j int) bool {
-		if t.rootRows[i].rowCells == nil { // why? module do not need this
+		if t.rootRows[i].rowCells == nil {
 			t.rootRows[i].rowCells = t.MarshalRowCells(t.rootRows[i])
 		}
 		if t.rootRows[j].rowCells == nil {
