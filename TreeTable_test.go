@@ -75,22 +75,7 @@ func generateMatrix(rows, cols int) [][]int {
 	return matrix
 }
 
-func TransposeMatrix2[T any](fields [][]T) (columns [][]T) {
-	if len(fields) == 0 {
-		return [][]T{}
-	}
-	numColumns := len(fields[0])
-	columns = make([][]T, numColumns)
-	for i := range columns {
-		columns[i] = make([]T, 0, len(fields))
-		for _, row := range fields {
-			columns[i] = append(columns[i], row[i])
-		}
-	}
-	return columns
-}
-
-func Benchmark_SizeColumnsToFit(b *testing.B) {
+func Benchmark_SizeColumnsToFit(b *testing.B) { // todo
 	const scale = 1.5
 	size := image.Point{X: 1200 * scale, Y: 600 * scale}
 	w := mylog.Check2(headless.NewWindow(size.X, size.Y))
@@ -105,26 +90,11 @@ func Benchmark_SizeColumnsToFit(b *testing.B) {
 	mylog.Check(w.Frame(gtx.Ops))
 	t := tableDemo()
 	for b.Loop() {
-		// 矩阵置换只执行一次
-		// Benchmark_SizeColumnsToFit-8   	  846088	      1685 ns/op  看起来也不差啊
-		// Benchmark_SizeColumnsToFit-8   	  299866	      4998 ns/op
-		// Benchmark_SizeColumnsToFit-8   	  226672	      4573 ns/op
-		// Benchmark_SizeColumnsToFit-8   	  217288	      5086 ns/op
-		// Benchmark_SizeColumnsToFit-8   	  278792	      4514 ns/op
-
-		// 恢复每次矩阵置换之后,渲染不那么丝滑了，可在节点获得焦点，鼠标悬停高亮行的时候明显感觉到卡顿
-		// Benchmark_SizeColumnsToFit-8   	   16428	    116786 ns/op
-		// Benchmark_SizeColumnsToFit-8   	   31593	     32610 ns/op
-		// Benchmark_SizeColumnsToFit-8   	   30961	     32604 ns/op
-		// Benchmark_SizeColumnsToFit-8   	   31825	     49652 ns/op
-		// Benchmark_SizeColumnsToFit-8   	   18141	     55213 ns/op
-		// Benchmark_SizeColumnsToFit-8   	   24626	     42476 ns/op
-		// Benchmark_SizeColumnsToFit-8   	   24418	     44423 ns/op
 		t.SizeColumnsToFit(gtx)
 	}
 }
 
-func BenchmarkLabelWidth(b *testing.B) {
+func BenchmarkLabelWidth(b *testing.B) { // todo
 	const scale = 1.5
 	size := image.Point{X: 1200 * scale, Y: 600 * scale}
 	w := mylog.Check2(headless.NewWindow(size.X, size.Y))
@@ -150,7 +120,7 @@ func BenchmarkWalk(b *testing.B) {
 	}
 }
 
-func BenchmarkMaxDepth(b *testing.B) {
+func BenchmarkMaxDepth(b *testing.B) { // todo
 	t := tableDemo()
 	for b.Loop() {
 		t.MaxDepth() // BenchmarkMaxDepth-8   	 8747222	       151.8 ns/op
@@ -357,7 +327,7 @@ func BenchmarkInsertWithResize(b *testing.B) {
 	}
 }
 
-func TestTreeTable_Filter(t1 *testing.T) {
+func TestTreeTable_Filter(t1 *testing.T) { // todo
 	t := tableDemo()
 	t.SetRootRowsCallBack()
 	t.Filter("ok")
