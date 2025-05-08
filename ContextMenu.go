@@ -27,7 +27,7 @@ type ContextMenu struct {
 	Items []*ContextMenuItem
 	area  *component.ContextArea
 	state component.MenuState
-	list  widget.List
+	list  *widget.List
 	sync.Once
 }
 
@@ -40,13 +40,20 @@ func NewContextMenu() *ContextMenu {
 			PositionHint:     0,
 		},
 		state: component.MenuState{},
-		list: widget.List{
+		list: &widget.List{
 			Scrollbar: widget.Scrollbar{},
 			List: layout.List{
 				Axis:        layout.Vertical,
 				ScrollToEnd: false,
-				Alignment:   0,
-				Position:    layout.Position{},
+				Alignment:   layout.Middle,
+				Position: layout.Position{
+					BeforeEnd:  false,
+					First:      0,
+					Offset:     0,
+					OffsetLast: 0,
+					Count:      0,
+					Length:     0,
+				},
 			},
 		},
 		Once: sync.Once{},
@@ -80,7 +87,7 @@ func (m *ContextMenu) Layout(gtx layout.Context, rootRows []layout.Widget) layou
 		return layout.Dimensions{}
 	}
 	return layout.Stack{}.Layout(gtx, layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-		return material.List(th, &m.list).Layout(gtx, len(rootRows), func(gtx layout.Context, index int) layout.Dimensions {
+		return material.List(th, m.list).Layout(gtx, len(rootRows), func(gtx layout.Context, index int) layout.Dimensions {
 			gtx.Constraints.Min.X = gtx.Constraints.Max.X
 			return rootRows[index](gtx)
 		})
