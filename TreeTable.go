@@ -63,7 +63,7 @@ type (
 	TableContext[T any] struct {
 		CustomContextMenuItems func(gtx layout.Context, n *Node[T]) iter.Seq[ContextMenuItem] // 通过SelectedNode传递给菜单的do取出元数据，比如删除文件,但是菜单是否绘制取决于当前渲染的行，所以要传递n给can
 		MarshalRowCells        func(n *Node[T]) (cells []CellData)                            // 序列化节点元数据
-		UnmarshalRowCells      func(n *Node[T], rows []CellData)                              // 节点编辑后反序列化回节点
+		UnmarshalRowCells      func(n *Node[T], rows []CellData) T                            // 节点编辑后反序列化回节点
 		RowSelectedCallback    func()                                                         // 行选中回调,通过SelectedNode传递给菜单
 		RowDoubleClickCallback func()                                                         // double click callback,通过SelectedNode传递给菜单
 		SetRootRowsCallBack    func()                                                         // 实例化所有节点回调,必要时调用root节点辅助操作
@@ -180,8 +180,8 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 			}
 		}
 		if t.UnmarshalRowCells == nil {
-			t.UnmarshalRowCells = func(n *Node[T], rows []CellData) {
-				n.Data = UnmarshalRow[T](rows, nil)
+			t.UnmarshalRowCells = func(n *Node[T], rows []CellData) T {
+				return UnmarshalRow[T](rows, nil)
 			}
 		}
 		mylog.CheckNil(t.RowSelectedCallback)
@@ -1357,7 +1357,7 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 	editor.Modal = true
 	editor.SetOnApply(func() { // todo bug ,debug it
 		// t.UnmarshalRowCells[T](t.SelectedNode, t.SelectedNode.rowCells)
-		t.UnmarshalRowCells(t.SelectedNode, editor.Rows) // todo test
+		t.SelectedNode.Data = t.UnmarshalRowCells(t.SelectedNode, editor.Rows) // todo test
 		t.updateMaxHierarchyColumnCellWidth()
 		t.SyncToModel()
 		mylog.Todo("save json data ?")
