@@ -424,7 +424,6 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T]) layout.Dimension
 						// 然后双击编辑行的时候从富文本取出完整行并换行显示，structView需要好好设计一下这个
 						// 这个在抓包场景很那个，url列一般都长
 					}
-
 					_, cell.width = t.cellWidth(gtx, n, &cell)
 					return t.CellFrame(gtx, &cell)
 				})
@@ -666,18 +665,17 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { // 增删改查中
 	// t.columns = TransposeMatrix(t.rows) // 如果不这么做的话，节点增删改查就不会实时刷新,为了提高性能需要手动刷新节点和宽度
 	for i, data := range TransposeMatrix(t.rows) {
 		if data.isHeader {
-			t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Key))
+			t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Key), align.StringWidth[unit.Dp](t.header.columnCells[i].Key))
 			if gtx != (layout.Context{}) {
 				t.maxColumnCellWidths[i] = max(t.maxColumnCellWidths[i], LabelWidth(gtx, data.Key), LabelWidth(gtx, t.header.columnCells[i].Key))
 			}
 		} else {
-			t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Value))
+			t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Value), align.StringWidth[unit.Dp](t.header.columnCells[i].Value))
 			if gtx != (layout.Context{}) {
 				t.maxColumnCellWidths[i] = max(t.maxColumnCellWidths[i], LabelWidth(gtx, data.Value), LabelWidth(gtx, t.header.columnCells[i].Value))
 			}
 		}
 	}
-	// t.updateMaxHierarchyColumnCellWidth()
 	gtx.Constraints = originalConstraints
 }
 
@@ -854,8 +852,8 @@ func (t *TreeTable[T]) cellWidth(gtx layout.Context, n *Node[T], cell *CellData)
 		}
 		return leftIndent, t.maxColumnCellWidths[HierarchyColumnID]
 	default: // //预渲染其他列
-		w := leftPadding + labelWidth + DividerWidth // 每列右侧有空间，不用右填充了，层级列也有
-		t.maxColumnCellWidths[cell.columID] = max(t.maxColumnCellWidths[cell.columID], w)
+		w := leftPadding + labelWidth + DividerWidth                                      // 每列右侧有空间，不用右填充了，层级列也有
+		t.maxColumnCellWidths[cell.columID] = max(t.maxColumnCellWidths[cell.columID], w) // todo  runtime error: index out of range [6] with length 5 in jsonTreeTable.go:112
 		return 0, t.maxColumnCellWidths[cell.columID]
 	}
 }
