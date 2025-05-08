@@ -42,8 +42,8 @@ return func(yield func(ux.ContextMenuItem) bool) {
 				return ""
 			})
 		},
-		UnmarshalRowCells: func(n *ux.Node[Godoc], rows []ux.CellData) {
-			n.Data = ux.UnmarshalRow[Godoc](rows, func(key, value string) (field any) {
+		UnmarshalRowCells: func(n *ux.Node[Godoc], rows []ux.CellData)Godoc {
+			return  ux.UnmarshalRow[Godoc](rows, func(key, value string) (field any) {
 				return nil
 			})
 		},

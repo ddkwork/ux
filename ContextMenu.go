@@ -75,9 +75,8 @@ func (m *ContextMenu) onClicked(gtx layout.Context) {
 	}
 }
 
-// Layout 线性的list，表格以及非线性的树形表格(核心:直接rootRow当做线性表格即可，顶层调用menu布局。转不过弯来一直去处理容器节点是否渲染menu布局的问题)均通过测试
 func (m *ContextMenu) Layout(gtx layout.Context, rootRows []layout.Widget) layout.Dimensions {
-	if len(rootRows) == 0 {
+	if len(rootRows) == 0 { // mitmproxy start
 		return layout.Dimensions{}
 	}
 	return layout.Stack{}.Layout(gtx, layout.Stacked(func(gtx layout.Context) layout.Dimensions {

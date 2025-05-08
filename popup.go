@@ -40,8 +40,10 @@ func Popup(visible *bool) PopupStyle {
 	}
 }
 
-var popupSurfaceColor = color.NRGBA{R: 50, G: 50, B: 51, A: 255}
-var popupShadowColor = color.NRGBA{R: 0, G: 0, B: 0, A: 192}
+var (
+	popupSurfaceColor = color.NRGBA{R: 50, G: 50, B: 51, A: 255}
+	popupShadowColor  = color.NRGBA{R: 0, G: 0, B: 0, A: 192}
+)
 
 func (s PopupStyle) Layout(gtx layout.Context, contents layout.Widget) layout.Dimensions {
 	if !*s.Visible {

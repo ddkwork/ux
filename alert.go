@@ -4,8 +4,10 @@ import (
 	"time"
 )
 
-const alertSpeed = 10 // units: fadeLevels per second
-const defaultAlertDuration = time.Second * 3
+const (
+	alertSpeed           = 10 // units: fadeLevels per second
+	defaultAlertDuration = time.Second * 3
+)
 
 type (
 	Alert struct {
