@@ -637,6 +637,7 @@ func InitHeader(data any) (columnCells []CellData) {
 	return
 }
 
+// SizeColumnsToFit todo not explort for now
 func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { // 增删改查中，只有增改+实例化，共3次需要调用这个函数，增改需要更新缓存的每列最大列宽即可，所以这个函数理论上只需要执行一次，这样性能最好
 	if t.RootRowCount() == 0 {
 		return // mitmproxy start
@@ -655,15 +656,16 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { // 增删改查中
 		t.updateRowNumber(t.Root, 0)
 		count = t.Root.LastChild().RowNumber
 	}
-	for i := range count {
+	for i := range count { // todo  1437	   1256535 ns/op
 		for _, node := range t.Root.Walk() {
 			if t.rows[i] == nil { // this will not safe for edit node data later
 				t.rows[i] = t.MarshalRowCells(node)
 			}
 		}
 	}
+
 	// t.columns = TransposeMatrix(t.rows) // 如果不这么做的话，节点增删改查就不会实时刷新,为了提高性能需要手动刷新节点和宽度
-	for i, data := range TransposeMatrix(t.rows) {
+	for i, data := range TransposeMatrix(t.rows) { // todo 1561	    731960 ns/op
 		if data.isHeader {
 			t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Key), align.StringWidth[unit.Dp](t.header.columnCells[i].Key))
 			if gtx != (layout.Context{}) {

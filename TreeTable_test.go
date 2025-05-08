@@ -29,7 +29,7 @@ func TestName(t *testing.T) {
 	})
 }
 
-func BenchmarkTransposeMatrix(b *testing.B) {
+func BenchmarkTransposeMatrix(b *testing.B) { // todo
 	columnCells := ux.InitHeader(packet{})
 	rows := make([][]packet, 0, len(columnCells))
 	for range 1000000 {
@@ -51,7 +51,9 @@ func BenchmarkTransposeMatrix(b *testing.B) {
 		})
 	}
 	for b.Loop() {
-		ux.TransposeMatrix[packet](rows) // BenchmarkTransposeMatrix-8   	       7	 161059457 ns/op 单独测试就很夸张
+		for range ux.TransposeMatrix[packet](rows) {
+
+		}
 	}
 }
 
@@ -89,6 +91,8 @@ func Benchmark_SizeColumnsToFit(b *testing.B) { // todo
 	}
 	mylog.Check(w.Frame(gtx.Ops))
 	t := tableDemo()
+	// println(t.String())
+	// return
 	for b.Loop() {
 		t.SizeColumnsToFit(gtx)
 	}
