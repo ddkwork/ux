@@ -197,9 +197,7 @@ func Run(p *Panel) {
 					for _, v := range ModalCallbacks.Range() {
 						v()
 					}
-					mylog.Call(func() {
-						p.Layout(gtx)
-					})
+					mylog.Call(func() { p.Layout(gtx) })
 
 					// p.w.Perform(deco.Update(gtx))
 					// decorationsStyle := material.Decorations(th, &deco, ^system.Action(0), title)

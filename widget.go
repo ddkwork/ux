@@ -16,10 +16,6 @@ type Widget interface {
 	Layout(gtx layout.Context) layout.Dimensions
 }
 
-var ZeroWidget = func(gtx layout.Context) layout.Dimensions {
-	return layout.Dimensions{}
-}
-
 type Widgets interface { // map[string]Widget
 	Button() Widget
 	Card() Widget
@@ -45,14 +41,11 @@ type Widgets interface { // map[string]Widget
 	Space() Widget
 	Spin() Widget
 	Switch() Widget
-	Table() Widget
 	Tabs() Widget
 	Text() Widget
 	TextField() Widget
 	TimeInput() Widget
 	Tooltip() Widget
-	Tree() Widget
-
 	LogView() Widget
 	Modal() Widget
 	Select() Widget
