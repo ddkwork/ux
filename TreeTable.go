@@ -1201,12 +1201,6 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 	editor := NewStructView("edit row", t.SelectedNode.Data, func(key string, field any) (value string) {
 		return "" // todo 这里需要实现编辑节点的功能
 	})
-	editor.Inset = layout.Inset{
-		Top:    60,
-		Bottom: 0,
-		Left:   150,
-		Right:  150,
-	}
 	editor.Modal = true
 	editor.SetOnApply(func() { // todo bug ,debug it
 		// t.UnmarshalRowCells[T](t.SelectedNode, t.SelectedNode.rowCells)

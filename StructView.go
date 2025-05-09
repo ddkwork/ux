@@ -44,7 +44,7 @@ type StructView[T any] struct { // 其实就是一个标题row+list滚动多个r
 	*component.ModalState
 	Visible bool
 	Modal   bool
-	layout.Inset
+	inset   layout.Inset
 }
 
 func (s *StructView[T]) Unmarshal(callback UnmarshalRowCallback) T {
@@ -201,10 +201,12 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 			)
 		})
 	})
+	gtx.Constraints.Max.Y *= 2
+	s.inset = layout.UniformInset(99)
 	if stream.IsAndroid() {
-		s.Inset = layout.Inset{}
+		s.inset = layout.Inset{}
 	}
-	return s.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+	return s.inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			s.ModalState.Show(gtx.Now, func(gtx layout.Context) layout.Dimensions {
 				return layout.UniformInset(unit.Dp(15)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {

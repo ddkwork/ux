@@ -5,8 +5,10 @@ import (
 
 	"gioui.org/layout"
 	"gioui.org/text"
+	"gioui.org/widget"
 	"github.com/ddkwork/golibrary/mylog"
 	"github.com/ddkwork/ux/languages"
+	"github.com/ddkwork/ux/resources/images"
 	"github.com/ddkwork/ux/widget/material"
 )
 
@@ -67,12 +69,36 @@ type Widgets interface { // map[string]Widget
 	Markdown() Widget
 }
 
-func LogView() Widget { // todo ux/explorer
-	logView := NewCodeEditor("", languages.GoKind)
-	mylog.SetCallBack(func(row string) {
-		logView.AppendText(row)
+type logView struct {
+	*ContextMenu
+	*CodeEditor
+}
+
+func LogView() *logView {
+	l := &logView{
+		ContextMenu: NewContextMenu(),
+		CodeEditor:  NewCodeEditor("", languages.GoKind),
+	}
+	mylog.SetCallBack(func(row string) { l.CodeEditor.AppendText(row) })
+	l.ContextMenu.AddItem(ContextMenuItem{
+		Title: "save",
+		Icon:  images.ContentSaveIcon,
+		Can:   func() bool { return true },
+		Do: func() {
+
+		},
+		AppendDivider: false,
+		Clickable:     widget.Clickable{},
 	})
-	return logView
+	return l
+}
+
+func (l *logView) Layout(gtx layout.Context) layout.Dimensions {
+	return l.ContextMenu.Layout(gtx, []layout.Widget{
+		func(gtx layout.Context) layout.Dimensions {
+			return l.CodeEditor.Layout(gtx)
+		},
+	})
 }
 
 func LayoutErrorLabel(gtx layout.Context, e error) layout.Dimensions {
