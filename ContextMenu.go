@@ -140,53 +140,55 @@ func (m *ContextMenu) drawContextArea(gtx layout.Context) layout.Dimensions { //
 }
 
 func (m *ContextMenu) LayoutTest(gtx layout.Context, rootRows []layout.Widget) layout.Dimensions {
-	m.AddItem(ContextMenuItem{
-		Title:         "Red",
-		Icon:          nil,
-		Can:           func() bool { return true },
-		Do:            func() { mylog.Info("red item clicked") },
-		AppendDivider: false,
-		Clickable:     widget.Clickable{},
-	})
-	m.AddItem(ContextMenuItem{
-		Title:         "Green",
-		Icon:          nil,
-		Can:           func() bool { return true },
-		Do:            func() { mylog.Info("Green item clicked") },
-		AppendDivider: false,
-		Clickable:     widget.Clickable{},
-	})
-	m.AddItem(ContextMenuItem{
-		Title:         "Blue",
-		Icon:          nil,
-		Can:           func() bool { return true },
-		Do:            func() { mylog.Info("Blue item clicked") },
-		AppendDivider: false,
-		Clickable:     widget.Clickable{},
-	})
-	m.AddItem(ContextMenuItem{
-		Title:         "Balance",
-		Icon:          images.ActionAccountBalanceIcon,
-		Can:           func() bool { return true },
-		Do:            func() { mylog.Info("Balance item clicked") },
-		AppendDivider: false,
-		Clickable:     widget.Clickable{},
-	})
-	m.AddItem(ContextMenuItem{
-		Title:         "Account",
-		Icon:          images.ActionAccountBoxIcon,
-		Can:           func() bool { return true },
-		Do:            func() { mylog.Info("Account item clicked") },
-		AppendDivider: false,
-		Clickable:     widget.Clickable{},
-	})
-	m.AddItem(ContextMenuItem{
-		Title:         "Cart",
-		Icon:          images.ActionAddShoppingCartIcon,
-		Can:           func() bool { return true },
-		Do:            func() { mylog.Info("Cart item clicked") },
-		AppendDivider: false,
-		Clickable:     widget.Clickable{},
+	m.Once.Do(func() {
+		m.AddItem(ContextMenuItem{
+			Title:         "Red",
+			Icon:          nil,
+			Can:           func() bool { return true },
+			Do:            func() { mylog.Info("red item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		})
+		m.AddItem(ContextMenuItem{
+			Title:         "Green",
+			Icon:          nil,
+			Can:           func() bool { return true },
+			Do:            func() { mylog.Info("Green item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		})
+		m.AddItem(ContextMenuItem{
+			Title:         "Blue",
+			Icon:          nil,
+			Can:           func() bool { return true },
+			Do:            func() { mylog.Info("Blue item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		})
+		m.AddItem(ContextMenuItem{
+			Title:         "Balance",
+			Icon:          images.ActionAccountBalanceIcon,
+			Can:           func() bool { return true },
+			Do:            func() { mylog.Info("Balance item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		})
+		m.AddItem(ContextMenuItem{
+			Title:         "Account",
+			Icon:          images.ActionAccountBoxIcon,
+			Can:           func() bool { return true },
+			Do:            func() { mylog.Info("Account item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		})
+		m.AddItem(ContextMenuItem{
+			Title:         "Cart",
+			Icon:          images.ActionAddShoppingCartIcon,
+			Can:           func() bool { return true },
+			Do:            func() { mylog.Info("Cart item clicked") },
+			AppendDivider: false,
+			Clickable:     widget.Clickable{},
+		})
 	})
 	return m.Layout(gtx, rootRows)
 }

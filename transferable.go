@@ -17,7 +17,6 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
-	"golang.org/x/exp/shiny/widget/theme"
 )
 
 const (
@@ -130,7 +129,7 @@ func (t *Transferable) Update(gtx layout.Context) error {
 	return nil
 }
 
-func (t *Transferable) Layout(gtx layout.Context, th *theme.Theme, w layout.Widget) layout.Dimensions {
+func (t *Transferable) Layout(gtx layout.Context, w layout.Widget) layout.Dimensions {
 	t.Update(gtx)
 
 	macro := op.Record(gtx.Ops)
