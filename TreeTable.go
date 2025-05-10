@@ -17,6 +17,7 @@ import (
 	"gioui.org/io/clipboard"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
+	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
@@ -829,6 +830,7 @@ func (t *TreeTable[T]) cellWidth(gtx layout.Context, n *Node[T], cell *CellData)
 	defer func() {
 		t.header.columnCells[cell.columID].width = max(t.header.columnCells[cell.columID].width, width)
 		cell.width = t.header.columnCells[cell.columID].width
+		gtx.Execute(op.InvalidateCmd{})
 	}()
 	v := cell.Value
 	if cell.isHeader {
