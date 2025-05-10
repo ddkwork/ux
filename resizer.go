@@ -3,9 +3,6 @@ package ux
 import (
 	"image"
 
-	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/ux/resources/colors"
-
 	"gioui.org/gesture"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -13,6 +10,7 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
+	"github.com/ddkwork/ux/resources/colors"
 )
 
 // Resize provides a draggable handle in between two widgets for resizing their area.
@@ -139,8 +137,8 @@ func (r *Resize) init(gtx layout.Context) {
 		currTotalRatio += rz.ratio
 		rz.float.pos = int(float32(r.length) * currTotalRatio)
 	}
-	mylog.Struct(totalRatio)
-	mylog.Struct(currTotalRatio)
+	// mylog.Struct(totalRatio)
+	// mylog.Struct(currTotalRatio)
 }
 
 func (r *Resize) onWindowResize(gtx layout.Context) {

@@ -14,7 +14,6 @@ import (
 	"strings"
 	"sync"
 
-	"gioui.org/gesture"
 	"gioui.org/io/clipboard"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -74,12 +73,13 @@ type (
 	tableHeader[T any] struct {
 		sortOrder          sortOrder    // 排序方式
 		sortedBy           int          // 排序列索引
-		drags              []tableDrag  // 拖动表头列参数
 		columnCells        []CellData   // 每列的最大深度，宽度,也可以把它看做一行
 		clickedColumnIndex int          // 被点击的列索引
-		manualWidthSet     []bool       // 新增状态标志数组，记录列是否被手动调整
 		sortAscending      bool         // 升序还是降序
 		contextMenu        *ContextMenu // 右键菜单，实现复制列数据到剪贴板
+		node               *Node[T]     // 列宽同步传参需要
+		// drags              []tableDrag  // 拖动表头列参数
+		// manualWidthSet     []bool       // 新增状态标志数组，记录列是否被手动调整
 	}
 	CellData struct {
 		Key              string      // 表头单元格文本或者节点编辑器每一行的key
@@ -97,31 +97,32 @@ type (
 		width            unit.Dp
 	}
 
-	tableDrag struct {
-		drag           gesture.Drag
-		hover          gesture.Hover
-		startPos       float32
-		shrinkNeighbor bool
-	}
+	// tableDrag struct {
+	// 	drag           gesture.Drag
+	// 	hover          gesture.Hover
+	// 	startPos       float32
+	// 	shrinkNeighbor bool
+	// }
 )
 
-// NewTreeTable 原理:通过flex+适当的上下文控制既可以完美绘制一个树形表格
-// 包括表头，父结点，子节点，右键菜单，通通flex
 func NewTreeTable[T any](data T) *TreeTable[T] {
 	columnCells := InitHeader(data)
 	columnCount := len(columnCells)
+	n := NewNode(data)
+	n.rowCells = columnCells
+	root := newRoot(data)
+	n.SetParent(root)
 	return &TreeTable[T]{
 		TableContext: TableContext[T]{},
-		Root:         newRoot(data),
+		Root:         root,
 		header: tableHeader[T]{
 			sortOrder:          0,
 			sortedBy:           0,
-			drags:              make([]tableDrag, 0),
 			columnCells:        columnCells,
 			clickedColumnIndex: -1,
-			manualWidthSet:     make([]bool, columnCount),
 			sortAscending:      false,
 			contextMenu:        NewContextMenu(),
+			node:               n,
 		},
 		rootRows:       nil,
 		filteredRows:   nil,
@@ -597,9 +598,6 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, cell *CellData) layout.Dime
 			if stream.IsAndroid() {
 				top /= 2
 			}
-			// if cell.rowID == 1 {
-			// 	top = 0 // why  安卓上，表头和第一行的列分割线出现虚线
-			// }
 			if cell.isHeader {
 				return layout.Inset{
 					Top:    top,
@@ -747,7 +745,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 			var cols []layout.FlexChild
 			elems := make([]*Resizable, 0)
 			for i, cell := range t.header.columnCells {
-				cell.width = t.maxColumnCellWidths[i]
+				_, cell.width = t.cellWidth(gtx, t.header.node, &cell)
 				if cell.Disabled {
 					continue
 				}
@@ -836,9 +834,10 @@ func (t *TreeTable[T]) cellWidth(gtx layout.Context, n *Node[T], cell *CellData)
 		gtx.Execute(op.InvalidateCmd{})
 	}()
 	v := cell.Value
-	// if t.header.clickedColumnIndex > -1 {
+	if cell.isHeader {
+		v = cell.Key
+	}
 	v += "  ⇧"
-	// }
 	switch cell.columID {
 	case HierarchyColumnID:
 		leftIndent := HierarchyIndent*(n.Depth()-1) + leftPadding
@@ -856,7 +855,7 @@ func (t *TreeTable[T]) cellWidth(gtx layout.Context, n *Node[T], cell *CellData)
 			if !strings.HasSuffix(cell.Value, ")") {
 				panic("you should call n.sumChildren method")
 			}
-			v = n.SumChildren() + "  ⇧"
+			v = n.SumChildren() // + "  ⇧"
 		}
 		labelWidth := LabelWidth(gtx, v)
 		current := leftIndent + labelWidth + DividerWidth
