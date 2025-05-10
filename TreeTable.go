@@ -149,7 +149,7 @@ func (t *TreeTable[T]) makeRootRowsWidget() {
 	}
 	for i, row := range t.RootRows() {
 		t.rootRowsWidget[i] = func(gtx layout.Context) layout.Dimensions {
-			return t.RowFrame(gtx, row)
+			return t.RowFrame(gtx, row, i)
 		}
 	}
 }
@@ -351,12 +351,12 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 	)
 }
 
-func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T]) layout.Dimensions {
+func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) layout.Dimensions {
 	if n.rowCells == nil {
 		n.rowCells = t.MarshalRowCells(n)
 	}
 	for i := range n.rowCells {
-		// n.rowCells[i].rowID = rowIndex                          // 行单元格id，暂时想到的应用场景是区域选中
+		n.rowCells[i].rowID = rowIndex                          // 行单元格id，暂时想到的应用场景是区域选中
 		n.rowCells[i].columID = t.header.columnCells[i].columID // 列分隔符,更新层级列宽度
 		n.rowCells[i].Key = t.header.columnCells[i].Key         // 为节点编辑的row布局kv对做准备
 
@@ -445,7 +445,8 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T]) layout.Dimension
 	if n.CanHaveChildren() && n.isOpen { // 如果是容器节点则递归填充孩子节点形成多行
 		for _, child := range n.Children {
 			rows = append(rows, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return t.RowFrame(gtx, child)
+				rowIndex++
+				return t.RowFrame(gtx, child, rowIndex)
 			}))
 		}
 	}
@@ -592,13 +593,17 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, cell *CellData) layout.Dime
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			top := topPadding
+			bottom := bottomPadding
 			if stream.IsAndroid() {
 				top /= 2
 			}
+			// if cell.rowID == 1 {
+			// 	top = 0 // why  安卓上，表头和第一行的列分割线出现虚线
+			// }
 			if cell.isHeader {
 				return layout.Inset{
 					Top:    top,
-					Bottom: bottomPadding,
+					Bottom: bottom,
 					Left:   leftPadding,
 					Right:  0,
 				}.Layout(gtx, material.Body2(th, cell.Key).Layout)
