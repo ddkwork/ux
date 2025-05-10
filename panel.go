@@ -1,43 +1,21 @@
 package ux
 
 import (
-	"bytes"
 	"image"
 	"image/color"
-	"image/draw"
-	"image/png"
-	"iter"
-	"os"
-	"path/filepath"
 	"sync"
 
-	"gioui.org/app"
-	_ "gioui.org/app/permission/networkstate"
-	_ "gioui.org/app/permission/storage"
-	"gioui.org/gpu/headless"
-	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/golibrary/safemap"
-	"github.com/ddkwork/ux/resources/colors"
-	"github.com/ddkwork/ux/resources/images"
 	"github.com/ddkwork/ux/widget/material"
 )
-
-var th = material.NewTheme()
-
-func NewTheme() *material.Theme {
-	return th
-}
 
 type Panel struct { // 使用泛型而不是接口，这样返回的每个控件结构体字段无需断言，并且有类型约束，是安全的
 	layout.Flex
 	children          []layout.FlexChild
-	w                 *app.Window
 	dumpCanvas        bool
 	imageAsBackground bool
 }
@@ -46,13 +24,13 @@ func (p *Panel) Empty() bool {
 	return len(p.children) == 0
 }
 
-func NewHPanel(w *app.Window) *Panel {
-	panel := NewPanel(w)
+func NewHPanel() *Panel {
+	panel := NewPanel()
 	panel.Axis = layout.Horizontal
 	return panel
 }
 
-func NewPanel(w *app.Window) *Panel { // 90% is Vertical
+func NewPanel() *Panel { // 90% is Vertical
 	return &Panel{
 		Flex: layout.Flex{
 			Axis:      layout.Vertical,
@@ -61,7 +39,6 @@ func NewPanel(w *app.Window) *Panel { // 90% is Vertical
 			WeightSum: 0,
 		},
 		children: make([]layout.FlexChild, 0),
-		w:        w,
 	}
 }
 
@@ -80,7 +57,6 @@ func (p *Panel) AddChildFlexed(weight float32, child Widget) {
 }
 
 func (p *Panel) Layout(gtx layout.Context) layout.Dimensions {
-	BackgroundDark(gtx)
 	if p.dumpCanvas {
 		SaveScreenshot(p)
 	}
@@ -99,158 +75,6 @@ func (p *Panel) SetDumpCanvas(dumpCanvas bool) {
 
 func (p *Panel) SetImageAsBackground(imageAsBackground bool) {
 	p.imageAsBackground = imageAsBackground
-}
-
-type AppBar struct {
-	Search *Input
-	About  *TipIconButton
-}
-
-func InitAppBar(hPanel *Panel, toolBars iter.Seq[*TipIconButton], speechTxt string) *AppBar {
-	search := NewInput("请输入搜索关键字...").SetIcon(images.ActionSearchIcon).SetRadius(16)
-	hPanel.AddChildFlexed(1, search) // todo 太多之后apk需要管理溢出
-
-	for toolbar := range toolBars {
-		hPanel.AddChild(toolbar)
-	}
-
-	about := NewTooltipButton(images.AlertErrorIcon, "about", func() {
-		if mylog.IsAndroid() {
-			mylog.Info("android not support about window")
-			return
-		}
-		About(NewWindow("about"), speechTxt)
-	})
-	hPanel.AddChild(about)
-	return &AppBar{
-		Search: search,
-		About:  about,
-	}
-}
-
-func BackgroundDark(gtx layout.Context) {
-	rect := clip.Rect{Max: gtx.Constraints.Max}
-	paint.FillShape(gtx.Ops, colors.BackgroundColor, rect.Op())
-}
-
-func drawImageBackground(gtx layout.Context) {
-	data := mylog.Check2(os.ReadFile("asset/background.png"))
-	img := mylog.Check2(png.Decode(bytes.NewReader(data)))
-	dst := image.NewRGBA(image.Rect(0, 0, gtx.Constraints.Max.X, gtx.Constraints.Max.Y))
-	draw.Draw(dst, dst.Bounds(), img, image.Point{}, draw.Over)
-	paint.NewImageOp(dst).Add(gtx.Ops)
-	paint.PaintOp{}.Add(gtx.Ops)
-}
-
-// //////////////////////////////////
-
-func NewWindow(title string) *app.Window {
-	w := new(app.Window)
-	w.Option(
-		app.Title(title),
-		app.Size(1200, 600),
-		// app.Decorated(false),
-	)
-	w.Perform(system.ActionCenter)
-	// mylog.Check(android_background_service.Start()) // todo fix xml
-	return w
-}
-
-func RunTest(title string, l Widget) {
-	w := new(app.Window)
-	w.Option(app.Title(title))
-	panel := NewPanel(w)
-	panel.AddChild(l)
-	Run(panel)
-}
-
-func Run(p *Panel) {
-	mylog.Call(func() {
-		/*
-				var et event.Event
-			if m.plugin != nil {
-				et = m.plugin(m.win)
-			} else {
-				et = m.win.Event()
-			}
-			m.Explorer.ListenEvents(et)
-		*/
-
-		// var (
-		//	deco  widget.Decorations
-		//	title string
-		// )
-
-		var ops op.Ops
-		go func() {
-			for {
-				e := p.w.Event()
-				switch e := e.(type) {
-				case app.DestroyEvent:
-					mylog.Check(e.Err)
-					os.Exit(0)
-				// case app.ConfigEvent:
-				//	deco.Maximized = e.Config.Mode == app.Maximized
-				//	title = e.Config.Title
-				case app.FrameEvent:
-					gtx := app.NewContext(&ops, e)
-					for _, v := range ModalCallbacks.Range() {
-						v()
-					}
-					mylog.Call(func() { p.Layout(gtx) })
-
-					// p.w.Perform(deco.Update(gtx))
-					// decorationsStyle := material.Decorations(th, &deco, ^system.Action(0), title)
-					// decorationsStyle.Background = color.NRGBA{
-					//	R: 44,
-					//	G: 44,
-					//	B: 44,
-					//	A: 255,
-					// }
-					// decorationsStyle.Foreground = th.Fg
-					// decorationsStyle.Layout(gtx)
-
-					e.Frame(gtx.Ops)
-				}
-			}
-		}()
-		app.Main()
-	})
-}
-
-var ModalCallbacks = new(safemap.M[string, func()])
-
-func SaveScreenshot(callback Widget) {
-	const scale = 1.5
-	size := image.Point{X: 1200 * scale, Y: 600 * scale}
-	w := mylog.Check2(headless.NewWindow(size.X, size.Y))
-	gtx := layout.Context{
-		Ops: new(op.Ops),
-		Metric: unit.Metric{
-			PxPerDp: scale,
-			PxPerSp: scale,
-		},
-		Constraints: layout.Exact(size),
-	}
-	BackgroundDark(gtx)
-	callback.Layout(gtx)
-	mylog.Check(w.Frame(gtx.Ops))
-	img := image.NewRGBA(image.Rectangle{Max: size})
-	mylog.Check(w.Screenshot(img))
-	var buf bytes.Buffer
-	mylog.Check(png.Encode(&buf, img))
-	mylog.Check(os.WriteFile(filepath.Join(DataDir(), "canvas.png"), buf.Bytes(), 0o666))
-}
-
-func DataDir() string {
-	switch {
-	case mylog.IsAndroid():
-		return mylog.Check2(app.DataDir())
-	case mylog.IsTermux():
-		return "/data/data/com.termux/files/usr" // todo choose another dir
-	default: // windows,linux
-		return "."
-	}
 }
 
 type Rect struct {

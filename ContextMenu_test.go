@@ -56,7 +56,7 @@ func TestNewPopupMenu(t *testing.T) {
 			os.Exit(0)
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
-			BackgroundDark(gtx)
+			DarkBackground(gtx)
 			m.LayoutTest(gtx, rows)
 			e.Frame(gtx.Ops)
 		}

@@ -7,6 +7,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/widget"
 	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/stream"
 	"github.com/ddkwork/ux/languages"
 	"github.com/ddkwork/ux/resources/images"
 	"github.com/ddkwork/ux/widget/material"
@@ -62,13 +63,13 @@ type Widgets interface { // map[string]Widget
 	Markdown() Widget
 }
 
-type logView struct {
+type LogView struct {
 	*ContextMenu
 	*CodeEditor
 }
 
-func LogView() *logView {
-	l := &logView{
+func NewLogView() *LogView {
+	l := &LogView{
 		ContextMenu: NewContextMenu(),
 		CodeEditor:  NewCodeEditor("", languages.GoKind),
 	}
@@ -78,7 +79,14 @@ func LogView() *logView {
 		Icon:  images.ContentSaveIcon,
 		Can:   func() bool { return true },
 		Do: func() {
-
+			if !stream.IsAndroid() {
+				return
+			}
+			go func() {
+				f := mylog.Check2(explore.CreateFile("sata.json"))
+				mylog.Check2(f.Write([]byte(l.CodeEditor.editor.Text())))
+				mylog.Check(f.Close())
+			}()
 		},
 		AppendDivider: false,
 		Clickable:     widget.Clickable{},
@@ -86,7 +94,7 @@ func LogView() *logView {
 	return l
 }
 
-func (l *logView) Layout(gtx layout.Context) layout.Dimensions {
+func (l *LogView) Layout(gtx layout.Context) layout.Dimensions {
 	return l.ContextMenu.Layout(gtx, []layout.Widget{
 		func(gtx layout.Context) layout.Dimensions {
 			return l.CodeEditor.Layout(gtx)

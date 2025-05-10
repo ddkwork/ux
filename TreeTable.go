@@ -681,15 +681,20 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { // 增删改查中
 	gtx.Constraints = originalConstraints
 }
 
-func (t *TreeTable[T]) SaveDate() { // todo ux/explorer
+func (t *TreeTable[T]) SaveDate() {
 	go func() {
 		t.JsonName = strings.TrimSuffix(t.JsonName, ".json")
+		t.JsonName += ".json"
 		if stream.IsAndroid() {
-			mylog.Todo("android save data to sd card")
-			// explorer.NewExplorer().CreateFile(filepath.Join("cache", t.JsonName+".json"), "")
+			go func() {
+				f := mylog.Check2(explore.CreateFile(t.JsonName))
+				mylog.Check2(f.Write([]byte(t.String())))
+				mylog.Check(f.Close())
+			}()
+			return
 		}
 
-		stream.MarshalJsonToFile(t.Root, filepath.Join("cache", t.JsonName+".json"))
+		stream.MarshalJsonToFile(t.Root, filepath.Join("cache", t.JsonName))
 		stream.WriteTruncate(filepath.Join("cache", t.JsonName+".txt"), t.Document()) // 调用t.Format()
 		if t.IsDocument {
 			b := stream.NewBuffer("")

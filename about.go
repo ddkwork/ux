@@ -7,18 +7,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ddkwork/ux/widget/material"
-
 	"gioui.org/app"
 	"gioui.org/io/event"
 	"gioui.org/io/key"
 	"gioui.org/io/pointer"
+	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/ddkwork/ux/widget/material"
 )
 
 // A []string to hold the speech as a list of paragraphs
@@ -40,7 +40,14 @@ func readText(data string) []string {
 }
 
 // The main draw function
-func About(w *app.Window, data string) error {
+func About(data string) error {
+	w := new(app.Window)
+	w.Option(
+		app.Title("about"),
+		app.Size(1200, 600),
+		// app.Decorated(false),
+	)
+	w.Perform(system.ActionCenter)
 	paragraphList = readText(data)
 	// y-position for text
 	var scrollY unit.Dp = 0
@@ -84,7 +91,7 @@ func About(w *app.Window, data string) error {
 	myColor := colorDark
 
 	for {
-		// listen for events in the window
+		// listen for events in the w
 		switch winE := w.Event().(type) {
 
 		// Should we draw a new frame?
@@ -317,7 +324,7 @@ func About(w *app.Window, data string) error {
 			event.Op(&ops, tag)
 
 			// ---------- FINALIZE ----------
-			// Frame completes the FrameEvent by drawing the graphical operations from ops into the window.
+			// Frame completes the FrameEvent by drawing the graphical operations from ops into the w.
 			winE.Frame(&ops)
 
 			// Should we shut down?
