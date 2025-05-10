@@ -852,9 +852,9 @@ func (t *TreeTable[T]) cellWidth(gtx layout.Context, n *Node[T], cell *CellData)
 		}
 		if n.CanHaveChildren() {
 			if !strings.HasSuffix(cell.Value, ")") {
-				panic("you should call n.sumChildren method")
+				panic("you should call n.SumChildren method")
 			}
-			v = n.SumChildren() // + "  ⇧"
+			v = n.SumChildren()
 		}
 		labelWidth := LabelWidth(gtx, v)
 		current := leftIndent + labelWidth + DividerWidth
