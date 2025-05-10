@@ -20,7 +20,6 @@ import (
 	"gioui.org/unit"
 	"gioui.org/x/explorer"
 	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/golibrary/safemap"
 	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/resources/images"
 	"github.com/ddkwork/ux/widget/material"
@@ -61,11 +60,18 @@ func Run(title string, widget Widget) {
 				case app.FrameEvent:
 					gtx := app.NewContext(&ops, e)
 					DarkBackground(gtx)
-					for _, v := range ModalCallbacks.Range() {
-						v()
-					}
-					mylog.Call(func() { widget.Layout(gtx) })
 
+					layout.Stack{}.Layout(gtx,
+						layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+							return widget.Layout(gtx)
+						}),
+						layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+							if PopupCallback != nil {
+								return PopupCallback.Layout(gtx)
+							}
+							return layout.Dimensions{Size: gtx.Constraints.Max}
+						}),
+					)
 					e.Frame(gtx.Ops)
 				}
 			}
@@ -74,7 +80,7 @@ func Run(title string, widget Widget) {
 	})
 }
 
-var ModalCallbacks = new(safemap.M[string, func()]) // todo use stack
+var PopupCallback Widget
 
 func SaveScreenshot(callback Widget) {
 	const scale = 1.5

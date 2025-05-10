@@ -116,6 +116,9 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 	for i, row := range s.Rows {
 		s.Rows[i].Value = s.fields.GetMust(row.Key + "：").GetText() // 刷新输入框的值
 	}
+	if !s.Visible {
+		return layout.Dimensions{}
+	}
 
 	if s.closeBtn.Clicked(gtx) {
 		s.Visible = false
@@ -203,7 +206,7 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 	})
 	gtx.Constraints.Max.Y *= 2
 	s.inset = layout.UniformInset(99)
-	if stream.IsAndroid() {
+	if stream.IsAndroid() || !s.Modal {
 		s.inset = layout.Inset{}
 	}
 	return s.inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {

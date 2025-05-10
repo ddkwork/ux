@@ -828,7 +828,10 @@ func (t *TreeTable[T]) cellWidth(gtx layout.Context, n *Node[T], cell *CellData)
 		t.header.columnCells[cell.columID].width = max(t.header.columnCells[cell.columID].width, width)
 		cell.width = t.header.columnCells[cell.columID].width
 	}()
-	labelWidth := LabelWidth(gtx, cell.Value) // + LabelWidth(gtx, n.SumChildren())
+	v := cell.Value
+	// if t.header.clickedColumnIndex > -1 {
+	v += "  ⇧"
+	// }
 	switch cell.columID {
 	case HierarchyColumnID:
 		leftIndent := HierarchyIndent*(n.Depth()-1) + leftPadding
@@ -842,6 +845,13 @@ func (t *TreeTable[T]) cellWidth(gtx layout.Context, n *Node[T], cell *CellData)
 				}
 			}
 		}
+		if n.CanHaveChildren() {
+			if !strings.HasSuffix(cell.Value, ")") {
+				panic("you should call n.sumChildren method")
+			}
+			v = n.SumChildren() + "  ⇧"
+		}
+		labelWidth := LabelWidth(gtx, v)
 		current := leftIndent + labelWidth + DividerWidth
 		maxWidth := (t.MaxDepth()-1)*HierarchyIndent + // 最大深度的左缩进
 			defaultHierarchyIconSize + // 层级图标宽度
@@ -859,6 +869,7 @@ func (t *TreeTable[T]) cellWidth(gtx layout.Context, n *Node[T], cell *CellData)
 		}
 		return leftIndent, t.maxColumnCellWidths[HierarchyColumnID]
 	default: // //预渲染其他列
+		labelWidth := LabelWidth(gtx, v)
 		w := leftPadding + labelWidth + DividerWidth                                      // 每列右侧有空间，不用右填充了，层级列也有
 		t.maxColumnCellWidths[cell.columID] = max(t.maxColumnCellWidths[cell.columID], w) // todo  runtime error: index out of range [6] with length 5 in jsonTreeTable.go:112
 		return 0, t.maxColumnCellWidths[cell.columID]
@@ -1202,7 +1213,6 @@ func (t *TreeTable[T]) Remove(gtx layout.Context) {
 }
 
 func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大深度有影响
-	ModalCallbacks.Reset()
 	editor := NewStructView("edit row", t.SelectedNode.Data, func(key string, field any) (value string) {
 		return "" // todo 这里需要实现编辑节点的功能
 	})
@@ -1212,11 +1222,7 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 		t.SelectedNode.Data = t.UnmarshalRowCells(t.SelectedNode, editor.Rows) // todo test
 		mylog.Todo("save json data ?")
 	})
-	ModalCallbacks.Set("node editor", func() {
-		if editor != nil && editor.Visible {
-			editor.Layout(gtx)
-		}
-	})
+	PopupCallback = editor
 }
 
 func (n *Node[T]) Find() (found *Node[T]) {
