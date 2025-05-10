@@ -872,11 +872,13 @@ func (t *TreeTable[T]) cellWidth(gtx layout.Context, n *Node[T], cell *CellData)
 		if current > t.maxColumnCellWidths[HierarchyColumnID] {
 			mylog.Todo(cmp.Diff(t.maxColumnCellWidths[HierarchyColumnID], current)) // 预渲染列宽大于限制宽度
 		}
+		gtx.Execute(op.InvalidateCmd{})
 		return leftIndent, t.maxColumnCellWidths[HierarchyColumnID]
 	default:
 		labelWidth := LabelWidth(gtx, v)
 		w := leftPadding + labelWidth + DividerWidth
 		t.maxColumnCellWidths[cell.columID] = max(t.maxColumnCellWidths[cell.columID], w) // todo  runtime error: index out of range [6] with length 5 in jsonTreeTable.go:112
+		gtx.Execute(op.InvalidateCmd{})
 		return 0, t.maxColumnCellWidths[cell.columID]
 	}
 }
