@@ -279,9 +279,8 @@ func About(data string) error {
 
 			// ---------- MARGINS ----------
 			// Margins
-			var marginWidth unit.Dp
-			marginWidth = (unit.Dp(gtx.Constraints.Max.X) - textWidth) / 3
-			margins := layout.Inset{
+			marginWidth := (unit.Dp(gtx.Constraints.Max.X) - textWidth) / 3
+			inset := layout.Inset{
 				Left:   marginWidth,
 				Right:  marginWidth,
 				Top:    unit.Dp(0),
@@ -289,10 +288,10 @@ func About(data string) error {
 			}
 
 			// ---------- LIST WITHIN MARGINS ----------
-			// 1) First the margins ...
-			margins.Layout(gtx,
+			// 1) First the inset ...
+			inset.Layout(gtx,
 				func(gtx layout.Context) layout.Dimensions {
-					// 2) ... then the list inside those margins ...
+					// 2) ... then the list inside those inset ...
 					return vizList.Layout(gtx, len(paragraphList),
 						// 3) ... where each paragraph is a separate item
 						func(gtx layout.Context, index int) layout.Dimensions {
