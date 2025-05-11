@@ -37,7 +37,7 @@ type (
 	TreeTable[T any] struct {
 		TableContext[T]                     // 实例化时传入的上下文
 		Root                *Node[T]        // 根节点,保存数据到json只需要调用它即可
-		header              tableHeader[T]  // 表头
+		header              *tableHeader[T] // 表头
 		rootRows            []*Node[T]      // from root.children
 		filteredRows        []*Node[T]      // 过滤后的行
 		rootRowsWidget      []layout.Widget // from layout
@@ -115,7 +115,7 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 	return &TreeTable[T]{
 		TableContext: TableContext[T]{},
 		Root:         root,
-		header: tableHeader[T]{
+		header: &tableHeader[T]{
 			sortOrder:          0,
 			sortedBy:           0,
 			columnCells:        columnCells,
@@ -1039,6 +1039,7 @@ func (t *TreeTable[T]) Sort() {
 	if len(t.rootRows) == 0 || t.header.sortedBy >= len(t.rootRows[0].rowCells) {
 		return // 如果没有子节点或者列索引无效，直接返回
 	}
+
 	sort.Slice(t.rootRows, func(i, j int) bool {
 		if t.rootRows[i].rowCells == nil {
 			t.rootRows[i].rowCells = t.MarshalRowCells(t.rootRows[i])
@@ -1048,10 +1049,12 @@ func (t *TreeTable[T]) Sort() {
 		}
 		cellI := t.rootRows[i].rowCells[t.header.sortedBy].Value
 		cellJ := t.rootRows[j].rowCells[t.header.sortedBy].Value
-		if t.header.sortAscending {
-			return cellI < cellJ
-		}
-		return cellI > cellJ
+		// mylog.Trace("xx", t.header.sortAscending)
+		return stream.NaturalLess(cellI, cellJ, t.header.sortAscending)
+		// if t.header.sortAscending {
+		// 	return cellI < cellJ
+		// }
+		// return cellI > cellJ
 	})
 }
 
