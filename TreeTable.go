@@ -667,7 +667,7 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { // 增删改查中
 		}
 	}
 
-	// t.columns = TransposeMatrix(t.rows) // 如果不这么做的话，节点增删改查就不会实时刷新,为了提高性能需要手动刷新节点和宽度
+	// t.columns = TransposeMatrix(t.cells) // 如果不这么做的话，节点增删改查就不会实时刷新,为了提高性能需要手动刷新节点和宽度
 	for i, data := range TransposeMatrix(t.rows) { // todo 1561	    731960 ns/op
 		if data.isHeader {
 			t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Key), align.StringWidth[unit.Dp](t.header.columnCells[i].Key))
@@ -1070,16 +1070,16 @@ const (
 	sortDescending
 )
 
-const (
-	defaultDividerWidth                   unit.Dp = 1
-	defaultDividerMargin                  unit.Dp = 1
-	defaultDividerHandleMinVerticalMargin unit.Dp = 2
-	defaultDividerHandleMaxHeight         unit.Dp = 12
-	defaultDividerHandleWidth             unit.Dp = 3
-	defaultDividerHandleRadius            unit.Dp = 2
-	defaultHeaderPadding                  unit.Dp = 5
-	defaultHeaderBorder                   unit.Dp = 1
-)
+// const (
+// 	defaultDividerWidth                   unit.Dp = 1
+// 	defaultDividerMargin                  unit.Dp = 1
+// 	defaultDividerHandleMinVerticalMargin unit.Dp = 2
+// 	defaultDividerHandleMaxHeight         unit.Dp = 12
+// 	defaultDividerHandleWidth             unit.Dp = 3
+// 	defaultDividerHandleRadius            unit.Dp = 2
+// 	defaultHeaderPadding                  unit.Dp = 5
+// 	defaultHeaderBorder                   unit.Dp = 1
+// )
 
 // ---------------------------------------泛型n叉树实现------------------------------------------
 
@@ -1228,7 +1228,7 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 	})
 	editor.Modal = true
 	editor.SetOnApply(func() { // todo bug ,debug it
-		// t.UnmarshalRowCells[T](t.SelectedNode, t.SelectedNode.rowCells)
+		// t.UnmarshalRowCells[T](t.SelectedNode, t.SelectedNode.cells)
 		t.SelectedNode.Data = t.UnmarshalRowCells(t.SelectedNode, editor.Rows) // todo test
 		mylog.Todo("save json data ?")
 	})

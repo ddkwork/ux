@@ -16,24 +16,24 @@ import (
 // Resize provides a draggable handle in between two widgets for resizing their area.
 type Resize struct {
 	// axis defines how the widgets and the handle are laid out.
-	axis               layout.Axis
+	axis               layout.Axis // 水平拖动设置列宽，垂直拖动设置行高
 	initialized        bool
 	length             int
 	totalHandlesLength int
-	resizables         []*Resizable
-	minLength          int
+	cells              []*Resizable // 表头是colum cell，行是row cell
+	minLength          int          // 这里应该设置为树形表格每列的最大列宽
 }
 
 type (
-	OnResizeCallback func(index int, newWidth int)
-	Resizable        struct {
+	ResizeCallback func(index int, newWidth int)
+	Resizable      struct {
 		// ratio is only calculated during initialization, based on widget's natural size.
 		//  It acts like minimum threshold ratio value beyond which widget size cannot be further reduced.
 		ratio          float32
 		Widget         layout.Widget
 		DividerHandler layout.Widget
-		Index          int              // 新增索引字段
-		OnResize       OnResizeCallback // 新增回调字段
+		Index          int            // 新增索引字段
+		OnResize       ResizeCallback // 新增回调字段
 		// dividerThickness int
 		float
 		resize *Resize
@@ -42,9 +42,9 @@ type (
 	}
 )
 
-func NewResizeWidget(axis layout.Axis, onResize OnResizeCallback, resizables ...*Resizable) *Resize {
-	r := &Resize{axis: axis, resizables: resizables}
-	for i, rz := range resizables {
+func NewResize(axis layout.Axis, onResize ResizeCallback, cells ...*Resizable) *Resize {
+	r := &Resize{axis: axis, cells: cells}
+	for i, rz := range cells {
 		rz.Index = i // 设置索引
 		rz.resize = r
 		if rz.DividerHandler == nil {
@@ -61,11 +61,11 @@ func NewResizeWidget(axis layout.Axis, onResize OnResizeCallback, resizables ...
 // in order for the resize to be smooth.
 func (r *Resize) Layout(gtx layout.Context) layout.Dimensions {
 	// Compute the first widget's max dragWidth/height.
-	if len(r.resizables) == 0 {
+	if len(r.cells) == 0 {
 		return layout.Dimensions{}
 	}
-	if len(r.resizables) == 1 {
-		return r.resizables[0].Widget(gtx)
+	if len(r.cells) == 1 {
+		return r.cells[0].Widget(gtx)
 	}
 
 	if !r.initialized {
@@ -81,7 +81,7 @@ func (r *Resize) Layout(gtx layout.Context) layout.Dimensions {
 
 	flex := layout.Flex{Axis: r.axis}
 	return flex.Layout(gtx,
-		r.resizables[0].Layout(gtx)...,
+		r.cells[0].Layout(gtx)...,
 	)
 }
 
@@ -90,41 +90,41 @@ func (r *Resize) init(gtx layout.Context) {
 	if r.minLength == 0 {
 		r.minLength = int(0.1 * float32(r.length))
 	}
-	allowedMinLength := r.length / len(r.resizables)
+	allowedMinLength := r.length / len(r.cells)
 	if r.minLength > allowedMinLength || r.minLength <= 0 {
 		r.minLength = allowedMinLength
 	}
 	var totalRatio float32
 	// Obtain the total ration to reset it between 0.0 - 1.00
 	var totalHandlesLength int
-	for i, rz := range r.resizables {
-		if rz.DividerHandler == nil {
-			rz.DividerHandler = r.CustomResizeHandleBar
+	for i, cell := range r.cells {
+		if cell.DividerHandler == nil {
+			cell.DividerHandler = r.CustomResizeHandleBar
 		}
 		m := op.Record(gtx.Ops)
-		d := rz.DividerHandler(gtx)
+		d := cell.DividerHandler(gtx)
 		m.Stop()
 		totalHandlesLength += r.axis.Convert(d.Size).X
 		m = op.Record(gtx.Ops)
-		d = rz.Widget(gtx)
+		d = cell.Widget(gtx)
 		m.Stop()
-		rz.ratio = float32(r.axis.Convert(d.Size).X) / float32(r.length)
-		totalRatio += rz.ratio
+		cell.ratio = float32(r.axis.Convert(d.Size).X) / float32(r.length)
+		totalRatio += cell.ratio
 		var prevResizable *Resizable
 		var nextResizable *Resizable
 		if i != 0 {
-			prevResizable = r.resizables[i-1]
+			prevResizable = r.cells[i-1]
 		}
-		if i < len(r.resizables)-1 {
-			nextResizable = r.resizables[i+1]
+		if i < len(r.cells)-1 {
+			nextResizable = r.cells[i+1]
 		}
-		rz.prev = prevResizable
-		rz.next = nextResizable
-		rz.resize = r
-		if i == len(r.resizables)-1 {
+		cell.prev = prevResizable
+		cell.next = nextResizable
+		cell.resize = r
+		if i == len(r.cells)-1 {
 			if totalRatio <= 1 {
-				totalRatio -= rz.ratio
-				rz.ratio = 1 - totalRatio
+				totalRatio -= cell.ratio
+				cell.ratio = 1 - totalRatio
 				totalRatio = 1
 			}
 		}
@@ -132,10 +132,10 @@ func (r *Resize) init(gtx layout.Context) {
 	r.totalHandlesLength = totalHandlesLength
 	// Reset the ratio between 0.0 - 1.00
 	var currTotalRatio float32
-	for _, rz := range r.resizables {
-		rz.ratio /= totalRatio // reset the total ratio
-		currTotalRatio += rz.ratio
-		rz.float.pos = int(float32(r.length) * currTotalRatio)
+	for _, cell := range r.cells {
+		cell.ratio /= totalRatio // reset the total ratio
+		currTotalRatio += cell.ratio
+		cell.float.pos = int(float32(r.length) * currTotalRatio)
 	}
 	// mylog.Struct(totalRatio)
 	// mylog.Struct(currTotalRatio)
@@ -146,8 +146,8 @@ func (r *Resize) onWindowResize(gtx layout.Context) {
 	prevLength := r.length
 	r.minLength = (currMinLength / prevLength) * r.length
 	r.length = r.axis.Convert(gtx.Constraints.Max).X
-	for _, rz := range r.resizables {
-		rz.float.pos = int((float32(rz.float.pos) / float32(prevLength)) * float32(r.length))
+	for _, cell := range r.cells {
+		cell.float.pos = int((float32(cell.float.pos) / float32(prevLength)) * float32(r.length))
 	}
 }
 
