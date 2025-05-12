@@ -828,6 +828,7 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 
 func (t *TreeTable[T]) cellWidth(gtx layout.Context, n *Node[T], cell *CellData) (indent, width unit.Dp) {
 	defer func() {
+		// todo vstart panic: runtime error: index out of range [6] with length 5
 		t.header.columnCells[cell.columID].width = max(t.header.columnCells[cell.columID].width, width)
 		cell.width = t.header.columnCells[cell.columID].width
 		gtx.Execute(op.InvalidateCmd{})
