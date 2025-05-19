@@ -3,7 +3,7 @@ module github.com/ddkwork/ux
 go 1.24.1
 
 require (
-	gioui.org v0.8.1-0.20250505174639-f73287be870d
+	gioui.org v0.8.1-0.20250516145245-0225334124a7
 	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0
 	github.com/alecthomas/chroma/v2 v2.17.2

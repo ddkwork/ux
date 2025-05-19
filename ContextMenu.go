@@ -43,9 +43,10 @@ func NewContextMenu() *ContextMenu {
 		list: &widget.List{
 			Scrollbar: widget.Scrollbar{},
 			List: layout.List{
-				Axis:        layout.Vertical,
-				ScrollToEnd: false,
-				Alignment:   layout.Middle,
+				Axis:          layout.Vertical,
+				ScrollToEnd:   false,
+				Alignment:     layout.Middle,
+				// ScrollAnyAxis: true,
 				Position: layout.Position{
 					BeforeEnd:  false,
 					First:      0,
