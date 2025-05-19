@@ -1,6 +1,6 @@
 module github.com/ddkwork/ux
 
-go 1.24.1
+go 1.24.3
 
 require (
 	gioui.org v0.8.1-0.20250516145245-0225334124a7
