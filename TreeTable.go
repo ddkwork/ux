@@ -171,6 +171,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 	t.once.Do(func() {
 		if t.SetRootRowsCallBack != nil { // github.com/ddkwork/mitmproxy
 			t.SetRootRowsCallBack()
+			t.CloseAll()
 		}
 		if t.JsonName == "" {
 			mylog.Check("JsonName is empty")

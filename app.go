@@ -67,6 +67,7 @@ func Run(title string, widget Widget) {
 						}),
 						layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 							if PopupCallback != nil {
+								defer func() { PopupCallback = nil }() //todo publick popup menu once here
 								return PopupCallback.Layout(gtx)
 							}
 							return layout.Dimensions{Size: gtx.Constraints.Max}

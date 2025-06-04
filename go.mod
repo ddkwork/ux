@@ -3,13 +3,14 @@ module github.com/ddkwork/ux
 go 1.24.3
 
 require (
-	gioui.org v0.8.1-0.20250516145245-0225334124a7
+	gioui.org v0.8.1-0.20250531011347-8104d527c746
 	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0
 	github.com/alecthomas/chroma/v2 v2.17.2
-	github.com/ddkwork/golibrary v0.1.2-0.20250507062101-31099ee7792e
+	github.com/ddkwork/golibrary v0.1.2-0.20250601104454-1341acc6b0bf
 	github.com/google/go-cmp v0.7.0
-	github.com/oligo/gvcode v0.2.2
+	//github.com/oligo/gvcode v0.2.3-0.20250522170606-2b5334207672
+	github.com/oligo/gvcode v0.2.3-0.20250530172317-23fd9c488683
 	github.com/yuin/goldmark v1.7.11
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0
 	golang.org/x/exp/shiny v0.0.0-20250408133849-7e4ce0ab07d0
@@ -23,7 +24,7 @@ require (
 	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/go-text/typesetting v0.3.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
+	github.com/rdleal/intervalst v1.4.1 // indirect
 	golang.org/x/mod v0.24.0 // indirect
-	golang.org/x/sync v0.14.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 )
