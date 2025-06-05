@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/std/mylog"
 )
 
 func sqDiffUInt8(x, y uint8) uint64 {

@@ -11,10 +11,10 @@ import (
 
 	"gioui.org/app"
 	"gioui.org/op"
-	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/std/mylog"
 
-	"github.com/ddkwork/golibrary/safemap"
-	"github.com/ddkwork/golibrary/stream"
+	"github.com/ddkwork/golibrary/std/safemap"
+	"github.com/ddkwork/golibrary/std/stream"
 )
 
 func TestTreeTable_ContextMenuItem(t1 *testing.T) {

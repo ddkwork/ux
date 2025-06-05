@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/ddkwork/golibrary/stream"
+	"github.com/ddkwork/golibrary/std/stream"
 )
 
 func TestName(t *testing.T) {
@@ -15,7 +15,7 @@ func TestName(t *testing.T) {
 package images
 
 import (
-	"github.com/ddkwork/golibrary/safemap"
+	"github.com/ddkwork/golibrary/std/safemap"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 `)

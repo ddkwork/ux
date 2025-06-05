@@ -15,7 +15,7 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/std/mylog"
 )
 
 type (

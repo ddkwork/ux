@@ -9,7 +9,7 @@ import (
 
 	"github.com/ddkwork/ux/internal/terminal/tint"
 
-	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/std/mylog"
 )
 
 func Demo() (*Screen, *ConsoleSettings) {

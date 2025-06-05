@@ -10,7 +10,7 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/std/mylog"
 	"github.com/ddkwork/ux/internal/giosvg"
 	_ "github.com/ddkwork/ux/resources/images/ico"
 )

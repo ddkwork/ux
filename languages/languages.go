@@ -9,8 +9,8 @@ import (
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/alecthomas/chroma/v2/styles"
 
-	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/golibrary/stream"
+	"github.com/ddkwork/golibrary/std/mylog"
+	"github.com/ddkwork/golibrary/std/stream"
 )
 
 var configs []*chroma.Config

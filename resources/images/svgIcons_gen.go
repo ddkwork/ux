@@ -4,7 +4,7 @@ import (
 	"embed"
 	"strings"
 
-	"github.com/ddkwork/golibrary/stream"
+	"github.com/ddkwork/golibrary/std/stream"
 )
 
 func svgCallback(value []byte) []byte {

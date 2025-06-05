@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"gioui.org/widget"
-	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/std/mylog"
 )
 
 // Table 是row布局，grid是rows和columns布局，网格是处理所有单元格的，row的话是通过结构体处理行单元格的

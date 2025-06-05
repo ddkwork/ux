@@ -8,8 +8,8 @@ import (
 	"gioui.org/io/clipboard"
 	"gioui.org/layout"
 	"gioui.org/widget"
-	"github.com/ddkwork/golibrary/mylog"
-	"github.com/ddkwork/golibrary/safemap"
+	"github.com/ddkwork/golibrary/std/mylog"
+	"github.com/ddkwork/golibrary/std/safemap"
 	"github.com/ddkwork/ux/resources/images"
 )
 

@@ -4,7 +4,7 @@ import (
 	"image"
 	"unicode"
 
-	"github.com/ddkwork/golibrary/stream"
+	"github.com/ddkwork/golibrary/std/stream"
 	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/resources/images"
 
@@ -20,7 +20,7 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"github.com/ddkwork/golibrary/safemap"
+	"github.com/ddkwork/golibrary/std/safemap"
 )
 
 var (

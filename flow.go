@@ -6,7 +6,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/widget"
-	"github.com/ddkwork/golibrary/safemap"
+	"github.com/ddkwork/golibrary/std/safemap"
 	"github.com/ddkwork/ux/widget/material"
 )
 

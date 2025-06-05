@@ -14,7 +14,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
-	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/std/mylog"
 	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/widget/material"

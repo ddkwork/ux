@@ -19,7 +19,7 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/x/explorer"
-	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/std/mylog"
 	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/resources/images"
 	"github.com/ddkwork/ux/widget/material"

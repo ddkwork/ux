@@ -1,7 +1,7 @@
 package images
 
 import (
-	"github.com/ddkwork/golibrary/safemap"
+	"github.com/ddkwork/golibrary/std/safemap"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 

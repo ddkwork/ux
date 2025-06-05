@@ -19,7 +19,7 @@ import (
 	"gioui.org/widget"
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
-	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/std/mylog"
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/oligo/gvcode"
 )

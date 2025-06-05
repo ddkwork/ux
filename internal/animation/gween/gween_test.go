@@ -5,7 +5,7 @@ import (
 
 	"github.com/ddkwork/ux/internal/animation/gween/ease"
 
-	"github.com/ddkwork/golibrary/assert"
+	"github.com/ddkwork/golibrary/std/assert"
 )
 
 func TestNew(t *testing.T) {

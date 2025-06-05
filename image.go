@@ -7,7 +7,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/widget"
-	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/std/mylog"
 	_ "github.com/ddkwork/ux/resources/images/ico"
 )
 

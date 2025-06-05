@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/std/mylog"
 	"github.com/ddkwork/ux"
 
 	"gioui.org/font"

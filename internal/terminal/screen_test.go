@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ddkwork/golibrary/assert"
+	"github.com/ddkwork/golibrary/std/assert"
 )
 
 func Test_LineSplit(t *testing.T) {

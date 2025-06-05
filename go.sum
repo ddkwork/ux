@@ -15,8 +15,8 @@ github.com/alecthomas/chroma/v2 v2.17.2 h1:Rm81SCZ2mPoH+Q8ZCc/9YvzPUN/E7HgPiPJD8
 github.com/alecthomas/chroma/v2 v2.17.2/go.mod h1:RVX6AvYm4VfYe/zsk7mjHueLDZor3aWCNE14TFlepBk=
 github.com/alecthomas/repr v0.4.0 h1:GhI2A8MACjfegCPVq9f1FLvIBS+DrQ2KQBFZP1iFzXc=
 github.com/alecthomas/repr v0.4.0/go.mod h1:Fr0507jx4eOXV7AlPV6AVZLYrLIuIeSOWtW57eE/O/4=
-github.com/ddkwork/golibrary v0.1.2-0.20250601104454-1341acc6b0bf h1:nE7HP8CXNhlmZ0mp8gqhfE3KPxbgBdp1Bvhq8TmQEWY=
-github.com/ddkwork/golibrary v0.1.2-0.20250601104454-1341acc6b0bf/go.mod h1:9h4fIDkCLCUmD1nyvei0qQD24SkdTeXg5NsRNVOibT4=
+github.com/ddkwork/golibrary v0.1.4-0.20250605163732-5443832e2c55 h1:od1bvYN0uKB4Rqtq+K6hAWgnIyy673yg4bLzzu5nVOA=
+github.com/ddkwork/golibrary v0.1.4-0.20250605163732-5443832e2c55/go.mod h1:9h4fIDkCLCUmD1nyvei0qQD24SkdTeXg5NsRNVOibT4=
 github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
 github.com/dlclark/regexp2 v1.11.5/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
 github.com/go-text/typesetting v0.3.0 h1:OWCgYpp8njoxSRpwrdd1bQOxdjOXDj9Rqart9ML4iF4=
@@ -30,9 +30,7 @@ github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX
 github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
 github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
 github.com/oligo/gvcode v0.2.3-0.20250530172317-23fd9c488683 h1:eyFUeP+RV/v6zoHqzZchxua1fvAOZM7pwzSHdhgPTNg=
-github.com/oligo/gvcode v0.2.3-0.20250530172317-23fd9c488683/go.mod h1:tGRywuCWJfQQ25W8afK//1oqkT8ezybEr/RGJLGFRfk=
 github.com/rdleal/intervalst v1.4.1 h1:8rCuAea0aj3Z6cDSeN3Q3c+LZjmHmrqZhXrJbqfPw0c=
-github.com/rdleal/intervalst v1.4.1/go.mod h1:xO89Z6BC+LQDH+IPQQw/OESt5UADgFD41tYMUINGpxQ=
 github.com/yuin/goldmark v1.7.11 h1:ZCxLyDMtz0nT2HFfsYG8WZ47Trip2+JyLysKcMYE5bo=
 github.com/yuin/goldmark v1.7.11/go.mod h1:ip/1k0VRfGynBgxOz0yCqHrbZXhcjxyuS66Brc7iBKg=
 golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 h1:R84qjqJb5nVJMxqWYb3np9L5ZsaDtB+a39EqjV0JSUM=

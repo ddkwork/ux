@@ -8,7 +8,7 @@ import (
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/widget"
-	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/std/mylog"
 	"github.com/ddkwork/ux/resources/images"
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/ddkwork/ux/x/component"
@@ -43,9 +43,9 @@ func NewContextMenu() *ContextMenu {
 		list: &widget.List{
 			Scrollbar: widget.Scrollbar{},
 			List: layout.List{
-				Axis:          layout.Vertical,
-				ScrollToEnd:   false,
-				Alignment:     layout.Middle,
+				Axis:        layout.Vertical,
+				ScrollToEnd: false,
+				Alignment:   layout.Middle,
 				// ScrollAnyAxis: true,
 				Position: layout.Position{
 					BeforeEnd:  false,

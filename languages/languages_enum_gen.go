@@ -1,6 +1,6 @@
 package languages
 
-import "github.com/ddkwork/golibrary/stream"
+import "github.com/ddkwork/golibrary/std/stream"
 
 type LanguagesKind byte
 

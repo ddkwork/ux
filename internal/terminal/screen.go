@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"gioui.org/font"
-	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/std/mylog"
 )
 
 type Point struct {

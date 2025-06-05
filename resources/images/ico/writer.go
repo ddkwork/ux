@@ -9,7 +9,7 @@ import (
 	"image/png"
 	"io"
 
-	"github.com/ddkwork/golibrary/mylog"
+	"github.com/ddkwork/golibrary/std/mylog"
 )
 
 func Encode(w io.Writer, im image.Image) {
