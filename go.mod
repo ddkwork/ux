@@ -9,13 +9,13 @@ require (
 	github.com/alecthomas/chroma/v2 v2.17.2
 	github.com/ddkwork/golibrary v0.1.4-0.20250616120223-0a6e456032ab
 	github.com/google/go-cmp v0.7.0
-	github.com/oligo/gvcode v0.2.3-0.20250530172317-23fd9c488683
+	github.com/oligo/gvcode v0.2.1-0.20250424030509-8138ffc92f73
 	github.com/yuin/goldmark v1.7.11
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0
 	golang.org/x/exp/shiny v0.0.0-20250408133849-7e4ce0ab07d0
 	golang.org/x/image v0.26.0
 	golang.org/x/net v0.40.0
-	golang.org/x/text v0.25.0
+	golang.org/x/text v0.26.0
 )
 
 require (
@@ -23,7 +23,6 @@ require (
 	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/go-text/typesetting v0.3.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
-	github.com/rdleal/intervalst v1.4.1 // indirect
-	golang.org/x/mod v0.24.0 // indirect
+	golang.org/x/mod v0.25.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 )
