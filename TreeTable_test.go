@@ -25,6 +25,7 @@ import (
 
 func TestName(t *testing.T) {
 	mylog.Call(func() {
+		stream.UpdateAllLocalRep()
 		// fakeError.Walk("")
 	})
 }

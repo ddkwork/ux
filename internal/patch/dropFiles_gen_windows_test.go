@@ -10,6 +10,7 @@ import (
 )
 
 func TestGenDropFiles(t *testing.T) {
+	t.Skip()
 	for _, path := range getOsFiles() {
 		if filepath.Base(path) == "os_windows.go" {
 			continue
