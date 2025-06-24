@@ -1498,3 +1498,9 @@ func (AndroidViewEvent) ImplementsEvent()     {}
 func (a AndroidViewEvent) Valid() bool {
 	return a != (AndroidViewEvent{})
 }
+
+var dragHandler = func(files []string) {}
+
+func FileDropCallback(fn func(files []string)) {
+	dragHandler = fn
+}

@@ -444,3 +444,9 @@ func (UIKitViewEvent) ImplementsEvent()     {}
 func (u UIKitViewEvent) Valid() bool {
 	return u != (UIKitViewEvent{})
 }
+
+var dragHandler = func(files []string) {}
+
+func FileDropCallback(fn func(files []string)) {
+	dragHandler = fn
+}

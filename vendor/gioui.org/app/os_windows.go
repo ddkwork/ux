@@ -148,7 +148,8 @@ func initResources() error {
 	return nil
 }
 
-const dwExStyle = windows.WS_EX_APPWINDOW | windows.WS_EX_WINDOWEDGE
+const dwExStyle = windows.WS_EX_APPWINDOW | windows.WS_EX_WINDOWEDGE | windows.WS_EX_ACCEPTFILES
+
 
 func (w *window) init() error {
 	var resErr error
@@ -186,8 +187,15 @@ func (w *window) init() error {
 		return err
 	}
 	w.hwnd = hwnd
+	setCaptionColor(gowindows.HWND(hwnd), 0x292929)
 	return nil
 }
+
+func setCaptionColor(handle syscall.HWND, color uint32) {
+	const DWMWA_CAPTION_COLOR = 35
+	 syscall.DwmSetWindowAttribute(handle, DWMWA_CAPTION_COLOR, unsafe.Pointer(&color), uint32(unsafe.Sizeof(color)))
+}
+
 
 // update handles changes done by the user, and updates the configuration.
 // It reads the window style and size/position and updates w.config.
@@ -224,6 +232,31 @@ func (w *window) update() {
 	w.draw(true)
 }
 
+var dragHandler = func(files []string) {}
+
+func FileDropCallback(fn func(files []string)) {
+	dragHandler = fn
+}
+type DropFilesEventData struct {
+	X, Y  int
+	Files []string
+}
+
+func genDropFilesEventArg(hDrop uintptr) DropFilesEventData {
+	var data DropFilesEventData
+	_, fileCount := windows.DragQueryFile(hDrop, 0xFFFFFFFF)
+	data.Files = make([]string, fileCount)
+
+	var i uint
+	for i = 0; i < fileCount; i++ {
+		data.Files[i], _ = windows.DragQueryFile(hDrop, i)
+	}
+
+	data.X, data.Y, _ = windows.DragQueryPoint(hDrop)
+	windows.DragFinish(hDrop)
+	return data
+}
+
 func windowProc(hwnd syscall.Handle, msg uint32, wParam, lParam uintptr) uintptr {
 	win, exists := winMap.Load(hwnd)
 	if !exists {
@@ -233,6 +266,8 @@ func windowProc(hwnd syscall.Handle, msg uint32, wParam, lParam uintptr) uintptr
 	w := win.(*window)
 
 	switch msg {
+	case windows.WM_DROPFILES:
+		dragHandler(genDropFilesEventArg(wParam).Files)
 	case windows.WM_UNICHAR:
 		if wParam == windows.UNICODE_NOCHAR {
 			// Tell the system that we accept WM_UNICHAR messages.

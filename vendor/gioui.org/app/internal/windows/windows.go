@@ -177,6 +177,9 @@ type PointerInfo struct {
 }
 
 const (
+	WM_DROPFILES      = 0x233 // 563
+	WS_EX_ACCEPTFILES = 0x00000010
+	
 	TRUE = 1
 
 	CPS_CANCEL = 0x0004
@@ -484,7 +487,52 @@ var (
 
 	dwmapi                        = syscall.NewLazySystemDLL("dwmapi")
 	_DwmExtendFrameIntoClientArea = dwmapi.NewProc("DwmExtendFrameIntoClientArea")
+
+	shell32         = syscall.NewLazySystemDLL("shell32")
+	_DragQueryFileW = shell32.NewProc("DragQueryFileW")
+	_DragQueryPoint = shell32.NewProc("DragQueryPoint")
+	_DragFinish     = shell32.NewProc("DragFinish")
 )
+
+func DragQueryFile(hDrop HDROP, iFile uint) (fileName string, fileCount uint) {
+	ret, _, _ := _DragQueryFileW.Call(hDrop, uintptr(iFile), 0, 0)
+	fileCount = uint(ret)
+	if iFile != 0xFFFFFFFF {
+		buf := make([]uint16, fileCount+1)
+		ret, _, _ := _DragQueryFileW.Call(
+			hDrop,
+			uintptr(iFile),
+			uintptr(unsafe.Pointer(&buf[0])),
+			uintptr(fileCount+1))
+
+		if ret == 0 {
+			panic("Invoke DragQueryFile error.")
+		}
+		fileName = syscall.UTF16ToString(buf)
+	}
+	return
+}
+
+func DragQueryPoint(hDrop HDROP) (x, y int, isClientArea bool) {
+	var pt POINT
+	ret, _, _ := _DragQueryPoint.Call(
+		hDrop,
+		uintptr(unsafe.Pointer(&pt)))
+	return int(pt.X), int(pt.Y), ret == 1
+}
+
+func DragFinish(hDrop HDROP) {
+	_DragFinish.Call(hDrop)
+}
+
+type (
+	HANDLE = uintptr
+	HDROP  = HANDLE
+)
+
+type POINT struct {
+	X, Y int32
+}
 
 func AdjustWindowRectEx(r *Rect, dwStyle uint32, bMenu int, dwExStyle uint32) {
 	_AdjustWindowRectEx.Call(uintptr(unsafe.Pointer(r)), uintptr(dwStyle), uintptr(bMenu), uintptr(dwExStyle))

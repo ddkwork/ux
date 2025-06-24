@@ -825,3 +825,9 @@ func (JSViewEvent) ImplementsEvent()     {}
 func (j JSViewEvent) Valid() bool {
 	return !(j.Element.IsNull() || j.Element.IsUndefined())
 }
+
+var dragHandler = func(files []string) {}
+
+func FileDropCallback(fn func(files []string)) {
+	dragHandler = fn
+}

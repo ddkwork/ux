@@ -97,3 +97,9 @@ var xCursor = [...]string{
 	pointer.CursorNorthEastSouthWestResize: "fd_double_arrow",
 	pointer.CursorNorthWestSouthEastResize: "bd_double_arrow",
 }
+
+var dragHandler = func(files []string) {}
+
+func FileDropCallback(fn func(files []string)) {
+	dragHandler = fn
+}

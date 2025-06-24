@@ -271,3 +271,9 @@ func (w *window) wakeup() {
 		w.loop.FlushEvents()
 	})
 }
+
+var dragHandler = func(files []string) {}
+
+func FileDropCallback(fn func(files []string)) {
+	dragHandler = fn
+}
