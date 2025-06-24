@@ -15,7 +15,6 @@ require (
 	golang.org/x/exp/shiny v0.0.0-20250620022241-b7579e27df2b
 	golang.org/x/image v0.28.0
 	golang.org/x/net v0.41.0
-	golang.org/x/sys v0.33.0
 	golang.org/x/text v0.26.0
 )
 
@@ -25,4 +24,5 @@ require (
 	github.com/go-text/typesetting v0.3.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	golang.org/x/mod v0.25.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
 )

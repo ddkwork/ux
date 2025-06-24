@@ -64,7 +64,7 @@ git.wow.st/gmp/jni
 github.com/alecthomas/chroma/v2
 github.com/alecthomas/chroma/v2/lexers
 github.com/alecthomas/chroma/v2/styles
-# github.com/ddkwork/golibrary v0.1.5-0.20250618042835-d187f1844d4a
+# github.com/ddkwork/golibrary v0.1.5-0.20250624034935-8fd93e0b3451
 ## explicit; go 1.25rc1
 github.com/ddkwork/golibrary/std/assert
 github.com/ddkwork/golibrary/std/assert/common

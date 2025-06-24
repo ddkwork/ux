@@ -25,6 +25,11 @@ type GeneratedFile struct {
 	imports      map[string]bool
 }
 
+func (g *GeneratedFile) SetPackageName(packageName string) *GeneratedFile {
+	g.packageName = packageName
+	return g
+}
+
 func (g *GeneratedFile) SetKeepOrigName(keepOrigName bool) *GeneratedFile {
 	g.keepOrigName = keepOrigName
 	return g
