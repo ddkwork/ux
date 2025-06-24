@@ -48,11 +48,13 @@ jobs:
       #          brew update
       #          brew install xcode
 
-      - name: Install Go dependencies
-        run: go mod tidy
+      #      - name: Install Go dependencies
+      #        run: go mod tidy
 
       - name: Run tests
-        run: go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -diff ./...  &&  go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -fix ./...
+          GOWORK=off GOFLAGS="-mod=vendor" go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -diff ./...
+          GOWORK=off GOFLAGS="-mod=vendor" go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -fix ./...
+  #        run: go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -diff ./...  &&  go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -fix ./...
 
 
   package-and-release:
