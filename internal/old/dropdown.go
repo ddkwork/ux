@@ -318,7 +318,6 @@ func (c *DropDown) Layout(gtx layout.Context) layout.Dimensions {
 func (c *DropDown) updateMenuItems() {
 	c.menu.Options = c.menu.Options[:0]
 	for _, opt := range c.options {
-		opt := opt
 		c.menu.Options = append(c.menu.Options, func(gtx layout.Context) layout.Dimensions {
 			if opt.isDivider {
 				dv := component.Divider(th)

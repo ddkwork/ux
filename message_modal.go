@@ -94,8 +94,6 @@ func (modal *MessageModal) layout(gtx layout.Context) layout.Dimensions {
 								count := len(modal.options)
 								items := make([]layout.FlexChild, 0, count)
 								for i := range modal.options {
-									i := i
-
 									if modal.onSubmit != nil {
 										if modal.options[i].Button.Clicked(gtx) {
 											modal.onSubmit(modal.options[i].Text)

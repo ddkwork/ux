@@ -172,8 +172,6 @@ func (p *Prompt) Layout(gtx layout.Context) layout.Dimensions {
 							)
 						}
 						for i := range p.options {
-							i := i
-
 							if p.options[i].Button.Clicked(gtx) {
 								p.result = p.options[i].Text
 								p.submit()
