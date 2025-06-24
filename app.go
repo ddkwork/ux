@@ -41,7 +41,6 @@ func Run(title string, widget Widget) {
 		w.Option(
 			app.Title(title),
 			app.Size(1200, 600),
-			// app.Decorated(false),
 		)
 		w.Perform(system.ActionCenter)
 		explore = explorer.NewExplorer(w)
