@@ -1,7 +1,5 @@
 eliasnaur.com/font v0.0.0-20230308162249-dd43949cb42d h1:ARo7NCVvN2NdhLlJE9xAbKweuI9L6UgfTbYb0YwPacY=
 eliasnaur.com/font v0.0.0-20230308162249-dd43949cb42d/go.mod h1:OYVuxibdk9OSLX8vAqydtRPP87PyTFcT9uH3MlEGBQA=
-gioui.org v0.8.1-0.20250531011347-8104d527c746 h1:fzkkWcBET2DyEylIqtauaO8NaZJjMP6NhSBVnz9jTCc=
-gioui.org v0.8.1-0.20250531011347-8104d527c746/go.mod h1:CjNig0wAhLt9WZxOPAusgFD8x8IRvqt26LdDBa3Jvao=
 gioui.org/cpu v0.0.0-20210808092351-bfe733dd3334/go.mod h1:A8M0Cn5o+vY5LTMlnRoK3O5kG+rH0kWfJjeKd9QpBmQ=
 gioui.org/shader v1.0.8 h1:6ks0o/A+b0ne7RzEqRZK5f4Gboz2CfG+mVliciy6+qA=
 gioui.org/shader v1.0.8/go.mod h1:mWdiME581d/kV7/iEhLmUgUK5iZ09XR5XpduXzbePVM=
@@ -15,6 +13,8 @@ github.com/alecthomas/chroma/v2 v2.18.0 h1:6h53Q4hW83SuF+jcsp7CVhLsMozzvQvO8HBbK
 github.com/alecthomas/chroma/v2 v2.18.0/go.mod h1:RVX6AvYm4VfYe/zsk7mjHueLDZor3aWCNE14TFlepBk=
 github.com/alecthomas/repr v0.4.0 h1:GhI2A8MACjfegCPVq9f1FLvIBS+DrQ2KQBFZP1iFzXc=
 github.com/alecthomas/repr v0.4.0/go.mod h1:Fr0507jx4eOXV7AlPV6AVZLYrLIuIeSOWtW57eE/O/4=
+github.com/ddkwork/gio v0.0.0-20250624060756-f1d229208006 h1:10LoSaB/rl78pTDZhKkb8dXUkZ0oACmb96lLYOUo+lE=
+github.com/ddkwork/gio v0.0.0-20250624060756-f1d229208006/go.mod h1:CjNig0wAhLt9WZxOPAusgFD8x8IRvqt26LdDBa3Jvao=
 github.com/ddkwork/golibrary v0.1.5-0.20250624034935-8fd93e0b3451 h1:TuVcsZmhog+m8LnQ40kZOE8TgT8rSeFDhuPUcTGlWVM=
 github.com/ddkwork/golibrary v0.1.5-0.20250624034935-8fd93e0b3451/go.mod h1:Mz9h57QxktABXdNL99/xoYmUnXoR10BpR7xYnePIibA=
 github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=

@@ -1,13 +1,13 @@
 Subject: [PATCH] dropFile
 ---
-Index: vendor/gioui.org/app/os_x11.go
+Index: app/os_x11.go
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
-diff --git a/vendor/gioui.org/app/os_x11.go b/vendor/gioui.org/app/os_x11.go
---- a/vendor/gioui.org/app/os_x11.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
-+++ b/vendor/gioui.org/app/os_x11.go	(date 1750734635988)
+diff --git a/app/os_x11.go b/app/os_x11.go
+--- a/app/os_x11.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
++++ b/app/os_x11.go	(date 1750734635988)
 @@ -926,3 +926,9 @@
  	w.xkb.SetKeymap(unsafe.Pointer(keymap), unsafe.Pointer(state))
  	return nil
@@ -18,14 +18,14 @@ diff --git a/vendor/gioui.org/app/os_x11.go b/vendor/gioui.org/app/os_x11.go
 +func FileDropCallback(fn func(files []string)) {
 +	dragHandler = fn
 +}
-Index: vendor/gioui.org/app/os_ios.go
+Index: app/os_ios.go
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
-diff --git a/vendor/gioui.org/app/os_ios.go b/vendor/gioui.org/app/os_ios.go
---- a/vendor/gioui.org/app/os_ios.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
-+++ b/vendor/gioui.org/app/os_ios.go	(date 1750734635985)
+diff --git a/app/os_ios.go b/app/os_ios.go
+--- a/app/os_ios.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
++++ b/app/os_ios.go	(date 1750734635985)
 @@ -444,3 +444,9 @@
  func (u UIKitViewEvent) Valid() bool {
  	return u != (UIKitViewEvent{})
@@ -36,14 +36,14 @@ diff --git a/vendor/gioui.org/app/os_ios.go b/vendor/gioui.org/app/os_ios.go
 +func FileDropCallback(fn func(files []string)) {
 +	dragHandler = fn
 +}
-Index: vendor/gioui.org/app/os_android.go
+Index: app/os_android.go
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
-diff --git a/vendor/gioui.org/app/os_android.go b/vendor/gioui.org/app/os_android.go
---- a/vendor/gioui.org/app/os_android.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
-+++ b/vendor/gioui.org/app/os_android.go	(date 1750734635984)
+diff --git a/app/os_android.go b/app/os_android.go
+--- a/app/os_android.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
++++ b/app/os_android.go	(date 1750734635984)
 @@ -1498,3 +1498,9 @@
  func (a AndroidViewEvent) Valid() bool {
  	return a != (AndroidViewEvent{})
@@ -54,14 +54,14 @@ diff --git a/vendor/gioui.org/app/os_android.go b/vendor/gioui.org/app/os_androi
 +func FileDropCallback(fn func(files []string)) {
 +	dragHandler = fn
 +}
-Index: vendor/gioui.org/app/os_darwin.go
+Index: app/os_darwin.go
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
-diff --git a/vendor/gioui.org/app/os_darwin.go b/vendor/gioui.org/app/os_darwin.go
---- a/vendor/gioui.org/app/os_darwin.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
-+++ b/vendor/gioui.org/app/os_darwin.go	(date 1750734635984)
+diff --git a/app/os_darwin.go b/app/os_darwin.go
+--- a/app/os_darwin.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
++++ b/app/os_darwin.go	(date 1750734635984)
 @@ -271,3 +271,9 @@
  		w.loop.FlushEvents()
  	})
@@ -72,14 +72,14 @@ diff --git a/vendor/gioui.org/app/os_darwin.go b/vendor/gioui.org/app/os_darwin.
 +func FileDropCallback(fn func(files []string)) {
 +	dragHandler = fn
 +}
-Index: vendor/gioui.org/app/os_macos.go
+Index: app/os_macos.go
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
-diff --git a/vendor/gioui.org/app/os_macos.go b/vendor/gioui.org/app/os_macos.go
---- a/vendor/gioui.org/app/os_macos.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
-+++ b/vendor/gioui.org/app/os_macos.go	(date 1750734635986)
+diff --git a/app/os_macos.go b/app/os_macos.go
+--- a/app/os_macos.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
++++ b/app/os_macos.go	(date 1750734635986)
 @@ -1166,3 +1166,9 @@
  func (a AppKitViewEvent) Valid() bool {
  	return a != (AppKitViewEvent{})
@@ -90,14 +90,14 @@ diff --git a/vendor/gioui.org/app/os_macos.go b/vendor/gioui.org/app/os_macos.go
 +func FileDropCallback(fn func(files []string)) {
 +	dragHandler = fn
 +}
-Index: vendor/gioui.org/app/internal/windows/windows.go
+Index: app/internal/windows/windows.go
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
-diff --git a/vendor/gioui.org/app/internal/windows/windows.go b/vendor/gioui.org/app/internal/windows/windows.go
---- a/vendor/gioui.org/app/internal/windows/windows.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
-+++ b/vendor/gioui.org/app/internal/windows/windows.go	(date 1750734491602)
+diff --git a/app/internal/windows/windows.go b/app/internal/windows/windows.go
+--- a/app/internal/windows/windows.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
++++ b/app/internal/windows/windows.go	(date 1750734491602)
 @@ -177,6 +177,9 @@
  }
  
@@ -161,14 +161,14 @@ diff --git a/vendor/gioui.org/app/internal/windows/windows.go b/vendor/gioui.org
  
  func AdjustWindowRectEx(r *Rect, dwStyle uint32, bMenu int, dwExStyle uint32) {
  	_AdjustWindowRectEx.Call(uintptr(unsafe.Pointer(r)), uintptr(dwStyle), uintptr(bMenu), uintptr(dwExStyle))
-Index: vendor/gioui.org/app/os_js.go
+Index: app/os_js.go
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
-diff --git a/vendor/gioui.org/app/os_js.go b/vendor/gioui.org/app/os_js.go
---- a/vendor/gioui.org/app/os_js.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
-+++ b/vendor/gioui.org/app/os_js.go	(date 1750734635985)
+diff --git a/app/os_js.go b/app/os_js.go
+--- a/app/os_js.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
++++ b/app/os_js.go	(date 1750734635985)
 @@ -825,3 +825,9 @@
  func (j JSViewEvent) Valid() bool {
  	return !(j.Element.IsNull() || j.Element.IsUndefined())
@@ -179,14 +179,14 @@ diff --git a/vendor/gioui.org/app/os_js.go b/vendor/gioui.org/app/os_js.go
 +func FileDropCallback(fn func(files []string)) {
 +	dragHandler = fn
 +}
-Index: vendor/gioui.org/app/os_wayland.go
+Index: app/os_wayland.go
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
-diff --git a/vendor/gioui.org/app/os_wayland.go b/vendor/gioui.org/app/os_wayland.go
---- a/vendor/gioui.org/app/os_wayland.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
-+++ b/vendor/gioui.org/app/os_wayland.go	(date 1750734635987)
+diff --git a/app/os_wayland.go b/app/os_wayland.go
+--- a/app/os_wayland.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
++++ b/app/os_wayland.go	(date 1750734635987)
 @@ -1937,3 +1937,9 @@
  	f := math.Float64frombits(b) - (3 << 43)
  	return float32(f)
@@ -197,14 +197,14 @@ diff --git a/vendor/gioui.org/app/os_wayland.go b/vendor/gioui.org/app/os_waylan
 +func FileDropCallback(fn func(files []string)) {
 +	dragHandler = fn
 +}
-Index: vendor/gioui.org/app/os_windows.go
+Index: app/os_windows.go
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
-diff --git a/vendor/gioui.org/app/os_windows.go b/vendor/gioui.org/app/os_windows.go
---- a/vendor/gioui.org/app/os_windows.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
-+++ b/vendor/gioui.org/app/os_windows.go	(date 1750735135345)
+diff --git a/app/os_windows.go b/app/os_windows.go
+--- a/app/os_windows.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
++++ b/app/os_windows.go	(date 1750735135345)
 @@ -148,7 +148,8 @@
  	return nil
  }
@@ -273,14 +273,14 @@ diff --git a/vendor/gioui.org/app/os_windows.go b/vendor/gioui.org/app/os_window
  	case windows.WM_UNICHAR:
  		if wParam == windows.UNICODE_NOCHAR {
  			// Tell the system that we accept WM_UNICHAR messages.
-Index: vendor/gioui.org/app/os_unix.go
+Index: app/os_unix.go
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
-diff --git a/vendor/gioui.org/app/os_unix.go b/vendor/gioui.org/app/os_unix.go
---- a/vendor/gioui.org/app/os_unix.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
-+++ b/vendor/gioui.org/app/os_unix.go	(date 1750734635986)
+diff --git a/app/os_unix.go b/app/os_unix.go
+--- a/app/os_unix.go	(revision abd7abd1145be0cd514828e30ca2625110aaa3f0)
++++ b/app/os_unix.go	(date 1750734635986)
 @@ -97,3 +97,9 @@
  	pointer.CursorNorthEastSouthWestResize: "fd_double_arrow",
  	pointer.CursorNorthWestSouthEastResize: "bd_double_arrow",
@@ -291,8 +291,6 @@ diff --git a/vendor/gioui.org/app/os_unix.go b/vendor/gioui.org/app/os_unix.go
 +func FileDropCallback(fn func(files []string)) {
 +	dragHandler = fn
 +}
-diff --git a/internal/patch/patch.tar b/internal/patch/patch.tar
-deleted file mode 100644
 index b6a1ebda5d3a75afd6d3163e1cfa389ea4d473e1..0000000000000000000000000000000000000000
 GIT binary patch
 literal 0
