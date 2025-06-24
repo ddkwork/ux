@@ -57,6 +57,9 @@ func Run(title string, widget Widget) {
 					mylog.Check(e.Err)
 					os.Exit(0)
 
+				case app.Win32ViewEvent:
+					setCaptionColor(e.HWND, 0x292929)
+
 				case app.FrameEvent:
 					gtx := app.NewContext(&ops, e)
 					DarkBackground(gtx)
