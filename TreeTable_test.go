@@ -24,9 +24,6 @@ import (
 )
 
 func TestName(t *testing.T) {
-	if stream.IsRunningOnGitHubActions() {
-		return
-	}
 	mylog.Call(func() {
 		stream.UpdateAllLocalRep()
 		// fakeError.Walk("")
