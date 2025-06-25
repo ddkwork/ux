@@ -47,6 +47,7 @@ func Run(title string, widget Widget) {
 		// mylog.Check(android_background_service.Start()) // todo fix xml
 
 		var ops op.Ops
+		Values := make(map[string]any)
 		go func() {
 			for {
 				e := w.Event()
@@ -58,6 +59,7 @@ func Run(title string, widget Widget) {
 
 				case app.FrameEvent:
 					gtx := app.NewContext(&ops, e)
+					gtx.Values = Values
 					DarkBackground(gtx)
 
 					layout.Stack{}.Layout(gtx,
@@ -65,9 +67,14 @@ func Run(title string, widget Widget) {
 							return widget.Layout(gtx)
 						}),
 						layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-							if PopupCallback != nil {
-								defer func() { PopupCallback = nil }() //todo publick popup menu once here
-								return PopupCallback.Layout(gtx)
+							for _, v := range gtx.Values {
+								switch v := v.(type) {
+								case Widget:
+									v.Layout(gtx)
+								case layout.Widget:
+									v(gtx)
+								}
+								//gtx.Values[k] = nil
 							}
 							return layout.Dimensions{Size: gtx.Constraints.Max}
 						}),
@@ -79,8 +86,6 @@ func Run(title string, widget Widget) {
 		app.Main()
 	})
 }
-
-var PopupCallback Widget
 
 func SaveScreenshot(callback Widget) {
 	const scale = 1.5

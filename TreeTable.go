@@ -672,12 +672,12 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { // 增删改查中
 	for i, data := range TransposeMatrix(t.rows) { // todo 1561	    731960 ns/op
 		if data.isHeader {
 			t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Key), align.StringWidth[unit.Dp](t.header.columnCells[i].Key))
-			if gtx != (layout.Context{}) {
+			if gtx.Ops != nil {
 				t.maxColumnCellWidths[i] = max(t.maxColumnCellWidths[i], LabelWidth(gtx, data.Key), LabelWidth(gtx, t.header.columnCells[i].Key))
 			}
 		} else {
 			t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Value), align.StringWidth[unit.Dp](t.header.columnCells[i].Value))
-			if gtx != (layout.Context{}) {
+			if gtx.Ops != nil {
 				t.maxColumnCellWidths[i] = max(t.maxColumnCellWidths[i], LabelWidth(gtx, data.Value), LabelWidth(gtx, t.header.columnCells[i].Value))
 			}
 		}
@@ -1234,7 +1234,9 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 		t.SelectedNode.Data = t.UnmarshalRowCells(t.SelectedNode, editor.Rows) // todo test
 		mylog.Todo("save json data ?")
 	})
-	PopupCallback = editor
+	return
+	gtx.Values[""] = editor
+	//gtx.Values["treeTable row editor"] = editor
 }
 
 func (n *Node[T]) Find() (found *Node[T]) {

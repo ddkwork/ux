@@ -87,41 +87,51 @@ func (m *ContextMenu) Layout(gtx layout.Context, rootRows []layout.Widget) layou
 	if len(rootRows) == 0 { // mitmproxy start
 		return layout.Dimensions{}
 	}
-	return layout.Stack{}.Layout(gtx, layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-		return material.List(th, m.list).Layout(gtx, len(rootRows), func(gtx layout.Context, index int) layout.Dimensions {
-			gtx.Constraints.Min.X = gtx.Constraints.Max.X
-			return rootRows[index](gtx)
+	gtx.Values[""] = layout.Widget(func(gtx layout.Context) layout.Dimensions {
+		return m.area.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			gtx.Constraints.Min = image.Point{}
+			m.onClicked(gtx)
+			return m.drawContextArea(gtx)
+			return component.Menu(th, &m.state).Layout(gtx) // 所有行的item共用一个popup菜单而不是每行popup一个
 		})
-	}),
-		layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-			// skip := false
-			// for {
-			// 	ev, ok := gtx.Event(pointer.Filter{
-			// 		Target: &m.area,
-			// 		Kinds:  pointer.Press,
-			// 	})
-			// 	if !ok {
-			// 		break
-			// 	}
-			// 	e, ok := ev.(pointer.Event)
-			// 	if !ok {
-			// 		continue
-			// 	}
-			// 	if e.Buttons.Contain(pointer.ButtonPrimary) && e.Kind == pointer.Press {
-			// 		skip = true
-			// 	}
-			// }
-			// if skip {
-			// 	return layout.Dimensions{}
-			// }
-			return m.area.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				gtx.Constraints.Min = image.Point{}
-				m.onClicked(gtx)
-				return m.drawContextArea(gtx)
-				return component.Menu(th, &m.state).Layout(gtx) // 所有行的item共用一个popup菜单而不是每行popup一个
-			})
-		}),
-	)
+	})
+	return material.List(th, m.list).Layout(gtx, len(rootRows), func(gtx layout.Context, index int) layout.Dimensions {
+		gtx.Constraints.Min.X = gtx.Constraints.Max.X
+		return rootRows[index](gtx)
+	})
+
+	//return layout.Stack{}.Layout(gtx, layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+	//
+	//}),
+	//	layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+	//		// skip := false
+	//		// for {
+	//		// 	ev, ok := gtx.Event(pointer.Filter{
+	//		// 		Target: &m.area,
+	//		// 		Kinds:  pointer.Press,
+	//		// 	})
+	//		// 	if !ok {
+	//		// 		break
+	//		// 	}
+	//		// 	e, ok := ev.(pointer.Event)
+	//		// 	if !ok {
+	//		// 		continue
+	//		// 	}
+	//		// 	if e.Buttons.Contain(pointer.ButtonPrimary) && e.Kind == pointer.Press {
+	//		// 		skip = true
+	//		// 	}
+	//		// }
+	//		// if skip {
+	//		// 	return layout.Dimensions{}
+	//		// }
+	//		return m.area.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+	//			gtx.Constraints.Min = image.Point{}
+	//			m.onClicked(gtx)
+	//			return m.drawContextArea(gtx)
+	//			return component.Menu(th, &m.state).Layout(gtx) // 所有行的item共用一个popup菜单而不是每行popup一个
+	//		})
+	//	})
+	//)
 }
 
 func (m *ContextMenu) drawContextArea(gtx layout.Context) layout.Dimensions { // popup区域的背景色，位置，四角弧度

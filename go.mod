@@ -18,7 +18,7 @@ require (
 	golang.org/x/text v0.26.0
 )
 
-replace gioui.org => github.com/ddkwork/gio v0.0.0-20250624122153-18add9e0f9ec
+replace gioui.org => github.com/ddkwork/gio v0.0.0-20250625043537-5cee46f1a925
 
 require (
 	gioui.org/shader v1.0.8 // indirect
