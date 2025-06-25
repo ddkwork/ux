@@ -5,6 +5,7 @@ package component
 import (
 	"image"
 	"math"
+	"runtime"
 	"time"
 
 	"gioui.org/f32"
@@ -13,6 +14,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
+	"github.com/ddkwork/golibrary/std/mylog"
 )
 
 // ContextArea is a region of the UI that responds to certain
@@ -73,7 +75,7 @@ func (r *ContextArea) Update(gtx layout.Context) {
 	for {
 		ev, ok := gtx.Event(pointer.Filter{
 			Target: r,
-			Kinds:  pointer.Press | pointer.Release,
+			Kinds:  pointer.Press | pointer.Release | pointer.Scroll,
 		})
 		if !ok {
 			break
@@ -81,6 +83,11 @@ func (r *ContextArea) Update(gtx layout.Context) {
 		e, ok := ev.(pointer.Event)
 		if !ok {
 			continue
+		}
+		if e.Kind == pointer.Scroll {
+			mylog.Success("scroll event", e.Scroll.X, e.Scroll.Y)
+			r.Dismiss()
+			break
 		}
 		if r.active {
 			// Check whether we should dismiss menu.
@@ -96,8 +103,10 @@ func (r *ContextArea) Update(gtx layout.Context) {
 				}
 			}
 		}
+
+		//todo  按系统精确和操作习惯精确设置，添加日志打印
 		if (e.Buttons.Contain(pointer.ButtonPrimary) && e.Kind == pointer.Press) ||
-			(e.Source == pointer.Touch && e.Kind == pointer.Press) {
+			(e.Source == pointer.Touch && e.Kind == pointer.Press && runtime.GOOS != "android") {
 			if r.activationTimer != nil {
 				r.activationTimer.Stop()
 			}
@@ -105,7 +114,9 @@ func (r *ContextArea) Update(gtx layout.Context) {
 				r.LongPressDuration = 500 * time.Millisecond
 			}
 			r.activationTimer = time.AfterFunc(r.LongPressDuration, func() {
-				r.Activate(e.Position)
+				if runtime.GOOS == "android" {
+					r.Activate(e.Position)
+				}
 			})
 		}
 		if e.Kind == pointer.Release {

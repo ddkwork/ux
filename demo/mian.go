@@ -10,5 +10,11 @@ func main() {
 	app.FileDropCallback(func(files []string) {
 		mylog.Struct(files)
 	})
-	ux.Run("demo", ux.NewLogView())
+
+	p := ux.NewPanel()
+	p.AddChild(
+		ux.NewInput("", "Input", "Hello, world!"),
+		//ux.NewLogView(),
+	)
+	ux.Run("demo", p)
 }

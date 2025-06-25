@@ -87,6 +87,9 @@ func (m *ContextMenu) Layout(gtx layout.Context, rootRows []layout.Widget) layou
 	if len(rootRows) == 0 { // mitmproxy start
 		return layout.Dimensions{}
 	}
+
+	//todo bug  需要获取焦点的时候再次设置pop区域，这样的话就要收集所有已经布局控件的pop区域？
+	//  否则我们看到的最后一个带有右键菜单的pop区域，被丢弃了。就是说需要有一种获取焦点切换pop区域的机制
 	gtx.Values[""] = layout.Widget(func(gtx layout.Context) layout.Dimensions {
 		return m.area.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			gtx.Constraints.Min = image.Point{}
