@@ -204,7 +204,6 @@ func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 			)
 		})
 	})
-	gtx.Constraints.Max.Y *= 2
 	s.inset = layout.UniformInset(99)
 	if stream.IsAndroid() || !s.Modal {
 		s.inset = layout.Inset{}

@@ -15,8 +15,8 @@ github.com/alecthomas/chroma/v2 v2.18.0 h1:6h53Q4hW83SuF+jcsp7CVhLsMozzvQvO8HBbK
 github.com/alecthomas/chroma/v2 v2.18.0/go.mod h1:RVX6AvYm4VfYe/zsk7mjHueLDZor3aWCNE14TFlepBk=
 github.com/alecthomas/repr v0.4.0 h1:GhI2A8MACjfegCPVq9f1FLvIBS+DrQ2KQBFZP1iFzXc=
 github.com/alecthomas/repr v0.4.0/go.mod h1:Fr0507jx4eOXV7AlPV6AVZLYrLIuIeSOWtW57eE/O/4=
-github.com/ddkwork/gio v0.0.0-20250704014803-f8808e620f77 h1:/t3wIv8r6zJJUKzLDtml/CRufBwDWKyqWaHpxLbMFkw=
-github.com/ddkwork/gio v0.0.0-20250704014803-f8808e620f77/go.mod h1:CjNig0wAhLt9WZxOPAusgFD8x8IRvqt26LdDBa3Jvao=
+github.com/ddkwork/gio v0.0.0-20250705014357-5ea78b52adf9 h1:KT1lrEsdbq6fU7VSeYVU1G0vNXl9zi+sNUSVyrBSkxk=
+github.com/ddkwork/gio v0.0.0-20250705014357-5ea78b52adf9/go.mod h1:CjNig0wAhLt9WZxOPAusgFD8x8IRvqt26LdDBa3Jvao=
 github.com/ddkwork/golibrary v0.1.5-0.20250627073414-26b52a7347b5 h1:CQut6rboQQ1W78hU90jJz3mBbR4+n7isOX/k6AvWlHo=
 github.com/ddkwork/golibrary v0.1.5-0.20250627073414-26b52a7347b5/go.mod h1:Mz9h57QxktABXdNL99/xoYmUnXoR10BpR7xYnePIibA=
 github.com/dlclark/regexp2 v1.11.5 h1:Q/sSnsKerHeCkc/jSTNq1oCm7KiVgUMZRDUoRu0JQZQ=
