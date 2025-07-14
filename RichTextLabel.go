@@ -71,7 +71,7 @@ func (l *RichTextLabel) SetText(text string, textStyles []syntax.Token, decorati
 	}
 }
 
-func (c *RichTextLabel) stylingText(text string) ([]syntax.Token, []decoration.Decoration) {
+func (l *RichTextLabel) stylingText(text string) ([]syntax.Token, []decoration.Decoration) {
 	//if c.styledCode == text {
 	//	return c.tokens
 	//}
@@ -159,8 +159,8 @@ func (l *RichTextLabel) Update(gtx layout.Context) {
 
 }
 
-func RichLabel(size unit.Sp, txt string) RichTextLabel {
-	l := RichTextLabel{
+func RichLabel(size unit.Sp, txt string) *RichTextLabel {
+	l := &RichTextLabel{
 		Font:     font.Font{Typeface: th.Face},
 		Text:     txt,
 		TextSize: size,
