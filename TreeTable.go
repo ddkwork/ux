@@ -538,37 +538,13 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, cell *CellData) layout.Dime
 	if cell.FgColor == (color.NRGBA{}) {
 		cell.FgColor = colors.White
 	}
-	// richText := NewRichText()
-	//
-	// if cell.IsNasm {
-	// 	tokens, style := languages.GetTokens(stream.NewBuffer(cell.Value), languages.NasmKind)
-	// 	for _, token := range tokens {
-	// 		colour := style.Get(token.Type).Colour
-	// 		color := color.NRGBA{
-	// 			R: colour.Red(),
-	// 			G: colour.Green(),
-	// 			B: colour.Blue(),
-	// 			A: 255,
-	// 		}
-	// 		richText.AddSpan(richtext.SpanStyle{
-	// 			// Font:        font.Font{},
-	// 			Size:        unit.Sp(12),
-	// 			Color:       color,
-	// 			Content:     cell.Value,
-	// 			Interactive: false,
-	// 		})
-	// 	}
-	// 	return inset.Layout(gtx, richText.Layout)
-	// }
-	// richText.AddSpan(richtext.SpanStyle{
-	// 	// Font:        font.Font{},
-	// 	Size:        unit.Sp(12),
-	// 	Color:       cell.FgColor,
-	// 	Content:     cell.Value,
-	// 	Interactive: false,
-	// })
-	//
-	// return inset.Layout(gtx, richText.Layout)
+
+	if cell.IsNasm {
+		label := RichLabel(12, "")
+		stylingText, decorations := label.stylingText(cell.Value)
+		label.SetText(cell.Value, stylingText, decorations)
+		return label.Layout(gtx)
+	}
 
 	return layout.Flex{
 		Axis:      layout.Horizontal,

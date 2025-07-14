@@ -201,7 +201,6 @@ func getLexer(lang languages.LanguagesKind) chroma.Lexer {
 	if lexer == nil {
 		lexer = lexers.Fallback
 	}
-
 	return chroma.Coalesce(lexer)
 }
 

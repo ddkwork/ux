@@ -1,6 +1,9 @@
 package ux
 
 import (
+	"fmt"
+	"github.com/ddkwork/golibrary/std/stream"
+	"github.com/ddkwork/ux/languages"
 	"image"
 
 	"gioui.org/font"
@@ -66,6 +69,54 @@ func (l *RichTextLabel) SetText(text string, textStyles []syntax.Token, decorati
 	if len(decorations) > 0 {
 		l.view.AddDecorations(decorations...)
 	}
+}
+
+func (c *RichTextLabel) stylingText(text string) ([]syntax.Token, []decoration.Decoration) {
+	//if c.styledCode == text {
+	//	return c.tokens
+	//}
+
+	// nolint:prealloc
+	var tokens []syntax.Token
+	var colors []decoration.Decoration
+
+	offset := 0
+	tokens_, style := languages.GetTokens(stream.NewBuffer(text), languages.NasmKind)
+
+	//iterator, err := c.lexer.Tokenise(nil, text)
+	//if err != nil {
+	//	return tokens
+	//}
+
+	for _, token := range tokens_ {
+		gtoken := syntax.Token{
+			Start: offset,
+			End:   offset + len([]rune(token.Value)),
+			Scope: syntax.StyleScope(fmt.Sprintf("%s", token.Type)),
+		}
+		tokens = append(tokens, gtoken)
+		offset = gtoken.End
+		nrgba := chromaColorToNRGBA(style.Get(token.Type).Colour)
+		colors = append(colors, decoration.Decoration{
+			Source:        nil,
+			Priority:      0,
+			Start:         offset,
+			End:           offset + len([]rune(token.Value)),
+			Background:    &decoration.Background{Color: color.MakeColor(nrgba)},
+			Underline:     nil,
+			Squiggle:      nil,
+			Strikethrough: nil,
+			Border:        nil,
+			Italic:        false,
+			Bold:          false,
+		})
+
+	}
+
+	//c.styledCode = text
+	//c.tokens = tokens
+
+	return tokens, colors
 }
 
 // Layout the label with the given shaper, font, size, text, and material, returning metadata about the shaped text.
