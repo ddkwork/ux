@@ -539,11 +539,11 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, cell *CellData) layout.Dime
 		cell.FgColor = colors.White
 	}
 
-	if cell.IsNasm {
-		label := RichLabel(12, "")
-		stylingText, decorations := label.stylingText(cell.Value)
-		label.SetText(cell.Value, stylingText, decorations)
-		return label.Layout(gtx)
+	if cell.IsNasm { //todo  bug
+		//label := RichLabel(12, "")
+		//stylingText, decorations := label.stylingText(cell.Value)
+		//label.SetText(cell.Value, stylingText, decorations)
+		//return label.Layout(gtx)
 	}
 
 	return layout.Flex{
