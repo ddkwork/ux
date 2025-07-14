@@ -8,7 +8,7 @@ require (
 	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0
 	github.com/alecthomas/chroma/v2 v2.19.0
-	github.com/ddkwork/golibrary v0.1.5-0.20250627073414-26b52a7347b5
+	github.com/ddkwork/golibrary v0.1.5-0.20250714094806-dc6ad63544b1
 	github.com/google/go-cmp v0.7.0
 	github.com/oligo/gvcode v0.3.0
 	github.com/yuin/goldmark v1.7.12
