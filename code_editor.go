@@ -3,25 +3,26 @@ package ux
 import (
 	"bytes"
 	_ "embed"
-	"image/color"
-
+	"fmt"
+	"gioui.org/font/opentype"
+	"github.com/ddkwork/golibrary/std/mylog"
 	"github.com/ddkwork/ux/languages"
 	"github.com/ddkwork/ux/resources/images"
+	"github.com/ddkwork/ux/widget/material"
+	"image"
+	"image/color"
 
 	"gioui.org/font"
-	"gioui.org/font/opentype"
-	"gioui.org/io/event"
-	"gioui.org/io/key"
 	"gioui.org/layout"
 	"gioui.org/op"
-	"gioui.org/op/paint"
+	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/lexers"
-	"github.com/ddkwork/golibrary/std/mylog"
-	"github.com/ddkwork/ux/widget/material"
 	"github.com/oligo/gvcode"
+	gvcolor "github.com/oligo/gvcode/color"
+	"github.com/oligo/gvcode/textstyle/syntax"
 )
 
 type CodeEditor struct {
@@ -29,12 +30,10 @@ type CodeEditor struct {
 	code   string
 
 	styledCode string
-	styles     []*gvcode.TextStyle
+	tokens     []syntax.Token
 
-	lexer     chroma.Lexer
-	codeStyle *chroma.Style
-
-	lang string
+	lexer chroma.Lexer
+	lang  languages.LanguagesKind
 
 	onChange func(text string)
 
@@ -45,11 +44,33 @@ type CodeEditor struct {
 	beatufier   widget.Clickable
 	loadExample widget.Clickable
 
-	onBeautify    func()
+	withBeautify bool
+
 	onLoadExample func()
 
-	vScrollbar      widget.Scrollbar
-	vScrollbarStyle material.ScrollbarStyle
+	xScroll widget.Scrollbar
+	yScroll widget.Scrollbar
+
+	editorConfig EditorConfig
+}
+type EditorConfig struct {
+	FontFamily        string `yaml:"fontFamily"`
+	FontSize          int    `yaml:"FontSize"`
+	Indentation       string `yaml:"indentation"` // spaces or tabs
+	Theme             string `yaml:"theme"`       // theme name, e.q dracula, github, etc.
+	TabWidth          int    `yaml:"tabWidth"`
+	AutoCloseBrackets bool   `yaml:"autoCloseBrackets"`
+	AutoCloseQuotes   bool   `yaml:"autoCloseQuotes"`
+}
+
+func (e EditorConfig) Changed(other EditorConfig) bool {
+	return e.FontFamily != other.FontFamily ||
+		e.FontSize != other.FontSize ||
+		e.Indentation != other.Indentation ||
+		e.Theme != other.Theme ||
+		e.TabWidth != other.TabWidth ||
+		e.AutoCloseBrackets != other.AutoCloseBrackets ||
+		e.AutoCloseQuotes != other.AutoCloseQuotes
 }
 
 var (
@@ -69,69 +90,127 @@ func MustGetCodeEditorFont() font.FontFace {
 	}
 }
 
-func NewCodeEditor(code string, lang ...languages.LanguagesKind) *CodeEditor {
-	l := "golang"
-	if len(lang) > 0 {
-		l = lang[0].String()
-	}
-	// 	editorFont := fonts.MustGetCodeEditorFont()
+// NewEditor is a helper function to setup a editor with the
+// provided theme.
+func NewEditor() *gvcode.Editor {
+	editor := &gvcode.Editor{}
+
+	colorScheme := syntax.ColorScheme{}
+	colorScheme.Foreground = gvcolor.MakeColor(th.Fg)
+	colorScheme.Background = gvcolor.MakeColor(th.Bg)
+	colorScheme.SelectColor = gvcolor.MakeColor(th.ContrastBg).MulAlpha(0x60)
+	colorScheme.LineColor = gvcolor.MakeColor(th.ContrastBg).MulAlpha(0x30)
+	colorScheme.LineNumberColor = gvcolor.MakeColor(th.Fg).MulAlpha(0xb6)
+
+	editor.WithOptions(
+		gvcode.WrapLine(false),
+		gvcode.WithFont(font.Font{Typeface: th.Face}),
+		gvcode.WithTextSize(th.TextSize),
+		gvcode.WithTextAlignment(text.Start),
+		gvcode.WithLineHeight(0, 1.2),
+		gvcode.WithTabWidth(4),
+		gvcode.WithLineNumberGutterGap(unit.Dp(24)),
+		gvcode.WithColorScheme(colorScheme),
+	)
+
+	return editor
+}
+
+const (
+	IndentationSpaces = "spaces"
+	IndentationTabs   = "tabs"
+)
+
+func NewCodeEditor(code string, lang languages.LanguagesKind) *CodeEditor {
+	fff := MustGetCodeEditorFont()
+
 	c := &CodeEditor{
-		editor: &gvcode.Editor{
-			// Font:                  editorFont.Font,
-			// TextSize:              unit.Sp(12),
-			// LineHeightScale:       1,
-			// WrapLine:              true,
-			// ReadOnly:              false,
-			// SoftTab:               true,
-			// TabWidth:              4,
-			// LineNumberGutter: 1,
-			// TextMaterial:     rgbToOp(theme.TextColor),
-			// SelectMaterial:        rgbToOp(theme.TextSelectionColor),
-			// TextHighlightMaterial: rgbToOp(theme.TextSelectionColor),
+		editor: NewEditor(),
+		code:   code,
+		font:   fff,
+		lang:   lang,
+		editorConfig: EditorConfig{
+			FontFamily:        "JetBrains Mono",
+			FontSize:          12,
+			Indentation:       IndentationSpaces,
+			Theme:             "dracula",
+			TabWidth:          4,
+			AutoCloseBrackets: true,
+			AutoCloseQuotes:   true,
 		},
-		code: code,
-		font: font.FontFace{
-			Font: font.Font{Typeface: "sourceSansPro"},
-		},
-		lang: l,
 	}
 
-	// c.editor.WithOptions(gvcode.WithShaperParams(c.font.Font, unit.Sp(12), text.Start, unit.Sp(16), 1))
-	// c.editor.WithOptions(gvcode.WithTabWidth(4))
-	// c.editor.WithOptions(gvcode.WithSoftTab(true))
-	c.editor.WithOptions(gvcode.WrapLine(true))
-	c.vScrollbarStyle = material.Scrollbar(th, &c.vScrollbar)
+	c.lexer = getLexer(lang)
+	c.setEditorOptions()
+
+	//prefs.AddGlobalConfigChangeListener(func(old, updated domain.GlobalConfig) {
+	//	if old.Spec.Editor.Changed(updated.Spec.Editor) {
+	//		c.editorConfig = updated.Spec.Editor
+	//		c.setEditorOptions()
+	//	}
+	//})
+
 	c.border = widget.Border{
-		Color:        rgb(0x6c6f76), // todo
+		Color:        th.BorderLightGrayColor,
 		Width:        unit.Dp(1),
 		CornerRadius: unit.Dp(4),
 	}
 
-	c.lexer = getLexer(l)
-	// style := styles.Get("dracula")
-	// if style == nil {
-	//	style = styles.Fallback
-	// }
-	// c.codeStyle = style
-	c.codeStyle = Dracula
 	c.editor.SetText(code)
 	return c
 }
 
-func getLexer(lang string) chroma.Lexer {
-	lexer := lexers.Get(lang)
+func (c *CodeEditor) setEditorOptions() {
+	// color scheme
+	colorScheme := syntax.ColorScheme{}
+	colorScheme.Foreground = gvcolor.MakeColor(th.Fg)
+	colorScheme.SelectColor = gvcolor.MakeColor(th.TextSelectionColor).MulAlpha(0x60)
+	colorScheme.LineColor = gvcolor.MakeColor(th.ContrastBg).MulAlpha(0x30)
+	colorScheme.LineNumberColor = gvcolor.MakeColor(th.ContrastFg).MulAlpha(0xb6)
+
+	syntaxStyles := getColorStyles("dracula")
+	for _, style := range syntaxStyles {
+		colorScheme.AddStyle(style.scope, style.textStyle, style.color, style.background)
+	}
+
+	editorOptions := []gvcode.EditorOption{
+		gvcode.WithFont(c.font.Font),
+		gvcode.WithTextSize(unit.Sp(c.editorConfig.FontSize)),
+		gvcode.WithTextAlignment(text.Start),
+		gvcode.WithLineHeight(unit.Sp(16), 1),
+		gvcode.WithTabWidth(c.editorConfig.TabWidth),
+		gvcode.WithSoftTab(c.editorConfig.Indentation == IndentationSpaces),
+		gvcode.WrapLine(true),
+		gvcode.WithLineNumber(true),
+		gvcode.WithColorScheme(colorScheme),
+	}
+
+	if !c.editorConfig.AutoCloseBrackets {
+		editorOptions = append(editorOptions, gvcode.WithQuotePairs(map[rune]rune{}))
+	}
+
+	if !c.editorConfig.AutoCloseQuotes {
+		editorOptions = append(editorOptions, gvcode.WithBracketPairs(map[rune]rune{}))
+	}
+
+	c.editor.WithOptions(editorOptions...)
+}
+
+func getLexer(lang languages.LanguagesKind) chroma.Lexer {
+	lexer := lexers.Get(lang.String())
 	if lexer == nil {
 		lexer = lexers.Fallback
 	}
+
 	return chroma.Coalesce(lexer)
+}
+
+func (c *CodeEditor) WithBeautifier(enabled bool) {
+	c.withBeautify = enabled
 }
 
 func (c *CodeEditor) SetOnChanged(f func(text string)) {
 	c.onChange = f
-}
-
-func (c *CodeEditor) SetOnBeautify(f func()) {
-	c.onBeautify = f
 }
 
 func (c *CodeEditor) SetReadOnly(readOnly bool) {
@@ -142,20 +221,18 @@ func (c *CodeEditor) SetOnLoadExample(f func()) {
 	c.onLoadExample = f
 }
 
-func (c *CodeEditor) AppendText(text string) {
-	c.editor.Insert(text)
-}
-
 func (c *CodeEditor) SetCode(code string) {
 	c.editor.SetText(code)
 	c.code = code
-	c.editor.UpdateTextStyles(c.stylingText(c.editor.Text()))
+	c.editor.SetSyntaxTokens(c.stylingText(c.editor.Text())...)
 }
-
-func (c *CodeEditor) SetLanguage(lang string) {
+func (c *CodeEditor) AppendText(text string) {
+	c.editor.Insert(text)
+}
+func (c *CodeEditor) SetLanguage(lang languages.LanguagesKind) {
 	c.lang = lang
 	c.lexer = getLexer(lang)
-	c.editor.UpdateTextStyles(c.stylingText(c.editor.Text()))
+	c.editor.SetSyntaxTokens(c.stylingText(c.editor.Text())...)
 }
 
 func (c *CodeEditor) Code() string {
@@ -165,55 +242,20 @@ func (c *CodeEditor) Code() string {
 func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 	if c.styledCode == "" {
 		// First time styling
-		c.editor.UpdateTextStyles(c.stylingText(c.editor.Text()))
+		c.editor.SetSyntaxTokens(c.stylingText(c.editor.Text())...)
 	}
+
+	scrollIndicatorColor := gvcolor.MakeColor(th.Fg).MulAlpha(0x30)
 
 	if !c.editor.ReadOnly() {
 		if ev, ok := c.editor.Update(gtx); ok {
 			if _, ok := ev.(gvcode.ChangeEvent); ok {
 				st := c.stylingText(c.editor.Text())
-				c.styles = st
-				c.editor.UpdateTextStyles(st)
+				c.tokens = st
+				c.editor.SetSyntaxTokens(st...)
 				if c.onChange != nil {
 					c.onChange(c.editor.Text())
 					c.code = c.editor.Text()
-				}
-			}
-		}
-
-		filters := []event.Filter{
-			key.FocusFilter{Target: c.editor},
-			key.Filter{Focus: c.editor, Name: "D", Required: key.ModShortcut},
-		}
-		for {
-			ke, ok := gtx.Event(filters...)
-			if !ok {
-				break
-			}
-			switch e := ke.(type) {
-			case key.Event:
-				if !gtx.Focused(c.editor) || e.State != key.Press {
-					break
-				}
-				if e.Modifiers.Contain(key.ModShortcut) {
-					switch e.Name {
-					case "D":
-						// c.editor.DuplicateLine()
-						// c.editor.DuplicateLine()
-						// func (e *Editor) DuplicateLine() {
-						//	e.initBuffer()
-						//	if e.text.SelectionLen() == 0 {
-						//		e.scratch = e.text.SelectedLine(e.scratch)
-						//		if len(e.scratch) > 0 && e.scratch[len(e.scratch)-1] != '\n' {
-						//			e.scratch = append(e.scratch, '\n')
-						//		}
-						//	} else {
-						//		e.scratch = e.text.SelectedText(e.scratch)
-						//	}
-						//	e.Insert(string(e.scratch))
-						// }
-						c.editor.UpdateTextStyles(c.stylingText(c.editor.Text()))
-					}
 				}
 			}
 		}
@@ -223,11 +265,19 @@ func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 		c.onLoadExample()
 	}
 
-	if c.beatufier.Clicked(gtx) {
-		c.onBeautify()
+	xScrollDist := c.xScroll.ScrollDistance()
+	yScrollDist := c.yScroll.ScrollDistance()
+	if xScrollDist != 0.0 || yScrollDist != 0.0 {
+		c.editor.Scroll(gtx, xScrollDist, yScrollDist)
 	}
 
 	flexH := layout.Flex{Axis: layout.Horizontal}
+
+	if c.withBeautify {
+		macro := op.Record(gtx.Ops)
+		c.beautyButton(gtx)
+		defer op.Defer(gtx.Ops, macro.Stop())
+	}
 
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -241,27 +291,12 @@ func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 					}
 
 					btn := Button(&c.loadExample, images.NavigationRefreshIcon, "Load Example")
-					// btn := NewNavButton("Load Example")
-					// btn.Color = theme.ButtonTextColor
-					// btn.Inset = layout.Inset{
-					//	Top: unit.Dp(4), Bottom: unit.Dp(4),
-					//	Left: unit.Dp(4), Right: unit.Dp(4),
-					// }
-
-					return btn.Layout(gtx)
-				}),
-				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-					if c.onBeautify == nil {
-						return layout.Dimensions{}
-					}
-
-					btn := Button(&c.beatufier, images.EditorFormatColorTextIcon, "Beautify")
-					// btn.Color = theme.ButtonTextColor//todo
+					//btn.Color = theme.ButtonTextColor
 					btn.Inset = layout.Inset{
-						Top: 4, Bottom: 4,
-						Left: 4, Right: 4,
+						Top: unit.Dp(4), Bottom: unit.Dp(4),
+						Left: unit.Dp(4), Right: unit.Dp(4),
 					}
-					// btn := NewNavButton("Load Example")
+
 					return btn.Layout(gtx)
 				}),
 			)
@@ -276,9 +311,29 @@ func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 							Left:   unit.Dp(8),
 							Right:  unit.Dp(4),
 						}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-							hint := "No example available"
-							return c.editorStyle(gtx, hint)
+							dims := c.editor.Layout(gtx, th.Shaper)
+
+							macro := op.Record(gtx.Ops)
+							scrollbarDims := func(gtx layout.Context) layout.Dimensions {
+								return layout.Inset{
+									Left: gtx.Metric.PxToDp(c.editor.GutterWidth()),
+								}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+									minX, maxX, _, _ := c.editor.ScrollRatio()
+									bar := makeScrollbar(&c.xScroll, scrollIndicatorColor.NRGBA())
+									return bar.Layout(gtx, layout.Horizontal, minX, maxX)
+								})
+							}(gtx)
+
+							scrollbarOp := macro.Stop()
+							defer op.Offset(image.Point{Y: dims.Size.Y - scrollbarDims.Size.Y}).Push(gtx.Ops).Pop()
+							scrollbarOp.Add(gtx.Ops)
+							return dims
 						})
+					}),
+					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						_, _, minY, maxY := c.editor.ScrollRatio()
+						bar := makeScrollbar(&c.yScroll, scrollIndicatorColor.NRGBA())
+						return bar.Layout(gtx, layout.Vertical, minY, maxY)
 					}),
 				)
 			})
@@ -286,79 +341,74 @@ func (c *CodeEditor) Layout(gtx layout.Context) layout.Dimensions {
 	)
 }
 
-func (c *CodeEditor) editorStyle(gtx layout.Context, _ string) layout.Dimensions {
-	es := NewEditor(c.editor)
-	es.Font.Typeface = "sourceSansPro"
-	es.SelectionColor = th.TextSelectionColor
-	editorDims := es.Layout(gtx)
-
-	layout.E.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		viewportStart, viewportEnd := c.editor.ViewPortRatio()
-		return c.vScrollbarStyle.Layout(gtx, layout.Vertical, viewportStart, viewportEnd)
-	})
-
-	if delta := c.vScrollbar.ScrollDistance(); delta != 0 {
-		c.editor.ScrollByRatio(gtx, delta)
+func (c *CodeEditor) beautyButton(gtx layout.Context) layout.Dimensions {
+	if c.beatufier.Clicked(gtx) {
+		//c.SetCode(BeautifyCode(c.lang, c.code))
+		c.SetCode(c.code)
+		if c.onChange != nil {
+			c.onChange(c.editor.Text())
+		}
 	}
 
-	return editorDims
+	return layout.Inset{Bottom: unit.Dp(4), Right: unit.Dp(4)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return layout.SE.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			btn := Button(&c.beatufier, images.ContentClearIcon, "Beautify")
+			//btn.Color = theme.ButtonTextColor
+			btn.Inset = layout.Inset{
+				Top: 4, Bottom: 4,
+				Left: 4, Right: 4,
+			}
+			return btn.Layout(gtx)
+		})
+	})
 }
 
-func (c *CodeEditor) stylingText(text string) []*gvcode.TextStyle {
+func makeScrollbar(scroll *widget.Scrollbar, color color.NRGBA) material.ScrollbarStyle {
+	bar := material.Scrollbar(th, scroll)
+	bar.Indicator.Color = color
+	bar.Indicator.CornerRadius = unit.Dp(0)
+	bar.Indicator.MinorWidth = unit.Dp(8)
+	bar.Track.MajorPadding = unit.Dp(0)
+	bar.Track.MinorPadding = unit.Dp(1)
+	return bar
+}
+
+func (c *CodeEditor) stylingText(text string) []syntax.Token {
 	if c.styledCode == text {
-		return c.styles
+		return c.tokens
 	}
 
 	// nolint:prealloc
-	var textStyles []*gvcode.TextStyle
+	var tokens []syntax.Token
 
 	offset := 0
 
-	iterator := mylog.Check2(c.lexer.Tokenise(nil, text))
+	iterator, err := c.lexer.Tokenise(nil, text)
+	if err != nil {
+		return tokens
+	}
 
 	for _, token := range iterator.Tokens() {
-		entry := c.codeStyle.Get(token.Type)
-
-		textStyle := &gvcode.TextStyle{
-			TextRange: gvcode.TextRange{
-				Start: offset,
-				End:   offset + len([]rune(token.Value)),
-			},
-			Color: rgbToOp(th.Fg),
-			// Background: rgbToOp(c.theme.Bg),
+		gtoken := syntax.Token{
+			Start: offset,
+			End:   offset + len([]rune(token.Value)),
+			Scope: syntax.StyleScope(fmt.Sprintf("%s", token.Type)),
 		}
-
-		if entry.Colour.IsSet() {
-			textStyle.Color = chromaColorToOp(entry.Colour)
-		}
-
-		textStyles = append(textStyles, textStyle)
-		offset = textStyle.End
+		tokens = append(tokens, gtoken)
+		offset = gtoken.End
 	}
 
 	c.styledCode = text
-	c.styles = textStyles
+	c.tokens = tokens
 
-	return textStyles
+	return tokens
 }
 
-func chromaColorToOp(textColor chroma.Colour) op.CallOp {
-	ops := new(op.Ops)
-
-	m := op.Record(ops)
-	paint.ColorOp{Color: color.NRGBA{
+func chromaColorToNRGBA(textColor chroma.Colour) color.NRGBA {
+	return color.NRGBA{
 		R: textColor.Red(),
 		G: textColor.Green(),
 		B: textColor.Blue(),
 		A: 0xff,
-	}}.Add(ops)
-	return m.Stop()
-}
-
-func rgbToOp(color color.NRGBA) op.CallOp {
-	ops := new(op.Ops)
-
-	m := op.Record(ops)
-	paint.ColorOp{Color: color}.Add(ops)
-	return m.Stop()
+	}
 }
