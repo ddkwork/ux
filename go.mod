@@ -1,6 +1,6 @@
 module github.com/ddkwork/ux
 
-go 1.25rc1
+go 1.25
 
 require (
 	gioui.org v0.8.1-0.20250531011347-8104d527c746
@@ -8,7 +8,7 @@ require (
 	gioui.org/x v0.8.2-0.20250115181849-c005f2ad1592
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0
 	github.com/alecthomas/chroma/v2 v2.20.0
-	github.com/ddkwork/golibrary v0.1.5-0.20250714094806-dc6ad63544b1
+	github.com/ddkwork/golibrary v0.1.5-0.20250816073422-ec5c841d4409
 	github.com/google/go-cmp v0.7.0
 	github.com/oligo/gvcode v0.3.0
 	github.com/yuin/goldmark v1.7.13
