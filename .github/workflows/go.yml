@@ -26,7 +26,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.25.0-rc.1'
+          go-version: '1.25.0'
 
       # manjaro linux
       # gioui提示vulkan构建约束被排除的原因是没有安装gcc，termux可以试试是不是这个原因
@@ -67,7 +67,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.25.0-rc.1'
+          go-version: '1.25.0'
 
       - name: Install dependencies
         run: go mod tidy
