@@ -27,7 +27,7 @@ func NewTooltipButton(icon []byte, tip string, callback func()) *TipIconButton {
 	t.CornerRadius = 14
 	t.Text.MaxLines = 3 // todo newlines
 	clickable := &widget.Clickable{}
-	iconButtonStyle := material.IconButton(th, clickable, icon, "")
+	iconButtonStyle := material.IconButton(th, clickable, icon, tip)
 	iconButtonStyle.Color = th.Fg
 	iconButtonStyle.Background = th.Color.InputFocusedBgColor
 	iconButtonStyle.Inset = layout.UniformInset(unit.Dp(6))

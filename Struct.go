@@ -69,6 +69,10 @@ func MarshalFields[T any](data T, callback MarshalRowCallback) (fields []CellDat
 			}
 		}
 		vv := fmt.Sprint(v)
+		if vv == "0" {
+			//todo检查字段是数字类型
+			vv = ""
+		}
 		// if vv == "" {
 		// 	vv = strconv.Quote("") // for struct2table
 		// }

@@ -35,7 +35,7 @@ type ButtonStyle struct {
 	Inset        layout.Inset
 	Button       *widget.Clickable
 	shaper       *text.Shaper
-	border       widget.Border
+	Border       widget.Border
 }
 
 type ButtonLayoutStyle struct {
@@ -60,7 +60,7 @@ func iconButtonSmall(button *widget.Clickable, icon []byte, txt string) ButtonSt
 	style := Button(button, icon, txt)
 	style.Inset = layout.Inset{}
 	style.IconSize = defaultHierarchyIconSize
-	style.border = widget.Border{}
+	style.Border = widget.Border{}
 	return style
 }
 
@@ -78,7 +78,7 @@ func Button(button *widget.Clickable, icon []byte, text string) ButtonStyle {
 		Inset:           layout.UniformInset(8),
 		Button:          button,
 		shaper:          th.Shaper,
-		border: widget.Border{
+		Border: widget.Border{
 			Color:        colors.Grey200,
 			CornerRadius: 16,
 			Width:        .5,
@@ -113,18 +113,18 @@ func (b ButtonStyle) Layout(gtx layout.Context) layout.Dimensions {
 			items = []layout.FlexChild{labelDims, iconDims}
 			b.Inset.Right = unit.Dp(5)
 		}
-		background := b.border.Color
+		background := b.Border.Color
 		switch {
 		case !gtx.Enabled():
 			background = Disabled(b.Background)
 		case b.Button.Hovered() || gtx.Focused(b.Button):
 			background = colors.Grey400
 		}
-		b.border.Color = background
+		b.Border.Color = background
 		if b.Icon == nil {
-			b.border.CornerRadius = 13
+			b.Border.CornerRadius = 13
 		}
-		return b.border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return b.Border.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			return b.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(gtx, items...)
 			})

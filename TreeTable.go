@@ -37,9 +37,11 @@ type (
 	TreeTable[T any] struct {
 		TableContext[T]                     // 实例化时传入的上下文
 		Root                *Node[T]        // 根节点,保存数据到json只需要调用它即可
+		OriginalRoot        *Node[T]        // 备份的原始根节点
 		header              *tableHeader[T] // 表头
 		rootRows            []*Node[T]      // from root.children
 		filteredRows        []*Node[T]      // 过滤后的行
+		groupedRows         []*Node[T]      // 分组后的行
 		rootRowsWidget      []layout.Widget // from layout
 		rows                [][]CellData    // 为了求最大列宽，把他当做全部节点展开的状态
 		SelectedNode        *Node[T]        // 当前选中的节点
@@ -69,6 +71,7 @@ type (
 		IsDocument             bool                                                           // 是否生成markdown文档
 		//	DragRemovedRowsCallback  func()
 		//	DropOccurredCallback     func()
+		GroupCallback func(gtx layout.Context) //按指定列相同的单元格值进行分组重建n叉树
 	}
 	tableHeader[T any] struct {
 		sortOrder          sortOrder    // 排序方式
@@ -115,6 +118,7 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 	return &TreeTable[T]{
 		TableContext: TableContext[T]{},
 		Root:         root,
+		OriginalRoot: nil,
 		header: &tableHeader[T]{
 			sortOrder:          0,
 			sortedBy:           0,
@@ -126,6 +130,7 @@ func NewTreeTable[T any](data T) *TreeTable[T] {
 		},
 		rootRows:       nil,
 		filteredRows:   nil,
+		groupedRows:    nil,
 		rootRowsWidget: nil,
 		rows:           nil,
 		// columns:                      nil,
@@ -156,9 +161,17 @@ func (t *TreeTable[T]) makeRootRowsWidget() {
 }
 
 func (t *TreeTable[T]) RootRows() []*Node[T] {
+	if t.groupedRows != nil {
+		return t.groupedRows
+	}
 	if t.filteredRows != nil {
 		return t.filteredRows
 	}
+	if t.Root == nil {
+		mylog.CheckNil(t.OriginalRoot)
+		t.Root = t.OriginalRoot
+	}
+	mylog.CheckNil(t.Root)
 	t.rootRows = t.Root.Children
 	return t.rootRows
 }
@@ -172,6 +185,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		if t.SetRootRowsCallBack != nil { // github.com/ddkwork/mitmproxy
 			t.SetRootRowsCallBack()
 			t.CloseAll()
+			t.OriginalRoot = deepcopy.Clone(t.Root)
 		}
 		if t.JsonName == "" {
 			mylog.Check("JsonName is empty")
@@ -200,6 +214,11 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		//	}
 		// }
 	})
+	if t.GroupCallback != nil {
+		mylog.CheckNil(t.OriginalRoot)
+		t.Root = deepcopy.Clone(t.OriginalRoot)
+		t.GroupCallback(gtx)
+	}
 	t.SizeColumnsToFit(gtx)
 	t.makeRootRowsWidget()
 
@@ -675,12 +694,12 @@ func (t *TreeTable[T]) SaveDate() {
 		}
 
 		stream.MarshalJsonToFile(t.Root, filepath.Join("cache", t.JsonName))
-		stream.WriteTruncate(filepath.Join("cache", t.JsonName+".txt"), t.Document()) // 调用t.Format()
+		stream.WriteTruncate(filepath.Join("cache", t.JsonName+".txt"), t.MarkDown()) // 调用t.Format()
 		if t.IsDocument {
 			b := stream.NewBuffer("")
 			b.WriteStringLn("# " + t.JsonName + " document table")
 			b.WriteStringLn("```text")
-			b.WriteStringLn(t.Document())
+			b.WriteStringLn(t.MarkDown())
 			b.WriteStringLn("```")
 			stream.WriteTruncate("README2.md", b.String())
 		}
@@ -917,6 +936,63 @@ func (t *TreeTable[T]) CopyColumn(gtx layout.Context) string {
 	gtx.Execute(clipboard.WriteCmd{Data: io.NopCloser(strings.NewReader(g.Format()))})
 	return g.String()
 }
+func (t *TreeTable[T]) updateOriginalRoot() {
+	t.OriginalRoot = deepcopy.Clone(t.Root) //to-do 增删改查调用它
+}
+func (t *TreeTable[T]) GroupBy(field string) {
+	// 按照字段名称找到分组的列
+	mylog.CheckNil(t.OriginalRoot)
+	t.Root = t.OriginalRoot
+	t.groupedRows = nil
+	groupColumIndex := -1
+	for i, cell := range t.header.columnCells {
+		if field == cell.Key {
+			groupColumIndex = i
+			mylog.Trace(i, "即将按"+strconv.Quote(cell.Key)+"列进行分组 ")
+			break
+		}
+	}
+	if groupColumIndex == -1 {
+		mylog.Check("未找到分组列,请检查输入的字段名称是否正确")
+		return
+	}
+
+	// 构建分组映射
+	groupMap := make(map[string][]*Node[T])
+	for _, n := range t.RootRows() {
+		cells := t.MarshalRowCells(n)
+		// 检查列索引是否有效
+		if groupColumIndex >= len(cells) {
+			continue
+		}
+		// 获取指定列的值
+		groupValue := cells[groupColumIndex].Value
+		// 将节点添加到对应的分组中
+		groupMap[groupValue] = append(groupMap[groupValue], n)
+	}
+
+	// 创建新的根节点
+	var zero T
+	root := newRoot(zero)
+	for groupKey, groupNodes := range groupMap {
+		// 创建容器节点
+		containerNode := NewContainerNode(groupKey, zero)
+		for _, node := range groupNodes {
+			// 将节点添加到容器节点中
+			containerNode.AddChild(node)
+		}
+		// 将容器节点添加到新的根节点中
+		root.AddChild(containerNode)
+	}
+
+	// 更新树形表格的根节点和根行
+	t.groupedRows = root.Children
+	t.Root = root
+	// 如果有分组结果，展开所有节点以便显示分组内容
+	if len(t.rootRows) > 0 {
+		t.OpenAll()
+	}
+}
 
 func (t *TreeTable[T]) ScrollRowIntoView(row int) {
 	t.contextMenu.list.ScrollTo(row)
@@ -1071,6 +1147,7 @@ type Node[T any] struct {
 	rowCells  []CellData       // 行单元格数据
 	rowClick  widget.Clickable // 行点击按钮绘制,每个节点对应一个
 	RowNumber int              // 展开所有节点状态下的下标，用于交替行背景色的条件
+	GroupKey  string           // 分组键, 根据该键值对数据进行分组
 }
 
 const ContainerKeyPostfix = "_container"
@@ -1210,9 +1287,8 @@ func (t *TreeTable[T]) Edit(gtx layout.Context) { // 编辑节点不会对最大
 		t.SelectedNode.Data = t.UnmarshalRowCells(t.SelectedNode, editor.Rows) // todo test
 		mylog.Todo("save json data ?")
 	})
-	return
-	gtx.Values[""] = editor
-	//gtx.Values["treeTable row editor"] = editor
+	//gtx.Values[""] = editor
+	gtx.Values["treeTable row editor"] = editor
 }
 
 func (n *Node[T]) Find() (found *Node[T]) {
@@ -1225,12 +1301,6 @@ func (n *Node[T]) Find() (found *Node[T]) {
 	return
 }
 
-// CopyRow todo 看起来tui的列宽计算需要细细优化
-// var rowData = []string{ "Row 4 (5)"  ,"GET" ,"example.com","/api/v4/resource"  ,"application/json","1593"       ,"OK"  ,"获取资源4"       ,"process4.exe"   ,"1m48s",}
-// var rowData = []string{ "Sub Sub Row2","GET" ,"example.com","/api/v4/resource1-2","application/json","106"        ,"OK"  ,"获取资源4-1-2"   ,"process4-1-2.exe","7s"   ,}
-// var rowData = []string{ "Sub Row3"   ,"GET" ,"example.com","/api/v4/resource3" ,"application/json","106"        ,"OK"  ,"获取资源4-3"     ,"process4-3.exe" ,"7s"   ,}
-// var rowData = []string{ "Row5"       ,"GET" ,"example.com","/api/v5/resource"  ,"application/json","104"        ,"OK"  ,"获取资源5"       ,"process5.exe"   ,"5s"   ,}
-// var rowData = []string{ "Row11"      ,"GET" ,"example.com","/api/v11/resource" ,"application/json","110"        ,"OK"  ,"获取资源11"      ,"process11.exe"  ,"11s"  ,}
 func (n *Node[T]) CopyRow(gtx layout.Context, widths []unit.Dp) string {
 	g := stream.NewGeneratedFile()
 	g.WriteString("var rowData = []string{ ")
@@ -1395,107 +1465,75 @@ func (n *Node[T]) SetChildren(children []*Node[T]) {
 	n.Children = children
 }
 
-// -------------------------tui
-const (
-	indent          = "│   "
-	childPrefix     = "├───"
-	lastChildPrefix = "└───"
-	indentBase      = unit.Dp(3)
-)
+func (t *TreeTable[T]) String() string { return t.MarkDown() }
 
-func (t *TreeTable[T]) maxColumnCellTextWidth() unit.Dp {
-	hierarchyIndent := unit.Dp(1)
-	dividerWidth := align.StringWidth[unit.Dp](" │ ")
-	iconWidth := align.StringWidth[unit.Dp](childPrefix)
-	return t.MaxDepth()*hierarchyIndent + // 最大深度的左缩进
-		iconWidth + // 图标宽度,不管深度是多少，每一行都只会有一个层级图标
-		t.maxColumnTextWidths[0] + 5 + // (8 * 2) + 20 + // 左右padding,20是sort图标的宽度或者容器节点求和的文本宽度
-		dividerWidth // 列分隔条宽度
-}
-
-func (t *TreeTable[T]) Format() *stream.Buffer {
-	buf := t.FormatHeader(t.maxColumnTextWidths)
-	t.FormatChildren(buf, t.rootRows) // 传入子节点打印函数
-	// mylog.Json("DrawRowCallback", buf.String())
-	return buf
-}
-
-func (t *TreeTable[T]) String() string { return t.Format().String() }
-
-func (t *TreeTable[T]) Document() string {
-	s := stream.NewBuffer("")
-	// s.WriteStringLn("// interface or method name here")
-	// s.WriteStringLn("/*")
-	for line := range t.Format().ToLines() {
-		s.WriteStringLn("  " + line)
-	}
-	// s.WriteStringLn("*/")
-	return s.String()
-}
-
-func (t *TreeTable[T]) FormatHeader(maxColumnCellTextWidths []unit.Dp) *stream.Buffer {
+func (t *TreeTable[T]) MarkDown() string {
 	b := stream.NewBuffer("")
-	all := t.maxColumnCellTextWidth()
-	for _, width := range maxColumnCellTextWidths {
-		all += width
-	}
-	all += align.StringWidth[unit.Dp]("│")*unit.Dp(len(maxColumnCellTextWidths)) + 4 // ?
-	b.WriteStringLn("┌─" + strings.Repeat("─", int(all)))
-	b.WriteString("│")
 
-	// 计算每个单元格的左边距
-	for i, cell := range t.header.columnCells {
-		paddedText := fmt.Sprintf("%-*s", int(maxColumnCellTextWidths[i]), cell.Value) // 左对齐填充
-
-		// 添加左边距，仅在首列进行处理，依据列宽计算
-		if i == HierarchyColumnID {
-			b.WriteString(strings.Repeat(" ", int(t.maxColumnCellTextWidth()-maxColumnCellTextWidths[i]-1))) // -1是分隔符的空间
-		}
-
-		b.WriteString(paddedText)
-		if i < t.columnCount-1 {
-			b.WriteString(" │ ") // 在每个单元格之间添加分隔符
+	// Step 1: 获取表头信息并生成表头行
+	columnCells := t.header.columnCells
+	var headerRow strings.Builder
+	headerRow.WriteString("|")
+	for _, cell := range columnCells {
+		if cell.isHeader {
+			headerRow.WriteString(" " + cell.Key + " |")
 		}
 	}
+	b.WriteStringLn(headerRow.String())
 
-	b.NewLine()
-	b.WriteStringLn("├─" + strings.Repeat("─", int(all)))
-	return b
+	// Step 2: 生成表头分隔行
+	var headerSeparator strings.Builder
+	headerSeparator.WriteString("|")
+	for _, cell := range columnCells {
+		if cell.isHeader {
+			headerSeparator.WriteString(" " + strings.Repeat("-", len(cell.Key)) + " |")
+		}
+	}
+	b.WriteStringLn(headerSeparator.String())
+
+	// Step 3: 遍历树形结构并生成每一行，包括缩进
+	t.walkAndFormatMarkdown(b, t.Root.Children, 0)
+	stream.WriteTruncate("treetable.md", b.String())
+
+	return b.String()
 }
 
-func (t *TreeTable[T]) FormatChildren(b *stream.Buffer, children []*Node[T]) {
-	for i, child := range children {
-		if child.rowCells == nil {
-			child.rowCells = t.MarshalRowCells(child)
+func (t *TreeTable[T]) walkAndFormatMarkdown(b *stream.Buffer, nodes []*Node[T], depth int) {
+	for i, node := range nodes {
+		if node.rowCells == nil {
+			node.rowCells = t.MarshalRowCells(node)
 		}
-		HierarchyColumBuf := stream.NewBuffer("")
-		for j, cell := range child.rowCells {
+		var row strings.Builder
+
+		// Step 4: 处理缩进并合并层级缩进符号和层级列单元格文本
+		if depth > 0 {
+			row.WriteString(strings.Repeat("&nbsp;&nbsp;&nbsp;", depth-1))
+		}
+
+		if i == len(nodes)-1 {
+			row.WriteString("└───")
+		} else {
+			row.WriteString("├───")
+		}
+
+		if len(node.rowCells) > HierarchyColumnID {
+			row.WriteString(node.rowCells[HierarchyColumnID].Value)
+		}
+
+		row.WriteString(" |")
+
+		// Step 5: 生成每一列的数据
+		for j, cell := range node.rowCells {
 			if j == HierarchyColumnID {
-				HierarchyColumBuf.WriteString("│")
-				HierarchyColumBuf.WriteString(strings.Repeat(" ", int(child.Depth()*indentBase)))
-				if i == len(children)-1 {
-					HierarchyColumBuf.WriteString("╰──") // "└───"
-				} else {
-					HierarchyColumBuf.WriteString("├──")
-				}
-				HierarchyColumBuf.WriteString(cell.Value)
-				if align.StringWidth[unit.Dp](HierarchyColumBuf.String()) < t.maxColumnCellTextWidth() {
-					HierarchyColumBuf.WriteString(strings.Repeat(" ", int(t.maxColumnCellTextWidth()-align.StringWidth[unit.Dp](HierarchyColumBuf.String()))))
-				}
-				HierarchyColumBuf.WriteString(" │ ")
-				b.WriteString(HierarchyColumBuf.String())
-				HierarchyColumBuf.Reset()
-				continue
+				continue // 已经在上一步合并了层级列单元格文本
 			}
-			b.WriteString(cell.Value)
-			if align.StringWidth[unit.Dp](cell.Value) < t.maxColumnTextWidths[j] {
-				b.WriteString(strings.Repeat(" ", int(t.maxColumnTextWidths[j]-align.StringWidth[unit.Dp](cell.Value))))
-			}
-			b.WriteString(" │ ")
+			row.WriteString(" " + cell.Value + " |")
 		}
-		b.NewLine()
-		if len(child.Children) > 0 {
-			t.FormatChildren(b, child.Children)
+
+		b.WriteStringLn(row.String())
+
+		if len(node.Children) > 0 {
+			t.walkAndFormatMarkdown(b, node.Children, depth+1)
 		}
 	}
 }
@@ -1735,5 +1773,3 @@ func (t *TreeTable[T]) FormatChildren(b *stream.Buffer, children []*Node[T]) {
 // 		}
 // 	}
 // }
-
-// v0.4

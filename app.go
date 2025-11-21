@@ -40,7 +40,7 @@ func Run(title string, widget Widget) {
 		w := new(app.Window)
 		w.Option(
 			app.Title(title),
-			app.Size(1200, 600),
+			app.Size(1400, 800),
 		)
 		w.Perform(system.ActionCenter)
 		explore = explorer.NewExplorer(w)

@@ -14,7 +14,6 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
-	"github.com/ddkwork/golibrary/std/mylog"
 )
 
 // ContextArea is a region of the UI that responds to certain
@@ -85,7 +84,7 @@ func (r *ContextArea) Update(gtx layout.Context) {
 			continue
 		}
 		if e.Kind == pointer.Scroll {
-			mylog.Success("scroll event", e.Scroll.X, e.Scroll.Y)
+			//mylog.Success("scroll event", e.Scroll.X, e.Scroll.Y)
 			r.Dismiss()
 			break
 		}
