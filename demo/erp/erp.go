@@ -3,13 +3,11 @@ package main
 import (
 	"fmt"
 	"iter"
-	"sync"
 	"time"
 
 	"gioui.org/layout"
 	"gioui.org/widget"
 	"github.com/ddkwork/golibrary/std/mylog"
-	"github.com/ddkwork/golibrary/std/safemap"
 	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/resources/images"
 )
@@ -870,7 +868,7 @@ func main() {
 		child:     &widget.Clickable{},
 		filter:    &widget.Clickable{},
 		sort:      &widget.Clickable{},
-		group:     &widget.Clickable{}, //todo改成下拉列表
+		group:     &widget.Clickable{},
 		check:     &widget.Clickable{},
 		bill:      &widget.Clickable{},
 		rowHeight: &widget.Clickable{},
@@ -883,28 +881,11 @@ func main() {
 		share:     &widget.Clickable{},
 		screen:    &widget.Clickable{},
 	}
-	t.SetRootRowsCallBack()
-	var once sync.Once
 	t.TableContext.GroupCallback = func(gtx layout.Context) {
-		once.Do(func() {
+		if bar.group.Clicked(gtx) { //todo pop window
 			t.GroupBy("姓名")
-
-		})
-		if bar.group.Clicked(gtx) {
-			t.GroupBy("name")
-			//t.GroupBy("姓名")
 		}
-	}
 
-	//checkButton.Clicked(nil)
-	//实现按日期分组
-	//groupByDataContainerNode := ux.NewContainerNode("", Info{})
-	byDataMap := make(map[string][]*ux.Node[Info]) //此处合理的做法是分离n叉树出去外部实现业务数据处理，ui调用lib
-	m := safemap.New[string, []*ux.Node[Info]](true)
-	for _, n := range t.Root.Children {
-		//n.SetParent(groupByDataContainerNode)
-		//byDataMap[FormatTime(n.Data.Data)] = append(byDataMap[FormatTime(n.Data.Data)], n)
-		m.Update(FormatTime(n.Data.Data), append(byDataMap[FormatTime(n.Data.Data)], n))
 	}
 
 	InitAppBar(hPanel, func(yield func(style ux.ButtonStyle) bool) {

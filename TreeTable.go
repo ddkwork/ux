@@ -214,13 +214,13 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 		//	}
 		// }
 	})
-	if t.GroupCallback != nil {
-		mylog.CheckNil(t.OriginalRoot)
-		t.Root = deepcopy.Clone(t.OriginalRoot)
-		t.GroupCallback(gtx)
-	}
+
 	t.SizeColumnsToFit(gtx)
 	t.makeRootRowsWidget()
+
+	if t.GroupCallback != nil {
+		t.GroupCallback(gtx)
+	}
 
 	for _, n := range t.rootRows {
 		t.contextMenu.Once.Do(func() {
