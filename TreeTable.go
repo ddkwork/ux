@@ -2,11 +2,13 @@ package ux
 
 import (
 	_ "embed"
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
 	"io"
 	"iter"
+	"os"
 	"path/filepath"
 	"slices"
 	"sort"
@@ -680,6 +682,42 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { // 增删改查中
 	gtx.Constraints = originalConstraints
 }
 
+func (t *TreeTable[T]) RenameColumn(oldName, newName string) error {
+	// 检查旧字段名称是否存在
+	oldIndex := -1
+	for i, cell := range t.header.columnCells {
+		if cell.Key == oldName {
+			oldIndex = i
+			break
+		}
+	}
+	if oldIndex == -1 {
+		return fmt.Errorf("字段名称 %s 不存在", oldName)
+	}
+
+	// 更新表头中的字段名称
+	t.header.columnCells[oldIndex].Key = newName
+	t.header.columnCells[oldIndex].Value = newName
+
+	// 更新所有节点中的字段名称
+	t.updateNodeCells(oldName, newName)
+
+	return nil
+}
+
+// updateNodeCells 更新所有节点中的字段名称
+func (t *TreeTable[T]) updateNodeCells(oldName, newName string) {
+	for _, node := range t.Root.Walk() {
+		if node.rowCells != nil {
+			for i, cell := range node.rowCells {
+				if cell.Key == oldName {
+					node.rowCells[i].Key = newName
+				}
+			}
+		}
+	}
+}
+
 func (t *TreeTable[T]) SaveDate() {
 	go func() {
 		t.JsonName = strings.TrimSuffix(t.JsonName, ".json")
@@ -693,7 +731,15 @@ func (t *TreeTable[T]) SaveDate() {
 			return
 		}
 
-		stream.MarshalJsonToFile(t.Root, filepath.Join("cache", t.JsonName))
+		// 创建一个包含表头和根节点的结构体
+		tableData := struct {
+			Header *tableHeader[T]
+			Root   *Node[T]
+		}{
+			Header: t.header,
+			Root:   t.Root,
+		}
+		stream.MarshalJsonToFile(tableData, filepath.Join("cache", t.JsonName))
 		stream.WriteTruncate(filepath.Join("cache", t.JsonName+".txt"), t.MarkDown()) // 调用t.Format()
 		if t.IsDocument {
 			b := stream.NewBuffer("")
@@ -704,6 +750,37 @@ func (t *TreeTable[T]) SaveDate() {
 			stream.WriteTruncate("README2.md", b.String())
 		}
 	}()
+}
+
+func LoadTreeTable[T any](filename string) (*TreeTable[T], error) {
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	tableData := struct {
+		Header *tableHeader[T]
+		Root   *Node[T]
+	}{}
+
+	err = json.Unmarshal(data, &tableData)
+	if err != nil {
+		return nil, err
+	}
+
+	t := NewTreeTable[T](tableData.Root.Data)
+	t.Root = tableData.Root
+	t.header = tableData.Header
+	t.columnCount = len(t.header.columnCells)
+
+	// 初始化 maxColumnCellWidths 和 maxColumnTextWidths
+	t.maxColumnCellWidths = make([]unit.Dp, t.columnCount)
+	t.maxColumnTextWidths = make([]unit.Dp, t.columnCount)
+
+	// 重新初始化根行
+	t.rootRows = t.Root.Children
+
+	return t, nil
 }
 
 // TransposeMatrix 把行切片矩阵置换为列切片,用于计算最大列宽的参数
