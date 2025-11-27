@@ -270,8 +270,8 @@ func tableDemo() *ux.TreeTable[packet] {
 			}
 			t.Root.OpenAll()
 		},
-		JsonName:   "demo",
-		IsDocument: true,
+		JsonName:      "demo",
+		CreatMarkdown: true,
 	}
 
 	const scale = 1.5

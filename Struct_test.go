@@ -36,7 +36,7 @@ func TestStructCodec(t *testing.T) {
 		}
 	})
 	for _, cell := range cells {
-		mylog.Trace(cell.Key, cell.Value)
+		mylog.Trace(cell.Name, cell.Value)
 	}
 	get := UnmarshalRow[packet](cells, func(key, value string) (field any) {
 		switch key {

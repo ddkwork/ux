@@ -135,7 +135,7 @@ func MaxLabelWidth(gtx layout.Context, rows []CellData) unit.Dp {
 	// originalConstraints := gtx.Constraints
 	maxWidth := unit.Dp(0)
 	for _, data := range rows {
-		currentWidth := LabelWidth(gtx, data.Key) // 可以使用max []unit.Dp，但是多了一层make []unit.Dp，浪费内存
+		currentWidth := LabelWidth(gtx, data.Name) // 可以使用max []unit.Dp，但是多了一层make []unit.Dp，浪费内存
 		if currentWidth > maxWidth {
 			maxWidth = currentWidth
 		}

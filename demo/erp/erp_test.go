@@ -801,8 +801,8 @@ func TestGroupBy(*testing.T) {
 			})
 
 		},
-		JsonName:   "treegrid",
-		IsDocument: false,
+		JsonName:      "treegrid",
+		CreatMarkdown: false,
 	}
 	t.SetRootRowsCallBack()
 	t.OriginalRoot = deepcopy.Clone(t.Root) //todo

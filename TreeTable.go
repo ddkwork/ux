@@ -70,7 +70,7 @@ type (
 		RowDoubleClickCallback func()                                                         // double click callback,通过SelectedNode传递给菜单
 		SetRootRowsCallBack    func()                                                         // 实例化所有节点回调,必要时调用root节点辅助操作
 		JsonName               string                                                         // 保存序列化树形表格到文件的文件名
-		IsDocument             bool                                                           // 是否生成markdown文档
+		CreatMarkdown          bool                                                           // 是否生成markdown文档
 		//	DragRemovedRowsCallback  func()
 		//	DropOccurredCallback     func()
 		GroupCallback func(gtx layout.Context) //按指定列相同的单元格值进行分组重建n叉树
@@ -87,9 +87,12 @@ type (
 		// manualWidthSet     []bool       // 新增状态标志数组，记录列是否被手动调整
 	}
 	CellData struct {
-		Key              string      // 表头单元格文本或者节点编辑器每一行的key
+		Name             string      // 表头单元格文本或者节点编辑器每一行的对应的列名，airtable中的字段名称
 		Value            string      // 单元格文本或者节点编辑器每一行的value
+		Type             CellType    // 单元格类型,airtable中有多种字段类型
 		Tooltip          string      // 单元格提示信息
+		Options          []string    `json:"options,omitempty"`      // 用于选择型字段
+		FormulaExpr      string      `json:"formula_expr,omitempty"` //用于公式列
 		Icon             []byte      // 单元格图标，格式支持：*giosvg.Icon, *widget.Icon, *widget.Image, image.Image
 		FgColor          color.NRGBA // 单元格前景色,着色渲染单元格
 		IsNasm           bool        // 是否是nasm汇编代码,为表头提供不同的着色渲染样式
@@ -108,6 +111,25 @@ type (
 	// 	startPos       float32
 	// 	shrinkNeighbor bool
 	// }
+)
+
+type CellType int //实现airtable中字段类型枚举
+
+const (
+	FieldTypeSingleLineText CellType = iota //单行文本
+	FieldTypeNumber                         //数字
+	FieldTypeSingleSelect                   //单选
+	FieldTypeMultipleSelect                 //多选
+	FieldTypeDateTime                       //日期
+	FieldTypeFormula                        //公式
+	FieldTypeAttachment                     //附件
+	FieldTypeLink                           //链接
+	FieldTypeUser                           //用户
+	FieldTypePhone                          //电话
+	FieldTypeEmail                          //邮箱
+	FieldTypeCheckbox                       //勾选框
+	FieldTypeURL                            //链接
+	FieldTypeMultiLineText                  //多行文本
 )
 
 func NewTreeTable[T any](data T) *TreeTable[T] {
@@ -381,7 +403,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 	for i := range n.rowCells {
 		n.rowCells[i].rowID = rowIndex                          // 行单元格id，暂时想到的应用场景是区域选中
 		n.rowCells[i].columID = t.header.columnCells[i].columID // 列分隔符,更新层级列宽度
-		n.rowCells[i].Key = t.header.columnCells[i].Key         // 为节点编辑的row布局kv对做准备
+		n.rowCells[i].Name = t.header.columnCells[i].Name       // 为节点编辑的row布局kv对做准备
 
 	}
 
@@ -601,7 +623,7 @@ func (t *TreeTable[T]) CellFrame(gtx layout.Context, cell *CellData) layout.Dime
 					Bottom: bottom,
 					Left:   leftPadding,
 					Right:  0,
-				}.Layout(gtx, material.Body2(th, cell.Key).Layout)
+				}.Layout(gtx, material.Body2(th, cell.Name).Layout)
 			}
 			return layout.Inset{
 				Top:    top,
@@ -621,7 +643,7 @@ func InitHeader(data any) (columnCells []CellData) {
 			field.Name = field.Tag.Get("table")
 		}
 		columnCells = append(columnCells, CellData{
-			Key:       field.Name,
+			Name:      field.Name,
 			Value:     field.Name,
 			Tooltip:   "",
 			Icon:      nil,
@@ -668,9 +690,9 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { // 增删改查中
 	// t.columns = TransposeMatrix(t.cells) // 如果不这么做的话，节点增删改查就不会实时刷新,为了提高性能需要手动刷新节点和宽度
 	for i, data := range TransposeMatrix(t.rows) { // todo 1561	    731960 ns/op
 		if data.isHeader {
-			t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Key), align.StringWidth[unit.Dp](t.header.columnCells[i].Key))
+			t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Name), align.StringWidth[unit.Dp](t.header.columnCells[i].Name))
 			if gtx.Ops != nil {
-				t.maxColumnCellWidths[i] = max(t.maxColumnCellWidths[i], LabelWidth(gtx, data.Key), LabelWidth(gtx, t.header.columnCells[i].Key))
+				t.maxColumnCellWidths[i] = max(t.maxColumnCellWidths[i], LabelWidth(gtx, data.Name), LabelWidth(gtx, t.header.columnCells[i].Name))
 			}
 		} else {
 			t.maxColumnTextWidths[i] = max(t.maxColumnTextWidths[i], align.StringWidth[unit.Dp](data.Value), align.StringWidth[unit.Dp](t.header.columnCells[i].Value))
@@ -686,7 +708,7 @@ func (t *TreeTable[T]) RenameColumn(oldName, newName string) error {
 	// 检查旧字段名称是否存在
 	oldIndex := -1
 	for i, cell := range t.header.columnCells {
-		if cell.Key == oldName {
+		if cell.Name == oldName {
 			oldIndex = i
 			break
 		}
@@ -696,7 +718,7 @@ func (t *TreeTable[T]) RenameColumn(oldName, newName string) error {
 	}
 
 	// 更新表头中的字段名称
-	t.header.columnCells[oldIndex].Key = newName
+	t.header.columnCells[oldIndex].Name = newName
 	t.header.columnCells[oldIndex].Value = newName
 
 	// 更新所有节点中的字段名称
@@ -710,8 +732,8 @@ func (t *TreeTable[T]) updateNodeCells(oldName, newName string) {
 	for _, node := range t.Root.Walk() {
 		if node.rowCells != nil {
 			for i, cell := range node.rowCells {
-				if cell.Key == oldName {
-					node.rowCells[i].Key = newName
+				if cell.Name == oldName {
+					node.rowCells[i].Name = newName
 				}
 			}
 		}
@@ -741,7 +763,7 @@ func (t *TreeTable[T]) SaveDate() {
 		}
 		stream.MarshalJsonToFile(tableData, filepath.Join("cache", t.JsonName))
 		stream.WriteTruncate(filepath.Join("cache", t.JsonName+".txt"), t.MarkDown()) // 调用t.Format()
-		if t.IsDocument {
+		if t.CreatMarkdown {
 			b := stream.NewBuffer("")
 			b.WriteStringLn("# " + t.JsonName + " document table")
 			b.WriteStringLn("```text")
@@ -841,8 +863,8 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 					}
 					mylog.Info("clickedColumnIndex", t.header.clickedColumnIndex)
 					for j := range t.header.columnCells {
-						t.header.columnCells[j].Key = strings.TrimSuffix(t.header.columnCells[j].Key, " ⇩")
-						t.header.columnCells[j].Key = strings.TrimSuffix(t.header.columnCells[j].Key, " ⇧")
+						t.header.columnCells[j].Name = strings.TrimSuffix(t.header.columnCells[j].Name, " ⇩")
+						t.header.columnCells[j].Name = strings.TrimSuffix(t.header.columnCells[j].Name, " ⇧")
 						t.header.columnCells[j].Value = strings.TrimSuffix(t.header.columnCells[j].Value, " ⇩")
 						t.header.columnCells[j].Value = strings.TrimSuffix(t.header.columnCells[j].Value, " ⇧")
 					}
@@ -851,9 +873,9 @@ func (t *TreeTable[T]) HeaderFrame(gtx layout.Context) layout.Dimensions {
 						switch t.header.sortOrder {
 						case sortNone:
 						case sortAscending:
-							t.header.columnCells[i].Key += " ⇧"
+							t.header.columnCells[i].Name += " ⇧"
 						case sortDescending:
-							t.header.columnCells[i].Key += " ⇩"
+							t.header.columnCells[i].Name += " ⇩"
 						}
 						t.Sort()
 					}
@@ -908,7 +930,7 @@ func (t *TreeTable[T]) cellWidth(gtx layout.Context, n *Node[T], cell *CellData)
 	}()
 	v := cell.Value
 	if cell.isHeader {
-		v = cell.Key
+		v = cell.Name
 	}
 	v += "  ⇧"
 	switch cell.columID {
@@ -1023,9 +1045,9 @@ func (t *TreeTable[T]) GroupBy(field string) {
 	t.groupedRows = nil
 	groupColumIndex := -1
 	for i, cell := range t.header.columnCells {
-		if field == cell.Key {
+		if field == cell.Name {
 			groupColumIndex = i
-			mylog.Trace(i, "即将按"+strconv.Quote(cell.Key)+"列进行分组 ")
+			mylog.Trace(i, "即将按"+strconv.Quote(cell.Name)+"列进行分组 ")
 			break
 		}
 	}
@@ -1553,7 +1575,7 @@ func (t *TreeTable[T]) MarkDown() string {
 	headerRow.WriteString("|")
 	for _, cell := range columnCells {
 		if cell.isHeader {
-			headerRow.WriteString(" " + cell.Key + " |")
+			headerRow.WriteString(" " + cell.Name + " |")
 		}
 	}
 	b.WriteStringLn(headerRow.String())
@@ -1563,7 +1585,7 @@ func (t *TreeTable[T]) MarkDown() string {
 	headerSeparator.WriteString("|")
 	for _, cell := range columnCells {
 		if cell.isHeader {
-			headerSeparator.WriteString(" " + strings.Repeat("-", len(cell.Key)) + " |")
+			headerSeparator.WriteString(" " + strings.Repeat("-", len(cell.Name)) + " |")
 		}
 	}
 	b.WriteStringLn(headerSeparator.String())

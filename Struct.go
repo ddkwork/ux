@@ -77,7 +77,7 @@ func MarshalFields[T any](data T, callback MarshalRowCallback) (fields []CellDat
 		// 	vv = strconv.Quote("") // for struct2table
 		// }
 		fields = append(fields, CellData{
-			Key:       field.Name,
+			Name:      field.Name,
 			Value:     vv,
 			Tooltip:   "",
 			Icon:      nil,
@@ -101,7 +101,7 @@ func UnmarshalFields[T any](fields []CellData, callback UnmarshalRowCallback) T 
 	}
 	valueOf = valueOf.Elem()
 	for _, f := range fields {
-		field, ok := valueOf.Type().FieldByName(f.Key)
+		field, ok := valueOf.Type().FieldByName(f.Name)
 		if !ok {
 			continue
 		}
@@ -110,12 +110,12 @@ func UnmarshalFields[T any](fields []CellData, callback UnmarshalRowCallback) T 
 			field.Tag.Get("json") == "-" {
 			continue
 		}
-		fieldValue := valueOf.FieldByName(f.Key)
+		fieldValue := valueOf.FieldByName(f.Name)
 		if !fieldValue.CanSet() {
-			panic("field is not settable: " + f.Key)
+			panic("field is not settable: " + f.Name)
 		}
 		if callback != nil {
-			if val := callback(f.Key, f.Value); val != nil {
+			if val := callback(f.Name, f.Value); val != nil {
 				if rv := reflect.ValueOf(val); rv.Type().AssignableTo(fieldValue.Type()) {
 					if s, ok := val.(string); ok && s == "" {
 						panic("反序列化回调内应该返回nil或者非空字符串，请检查回调内的default返回值")

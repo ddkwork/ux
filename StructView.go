@@ -56,10 +56,10 @@ func NewStructView[T any](title string, object T, callback MarshalRowCallback) *
 	FieldRows := new(safemap.M[string, *Input])
 	rows := MarshalRow(object, callback)
 	for _, row := range rows {
-		input := NewInput(row.Key)
+		input := NewInput(row.Name)
 		input.SetText(row.Value)
 		input.editor.Alignment = text.Start // 左对齐 todo bug, not work
-		FieldRows.Update(row.Key+"：", input)
+		FieldRows.Update(row.Name+"：", input)
 	}
 	const defaultModalAnimationDuration = time.Millisecond * 250
 	return &StructView[T]{
@@ -114,7 +114,7 @@ func RightAlignLabel(gtx layout.Context, maxWidth unit.Dp, text string) layout.D
 
 func (s *StructView[T]) Layout(gtx layout.Context) layout.Dimensions {
 	for i, row := range s.Rows {
-		s.Rows[i].Value = s.fields.GetMust(row.Key + "：").GetText() // 刷新输入框的值
+		s.Rows[i].Value = s.fields.GetMust(row.Name + "：").GetText() // 刷新输入框的值
 	}
 	if !s.Visible {
 		return layout.Dimensions{}
