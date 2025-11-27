@@ -8,6 +8,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/widget"
 	"github.com/ddkwork/golibrary/std/mylog"
+	"github.com/ddkwork/golibrary/std/stream"
 	"github.com/ddkwork/ux"
 	"github.com/ddkwork/ux/resources/images"
 )
@@ -18,7 +19,7 @@ type (
 		Name string    `table:"姓名"` //结账按姓名分组，减去伙食费就是每个女工的工资条，吃饭打卡设计？
 
 		//todi 添加更多的分类，如果价格不同的话，需要解决这里占据太宽的问题，子节点？
-		Lazhi        int `table:"蜡纸"`  //加入大果做成celltype，然后form录入明细？这样看不到分类汇总和小计
+		Lazhi        int `table:"蜡纸"`   //加入大果做成celltype，然后form录入明细？这样看不到分类汇总和小计
 		Zhongxiaoguo int `table:"中小果"` //为了日结公式的使用，价格不同的必须有独立的列？
 		JianShu      int `table:"件数"`
 
@@ -31,8 +32,8 @@ type (
 		//这么多列需要三折叠屏才合适，或者横屏编辑，需要支持动态删除列，近年来的场景不需要这么多分类，都是统价
 
 		IndexCard string `table:"第几车"` //实现celltype？自动自增
-		SendCard  int    `table:"发车"`  //todo 把分类件数明细，驾驶员姓名，电话，车牌，接货人和电话，接货点等布局一个from作为celltype
-		YuHuo     int    `table:"余货"`  //todo 核查计数准确性，自动校验后写入图标或者相差的件数
+		SendCard  int    `table:"发车"`   //todo 把分类件数明细，驾驶员姓名，电话，车牌，接货人和电话，接货点等布局一个from作为celltype
+		YuHuo     int    `table:"余货"`   //todo 核查计数准确性，自动校验后写入图标或者相差的件数
 
 		Women int `table:"女工日结"` //todo 公式引入
 		Man   int `table:"男工车结"` //todo 结账form加入来去路费，平常用车耗油，小费等用于汇总结账需要
@@ -46,7 +47,7 @@ type (
 //todo加入截图功能，截屏整个画布，截屏所有女工的日结，截屏结账分类汇总
 
 func main() {
-	//stream.GitProxy(false)
+	//stream.GitProxy(true)
 	//return
 	t := ux.NewTreeTable(Info{})
 	t.TableContext = ux.TableContext[Info]{
