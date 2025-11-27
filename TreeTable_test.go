@@ -6,6 +6,7 @@ import (
 	"iter"
 	"net/http"
 	"os"
+	"reflect"
 	"slices"
 	"strings"
 	"testing"
@@ -156,7 +157,7 @@ func tableDemo() *ux.TreeTable[packet] {
 					Can:   func() bool { return stream.IsFilePath(n.Data.Path) }, // n是当前渲染的行,它的元数据是路径才显示
 					Do: func() {
 						mylog.Check(os.Remove(t.SelectedNode.Data.Path))
-						t.Remove(gtx)
+						t.Remove()
 					},
 					AppendDivider: false,
 					Clickable:     widget.Clickable{},
@@ -167,7 +168,7 @@ func tableDemo() *ux.TreeTable[packet] {
 					Can:   func() bool { return stream.IsDir(n.Data.Path) }, // n是当前渲染的行,它的元数据是目录才显示
 					Do: func() {
 						mylog.Check(os.RemoveAll(t.SelectedNode.Data.Path))
-						t.Remove(gtx)
+						t.Remove()
 					},
 					AppendDivider: false,
 					Clickable:     widget.Clickable{},
@@ -360,4 +361,30 @@ func TestTreeTable_updateRowNumber(t1 *testing.T) {
 	demo := tableDemo()
 	// mylog.Struct(demo.Root.LastChild())
 	assert.Equal(t1, demo.Root.LastChild().RowNumber, ux.CountTableRows(demo.RootRows()))
+}
+
+func TestLoadDynamicTreeTable(t *testing.T) {
+	type args struct {
+		filename string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *ux.TreeTable[reflect.Value]
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ux.LoadDynamicTreeTable(tt.args.filename)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("LoadDynamicTreeTable() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("LoadDynamicTreeTable() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
