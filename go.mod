@@ -11,6 +11,7 @@ require (
 	github.com/ddkwork/golibrary v0.1.5-0.20250816073422-ec5c841d4409
 	github.com/gdamore/tcell/v2 v2.9.0
 	github.com/google/go-cmp v0.7.0
+	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/oligo/gvcode v0.4.0
 	github.com/rivo/tview v0.42.0
 	github.com/xuri/excelize/v2 v2.10.0
@@ -20,6 +21,7 @@ require (
 	golang.org/x/image v0.32.0
 	golang.org/x/net v0.46.0
 	golang.org/x/text v0.30.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 replace gioui.org => github.com/ddkwork/gio v0.0.0-20251104012800-d9198c2acba0
