@@ -1828,13 +1828,14 @@ func (t *TreeTable[T]) walkAndFormatMarkdown(b *stream.Buffer, nodes []*Node[T],
 
 		// Step 4: 处理缩进并合并层级缩进符号和层级列单元格文本
 		if depth > 0 {
-			row.WriteString(strings.Repeat("&nbsp;&nbsp;&nbsp;", depth-1))
+			row.WriteString(strings.Repeat("&nbsp;&nbsp;&nbsp;", depth))
+			//row.WriteString(strings.Repeat("&nbsp;&nbsp;&nbsp;", depth-1))
 		}
 
 		if i == len(nodes)-1 {
-			row.WriteString("└───")
+			row.WriteString("└──")
 		} else {
-			row.WriteString("├───")
+			row.WriteString("├──")
 		}
 
 		if len(node.rowCells) > HierarchyColumnID {
