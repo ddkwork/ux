@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	_ "github.com/mattn/go-sqlite3"
 	"gopkg.in/yaml.v3"
+	_ "modernc.org/sqlite"
 )
 
 // ================================
