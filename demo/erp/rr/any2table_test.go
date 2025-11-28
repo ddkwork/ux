@@ -120,23 +120,21 @@ func BenchmarkJSONParser(b *testing.B) {
 	jsonContent := `{"name": "test", "value": "benchmark"}`
 	fileParser := NewFileParser()
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		fileParser.ParseContent(jsonContent, "json")
 	}
 }
 
 func BenchmarkCodeGeneration(b *testing.B) {
 	root := NewNode("root", "")
-	for i := 0; i < 100; i++ {
+	for range 100 {
 		child := NewNode("child", "value")
 		root.AddChild(child)
 	}
 
 	codeGen := CodeGenerator{}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		codeGen.GenerateInstanceCode(root, "benchmarkTree")
 	}
 }

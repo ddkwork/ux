@@ -28,7 +28,7 @@ type Node[T any] struct {
 }
 
 // Metadata 元数据存储
-type Metadata map[string]interface{}
+type Metadata map[string]any
 
 // NewNode 创建新节点
 func NewNode[T any](name string, value T) *Node[T] {
@@ -46,7 +46,7 @@ func (n *Node[T]) AddChild(child *Node[T]) {
 }
 
 // AddMetadata 添加元数据
-func (n *Node[T]) AddMetadata(key string, value interface{}) {
+func (n *Node[T]) AddMetadata(key string, value any) {
 	if n.Metadata == nil {
 		n.Metadata = make(Metadata)
 	}
@@ -151,7 +151,7 @@ func (jp *JSONParser) SupportsFormat(format string) bool {
 }
 
 func (jp *JSONParser) Parse(reader io.Reader) (*Node[string], error) {
-	var data interface{}
+	var data any
 	decoder := json.NewDecoder(reader)
 	if err := decoder.Decode(&data); err != nil {
 		return nil, err
@@ -162,15 +162,15 @@ func (jp *JSONParser) Parse(reader io.Reader) (*Node[string], error) {
 	return root, nil
 }
 
-func (jp *JSONParser) parseValue(value interface{}, parent *Node[string], key string) {
+func (jp *JSONParser) parseValue(value any, parent *Node[string], key string) {
 	switch v := value.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		node := NewNode(key, "")
 		parent.AddChild(node)
 		for k, val := range v {
 			jp.parseValue(val, node, k)
 		}
-	case []interface{}:
+	case []any:
 		node := NewNode(key, "array")
 		parent.AddChild(node)
 		for i, val := range v {
@@ -183,7 +183,7 @@ func (jp *JSONParser) parseValue(value interface{}, parent *Node[string], key st
 	}
 }
 
-func (jp *JSONParser) valueToString(v interface{}) string {
+func (jp *JSONParser) valueToString(v any) string {
 	if v == nil {
 		return "null"
 	}
@@ -470,7 +470,7 @@ func (sp *SQLiteParser) ParseFile(dbPath string) (*Node[string], error) {
 				var cid int
 				var name, ctype string
 				var notnull, pk int
-				var dflt_value interface{}
+				var dflt_value any
 
 				columns.Scan(&cid, &name, &ctype, &notnull, &dflt_value, &pk)
 				colNode := NewNode(name, ctype)
@@ -495,7 +495,7 @@ func (yp *YAMLParser) SupportsFormat(format string) bool {
 }
 
 func (yp *YAMLParser) Parse(reader io.Reader) (*Node[string], error) {
-	var data interface{}
+	var data any
 	content, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
@@ -510,21 +510,21 @@ func (yp *YAMLParser) Parse(reader io.Reader) (*Node[string], error) {
 	return root, nil
 }
 
-func (yp *YAMLParser) parseValue(value interface{}, parent *Node[string], key string) {
+func (yp *YAMLParser) parseValue(value any, parent *Node[string], key string) {
 	switch v := value.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		node := NewNode(key, "")
 		parent.AddChild(node)
 		for k, val := range v {
 			yp.parseValue(val, node, k)
 		}
-	case map[interface{}]interface{}:
+	case map[any]any:
 		node := NewNode(key, "")
 		parent.AddChild(node)
 		for k, val := range v {
 			yp.parseValue(val, node, fmt.Sprintf("%v", k))
 		}
-	case []interface{}:
+	case []any:
 		node := NewNode(key, "sequence")
 		parent.AddChild(node)
 		for i, val := range v {
@@ -537,7 +537,7 @@ func (yp *YAMLParser) parseValue(value interface{}, parent *Node[string], key st
 	}
 }
 
-func (yp *YAMLParser) valueToString(v interface{}) string {
+func (yp *YAMLParser) valueToString(v any) string {
 	if v == nil {
 		return "null"
 	}
