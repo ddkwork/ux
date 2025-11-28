@@ -1837,6 +1837,7 @@ func (t *TreeTable[T]) walkAndFormatMarkdown(b *stream.Buffer, nodes []*Node[T],
 		} else {
 			row.WriteString("├──")
 		}
+		row.WriteString("&nbsp;")
 
 		if len(node.rowCells) > HierarchyColumnID {
 			row.WriteString(node.rowCells[HierarchyColumnID].Value)
