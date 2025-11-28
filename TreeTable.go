@@ -926,7 +926,74 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { // 增删改查中
 	gtx.Constraints = originalConstraints
 }
 
-func (t *TreeTable[T]) RenameColumn(oldName, newName string) error {
+// 增删改查列，字段，重建元数据结构体，重建rootrows
+func (t *TreeTable[T]) Rebuild(data any) { //todo 这里应该处理反射生成的结构体，需要足够的单元测试和压力测试，以及性能测试
+	t.header = &tableHeader[T]{
+		columnCells: InitHeader(data),
+		node:        &Node[T]{Data: data},
+	}
+	t.columnCount = len(t.header.columnCells)
+	t.maxColumnCellWidths = make([]unit.Dp, t.columnCount)
+	t.maxColumnTextWidths = make([]unit.Dp, t.columnCount)
+	t.rootRows = t.Root.Children
+}
+
+// todo 实现列的增删改查，重命名就是改，需要实现另外的三个方法，完善上面的重建元数据逻辑并更新n叉树相关的东西
+func (t *TreeTable[T]) AddColumn(name string) { //todo 根据用户的选择的字段类型，这里需要传入字段类型
+	// 检查字段名称是否存在
+	for _, cell := range t.header.columnCells {
+		if cell.Name == name {
+			mylog.Check(fmt.Errorf("字段名称 %s 已存在", name))
+		}
+	}
+
+	// 新增字段
+	t.header.columnCells = append(t.header.columnCells, CellData{
+		Name:      name,
+		Value:     name,
+		Tooltip:   "",
+		Icon:      nil,
+		FgColor:   color.NRGBA{},
+		IsNasm:    false,
+		Disabled:  false,
+		isHeader:  true,
+		columID:   len(t.header.columnCells),
+		rowID:     0,
+		Clickable: widget.Clickable{},
+		RichText:  RichText{},
+	})
+
+	// 新增节点的字段
+	t.updateNodeCells(t.header.columnCells[len(t.header.columnCells)-2].Name, name)
+	// 重置最大列宽
+	t.maxColumnCellWidths = append(t.maxColumnCellWidths, 0)
+	t.maxColumnTextWidths = append(t.maxColumnTextWidths, 0)
+}
+
+func (t *TreeTable[T]) DeleteColumn(name string) {
+	// 检查字段名称是否存在
+	index := -1
+	for i, cell := range t.header.columnCells {
+		if cell.Name == name {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		mylog.Check(fmt.Errorf("字段名称 %s 不存在", name))
+	}
+
+	// 删除字段
+	t.header.columnCells = append(t.header.columnCells[:index], t.header.columnCells[index+1:]...)
+
+	// 删除节点的字段
+	t.updateNodeCells(name, "")
+	// 重置最大列宽
+	t.maxColumnCellWidths = append(t.maxColumnCellWidths[:index], t.maxColumnCellWidths[index+1:]...)
+	t.maxColumnTextWidths = append(t.maxColumnTextWidths[:index], t.maxColumnTextWidths[index+1:]...)
+}
+
+func (t *TreeTable[T]) RenameColumn(oldName, newName string) {
 	// 检查旧字段名称是否存在
 	oldIndex := -1
 	for i, cell := range t.header.columnCells {
@@ -936,7 +1003,7 @@ func (t *TreeTable[T]) RenameColumn(oldName, newName string) error {
 		}
 	}
 	if oldIndex == -1 {
-		return fmt.Errorf("字段名称 %s 不存在", oldName)
+		mylog.Check(fmt.Errorf("字段名称 %s 不存在", oldName))
 	}
 
 	// 更新表头中的字段名称
@@ -945,8 +1012,6 @@ func (t *TreeTable[T]) RenameColumn(oldName, newName string) error {
 
 	// 更新所有节点中的字段名称
 	t.updateNodeCells(oldName, newName)
-
-	return nil
 }
 
 // updateNodeCells 更新所有节点中的字段名称
