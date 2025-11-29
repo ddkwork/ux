@@ -938,6 +938,9 @@ func (t *TreeTable[T]) Rebuild(data any) { //todo 这里应该处理反射生成
 	t.rootRows = t.Root.Children
 }
 
+// 默认字段，日期，姓名，分组后实现日结和个人工资总账，增加一个备注列
+// 实现一个单价编辑器，公告作为标题，公式列我们不制作公式引擎，没有语法提示和高亮，
+// 我们使用mcp网络通信或者接口解耦的sdk api，公式列的列单元格切片填充我们直接执行go代码填充，在安卓上，我们应该embed Go的playground?怎么做呢？
 // todo 实现列的增删改查，重命名就是改，需要实现另外的三个方法，完善上面的重建元数据逻辑并更新n叉树相关的东西
 func (t *TreeTable[T]) AddColumn(name string) { //todo 根据用户的选择的字段类型，这里需要传入字段类型
 	// 检查字段名称是否存在

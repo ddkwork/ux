@@ -10,6 +10,7 @@ require (
 	github.com/ddkwork/golibrary v0.1.5-0.20250816073422-ec5c841d4409
 	github.com/google/go-cmp v0.7.0
 	github.com/oligo/gvcode v0.4.2
+	github.com/traefik/yaegi v0.16.1
 	github.com/xuri/excelize/v2 v2.10.0
 	github.com/yuin/goldmark v1.7.13
 	golang.org/x/exp v0.0.0-20251125195548-87e1e737ad39
