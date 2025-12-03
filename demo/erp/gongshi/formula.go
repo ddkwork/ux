@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -32,7 +34,7 @@ type ColumnConfig struct {
 type SDKFunctions struct {
 	rows         []map[string]interface{}
 	currentRow   map[string]interface{}
-	currentIndex int
+	CurrentIndex int // 修改为大写字母开头
 }
 
 // Sum 计算指定列的总和
@@ -116,17 +118,113 @@ func NewFormulaInterpreter(rows []map[string]interface{}, currentRowIndex int) *
 	sdk := &SDKFunctions{
 		rows:         rows,
 		currentRow:   rows[currentRowIndex],
-		currentIndex: currentRowIndex,
+		CurrentIndex: currentRowIndex, // 修改为大写字母开头
+	}
+
+	// 创建临时目录并写入SDK代码
+	tmpDir := "tmp"
+	if err := os.MkdirAll(tmpDir, 0755); err != nil {
+		fmt.Printf("创建临时目录错误: %v\n", err)
+		return nil
+	}
+
+	sdkDir := filepath.Join(tmpDir, "sdk")
+	if err := os.MkdirAll(sdkDir, 0755); err != nil {
+		fmt.Printf("创建SDK临时目录错误: %v\n", err)
+		return nil
+	}
+
+	sdkFile := filepath.Join(sdkDir, "sdk.go")
+	sdkCode := `
+package sdk
+
+import (
+	"fmt"
+	"strconv"
+)
+
+type SDKFunctions struct {
+	rows         []map[string]interface{}
+	currentRow   map[string]interface{}
+	CurrentIndex int // 修改为大写字母开头
+}
+
+func (sdk *SDKFunctions) Sum(columnName string) float64 {
+	total := 0.0
+	for _, row := range sdk.rows {
+		if val, ok := row[columnName].(float64); ok {
+			total += val
+		} else if val, ok := row[columnName].(int); ok {
+			total += float64(val)
+		} else if val, ok := row[columnName].(string); ok {
+			if f, err := strconv.ParseFloat(val, 64); err == nil {
+				total += f
+			}
+		}
+	}
+	return total
+}
+
+func (sdk *SDKFunctions) SumIf(targetColumn, conditionColumn, conditionValue string) float64 {
+	total := 0.0
+	for _, row := range sdk.rows {
+		if fmt.Sprint(row[conditionColumn]) == conditionValue {
+			if val, ok := row[targetColumn].(float64); ok {
+				total += val
+			} else if val, ok := row[targetColumn].(int); ok {
+				total += float64(val)
+			} else if val, ok := row[targetColumn].(string); ok {
+				if f, err := strconv.ParseFloat(val, 64); err == nil {
+					total += f
+				}
+			}
+		}
+	}
+	return total
+}
+
+func (sdk *SDKFunctions) CurrentRow() map[string]interface{} {
+	return sdk.currentRow
+}
+
+func (sdk *SDKFunctions) GetCell(rowIndex int, columnName string) interface{} {
+	if rowIndex >= 0 && rowIndex < len(sdk.rows) {
+		return sdk.rows[rowIndex][columnName]
+	}
+	return nil
+}
+
+func (sdk *SDKFunctions) GetCellFloat(rowIndex int, columnName string) float64 {
+	val := sdk.GetCell(rowIndex, columnName)
+	switch v := val.(type) {
+	case float64:
+		return v
+	case int:
+		return float64(v)
+	case string:
+		f, _ := strconv.ParseFloat(v, 64)
+		return f
+	default:
+		return 0.0
+	}
+}
+`
+
+	if err := os.WriteFile(sdkFile, []byte(sdkCode), 0644); err != nil {
+		fmt.Printf("写入SDK临时文件错误: %v\n", err)
+		return nil
 	}
 
 	// 注入SDK函数到解释器
 	i.Use(interp.Exports{
 		"sdk/sdk": map[string]reflect.Value{
+			"SDKFunctions": reflect.ValueOf(sdk),
 			"Sum":          reflect.ValueOf(sdk.Sum),
 			"SumIf":        reflect.ValueOf(sdk.SumIf),
 			"CurrentRow":   reflect.ValueOf(sdk.CurrentRow),
 			"GetCell":      reflect.ValueOf(sdk.GetCell),
 			"GetCellFloat": reflect.ValueOf(sdk.GetCellFloat),
+			"CurrentIndex": reflect.ValueOf(sdk.CurrentIndex), // 修改为大写字母开头
 		},
 	})
 
@@ -142,14 +240,35 @@ func (fi *FormulaInterpreter) Execute(formulaCode string) (interface{}, error) {
 	wrappedCode := `
 package main
 
-import "sdk/sdk"
+import (
+	"fmt"
+	"sdk/sdk"
+)
 
-func calculate() interface{} {
+func calculate(rows []map[string]interface{}, currentIndex int) interface{} {
+	sdk := &sdk.SDKFunctions{
+		rows:         rows,
+		currentRow:   rows[currentIndex],
+		CurrentIndex: currentIndex,
+	}
+
 	` + formulaCode + `
 }
 
-var result = calculate()
+var result = calculate(rows, currentIndex)
 `
+
+	// 写入临时文件
+	tmpDir := "tmp"
+	if err := os.MkdirAll(tmpDir, 0755); err != nil {
+		return nil, fmt.Errorf("创建临时目录错误: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	formulaFile := filepath.Join(tmpDir, "formula.go")
+	if err := os.WriteFile(formulaFile, []byte(wrappedCode), 0644); err != nil {
+		return nil, fmt.Errorf("写入临时文件错误: %v", err)
+	}
 
 	// 执行代码
 	_, err := fi.interpreter.Eval(wrappedCode)
@@ -174,10 +293,10 @@ type SugarSyntax struct{}
 
 func (ss *SugarSyntax) Transform(compactCode string) string {
 	transformations := map[string]string{
-		`@姓名`:          `currentRow()["姓名"]`,
-		`@女工日结`:        `getCellFloat(currentIndex, "女工日结")`,
-		`SUMIF.*`:      `sumIf`, // 需要更复杂的正则替换
-		`currentIndex`: `currentRowIndex`,
+		`@姓名`:        `sdk.CurrentRow()["姓名"].(string)`,
+		`@女工日结`:    `sdk.GetCellFloat(sdk.CurrentIndex, "女工日结")`, // 修改为大写字母开头
+		`SUMIF.*`:      `sdk.SumIf`,                                      // 需要更复杂的正则替换
+		`currentIndex`: `sdk.CurrentIndex`,
 	}
 
 	result := compactCode
@@ -252,8 +371,8 @@ func main() {
 	table.AddColumn("姓名", "text", "")
 	table.AddColumn("女工日结", "number", "")
 	table.AddColumn("应发工资", "formula", `
-name := currentRow()["姓名"].(string)
-dailyWage := getCellFloat(currentIndex, "女工日结")
+name := sdk.CurrentRow()["姓名"].(string)
+dailyWage := sdk.GetCellFloat(sdk.CurrentIndex, "女工日结") // 修改为大写字母开头
 
 switch name {
 case "拼车", "三人组":
@@ -261,10 +380,10 @@ case "拼车", "三人组":
 case "房东":
 	return dailyWage
 case "杨萍":
-	threeGroupSum := sumIf("女工日结", "姓名", "三人组")
+	threeGroupSum := sdk.SumIf("女工日结", "姓名", "三人组")
 	return threeGroupSum/3 + dailyWage
 case "二人组":
-	threeGroupSum := sumIf("女工日结", "姓名", "三人组")
+	threeGroupSum := sdk.SumIf("女工日结", "姓名", "三人组")
 	return threeGroupSum/3 + dailyWage/2
 default:
 	return 0.0
@@ -272,17 +391,16 @@ default:
 `)
 
 	// 添加测试数据
-	table.AddRow(map[string]interface{}{"姓名": "拼车", "女工日结": 100})
-	table.AddRow(map[string]interface{}{"姓名": "三人组", "女工日结": 300})
-	table.AddRow(map[string]interface{}{"姓名": "房东", "女工日结": 150})
-	table.AddRow(map[string]interface{}{"姓名": "杨萍", "女工日结": 120})
-	table.AddRow(map[string]interface{}{"姓名": "二人组", "女工日结": 200})
+	table.AddRow(map[string]interface{}{"姓名": "拼车", "女工日结": 100.0})
+	table.AddRow(map[string]interface{}{"姓名": "三人组", "女工日结": 300.0})
+	table.AddRow(map[string]interface{}{"姓名": "房东", "女工日结": 150.0})
+	table.AddRow(map[string]interface{}{"姓名": "杨萍", "女工日结": 120.0})
+	table.AddRow(map[string]interface{}{"姓名": "二人组", "女工日结": 200.0})
 
 	// 打印结果
 	fmt.Println("计算结果:")
 	for i, row := range table.Rows {
-		fmt.Printf("行%d: 姓名=%s, 女工日结=%.1f, 应发工资=%.1f\n",
-			i, row["姓名"], row["女工日结"], row["应发工资"])
+		fmt.Printf("行%d: 姓名=%s, 女工日结=%.1f, 应发工资=%s\n", i, row["姓名"], row["女工日结"], row["应发工资"])
 	}
 
 	// 测试单个公式计算
@@ -290,7 +408,7 @@ default:
 	interpreter := NewFormulaInterpreter(table.Rows, 3) // 测试杨萍的行
 
 	result, err := interpreter.Execute(`
-name := currentRow()["姓名"].(string)
+name := sdk.CurrentRow()["姓名"].(string)
 if name == "杨萍" {
 	return "这是杨萍的测试"
 }
