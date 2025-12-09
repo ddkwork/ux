@@ -2,454 +2,217 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"reflect"
-	"strconv"
-	"strings"
+	"sync"
 
+	"github.com/ddkwork/golibrary/std/stream"
 	"github.com/traefik/yaegi/interp"
 	"github.com/traefik/yaegi/stdlib"
 )
 
-// =============================
-// 表格数据结构
-// =============================
-
-type FormulaTable struct {
-	Rows    []map[string]interface{}
-	Columns map[string]*ColumnConfig
+// ==================== 内存表格 ====================
+type MemoryTable struct {
+	mu   sync.RWMutex
+	rows []map[string]interface{}
 }
 
-type ColumnConfig struct {
-	Name    string
-	Type    string // "text", "number", "formula"
-	Formula string // 用户输入的Go代码
+func NewMemoryTable() *MemoryTable {
+	return &MemoryTable{rows: make([]map[string]interface{}, 0)}
 }
 
-// =============================
-// SDK函数库（预编译的）
-// =============================
-
-type SDKFunctions struct {
-	rows         []map[string]interface{}
-	currentRow   map[string]interface{}
-	CurrentIndex int // 修改为大写字母开头
+func (t *MemoryTable) AddRow(row map[string]interface{}) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.rows = append(t.rows, row)
 }
 
-// Sum 计算指定列的总和
-func (sdk *SDKFunctions) Sum(columnName string) float64 {
-	total := 0.0
-	for _, row := range sdk.rows {
-		if val, ok := row[columnName].(float64); ok {
-			total += val
-		} else if val, ok := row[columnName].(int); ok {
-			total += float64(val)
-		} else if val, ok := row[columnName].(string); ok {
-			if f, err := strconv.ParseFloat(val, 64); err == nil {
-				total += f
-			}
-		}
+func (t *MemoryTable) RowCount() int {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	return len(t.rows)
+}
+
+func (t *MemoryTable) GetRow(i int) map[string]interface{} {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	if i < 0 || i >= len(t.rows) {
+		return nil
 	}
-	return total
-}
-
-// SumIf 条件求和
-func (sdk *SDKFunctions) SumIf(targetColumn, conditionColumn, conditionValue string) float64 {
-	total := 0.0
-	for _, row := range sdk.rows {
-		if fmt.Sprint(row[conditionColumn]) == conditionValue {
-			if val, ok := row[targetColumn].(float64); ok {
-				total += val
-			} else if val, ok := row[targetColumn].(int); ok {
-				total += float64(val)
-			} else if val, ok := row[targetColumn].(string); ok {
-				if f, err := strconv.ParseFloat(val, 64); err == nil {
-					total += f
-				}
-			}
-		}
+	row := make(map[string]interface{})
+	for k, v := range t.rows[i] {
+		row[k] = v
 	}
-	return total
+	return row
 }
 
-// CurrentRow 获取当前行数据
-func (sdk *SDKFunctions) CurrentRow() map[string]interface{} {
-	return sdk.currentRow
-}
-
-// GetCell 获取指定单元格值
-func (sdk *SDKFunctions) GetCell(rowIndex int, columnName string) interface{} {
-	if rowIndex >= 0 && rowIndex < len(sdk.rows) {
-		return sdk.rows[rowIndex][columnName]
+func (t *MemoryTable) SetValue(i int, col string, val interface{}) error {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if i < 0 || i >= len(t.rows) {
+		return fmt.Errorf("索引越界")
 	}
+	t.rows[i][col] = val
 	return nil
 }
 
-// GetCellFloat 安全获取浮点数
-func (sdk *SDKFunctions) GetCellFloat(rowIndex int, columnName string) float64 {
-	val := sdk.GetCell(rowIndex, columnName)
-	switch v := val.(type) {
-	case float64:
-		return v
-	case int:
-		return float64(v)
-	case string:
-		f, _ := strconv.ParseFloat(v, 64)
-		return f
-	default:
-		return 0.0
+func (t *MemoryTable) SumIf(field string, crit interface{}, sumField string) float64 {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	var sum float64
+	for _, r := range t.rows {
+		if v, ok := r[field]; ok && fmt.Sprint(v) == fmt.Sprint(crit) {
+			if sv, ok := r[sumField].(float64); ok {
+				sum += sv
+			} else if iv, ok := r[sumField].(int); ok {
+				sum += float64(iv)
+			}
+		}
 	}
+	return sum
 }
 
-// =============================
-// Go代码解释器
-// =============================
+// ==================== Yaegi 引擎 ====================
+type YaegiEngine struct{}
 
-type FormulaInterpreter struct {
-	interpreter *interp.Interpreter
-	sdk         *SDKFunctions
+func NewYaegiEngine() *YaegiEngine {
+	return &YaegiEngine{}
 }
 
-func NewFormulaInterpreter(rows []map[string]interface{}, currentRowIndex int) *FormulaInterpreter {
-	i := interp.New(interp.Options{})
+// 计算单行公式 - 真正的脚本化版本
+func (e *YaegiEngine) CalculateRow(script string, row map[string]interface{}, tableData []map[string]interface{}) (float64, error) {
+	// 创建新的解释器实例
+	i := interp.New(interp.Options{
+		GoPath:       "./",
+		Unrestricted: true,
+	})
 	i.Use(stdlib.Symbols)
 
-	sdk := &SDKFunctions{
-		rows:         rows,
-		currentRow:   rows[currentRowIndex],
-		CurrentIndex: currentRowIndex, // 修改为大写字母开头
-	}
-
-	// 创建临时目录并写入SDK代码
-	tmpDir := "tmp"
-	if err := os.MkdirAll(tmpDir, 0755); err != nil {
-		fmt.Printf("创建临时目录错误: %v\n", err)
-		return nil
-	}
-
-	sdkDir := filepath.Join(tmpDir, "sdk")
-	if err := os.MkdirAll(sdkDir, 0755); err != nil {
-		fmt.Printf("创建SDK临时目录错误: %v\n", err)
-		return nil
-	}
-
-	sdkFile := filepath.Join(sdkDir, "sdk.go")
-	sdkCode := `
-package sdk
-
-import (
-	"fmt"
-	"strconv"
-)
-
-type SDKFunctions struct {
-	rows         []map[string]interface{}
-	currentRow   map[string]interface{}
-	CurrentIndex int // 修改为大写字母开头
-}
-
-func (sdk *SDKFunctions) Sum(columnName string) float64 {
-	total := 0.0
-	for _, row := range sdk.rows {
-		if val, ok := row[columnName].(float64); ok {
-			total += val
-		} else if val, ok := row[columnName].(int); ok {
-			total += float64(val)
-		} else if val, ok := row[columnName].(string); ok {
-			if f, err := strconv.ParseFloat(val, 64); err == nil {
-				total += f
-			}
-		}
-	}
-	return total
-}
-
-func (sdk *SDKFunctions) SumIf(targetColumn, conditionColumn, conditionValue string) float64 {
-	total := 0.0
-	for _, row := range sdk.rows {
-		if fmt.Sprint(row[conditionColumn]) == conditionValue {
-			if val, ok := row[targetColumn].(float64); ok {
-				total += val
-			} else if val, ok := row[targetColumn].(int); ok {
-				total += float64(val)
-			} else if val, ok := row[targetColumn].(string); ok {
-				if f, err := strconv.ParseFloat(val, 64); err == nil {
-					total += f
+	// 构建完整的 Go 代码
+	code := fmt.Sprintf(`
+		package main
+		
+		import "fmt"
+		
+		// 当前行数据
+		var row = %#v
+		
+		// 表格数据
+		var tableData = %#v
+		
+		// SUMIF 函数
+		func SUMIF(field string, criteria interface{}, sumField string) float64 {
+			var sum float64
+			for _, r := range tableData {
+				if fmt.Sprint(r[field]) == fmt.Sprint(criteria) {
+					if val, ok := r[sumField].(float64); ok {
+						sum += val
+					} else if val, ok := r[sumField].(int); ok {
+						sum += float64(val)
+					}
 				}
 			}
+			return sum
 		}
-	}
-	return total
-}
+		
+		// 执行用户脚本
+		func calc() float64 {
+			%s
+		}
+	`, row, tableData, script) //妙，调用sdk api动态生成代码运算的数据而不是使用反射导出sdk api方法，那样会得到很多错误
+	//思考，有没有别的场景不是传递这些参数呢？
 
-func (sdk *SDKFunctions) CurrentRow() map[string]interface{} {
-	return sdk.currentRow
-}
-
-func (sdk *SDKFunctions) GetCell(rowIndex int, columnName string) interface{} {
-	if rowIndex >= 0 && rowIndex < len(sdk.rows) {
-		return sdk.rows[rowIndex][columnName]
-	}
-	return nil
-}
-
-func (sdk *SDKFunctions) GetCellFloat(rowIndex int, columnName string) float64 {
-	val := sdk.GetCell(rowIndex, columnName)
-	switch v := val.(type) {
-	case float64:
-		return v
-	case int:
-		return float64(v)
-	case string:
-		f, _ := strconv.ParseFloat(v, 64)
-		return f
-	default:
-		return 0.0
-	}
-}
-`
-
-	if err := os.WriteFile(sdkFile, []byte(sdkCode), 0644); err != nil {
-		fmt.Printf("写入SDK临时文件错误: %v\n", err)
-		return nil
-	}
-
-	// 注入SDK函数到解释器
-	i.Use(interp.Exports{
-		"sdk/sdk": map[string]reflect.Value{
-			"SDKFunctions": reflect.ValueOf(sdk),
-			"Sum":          reflect.ValueOf(sdk.Sum),
-			"SumIf":        reflect.ValueOf(sdk.SumIf),
-			"CurrentRow":   reflect.ValueOf(sdk.CurrentRow),
-			"GetCell":      reflect.ValueOf(sdk.GetCell),
-			"GetCellFloat": reflect.ValueOf(sdk.GetCellFloat),
-			"CurrentIndex": reflect.ValueOf(sdk.CurrentIndex), // 修改为大写字母开头
-		},
-	})
-
-	return &FormulaInterpreter{
-		interpreter: i,
-		sdk:         sdk,
-	}
-}
-
-// Execute 执行Go代码公式
-func (fi *FormulaInterpreter) Execute(formulaCode string) (interface{}, error) {
-	// 包装用户代码
-	wrappedCode := `
-package main
-
-import (
-	"fmt"
-	"sdk/sdk"
-)
-
-func calculate(rows []map[string]interface{}, currentIndex int) interface{} {
-	sdk := &sdk.SDKFunctions{
-		rows:         rows,
-		currentRow:   rows[currentIndex],
-		CurrentIndex: currentIndex,
-	}
-
-	` + formulaCode + `
-}
-
-var result = calculate(rows, currentIndex)
-`
-
-	// 写入临时文件
-	tmpDir := "tmp"
-	if err := os.MkdirAll(tmpDir, 0755); err != nil {
-		return nil, fmt.Errorf("创建临时目录错误: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
-
-	formulaFile := filepath.Join(tmpDir, "formula.go")
-	if err := os.WriteFile(formulaFile, []byte(wrappedCode), 0644); err != nil {
-		return nil, fmt.Errorf("写入临时文件错误: %v", err)
-	}
-
+	stream.WriteGoFile("tmp/main.go", code) //执行goland语法检查
 	// 执行代码
-	_, err := fi.interpreter.Eval(wrappedCode)
+	v, err := i.Eval(code)
 	if err != nil {
-		return nil, fmt.Errorf("代码执行错误: %v", err)
+		return 0, fmt.Errorf("执行失败: %v", err)
 	}
 
 	// 获取结果
-	v, err := fi.interpreter.Eval("result")
-	if err != nil {
-		return nil, fmt.Errorf("获取结果错误: %v", err)
+	result, ok := v.Interface().(float64)
+	if !ok {
+		return 0, fmt.Errorf("结果类型错误")
 	}
 
-	return v.Interface(), nil
+	return result, nil
 }
 
-// =============================
-// 语法糖转换器（可选）
-// =============================
-
-type SugarSyntax struct{}
-
-func (ss *SugarSyntax) Transform(compactCode string) string {
-	transformations := map[string]string{
-		`@姓名`:        `sdk.CurrentRow()["姓名"].(string)`,
-		`@女工日结`:    `sdk.GetCellFloat(sdk.CurrentIndex, "女工日结")`, // 修改为大写字母开头
-		`SUMIF.*`:      `sdk.SumIf`,                                      // 需要更复杂的正则替换
-		`currentIndex`: `sdk.CurrentIndex`,
-	}
-
-	result := compactCode
-	for short, long := range transformations {
-		result = strings.ReplaceAll(result, short, long)
-	}
-	return result
-}
-
-// =============================
-// 表格集成
-// =============================
-
-func NewFormulaTable() *FormulaTable {
-	return &FormulaTable{
-		Rows:    make([]map[string]interface{}, 0),
-		Columns: make(map[string]*ColumnConfig),
-	}
-}
-
-// AddColumn 添加列定义
-func (ft *FormulaTable) AddColumn(name, colType, formula string) {
-	ft.Columns[name] = &ColumnConfig{
-		Name:    name,
-		Type:    colType,
-		Formula: formula,
-	}
-}
-
-// AddRow 添加行并自动计算公式列
-func (ft *FormulaTable) AddRow(rowData map[string]interface{}) error {
-	// 添加行数据
-	ft.Rows = append(ft.Rows, rowData)
-	rowIndex := len(ft.Rows) - 1
-
-	// 计算所有公式列
-	for colName, colConfig := range ft.Columns {
-		if colConfig.Type == "formula" && colConfig.Formula != "" {
-			err := ft.calculateFormulaColumn(colName, colConfig.Formula, rowIndex)
-			if err != nil {
-				return fmt.Errorf("列%s计算错误: %v", colName, err)
-			}
-		}
-	}
-
-	return nil
-}
-
-func (ft *FormulaTable) calculateFormulaColumn(colName, formula string, rowIndex int) error {
-	interpreter := NewFormulaInterpreter(ft.Rows, rowIndex)
-
-	result, err := interpreter.Execute(formula)
-	if err != nil {
-		// 存储错误信息
-		ft.Rows[rowIndex][colName] = "错误: " + err.Error()
-		return err
-	}
-
-	ft.Rows[rowIndex][colName] = result
-	return nil
-}
-
-// =============================
-// 使用示例
-// =============================
-
+// ==================== 主程序 ====================
 func main() {
 	// 创建表格
-	table := NewFormulaTable()
+	table := NewMemoryTable()
 
-	// 定义列
-	table.AddColumn("姓名", "text", "")
-	table.AddColumn("女工日结", "number", "")
-	table.AddColumn("应发工资", "formula", `
-name := sdk.CurrentRow()["姓名"].(string)
-dailyWage := sdk.GetCellFloat(sdk.CurrentIndex, "女工日结") // 修改为大写字母开头
+	// 添加数据
+	table.AddRow(map[string]interface{}{"姓名": "拼车", "女工日结": 0.0})
+	table.AddRow(map[string]interface{}{"姓名": "三人组", "女工日结": 900.0})
+	table.AddRow(map[string]interface{}{"姓名": "房东", "女工日结": 350.0})
+	table.AddRow(map[string]interface{}{"姓名": "杨萍", "女工日结": 200.0})
+	table.AddRow(map[string]interface{}{"姓名": "二人组", "女工日结": 600.0})
 
-switch name {
-case "拼车", "三人组":
-	return 0.0
-case "房东":
-	return dailyWage
-case "杨萍":
-	threeGroupSum := sdk.SumIf("女工日结", "姓名", "三人组")
-	return threeGroupSum/3 + dailyWage
-case "二人组":
-	threeGroupSum := sdk.SumIf("女工日结", "姓名", "三人组")
-	return threeGroupSum/3 + dailyWage/2
-default:
-	return 0.0
-}
-`)
+	// 创建 Yaegi 引擎
+	engine := NewYaegiEngine()
 
-	// 添加测试数据
-	table.AddRow(map[string]interface{}{"姓名": "拼车", "女工日结": 100.0})
-	table.AddRow(map[string]interface{}{"姓名": "三人组", "女工日结": 300.0})
-	table.AddRow(map[string]interface{}{"姓名": "房东", "女工日结": 150.0})
-	table.AddRow(map[string]interface{}{"姓名": "杨萍", "女工日结": 120.0})
-	table.AddRow(map[string]interface{}{"姓名": "二人组", "女工日结": 200.0})
+	// 真正的脚本化公式 - 完全写在字符串中
+	script := `
+		// 获取当前行数据
+		name := row["姓名"].(string)
+		
+		// 安全获取女工日结值
+		var nvGong float64
+		switch v := row["女工日结"].(type) {
+		case float64:
+			nvGong = v
+		case int:
+			nvGong = float64(v)
+		case int64:
+			nvGong = float64(v)
+		default:
+			nvGong = 0.0
+		}
+		
+		// 计算三人组总和
+		sanRenZuSum := SUMIF("姓名", "三人组", "女工日结")
+		
+		// 使用 Go 的 switch 语句
+		switch name {
+		case "拼车", "三人组":
+			return 0.0
+		case "房东":
+			return nvGong
+		case "杨萍":
+			return (sanRenZuSum / 3.0) + nvGong
+		case "二人组":
+			return (sanRenZuSum / 3.0) + (nvGong / 2.0)
+		default:
+			return 0.0
+		}
+	`
 
-	// 打印结果
-	fmt.Println("计算结果:")
-	for i, row := range table.Rows {
-		fmt.Printf("行%d: 姓名=%s, 女工日结=%.1f, 应发工资=%s\n", i, row["姓名"], row["女工日结"], row["应发工资"])
+	// 计算
+	fmt.Println("=== 计算结果 ===")
+	fmt.Printf("%-10s | %-10s | %-10s\n", "姓名", "女工日结", "计算结果")
+	fmt.Println("-----------|------------|------------")
+
+	// 获取表格数据
+
+	for i := 0; i < table.RowCount(); i++ {
+		row := table.GetRow(i)
+
+		// 使用 Yaegi 计算
+		result, err := engine.CalculateRow(script, row, table.rows)
+		if err != nil {
+			fmt.Printf("行 %d 错误: %v\n", i, err)
+			result = 0.0
+		}
+
+		table.SetValue(i, "计算结果", result)
+
+		fmt.Printf("%-10s | %-10.0f | %-10.2f\n",
+			row["姓名"], row["女工日结"], result)
 	}
 
-	// 测试单个公式计算
-	fmt.Println("\n测试单个公式:")
-	interpreter := NewFormulaInterpreter(table.Rows, 3) // 测试杨萍的行
-
-	result, err := interpreter.Execute(`
-name := sdk.CurrentRow()["姓名"].(string)
-if name == "杨萍" {
-	return "这是杨萍的测试"
-}
-return "不是杨萍"
-`)
-
-	if err != nil {
-		fmt.Println("错误:", err)
-	} else {
-		fmt.Println("结果:", result)
-	}
-}
-
-// =============================
-// 安卓端优化版本
-// =============================
-
-// AndroidFormulaInterpreter 安卓专用，带缓存优化
-type AndroidFormulaInterpreter struct {
-	baseInterpreter *FormulaInterpreter
-	cache           map[string]interface{}
-}
-
-func NewAndroidFormulaInterpreter(rows []map[string]interface{}, currentRowIndex int) *AndroidFormulaInterpreter {
-	return &AndroidFormulaInterpreter{
-		baseInterpreter: NewFormulaInterpreter(rows, currentRowIndex),
-		cache:           make(map[string]interface{}),
-	}
-}
-
-func (ai *AndroidFormulaInterpreter) ExecuteWithCache(formula string) (interface{}, error) {
-	// 检查缓存
-	if cached, exists := ai.cache[formula]; exists {
-		return cached, nil
-	}
-
-	// 执行并缓存结果
-	result, err := ai.baseInterpreter.Execute(formula)
-	if err == nil {
-		ai.cache[formula] = result
-	}
-
-	return result, err
+	// 验证
+	sanRenZuSum := table.SumIf("姓名", "三人组", "女工日结")
+	fmt.Printf("\n验证: 三人组总和=%.0f\n", sanRenZuSum)
+	fmt.Printf("杨萍应得: %.0f/3 + 200 = %.0f\n", sanRenZuSum, sanRenZuSum/3+200)
+	fmt.Printf("二人组应得: %.0f/3 + 600/2 = %.0f\n", sanRenZuSum, sanRenZuSum/3+300)
 }
