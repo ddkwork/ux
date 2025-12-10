@@ -1,16 +1,18 @@
 package sdk
 
+import "maps"
+
 import "fmt"
 
 type MemoryTable struct {
-	rows []map[string]interface{}
+	rows []map[string]any
 }
 
 func NewMemoryTable() *MemoryTable {
-	return &MemoryTable{rows: make([]map[string]interface{}, 0)}
+	return &MemoryTable{rows: make([]map[string]any, 0)}
 }
 
-func (t *MemoryTable) AddRow(row map[string]interface{}) {
+func (t *MemoryTable) AddRow(row map[string]any) {
 	if _, ok := row["计算结果"]; !ok {
 		row["计算结果"] = 0.0
 	}
@@ -21,18 +23,16 @@ func (t *MemoryTable) RowCount() int {
 	return len(t.rows)
 }
 
-func (t *MemoryTable) GetRow(i int) map[string]interface{} {
+func (t *MemoryTable) GetRow(i int) map[string]any {
 	if i < 0 || i >= len(t.rows) {
 		return nil
 	}
-	row := make(map[string]interface{})
-	for k, v := range t.rows[i] {
-		row[k] = v
-	}
+	row := make(map[string]any)
+	maps.Copy(row, t.rows[i])
 	return row
 }
 
-func (t *MemoryTable) SetValue(i int, col string, val interface{}) error {
+func (t *MemoryTable) SetValue(i int, col string, val any) error {
 	if i < 0 || i >= len(t.rows) {
 		return fmt.Errorf("索引越界")
 	}
@@ -40,7 +40,7 @@ func (t *MemoryTable) SetValue(i int, col string, val interface{}) error {
 	return nil
 }
 
-func (t *MemoryTable) SumIf(field string, crit interface{}, sumField string) float64 {
+func (t *MemoryTable) SumIf(field string, crit any, sumField string) float64 {
 	var sum float64
 	for _, r := range t.rows {
 		if v, ok := r[field]; ok && fmt.Sprint(v) == fmt.Sprint(crit) {

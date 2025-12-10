@@ -90,11 +90,11 @@ func RunScript(t *sdk.MemoryTable, index int) {
 func main() {
 	table := sdk.NewMemoryTable()
 
-	table.AddRow(map[string]interface{}{"姓名": "拼车", "女工日结": 0.0})
-	table.AddRow(map[string]interface{}{"姓名": "三人组", "女工日结": 900.0})
-	table.AddRow(map[string]interface{}{"姓名": "房东", "女工日结": 350.0})
-	table.AddRow(map[string]interface{}{"姓名": "杨萍", "女工日结": 200.0})
-	table.AddRow(map[string]interface{}{"姓名": "二人组", "女工日结": 600.0})
+	table.AddRow(map[string]any{"姓名": "拼车", "女工日结": 0.0})
+	table.AddRow(map[string]any{"姓名": "三人组", "女工日结": 900.0})
+	table.AddRow(map[string]any{"姓名": "房东", "女工日结": 350.0})
+	table.AddRow(map[string]any{"姓名": "杨萍", "女工日结": 200.0})
+	table.AddRow(map[string]any{"姓名": "二人组", "女工日结": 600.0})
 
 	engine := NewYaegiEngine(table)
 
