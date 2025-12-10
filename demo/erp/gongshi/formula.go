@@ -10,6 +10,8 @@ import (
 )
 
 //go:generate go run github.com/traefik/yaegi/cmd/yaegi extract github.com/ddkwork/ux/demo/erp/gongshi/sdk
+var Symbols = interp.Exports{}
+
 type YaegiEngine struct {
 	interp *interp.Interpreter
 	table  *sdk.MemoryTable
@@ -25,8 +27,6 @@ func NewYaegiEngine(table *sdk.MemoryTable) *YaegiEngine {
 	engine := &YaegiEngine{interp: i, table: table}
 	return engine
 }
-
-var Symbols = interp.Exports{}
 
 func (e *YaegiEngine) CalculateRow(rowIndex int) error {
 	row := e.table.GetRow(rowIndex)
