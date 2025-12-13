@@ -64,7 +64,7 @@ func init() {
 
 // _github_com_ddkwork_ux_demo_erp_gongshi_sdk_TableRowConstraint is an interface wrapper for TableRowConstraint type
 type _github_com_ddkwork_ux_demo_erp_gongshi_sdk_TableRowConstraint struct {
-	IValue           interface{}
+	IValue           any
 	WCanHaveChildren func() bool
 	WCellDataForSort func(col int) string
 	WChildren        func() []*sdk.Node
@@ -110,7 +110,7 @@ func (W _github_com_ddkwork_ux_demo_erp_gongshi_sdk_TableRowConstraint) SetParen
 
 // _github_com_ddkwork_ux_demo_erp_gongshi_sdk_TableRowData is an interface wrapper for TableRowData type
 type _github_com_ddkwork_ux_demo_erp_gongshi_sdk_TableRowData struct {
-	IValue           interface{}
+	IValue           any
 	WCanHaveChildren func() bool
 	WCellDataForSort func(col int) string
 	WChildren        func() []*sdk.Node

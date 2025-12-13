@@ -27,10 +27,7 @@ func (t *TreeTable) ToMarkdown(name string) string {
 	// Write data rows
 	for node := range t.dataNodes() {
 		// Calculate relative depth (root is depth 0)
-		depth := node.Depth() - 1
-		if depth < 0 {
-			depth = 0
-		}
+		depth := max(node.Depth()-1, 0)
 
 		// Create indentation and icon
 		indent := strings.Repeat("&nbsp;&nbsp;&nbsp;", depth)
