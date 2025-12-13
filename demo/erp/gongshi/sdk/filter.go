@@ -4,7 +4,78 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/ddkwork/ux/demo/erp/gongshi/sdk/field"
 )
+
+func (t *TreeTable) IsFiltered() bool { return t.filteredRows != nil }
+func (t *TreeTable) Filter(text string) {
+	if text == "" {
+		t.filteredRows = nil
+		t.Root.Children = t.rootRows
+		t.OpenAll()
+		return
+	}
+	t.filteredRows = make([]*Node, 0) // todo root row is not container case handle
+	//for _, node := range t.Root.WalkContainer() { // todo bug 需要改回之前的回调模式？需要调试，编辑节点模态窗口bug
+	//	if node.rowCells == nil {
+	//		node.rowCells = t.MarshalRowCells(node)
+	//	}
+	//	for _, cell := range node.rowCells {
+	//		// mylog.Info(cell.Value, text)
+	//		if strings.EqualFold(cell.Value, text) { // 忽略大小写的情况下相等,支持unicode
+	//			t.filteredRows = append(t.filteredRows, node) // 先过滤所有容器节点
+	//		}
+	//	}
+	//}
+	// for i, row := range t.filteredRows {
+	//	break
+	//	children := make([]*Node, 0)
+	//	for _, node := range row.Walk() { // todo bug
+	//		columnCells := t.MarshalRowCells(node)
+	//		for _, cell := range columnCells {
+	//			mylog.Info(cell.Value, text)
+	//			if strings.EqualFold(cell.Value, text) {
+	//				children = append(children, node) // 过滤子节点
+	//			}
+	//		}
+	//	}
+	//	t.filteredRows[i].Children = children
+	// }
+	if len(t.filteredRows) == 0 {
+		return
+	}
+	t.OpenAll()
+	/*
+		func (t *Table) ApplyFilter(filter func(row T) bool) {
+			if filter == nil {
+				if t.filteredRows == nil {
+					return
+				}
+				t.filteredRows = nil
+			} else {
+				t.filteredRows = make([]T, 0)
+				for _, row := range t.Model.RootRows() {
+					t.applyFilter(row, filter)
+				}
+			}
+			if t.header != nil && t.header.HasSort() {
+				t.header.ApplySort()
+			}
+		}
+
+		func (t *Table) applyFilter(row T, filter func(row T) bool) {
+			if !filter(row) {
+				t.filteredRows = append(t.filteredRows, row)
+			}
+			if row.CanHaveChildren() {
+				for _, child := range row.Children() {
+					t.applyFilter(child, filter)
+				}
+			}
+		}
+	*/
+}
 
 // ------------------------------ 过滤系统 ------------------------------
 
@@ -59,8 +130,8 @@ var DefaultFilterOptions = FilterOptions{
 // ------------------------------ 过滤方法实现 ------------------------------
 
 // 应用过滤条件到单个节点
-func (n *Node) ApplyFilter(condition FilterCondition, options FilterOptions, table *TreeTable) bool {
-	cell := n.GetCell(condition.Column, table)
+func (n *Node) ApplyFilter(condition FilterCondition, options FilterOptions) bool {
+	cell := n.GetCell(condition.Column)
 	if cell == nil {
 		return false
 	}
@@ -72,15 +143,9 @@ func (n *Node) ApplyFilter(condition FilterCondition, options FilterOptions, tab
 	case OpIsNotEmpty:
 		return cell.Value != nil && fmt.Sprint(cell.Value) != ""
 	case OpIsTrue:
-		if b, ok := cell.AsBool(); ok {
-			return b
-		}
-		return false
+		return cell.AsBool()
 	case OpIsFalse:
-		if b, ok := cell.AsBool(); ok {
-			return !b
-		}
-		return false
+		return cell.AsBool()
 	}
 
 	// 获取比较值
@@ -296,7 +361,7 @@ func evaluateFilterGroup(node *Node, group *FilterGroup, options FilterOptions, 
 	currentResult := true
 	if len(group.Conditions) > 0 {
 		for _, cond := range group.Conditions {
-			condResult := node.ApplyFilter(cond, options, table)
+			condResult := node.ApplyFilter(cond, options)
 			if group.Logic == "OR" {
 				currentResult = currentResult || condResult
 				if currentResult {
@@ -348,7 +413,7 @@ func (t *TreeTable) FilterNodes(group *FilterGroup, options FilterOptions) []*No
 
 	// 使用自定义过滤函数（如果存在）
 	if options.CustomEval != nil {
-		for node := range t.Root.Walk() {
+		for _, node := range t.Root.Walk() {
 			if options.CustomEval(node) {
 				results = append(results, node)
 			}
@@ -357,7 +422,7 @@ func (t *TreeTable) FilterNodes(group *FilterGroup, options FilterOptions) []*No
 	}
 
 	// 使用过滤组
-	for node := range t.Root.Walk() {
+	for _, node := range t.Root.Walk() {
 		if evaluateFilterGroup(node, group, options, t) {
 			results = append(results, node)
 		}
@@ -383,10 +448,10 @@ func (t *TreeTable) FilterByText(searchText string, options FilterOptions) []*No
 
 	// 为每个文本列添加条件
 	for _, col := range t.Columns {
-		if col.Type == FieldTypeSingleLineText ||
-			col.Type == FieldTypeMultiLineText ||
-			col.Type == FieldTypeEmail ||
-			col.Type == FieldTypeURL {
+		if col.Type == field.TextType ||
+			col.Type == field.MultiLineTextType ||
+			col.Type == field.EmailType ||
+			col.Type == field.UrlType {
 			group.Conditions = append(group.Conditions, FilterCondition{
 				Column:   col.Name,
 				Operator: OpContains,
