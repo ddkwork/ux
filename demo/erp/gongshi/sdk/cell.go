@@ -62,7 +62,7 @@ func (n *Node) SetCellValue(colName string, value any, table *TreeTable) {
 }
 
 // SetCellValue 通过行索引和列名设置单元格值
-func (t *TreeTable) SetCellValue(rowIndex int, colName string, value any) {
+func (t *TreeTable) SetCellValue(rowIndex int, colName string, value any) { //todo bug 没有更新节点的单元格导致markdown刷新失败
 	row := t.GetRow(rowIndex)
 	row.SetCellValue(colName, value, t)
 }

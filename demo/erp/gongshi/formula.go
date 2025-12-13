@@ -78,6 +78,7 @@ import (
 func RunScript(t *sdk.TreeTable, rowIndex int) {
 	nameVal := t.GetCellByRowIndex(rowIndex, "姓名").AsString()
 	name := fmt.Sprintf("%v", nameVal)
+println(name)
 
 	nvGongVal := t.GetCellByRowIndex(rowIndex, "女工日结").AsFloat()
 	nvGong, _ := sdk.ToFloat(nvGongVal)
