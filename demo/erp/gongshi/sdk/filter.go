@@ -413,7 +413,7 @@ func (t *TreeTable) FilterNodes(group *FilterGroup, options FilterOptions) []*No
 
 	// 使用自定义过滤函数（如果存在）
 	if options.CustomEval != nil {
-		for _, node := range t.Root.Walk() {
+		for node := range t.Root.Walk() {
 			if options.CustomEval(node) {
 				results = append(results, node)
 			}
@@ -422,7 +422,7 @@ func (t *TreeTable) FilterNodes(group *FilterGroup, options FilterOptions) []*No
 	}
 
 	// 使用过滤组
-	for _, node := range t.Root.Walk() {
+	for node := range t.Root.Walk() {
 		if evaluateFilterGroup(node, group, options, t) {
 			results = append(results, node)
 		}

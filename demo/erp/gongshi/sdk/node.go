@@ -20,6 +20,7 @@ type Node struct {
 	isOpen    bool       // Whether expanded (only for container nodes)
 	GroupKey  string     // Grouping key
 	RowNumber int        // Row number (for sorting)
+	walkIndex int
 }
 
 func newRoot() *Node         { return NewContainerNode("root", nil) }
@@ -142,13 +143,15 @@ func (n *Node) SetChildren(children []*Node) {
 	n.Children = children
 }
 
-func (n *Node) Walk() iter.Seq2[int, *Node] {
-	return func(yield func(int, *Node) bool) {
-		if !yield(0, n) {
+func (n *Node) Walk() iter.Seq[*Node] {
+	return func(yield func(*Node) bool) {
+		n.walkIndex = 0
+		if !yield(n) {
 			return
 		}
 		for i, child := range n.Children {
-			if !yield(i, child) { // 迭代索引是为了insert和remove时定位
+			child.walkIndex = i
+			if !yield(child) { // 迭代索引是为了insert和remove时定位
 				break
 			}
 			if child.CanHaveChildren() {
@@ -255,7 +258,7 @@ func (n *Node) Depth() int {
 }
 func (t *TreeTable) MaxDepth() int {
 	maxDepth := 0
-	for _, node := range t.Root.Walk() {
+	for node := range t.Root.Walk() {
 		childDepth := node.Depth()
 		if childDepth > maxDepth {
 			maxDepth = childDepth
@@ -264,7 +267,7 @@ func (t *TreeTable) MaxDepth() int {
 	return maxDepth
 }
 func (n *Node) Find() (found *Node) {
-	for _, child := range n.parent.Walk() {
+	for child := range n.parent.Walk() {
 		if child.ID == n.ID {
 			found = child
 			break
@@ -357,9 +360,9 @@ func (n *Node) Index() int {
 }
 
 func (n *Node) Remove() {
-	for i, child := range n.parent.Walk() {
+	for child := range n.parent.Walk() {
 		if child.ID == n.ID {
-			n.parent.Children = slices.Delete(n.parent.Children, i, i+1)
+			n.parent.Children = slices.Delete(n.parent.Children, child.walkIndex, child.walkIndex+1)
 			break
 		}
 	}

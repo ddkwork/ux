@@ -231,7 +231,7 @@ func printFlatTable(table *sdk.TreeTable) {
 
 func printGroupedTable(table *sdk.TreeTable) {
 	fmt.Println("树形结构:")
-	for _, node := range table.Root.Walk() {
+	for node := range table.Root.Walk() {
 		indent := strings.Repeat("  ", node.Depth()-1)
 		if node.IsContainer() {
 			groupName := node.GroupKey

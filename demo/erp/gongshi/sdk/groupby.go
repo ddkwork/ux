@@ -168,7 +168,7 @@ func (t *TreeTable) Aggregate(groupColumn, targetColumn, aggType string) map[str
 			count := 0
 
 			// 遍历分组内的所有行
-			for _, row := range node.Walk() {
+			for row := range node.Walk() {
 				if row.IsContainer() {
 					continue
 				}
@@ -231,7 +231,7 @@ func (t *TreeTable) GetGroups() []*Node {
 
 // ExpandAllGroups 展开所有分组
 func (t *TreeTable) ExpandAllGroups() {
-	for _, node := range t.Root.Walk() {
+	for node := range t.Root.Walk() {
 		if node.IsContainer() {
 			node.isOpen = true
 		}
@@ -240,7 +240,7 @@ func (t *TreeTable) ExpandAllGroups() {
 
 // CollapseAllGroups 折叠所有分组
 func (t *TreeTable) CollapseAllGroups() {
-	for _, node := range t.Root.Walk() {
+	for node := range t.Root.Walk() {
 		if node.IsContainer() && !strings.HasPrefix(node.Type, "root") {
 			node.isOpen = false
 		}
@@ -284,7 +284,7 @@ func (t *TreeTable) Ungroup() {
 
 	// 将所有行提取到根节点
 	for _, node := range t.Root.Children {
-		for _, row := range node.Walk() {
+		for row := range node.Walk() {
 			if !row.IsContainer() {
 				row.parent = nil
 				root.AddChild(row)
