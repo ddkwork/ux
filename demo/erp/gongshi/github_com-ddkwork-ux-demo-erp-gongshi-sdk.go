@@ -4,16 +4,60 @@ package main
 
 import (
 	"github.com/ddkwork/ux/demo/erp/gongshi/sdk"
-
 	"reflect"
 )
 
 func init() {
 	Symbols["github.com/ddkwork/ux/demo/erp/gongshi/sdk/sdk"] = map[string]reflect.Value{
 		// function, constant and variable definitions
-		"NewMemoryTable": reflect.ValueOf(sdk.NewMemoryTable),
+		"DefaultFilterOptions":    reflect.ValueOf(&sdk.DefaultFilterOptions).Elem(),
+		"DetectTypeFromString":    reflect.ValueOf(sdk.DetectTypeFromString),
+		"ExampleUsage":            reflect.ValueOf(sdk.ExampleUsage),
+		"FieldTypeAttachment":     reflect.ValueOf(sdk.FieldTypeAttachment),
+		"FieldTypeCheckbox":       reflect.ValueOf(sdk.FieldTypeCheckbox),
+		"FieldTypeDateTime":       reflect.ValueOf(sdk.FieldTypeDateTime),
+		"FieldTypeEmail":          reflect.ValueOf(sdk.FieldTypeEmail),
+		"FieldTypeFormula":        reflect.ValueOf(sdk.FieldTypeFormula),
+		"FieldTypeLink":           reflect.ValueOf(sdk.FieldTypeLink),
+		"FieldTypeMultiLineText":  reflect.ValueOf(sdk.FieldTypeMultiLineText),
+		"FieldTypeMultipleSelect": reflect.ValueOf(sdk.FieldTypeMultipleSelect),
+		"FieldTypeNumber":         reflect.ValueOf(sdk.FieldTypeNumber),
+		"FieldTypePhone":          reflect.ValueOf(sdk.FieldTypePhone),
+		"FieldTypeSingleLineText": reflect.ValueOf(sdk.FieldTypeSingleLineText),
+		"FieldTypeSingleSelect":   reflect.ValueOf(sdk.FieldTypeSingleSelect),
+		"FieldTypeURL":            reflect.ValueOf(sdk.FieldTypeURL),
+		"FieldTypeUser":           reflect.ValueOf(sdk.FieldTypeUser),
+		"FromJSON":                reflect.ValueOf(sdk.FromJSON),
+		"NewContainerNode":        reflect.ValueOf(sdk.NewContainerNode),
+		"NewFilterCondition":      reflect.ValueOf(sdk.NewFilterCondition),
+		"NewFilterGroup":          reflect.ValueOf(sdk.NewFilterGroup),
+		"NewNode":                 reflect.ValueOf(sdk.NewNode),
+		"NewTreeTable":            reflect.ValueOf(sdk.NewTreeTable),
+		"OpContains":              reflect.ValueOf(sdk.OpContains),
+		"OpEndsWith":              reflect.ValueOf(sdk.OpEndsWith),
+		"OpEqual":                 reflect.ValueOf(sdk.OpEqual),
+		"OpGreaterEqual":          reflect.ValueOf(sdk.OpGreaterEqual),
+		"OpGreaterThan":           reflect.ValueOf(sdk.OpGreaterThan),
+		"OpIn":                    reflect.ValueOf(sdk.OpIn),
+		"OpIsEmpty":               reflect.ValueOf(sdk.OpIsEmpty),
+		"OpIsFalse":               reflect.ValueOf(sdk.OpIsFalse),
+		"OpIsNotEmpty":            reflect.ValueOf(sdk.OpIsNotEmpty),
+		"OpIsTrue":                reflect.ValueOf(sdk.OpIsTrue),
+		"OpLessEqual":             reflect.ValueOf(sdk.OpLessEqual),
+		"OpLessThan":              reflect.ValueOf(sdk.OpLessThan),
+		"OpNotEqual":              reflect.ValueOf(sdk.OpNotEqual),
+		"OpNotIn":                 reflect.ValueOf(sdk.OpNotIn),
+		"OpStartsWith":            reflect.ValueOf(sdk.OpStartsWith),
+		"ToFloat":                 reflect.ValueOf(sdk.ToFloat),
 
 		// type definitions
-		"MemoryTable": reflect.ValueOf((*sdk.MemoryTable)(nil)),
+		"CellData":        reflect.ValueOf((*sdk.CellData)(nil)),
+		"FieldType":       reflect.ValueOf((*sdk.FieldType)(nil)),
+		"FilterCondition": reflect.ValueOf((*sdk.FilterCondition)(nil)),
+		"FilterGroup":     reflect.ValueOf((*sdk.FilterGroup)(nil)),
+		"FilterOperator":  reflect.ValueOf((*sdk.FilterOperator)(nil)),
+		"FilterOptions":   reflect.ValueOf((*sdk.FilterOptions)(nil)),
+		"Node":            reflect.ValueOf((*sdk.Node)(nil)),
+		"TreeTable":       reflect.ValueOf((*sdk.TreeTable)(nil)),
 	}
 }

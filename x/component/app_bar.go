@@ -422,13 +422,6 @@ func (a *AppBar) Layout(gtx layout.Context, theme *material.Theme, navDesc, over
 	return layout.Dimensions{Size: gtx.Constraints.Max}
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 // AppBarEvent
 type AppBarEvent interface {
 	AppBarEvent()

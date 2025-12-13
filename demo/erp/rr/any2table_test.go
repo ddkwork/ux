@@ -5,6 +5,9 @@ import (
 	"testing"
 )
 
+//go:generate  yaegi extract github.com/ddkwork/ux
+//var Symbols = interp.Exports{}
+
 func TestJSONParser(t *testing.T) {
 	jsonContent := `{"name": "John Doe", "age": 30, "active": true}`
 

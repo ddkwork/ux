@@ -200,55 +200,55 @@ func generateStruct(rows [][]string) reflect.Type {
 		case FieldTypeNumber:
 			fields[i] = reflect.StructField{
 				Name: columnName,
-				Type: reflect.TypeOf(float64(0)),
+				Type: reflect.TypeFor[float64](),
 				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
 			}
 		case FieldTypeDateTime:
 			fields[i] = reflect.StructField{
 				Name: columnName,
-				Type: reflect.TypeOf(time.Time{}),
+				Type: reflect.TypeFor[time.Time](),
 				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
 			}
 		case FieldTypeEmail:
 			fields[i] = reflect.StructField{
 				Name: columnName,
-				Type: reflect.TypeOf(""),
+				Type: reflect.TypeFor[string](),
 				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
 			}
 		case FieldTypeURL:
 			fields[i] = reflect.StructField{
 				Name: columnName,
-				Type: reflect.TypeOf(""),
+				Type: reflect.TypeFor[string](),
 				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
 			}
 		case FieldTypeSingleLineText, FieldTypeMultiLineText:
 			fields[i] = reflect.StructField{
 				Name: columnName,
-				Type: reflect.TypeOf(""),
+				Type: reflect.TypeFor[string](),
 				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
 			}
 		case FieldTypeSingleSelect, FieldTypeMultipleSelect:
 			fields[i] = reflect.StructField{
 				Name: columnName,
-				Type: reflect.TypeOf(""),
+				Type: reflect.TypeFor[string](),
 				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
 			}
 		case FieldTypeCheckbox:
 			fields[i] = reflect.StructField{
 				Name: columnName,
-				Type: reflect.TypeOf(true),
+				Type: reflect.TypeFor[bool](),
 				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
 			}
 		case FieldTypeAttachment, FieldTypeLink, FieldTypeUser, FieldTypePhone, FieldTypeFormula:
 			fields[i] = reflect.StructField{
 				Name: columnName,
-				Type: reflect.TypeOf(""),
+				Type: reflect.TypeFor[string](),
 				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
 			}
 		default:
 			fields[i] = reflect.StructField{
 				Name: columnName,
-				Type: reflect.TypeOf(""),
+				Type: reflect.TypeFor[string](),
 				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
 			}
 		}
@@ -276,7 +276,7 @@ func createInstances(structType reflect.Type, rows [][]string) []reflect.Value {
 			case reflect.String:
 				field.SetString(value)
 			case reflect.Struct:
-				if field.Type() == reflect.TypeOf(time.Time{}) {
+				if field.Type() == reflect.TypeFor[time.Time]() {
 					t, _ := time.Parse(time.RFC3339, value)
 					field.Set(reflect.ValueOf(t))
 				}
@@ -928,9 +928,9 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { // 增删改查中
 
 // 增删改查列，字段，重建元数据结构体，重建rootrows
 func (t *TreeTable[T]) Rebuild(data any) { //todo 这里应该处理反射生成的结构体，需要足够的单元测试和压力测试，以及性能测试
-	t.header = &tableHeader[T]{
+	t.header = &tableHeader[T]{ //这里似乎不适合类型约束
 		columnCells: InitHeader(data),
-		node:        &Node[T]{Data: data},
+		//node:        &Node[T]{Data: data},//todo bug
 	}
 	t.columnCount = len(t.header.columnCells)
 	t.maxColumnCellWidths = make([]unit.Dp, t.columnCount)
@@ -1897,7 +1897,6 @@ func (t *TreeTable[T]) walkAndFormatMarkdown(b *stream.Buffer, nodes []*Node[T],
 		// Step 4: 处理缩进并合并层级缩进符号和层级列单元格文本
 		if depth > 0 {
 			row.WriteString(strings.Repeat("&nbsp;&nbsp;&nbsp;", depth))
-			//row.WriteString(strings.Repeat("&nbsp;&nbsp;&nbsp;", depth-1))
 		}
 
 		if i == len(nodes)-1 {

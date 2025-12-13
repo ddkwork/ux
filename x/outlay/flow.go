@@ -180,13 +180,6 @@ func (g *Flow) Layout(gtx layout.Context, num int, el FlowElement) layout.Dimens
 	})
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 func axisPoint(a layout.Axis, main, cross int) image.Point {
 	if a == layout.Horizontal {
 		return image.Point{X: main, Y: cross}

@@ -31,8 +31,8 @@ var toPx = [...]float64{Px: 1, Cm: 96. / 2.54, Mm: 9.6 / 2.54, Pt: 96. / 72., In
 func findUnit(s string) (u unite, value string) {
 	s = strings.TrimSpace(s)
 	for u, suffix := range absoluteUnits {
-		if strings.HasSuffix(s, suffix) {
-			valueS := strings.TrimSpace(strings.TrimSuffix(s, suffix))
+		if before, ok := strings.CutSuffix(s, suffix); ok {
+			valueS := strings.TrimSpace(before)
 			return unite(u), valueS
 		}
 	}

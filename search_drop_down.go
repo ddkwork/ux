@@ -210,11 +210,11 @@ type KeyValue struct {
 }
 
 func KeyValuesToText(values []KeyValue) string {
-	var text string
+	var text strings.Builder
 	for _, v := range values {
-		text += v.Key + ": " + v.Value + "\n"
+		text.WriteString(v.Key + ": " + v.Value + "\n")
 	}
-	return text
+	return text.String()
 }
 
 func TextToKeyValue(txt string) []KeyValue {

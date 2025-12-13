@@ -146,13 +146,6 @@ func (f *Fan) Layout(gtx layout.Context, items ...FanItem) layout.Dimensions {
 	}
 }
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 func (f *Fan) layoutItem(gtx layout.Context, index int, params fanParams) layout.Dimensions {
 	arc := params.arc
 	radius := params.radius
