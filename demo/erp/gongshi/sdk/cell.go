@@ -62,13 +62,9 @@ func (n *Node) SetCellValue(colName string, value any, table *TreeTable) {
 }
 
 // SetCellValue 通过行索引和列名设置单元格值
-func (t *TreeTable) SetCellValue(rowIndex int, colName string, value any) bool {
+func (t *TreeTable) SetCellValue(rowIndex int, colName string, value any) {
 	row := t.GetRow(rowIndex)
-	if row == nil {
-		return false
-	}
 	row.SetCellValue(colName, value, t)
-	return true
 }
 
 // AsString returns the string representation of the cell value.

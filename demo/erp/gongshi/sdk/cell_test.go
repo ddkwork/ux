@@ -2,7 +2,6 @@ package sdk
 
 import (
 	"reflect"
-	"sync"
 	"testing"
 	"time"
 
@@ -368,52 +367,10 @@ func TestTreeTable_GetCellByRowIndex(t1 *testing.T) {
 }
 
 func TestTreeTable_SetCellValue(t1 *testing.T) {
-	type fields struct {
-		Root             *Node
-		OriginalRoot     *Node
-		Columns          []ColumnDefinition
-		columnMap        map[string]*ColumnDefinition
-		SelectedNode     *Node
-		once             sync.Once
-		OnRowSelected    func(n *Node)
-		OnRowDoubleClick func(n *Node)
-		filteredRows     []*Node
-		groupedRows      []*Node
-		rootRows         []*Node
-	}
-	type args struct {
-		rowIndex int
-		colName  string
-		value    any
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t1.Run(tt.name, func(t1 *testing.T) {
-			t := &TreeTable{
-				Root:             tt.fields.Root,
-				OriginalRoot:     tt.fields.OriginalRoot,
-				Columns:          tt.fields.Columns,
-				columnMap:        tt.fields.columnMap,
-				SelectedNode:     tt.fields.SelectedNode,
-				once:             tt.fields.once,
-				OnRowSelected:    tt.fields.OnRowSelected,
-				OnRowDoubleClick: tt.fields.OnRowDoubleClick,
-				filteredRows:     tt.fields.filteredRows,
-				groupedRows:      tt.fields.groupedRows,
-				rootRows:         tt.fields.rootRows,
-			}
-			if got := t.SetCellValue(tt.args.rowIndex, tt.args.colName, tt.args.value); got != tt.want {
-				t1.Errorf("SetCellValue() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	t := tableDemo()
+	t.SetCellValue(0, "姓名", "4人组")
+	assert.Equal(t1, "4人组", t.GetCellByRowIndex(0, "姓名").AsString())
+	t.ToMarkdown("TestTreeTable_SetCellValue")
 }
 
 func Test_detectTypeFromString(t *testing.T) {
