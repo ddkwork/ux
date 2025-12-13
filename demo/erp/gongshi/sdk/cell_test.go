@@ -361,13 +361,13 @@ func TestNode_SetCellValue(t *testing.T) {
 	}
 }
 func TestTreeTable_GetCellByRowIndex(t1 *testing.T) {
-	t := tableDemo()
+	t := TableDemo()
 	assert.Equal(t1, "三人组", t.GetCellByRowIndex(0, "姓名").AsString())
 	assert.Equal(t1, 2966.30, t.GetCellByRowIndex(0, "女工日结").AsFloat())
 }
 
 func TestTreeTable_SetCellValue(t1 *testing.T) {
-	t := tableDemo()
+	t := TableDemo()
 	t.SetCellValue(0, "姓名", "4人组")
 	assert.Equal(t1, "4人组", t.GetCellByRowIndex(0, "姓名").AsString())
 	t.ToMarkdown("TestTreeTable_SetCellValue")

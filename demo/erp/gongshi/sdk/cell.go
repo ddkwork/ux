@@ -53,16 +53,17 @@ func (n *Node) SetCellValue(colName string, value any, table *TreeTable) {
 			Type:       colDef.Type,
 		})
 	} else {
-		n.RowCells = append(n.RowCells, CellData{
-			ColumnName: colName,
-			Value:      value,
-			Type:       inferType(value),
-		})
+		panic("需要更新的列名传入错误")
+		//n.RowCells = append(n.RowCells, CellData{
+		//	ColumnName: colName,
+		//	Value:      value,
+		//	Type:       inferType(value),
+		//})
 	}
 }
 
 // SetCellValue 通过行索引和列名设置单元格值
-func (t *TreeTable) SetCellValue(rowIndex int, colName string, value any) { //todo bug 没有更新节点的单元格导致markdown刷新失败
+func (t *TreeTable) SetCellValue(rowIndex int, colName string, value any) {
 	row := t.GetRow(rowIndex)
 	row.SetCellValue(colName, value, t)
 }

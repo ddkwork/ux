@@ -2,7 +2,7 @@ package sdk
 
 import "github.com/ddkwork/ux/demo/erp/gongshi/sdk/field"
 
-func tableDemo() *TreeTable {
+func TableDemo() *TreeTable {
 	table := NewTreeTable()
 
 	// 2. 直观的表格数据定义
@@ -20,31 +20,25 @@ import (
 	"github.com/ddkwork/ux/demo/erp/gongshi/sdk"
 )
 
-func RunScript(t *TreeTable, rowIndex int) {
-	nameVal, ok := t.GetCellByRowIndex(rowIndex, "姓名")
-	if !ok {
-		return
-	}
+func RunScript(t *sdk.TreeTable, rowIndex int) {
+	nameVal := t.GetCellByRowIndex(rowIndex, "姓名").AsString()
 	name := fmt.Sprintf("%v", nameVal)
 
-	nvGongVal, ok := t.GetCellByRowIndex(rowIndex, "女工日结")
-	if !ok {
-		return
-	}
-	nvGong, _ := ToFloat(nvGongVal)
+	nvGongVal := t.GetCellByRowIndex(rowIndex, "女工日结").AsFloat()
+	nvGong, _ := sdk.ToFloat(nvGongVal)
 
 	sanRenZuSum := t.SumIf("姓名", "三人组", "女工日结")
 	switch name {
 	case "拼车", "三人组":
-		t.SetCellValue(rowIndex, "计算结果", 0.0)
+		t.SetCellValue(rowIndex, "女工实发工资", 0.0)
 	case "房东":
-		t.SetCellValue(rowIndex, "计算结果", nvGong)
+		t.SetCellValue(rowIndex, "女工实发工资", nvGong)
 	case "杨萍":
-		t.SetCellValue(rowIndex, "计算结果", (sanRenZuSum/3.0)+nvGong)
+		t.SetCellValue(rowIndex, "女工实发工资", (sanRenZuSum/3.0)+nvGong)
 	case "二人组":
-		t.SetCellValue(rowIndex, "计算结果", (sanRenZuSum/3.0)+(nvGong/2.0))
+		t.SetCellValue(rowIndex, "女工实发工资", (sanRenZuSum/3.0)+(nvGong/2.0))
 	default:
-		t.SetCellValue(rowIndex, "计算结果", 0.0)
+		t.SetCellValue(rowIndex, "女工实发工资", 0.0)
 	}
 }
 `},
