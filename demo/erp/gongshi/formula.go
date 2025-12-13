@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/ddkwork/golibrary/std/stream"
 	"github.com/ddkwork/ux/demo/erp/gongshi/sdk"
@@ -101,142 +102,6 @@ func RunScript(t *sdk.TreeTable, rowIndex int) {
 	return nil
 }
 
-// 添加示例节点（含公式列依赖）
-func addExampleNodes() *sdk.Node {
-	// 员工1 - 杨萍
-	emp1 := sdk.NewNode([]sdk.CellData{
-		{Name: "姓名", Value: "杨萍", Type: "text"},
-		{Name: "出生年份", Value: 1990, Type: "number"},
-		{Name: "年龄", Type: "formula", Formula: `
-			func(ctx map[string]interface{}, node *Node, table *TreeTable) interface{} {
-				return 2024 - int(ctx["出生年份"].(float64))
-			}
-		`},
-		{Name: "女工日结", Value: 150.0, Type: "number"},
-		{Name: "计算结果", Type: "formula", Formula: `
-			func(ctx map[string]interface{}, node *Node, table *TreeTable) interface{} {
-				name := ctx["姓名"].(string)
-				nvGong := ctx["女工日结"].(float64)
-				sanRenZuSum := table.SumIf("姓名", "三人组", "女工日结")
-				
-				if name == "杨萍" {
-					return (sanRenZuSum/3.0) + nvGong
-				}
-				return 0.0
-			}
-		`},
-		{Name: "入职日期", Value: "2020-03-15", Type: "date"},
-		{Name: "状态", Value: "在职", Type: "select"},
-	})
-
-	// 员工2 - 房东
-	emp2 := sdk.NewNode([]sdk.CellData{
-		{Name: "姓名", Value: "房东", Type: "text"},
-		{Name: "出生年份", Value: 1985, Type: "number"},
-		{Name: "年龄", Type: "formula", Formula: `
-			func(ctx map[string]interface{}, node *Node, table *TreeTable) interface{} {
-				return 2024 - int(ctx["出生年份"].(float64))
-			}
-		`},
-		{Name: "女工日结", Value: 200.0, Type: "number"},
-		{Name: "计算结果", Type: "formula", Formula: `
-			func(ctx map[string]interface{}, node *Node, table *TreeTable) interface{} {
-				name := ctx["姓名"].(string)
-				nvGong := ctx["女工日结"].(float64)
-				
-				if name == "房东" {
-					return nvGong
-				}
-				return 0.0
-			}
-		`},
-		{Name: "入职日期", Value: "2019-07-01", Type: "date"},
-		{Name: "状态", Value: "在职", Type: "select"},
-	})
-
-	// 三人组
-	sanRenZu := sdk.NewNode([]sdk.CellData{
-		{Name: "姓名", Value: "三人组", Type: "text"},
-		{Name: "出生年份", Value: 0, Type: "number"},
-		{Name: "年龄", Type: "formula", Formula: `
-			func(ctx map[string]interface{}, node *Node, table *TreeTable) interface{} {
-				return 0
-			}
-		`},
-		{Name: "女工日结", Value: 300.0, Type: "number"},
-		{Name: "计算结果", Type: "formula", Formula: `
-			func(ctx map[string]interface{}, node *Node, table *TreeTable) interface{} {
-				return 0
-			}
-		`},
-		{Name: "入职日期", Value: "", Type: "date"},
-		{Name: "状态", Value: "在职", Type: "select"},
-	})
-
-	// 容器节点（部门）
-	dept := sdk.NewContainerNode("部门", []sdk.CellData{
-		{Name: "姓名", Value: "技术部", Type: "text"},
-		{Name: "出生年份", Value: 0, Type: "number"},
-		{Name: "年龄", Type: "formula", Formula: `
-			func(ctx map[string]interface{}, node *Node, table *TreeTable) interface{} {
-				return 0
-			}
-		`},
-		{Name: "女工日结", Value: 0.0, Type: "number"},
-		{Name: "计算结果", Type: "formula", Formula: `
-			func(ctx map[string]interface{}, node *Node, table *TreeTable) interface{} {
-				return 0
-			}
-		`},
-		{Name: "入职日期", Value: "", Type: "date"},
-		{Name: "状态", Value: "在职", Type: "select"},
-	})
-	dept.AddChildren([]*sdk.Node{emp1, emp2, sanRenZu})
-	return dept
-}
-
-// ------------------------------ 示例用法（含公式计算演示） ------------------------------
-func main() {
-	// 创建表格并添加示例节点
-	t := sdk.NewTreeTable()
-	nodes := addExampleNodes()
-	t.Root.AddChild(nodes)
-
-	stream.WriteTruncate("tmp/1.md", t.ToMarkdown())
-
-	// 打印Markdown（自动计算公式列值）
-	//fmt.Println("=== 树形表格（含公式列）===")
-	//fmt.Println(t.ToMarkdown())
-
-	// 修改依赖列值，观察公式列自动更新
-	if len(t.Root.Children) > 0 && len(t.Root.Children[0].Children) > 0 {
-		empNode := t.Root.Children[0].Children[0] // 获取第一个员工节点
-		empNode.SetCellValue("女工日结", 250.0, t)    // 修改女工日结
-
-		// 手动触发公式计算
-		for i := range empNode.RowCells {
-			if empNode.RowCells[i].Type == "formula" {
-				//t.calculateFormulaCell(empNode, &empNode.RowCells[i])
-			}
-		}
-
-		//fmt.Println("\n=== 修改女工日结后 ===")
-	}
-
-	// 导出JSON（含公式定义）
-	//if jsonData, err := t.ToJSON(); err == nil {
-	//	fmt.Println("\n=== JSON导出（含公式）===")
-	//	fmt.Println(string(jsonData))
-	//}
-
-	engine := NewYaegiEngine(t)
-	for i := 0; i < t.RowCount(); i++ {
-		if err := engine.CalculateRow(i); err != nil {
-			fmt.Printf("行 %d 错误: %v\n", i, err)
-		}
-	}
-}
-
 //func main() {
 //	table := sdk.NewTreeTable()
 //
@@ -271,3 +136,145 @@ func main() {
 //	fmt.Printf("杨萍应得: %.0f/3 + 200 = %.0f\n", sanRenZuSum, sanRenZuSum/3+200)
 //	fmt.Printf("二人组应得: %.0f/3 + 600/2 = %.0f\n", sanRenZuSum, sanRenZuSum/3+300)
 //}
+ 
+func main() {
+	// 1. 创建表格
+	table := sdk.NewTreeTable()
+
+	// 2. 直观的表格数据定义
+	data := sdk.TableData{
+		Columns: []sdk.ColumnConfig{
+			{Name: "姓名", Type: sdk.FieldTypeSingleLineText},
+			{Name: "女工日结", Type: sdk.FieldTypeNumber},
+			{Name: "男工车结", Type: sdk.FieldTypeNumber},
+			{Name: "女工实发工资", Type: sdk.FieldTypeFormula, Formula: "{{女工日结}} * 0.8 + {{男工车结}} * 0.5"},
+		},
+		Rows: [][]any{
+			{"三人组", 2966.30, 1104.20, 0},
+			{"房东", 442.40, 196.80, 442.4},
+			{"二人组", 5913.60, 2248.60, 3945.566666667},
+			{"杨萍", 3744.90, 1465.20, 4733.666666667},
+			{"拼车", 406.90, 175.00, 0},
+		},
+	}
+
+	// 3. 一键设置数据
+	table.LoadTableData(data)
+
+	// 4. 显示数据
+	fmt.Println("=== 基础数据展示 ===")
+	fmt.Printf("%-8s %-12s %-12s %-16s\n", "姓名", "女工日结", "男工车结", "女工实发工资")
+	fmt.Println("────────── ──────────── ──────────── ────────────────")
+
+	for _, row := range table.AllRows() {
+		name := row.GetCell("姓名", table).Value
+		day := row.GetCell("女工日结", table).Value
+		car := row.GetCell("男工车结", table).Value
+		salary := row.GetCell("女工实发工资", table).Value
+		fmt.Printf("%-8v %-12v %-12v %-16v\n", name, day, car, salary)
+	}
+
+	// 5. 排序演示
+	fmt.Println("\n=== 按女工日结降序排序 ===")
+	table.SortByColumn("女工日结", false)
+	for i, row := range table.AllRows() {
+		name := row.GetCell("姓名", table).Value
+		day := row.GetCell("女工日结", table).Value
+		fmt.Printf("%d. %v: %v\n", i+1, name, day)
+	}
+}
+
+func main2() {
+	// 1. 创建表格
+	table := sdk.NewTreeTable()
+
+	// 2. 设置数据（包含重复姓名用于分组）
+	data := sdk.TableData{
+		Columns: []sdk.ColumnConfig{
+			{Name: "姓名", Type: sdk.FieldTypeSingleLineText},
+			{Name: "女工日结", Type: sdk.FieldTypeNumber},
+			{Name: "男工车结", Type: sdk.FieldTypeNumber},
+			{Name: "女工实发工资", Type: sdk.FieldTypeNumber},
+		},
+		Rows: [][]any{
+			{"三人组", 2966.30, 1104.20, 0.0},
+			{"房东", 442.40, 196.80, 442.4},
+			{"二人组", 5913.60, 2248.60, 3945.57},
+			{"杨萍", 3744.90, 1465.20, 4733.67},
+			{"拼车", 406.90, 175.00, 0.0},
+			{"三人组", 3000.00, 1200.00, 0.0}, // 另一个三人组
+			{"房东", 500.00, 200.00, 500.0},   // 另一个房东
+		},
+	}
+
+	table.LoadTableData(data)
+
+	// 3. 显示原始数据
+	fmt.Println("=== 原始数据 ===")
+	printFlatTable(table)
+
+	// 4. 按姓名分组
+	fmt.Println("\n=== 按姓名分组后 ===")
+	table.GroupBy("姓名")
+	printGroupedTable(table)
+
+	// 5. 聚合计算
+	fmt.Println("\n=== 分组聚合结果 ===")
+	aggResult := table.Aggregate("姓名", "女工日结", "sum")
+	for group, sum := range aggResult {
+		fmt.Printf("%s 组女工日结总和: %.2f\n", group, sum)
+	}
+
+	// 6. 显示每个分组详情
+	fmt.Println("\n=== 分组详情 ===")
+	for _, group := range table.GetGroups() {
+		groupName := group.GroupKey
+		if cell := group.GetCell("姓名", table); cell != nil {
+			groupName = fmt.Sprintf("%v", cell.Value)
+		}
+		fmt.Printf("\n📁 分组: %s (%d人)\n", groupName, len(group.Children))
+
+		for _, member := range group.Children {
+			if name := member.GetCell("姓名", table); name != nil {
+				if day := member.GetCell("女工日结", table); day != nil {
+					fmt.Printf("  👤 %v: %v\n", name.Value, day.Value)
+				}
+			}
+		}
+	}
+
+	// 7. 取消分组
+	fmt.Println("\n=== 取消分组 ===")
+	table.Ungroup()
+	printFlatTable(table)
+}
+
+func printFlatTable(table *sdk.TreeTable) {
+	fmt.Printf("%-8s %-12s %-12s %-16s\n", "姓名", "女工日结", "男工车结", "女工实发工资")
+	fmt.Println("────────── ──────────── ──────────── ────────────────")
+	for _, row := range table.AllRows() {
+		name := row.GetCell("姓名", table).Value
+		day := row.GetCell("女工日结", table).Value
+		car := row.GetCell("男工车结", table).Value
+		salary := row.GetCell("女工实发工资", table).Value
+		fmt.Printf("%-8v %-12v %-12v %-16v\n", name, day, car, salary)
+	}
+}
+
+func printGroupedTable(table *sdk.TreeTable) {
+	fmt.Println("树形结构:")
+	for node := range table.Root.Walk() {
+		indent := strings.Repeat("  ", node.Depth()-1)
+		if node.IsContainer() {
+			groupName := node.GroupKey
+			if cell := node.GetCell("姓名", table); cell != nil {
+				groupName = fmt.Sprintf("%v", cell.Value)
+			}
+			fmt.Printf("%s📁 分组: %s (%d人)\n", indent, groupName, len(node.Children))
+		} else {
+			name := node.GetCell("姓名", table).Value
+			day := node.GetCell("女工日结", table).Value
+			fmt.Printf("%s👤 %v: %v\n", indent, name, day)
+		}
+	}
+}

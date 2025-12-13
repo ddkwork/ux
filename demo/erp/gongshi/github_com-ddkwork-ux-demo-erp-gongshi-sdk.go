@@ -11,10 +11,10 @@ func init() {
 	Symbols["github.com/ddkwork/ux/demo/erp/gongshi/sdk/sdk"] = map[string]reflect.Value{
 		// function, constant and variable definitions
 		"DefaultFilterOptions":    reflect.ValueOf(&sdk.DefaultFilterOptions).Elem(),
-		"DetectTypeFromString":    reflect.ValueOf(sdk.DetectTypeFromString),
 		"ExampleUsage":            reflect.ValueOf(sdk.ExampleUsage),
 		"FieldTypeAttachment":     reflect.ValueOf(sdk.FieldTypeAttachment),
 		"FieldTypeCheckbox":       reflect.ValueOf(sdk.FieldTypeCheckbox),
+		"FieldTypeCurrency":       reflect.ValueOf(sdk.FieldTypeCurrency),
 		"FieldTypeDateTime":       reflect.ValueOf(sdk.FieldTypeDateTime),
 		"FieldTypeEmail":          reflect.ValueOf(sdk.FieldTypeEmail),
 		"FieldTypeFormula":        reflect.ValueOf(sdk.FieldTypeFormula),
@@ -22,6 +22,7 @@ func init() {
 		"FieldTypeMultiLineText":  reflect.ValueOf(sdk.FieldTypeMultiLineText),
 		"FieldTypeMultipleSelect": reflect.ValueOf(sdk.FieldTypeMultipleSelect),
 		"FieldTypeNumber":         reflect.ValueOf(sdk.FieldTypeNumber),
+		"FieldTypePercent":        reflect.ValueOf(sdk.FieldTypePercent),
 		"FieldTypePhone":          reflect.ValueOf(sdk.FieldTypePhone),
 		"FieldTypeSingleLineText": reflect.ValueOf(sdk.FieldTypeSingleLineText),
 		"FieldTypeSingleSelect":   reflect.ValueOf(sdk.FieldTypeSingleSelect),
@@ -51,13 +52,16 @@ func init() {
 		"ToFloat":                 reflect.ValueOf(sdk.ToFloat),
 
 		// type definitions
-		"CellData":        reflect.ValueOf((*sdk.CellData)(nil)),
-		"FieldType":       reflect.ValueOf((*sdk.FieldType)(nil)),
-		"FilterCondition": reflect.ValueOf((*sdk.FilterCondition)(nil)),
-		"FilterGroup":     reflect.ValueOf((*sdk.FilterGroup)(nil)),
-		"FilterOperator":  reflect.ValueOf((*sdk.FilterOperator)(nil)),
-		"FilterOptions":   reflect.ValueOf((*sdk.FilterOptions)(nil)),
-		"Node":            reflect.ValueOf((*sdk.Node)(nil)),
-		"TreeTable":       reflect.ValueOf((*sdk.TreeTable)(nil)),
+		"CellData":         reflect.ValueOf((*sdk.CellData)(nil)),
+		"ColumnConfig":     reflect.ValueOf((*sdk.ColumnConfig)(nil)),
+		"ColumnDefinition": reflect.ValueOf((*sdk.ColumnDefinition)(nil)),
+		"FieldType":        reflect.ValueOf((*sdk.FieldType)(nil)),
+		"FilterCondition":  reflect.ValueOf((*sdk.FilterCondition)(nil)),
+		"FilterGroup":      reflect.ValueOf((*sdk.FilterGroup)(nil)),
+		"FilterOperator":   reflect.ValueOf((*sdk.FilterOperator)(nil)),
+		"FilterOptions":    reflect.ValueOf((*sdk.FilterOptions)(nil)),
+		"Node":             reflect.ValueOf((*sdk.Node)(nil)),
+		"TableData":        reflect.ValueOf((*sdk.TableData)(nil)),
+		"TreeTable":        reflect.ValueOf((*sdk.TreeTable)(nil)),
 	}
 }

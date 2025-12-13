@@ -4,19 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"iter"
-	"runtime"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/ddkwork/golibrary/std/stream"
 	"github.com/google/uuid"
 )
 
-// ------------------------------ 字段类型定义（Airtable风格） ------------------------------
+// FieldType represents the type of a field in the table.
 type FieldType string
 
+// Constants for FieldType.
 const (
 	FieldTypeSingleLineText FieldType = "text"
 	FieldTypeNumber         FieldType = "number"
@@ -32,87 +33,184 @@ const (
 	FieldTypeCheckbox       FieldType = "checkbox"
 	FieldTypeURL            FieldType = "url"
 	FieldTypeMultiLineText  FieldType = "multiLineText"
+	FieldTypeCurrency       FieldType = "currency"
+	FieldTypePercent        FieldType = "percent"
 )
 
-// ------------------------------ 核心数据结构（支持公式） ------------------------------
+// Node represents a node in the tree table.
 type Node struct {
-	ID        string     // 节点唯一ID（使用UUID）
-	Type      string     // 节点类型（容器节点以"_container"结尾）
-	RowCells  []CellData // 行数据（含公式列）
-	Children  []*Node    // 子节点
-	parent    *Node      // 父节点
-	isOpen    bool       // 是否展开（仅容器节点有效）
-	GroupKey  string     // 分组键
-	RowNumber int        // 行号（用于排序）
+	ID        string     // Unique identifier for the node (UUID)
+	Type      string     // Node type (container nodes end with "_container")
+	RowCells  []CellData // Row data (including formula columns)
+	Children  []*Node    // Child nodes
+	parent    *Node      // Parent node
+	isOpen    bool       // Whether expanded (only for container nodes)
+	GroupKey  string     // Grouping key
+	RowNumber int        // Row number (for sorting)
 }
 
+// TreeTable represents the tree table structure.
 type TreeTable struct {
-	Root         *Node          // 根节点（虚拟容器）
-	OriginalRoot *Node          // 原始根节点备份
-	Columns      []CellData     // 表头定义（含公式列）
-	columnMap    map[string]int // 列名到索引的映射
-	SelectedNode *Node          // 当前选中节点
-	once         sync.Once      // 一次性初始化标记
+	Root         *Node                        // Root node (virtual container)
+	OriginalRoot *Node                        // Backup of the original root node
+	Columns      []ColumnDefinition           // Header definitions (using ColumnDefinition)
+	columnMap    map[string]*ColumnDefinition // Mapping from column name to definition
+	SelectedNode *Node                        // Currently selected node
+	once         sync.Once                    // One-time initialization marker
 
-	// 回调函数
+	// Callback functions
 	OnRowSelected    func(n *Node)
 	OnRowDoubleClick func(n *Node)
 }
 
-// CellData 单元格数据（增强类型安全）
-type CellData struct {
-	Name       string    // 列名（唯一标识）
-	Value      any       // 单元格值（公式计算结果或手动输入值）
-	Type       FieldType // 数据类型
-	Formula    string    // 公式代码（Go代码片段）
-	Options    []string  // 选项（用于单选/多选）
-	IsDisabled bool      // 是否禁用编辑
-	Width      int       // 列宽（像素）
-	isHeader   bool      // 是否为表头单元格
+// ColumnDefinition defines a column in the table.
+type ColumnDefinition struct {
+	Name         string    // Column name (unique identifier)
+	Type         FieldType // Data type
+	Formula      string    // Column formula text (stores Go code!)
+	Options      []string  // Options (for single/multiple select)
+	IsDisabled   bool      // Whether editing is disabled
+	Width        int       // Column width in pixels
+	DefaultValue any       // Default value
+	Values       []any     // Initial values for all cells in the column (for batch initialization)
 }
 
-// 类型安全的值获取方法
+// CellData represents a cell in the table.
+type CellData struct {
+	ColumnName string    // Associated column name (key! find column definition via this field)
+	Value      any       // Cell value
+	Type       FieldType // Data type (can inherit from column definition)
+}
+
+// ColumnConfig 列配置（简化版）
+type ColumnConfig struct {
+	Name     string    // 列名
+	Type     FieldType // 数据类型
+	Formula  string    // 公式（可选）
+	Options  []string  // 选项（可选）
+	Width    int       // 宽度（可选）
+	Disabled bool      // 是否禁用（可选）
+}
+
+// TableData 表格数据（核心！）
+type TableData struct {
+	Columns []ColumnConfig // 列定义
+	Rows    [][]any        // 行数据（每行对应一个数据记录）
+}
+
+// AsString returns the string representation of the cell value.
 func (c *CellData) AsString() (string, bool) {
 	v, ok := c.Value.(string)
 	return v, ok
 }
 
+// AsInt returns the integer representation of the cell value.
 func (c *CellData) AsInt() (int, bool) {
 	switch v := c.Value.(type) {
 	case int:
 		return v, true
 	case float64:
 		return int(v), true
+	case int64:
+		return int(v), true
 	default:
+		if i, err := strconv.Atoi(fmt.Sprintf("%v", c.Value)); err == nil {
+			return i, true
+		}
 		return 0, false
 	}
 }
 
+// AsFloat returns the float64 representation of the cell value.
 func (c *CellData) AsFloat() (float64, bool) {
 	switch v := c.Value.(type) {
 	case float64:
 		return v, true
 	case int:
 		return float64(v), true
+	case int64:
+		return float64(v), true
 	default:
+		if f, err := strconv.ParseFloat(fmt.Sprintf("%v", c.Value), 64); err == nil {
+			return f, true
+		}
 		return 0, false
 	}
 }
 
+// AsBool returns the boolean representation of the cell value.
 func (c *CellData) AsBool() (bool, bool) {
 	v, ok := c.Value.(bool)
-	return v, ok
+	if ok {
+		return v, true
+	}
+
+	// String representations of boolean
+	if s, ok := c.Value.(string); ok {
+		switch strings.ToLower(s) {
+		case "true", "1", "yes", "是":
+			return true, true
+		case "false", "0", "no", "否":
+			return false, true
+		}
+	}
+
+	return false, false
 }
 
-// 判断是否为公式单元格
+// AsTime returns the time.Time representation of the cell value.
+func (c *CellData) AsTime() (time.Time, bool) {
+	switch v := c.Value.(type) {
+	case time.Time:
+		return v, true
+	case string:
+		// Try multiple time formats
+		formats := []string{
+			time.RFC3339,
+			"2006-01-02",
+			"2006-01-02 15:04:05",
+			"2006-01-02T15:04:05Z",
+			"01/02/2006",
+			"2006/01/02",
+		}
+		for _, format := range formats {
+			if t, err := time.Parse(format, v); err == nil {
+				return t, true
+			}
+		}
+	}
+	return time.Time{}, false
+}
+
+// IsFormula checks if the cell is a formula column.
 func (c *CellData) IsFormula() bool {
-	return c.Type == FieldTypeFormula && c.Formula != ""
+	return c.Type == FieldTypeFormula
 }
 
-// ------------------------------ 节点方法（支持公式计算） ------------------------------
+// IsSelect checks if the cell is a select type (single or multiple).
+func (c *CellData) IsSelect() bool {
+	return c.Type == FieldTypeSingleSelect || c.Type == FieldTypeMultipleSelect
+}
+
+// IsAttachment checks if the cell is an attachment type.
+func (c *CellData) IsAttachment() bool {
+	return c.Type == FieldTypeAttachment
+}
+
+// IsLink checks if the cell is a link type.
+func (c *CellData) IsLink() bool {
+	return c.Type == FieldTypeLink
+}
+
+// DetectValueType detects the field type of the cell value.
+func (c *CellData) DetectValueType() FieldType {
+	return inferType(c.Value)
+}
+
+// NewNode creates a new node with the given row cells.
 func NewNode(rowCells []CellData) *Node {
 	return &Node{
-		ID:        uuid.New().String(), // 使用UUID
+		ID:        uuid.New().String(),
 		Type:      "node",
 		RowCells:  rowCells,
 		Children:  nil,
@@ -123,6 +221,7 @@ func NewNode(rowCells []CellData) *Node {
 	}
 }
 
+// NewContainerNode creates a new container node.
 func NewContainerNode(typeKey string, rowCells []CellData) *Node {
 	n := NewNode(rowCells)
 	n.Type = typeKey + "_container"
@@ -130,7 +229,7 @@ func NewContainerNode(typeKey string, rowCells []CellData) *Node {
 	return n
 }
 
-// 克隆节点（深拷贝）
+// Clone creates a deep copy of the node.
 func (n *Node) Clone() *Node {
 	clone := &Node{
 		ID:        uuid.New().String(),
@@ -142,12 +241,12 @@ func (n *Node) Clone() *Node {
 		RowNumber: n.RowNumber,
 	}
 
-	// 复制行数据
+	// Copy row data
 	for i, cell := range n.RowCells {
 		clone.RowCells[i] = cell
 	}
 
-	// 复制子节点
+	// Copy child nodes
 	for i, child := range n.Children {
 		cloneChild := child.Clone()
 		cloneChild.parent = clone
@@ -157,20 +256,20 @@ func (n *Node) Clone() *Node {
 	return clone
 }
 
-// 添加子节点
+// AddChild adds a child node.
 func (n *Node) AddChild(child *Node) {
 	child.parent = n
 	n.Children = append(n.Children, child)
 }
 
-// 批量添加子节点
+// AddChildren adds multiple child nodes.
 func (n *Node) AddChildren(children []*Node) {
 	for _, child := range children {
 		n.AddChild(child)
 	}
 }
 
-// 插入子节点到指定位置
+// InsertChild inserts a child node at the specified position.
 func (n *Node) InsertChild(index int, child *Node) {
 	if index < 0 || index > len(n.Children) {
 		index = len(n.Children)
@@ -179,7 +278,7 @@ func (n *Node) InsertChild(index int, child *Node) {
 	n.Children = append(n.Children[:index], append([]*Node{child}, n.Children[index:]...)...)
 }
 
-// 移除子节点
+// RemoveChild removes a child node.
 func (n *Node) RemoveChild(child *Node) {
 	for i, c := range n.Children {
 		if c.ID == child.ID {
@@ -189,12 +288,12 @@ func (n *Node) RemoveChild(child *Node) {
 	}
 }
 
-// 判断是否为容器节点
+// IsContainer checks if the node is a container.
 func (n *Node) IsContainer() bool {
 	return strings.HasSuffix(n.Type, "_container")
 }
 
-// 获取节点深度
+// Depth returns the depth of the node in the tree.
 func (n *Node) Depth() int {
 	depth := 0
 	for p := n.parent; p != nil; p = p.parent {
@@ -203,7 +302,7 @@ func (n *Node) Depth() int {
 	return depth
 }
 
-// 使用iter迭代器遍历节点
+// Walk iterates over the node and its descendants.
 func (n *Node) Walk() iter.Seq[*Node] {
 	return func(yield func(*Node) bool) {
 		if !yield(n) {
@@ -219,25 +318,20 @@ func (n *Node) Walk() iter.Seq[*Node] {
 	}
 }
 
-// 获取指定列名的单元格（自动计算公式列值）
-func (n *Node) GetCell(colName string, table *TreeTable) *CellData {
+// GetCell retrieves a cell by column name.
+func (n *Node) GetCell(colName string, _ *TreeTable) *CellData {
 	for i := range n.RowCells {
-		if n.RowCells[i].Name == colName {
-			cell := &n.RowCells[i]
-			// 如果是公式列且值未计算，则执行公式计算
-			if cell.IsFormula() {
-				// table.calculateFormulaCell(n, cell)
-			}
-			return cell
+		if n.RowCells[i].ColumnName == colName {
+			return &n.RowCells[i]
 		}
 	}
 	return nil
 }
 
-// 设置单元格值（允许设置公式列）
+// SetCellValue sets the value of a cell by column name.
 func (n *Node) SetCellValue(colName string, value any, table *TreeTable) {
 	for i := range n.RowCells {
-		if n.RowCells[i].Name == colName {
+		if n.RowCells[i].ColumnName == colName {
 			cell := &n.RowCells[i]
 			cell.Value = value
 			if cell.Type == "" {
@@ -246,25 +340,746 @@ func (n *Node) SetCellValue(colName string, value any, table *TreeTable) {
 			return
 		}
 	}
-	// 列不存在则新增
-	colDef := table.GetColumn(colName)
+	// Column does not exist, add it
+	colDef := table.GetColumnDefinition(colName)
 	if colDef != nil {
 		n.RowCells = append(n.RowCells, CellData{
-			Name:  colName,
-			Value: value,
-			Type:  colDef.Type,
+			ColumnName: colName,
+			Value:      value,
+			Type:       colDef.Type,
 		})
 	} else {
 		n.RowCells = append(n.RowCells, CellData{
-			Name:  colName,
-			Value: value,
-			Type:  inferType(value),
+			ColumnName: colName,
+			Value:      value,
+			Type:       inferType(value),
 		})
 	}
 }
 
+// Walk2 iterates over the node and its descendants with indices.
+func (n *Node) Walk2() iter.Seq2[int, *Node] {
+	return func(yield func(int, *Node) bool) {
+		if !yield(0, n) {
+			return
+		}
+		for i, child := range n.Children {
+			for node := range child.Walk() {
+				if !yield(i, node) {
+					return
+				}
+			}
+		}
+	}
+}
+
+// NewTreeTable creates a new TreeTable instance.
+func NewTreeTable() *TreeTable {
+	return &TreeTable{
+		Root:      NewContainerNode("root", nil),
+		columnMap: make(map[string]*ColumnDefinition),
+	}
+}
+
+// initColumnMap initializes the column name to definition mapping.
+func (t *TreeTable) initColumnMap() {
+	t.columnMap = make(map[string]*ColumnDefinition)
+	for i := range t.Columns {
+		col := &t.Columns[i]
+		t.columnMap[col.Name] = col
+	}
+}
+
+// GetColumnDefinition returns the column definition by name.
+func (t *TreeTable) GetColumnDefinition(colName string) *ColumnDefinition {
+	if col, ok := t.columnMap[colName]; ok {
+		return col
+	}
+	return nil
+}
+
+// GetRow 通过行索引获取行节点
+func (t *TreeTable) GetRow(rowIndex int) *Node {
+	rows := t.AllRows()
+	if rowIndex < 0 || rowIndex >= len(rows) {
+		return nil
+	}
+	return rows[rowIndex]
+}
+
+// GetCellValue 通过行索引和列名获取单元格值
+func (t *TreeTable) GetCellValue(rowIndex int, colName string) (any, bool) {
+	row := t.GetRow(rowIndex)
+	if row == nil {
+		return nil, false
+	}
+	cell := row.GetCell(colName, t)
+	if cell == nil {
+		return nil, false
+	}
+	return cell.Value, true
+}
+
+// SetCellValue 通过行索引和列名设置单元格值
+func (t *TreeTable) SetCellValue(rowIndex int, colName string, value any) bool {
+	row := t.GetRow(rowIndex)
+	if row == nil {
+		return false
+	}
+	row.SetCellValue(colName, value, t)
+	return true
+}
+
+// dataNodes returns a sequence of all data nodes (children of the root).
+func (t *TreeTable) dataNodes() iter.Seq[*Node] {
+	return func(yield func(*Node) bool) {
+		for _, child := range t.Root.Children {
+			stack := []*Node{child}
+			for len(stack) > 0 {
+				n := stack[len(stack)-1]
+				stack = stack[:len(stack)-1]
+
+				if !yield(n) {
+					return
+				}
+
+				for i := len(n.Children) - 1; i >= 0; i-- {
+					stack = append(stack, n.Children[i])
+				}
+			}
+		}
+	}
+}
+
+// dataNodesSlice returns a slice of all data nodes.
+func (t *TreeTable) dataNodesSlice() []*Node {
+	var nodes []*Node
+	for node := range t.dataNodes() {
+		nodes = append(nodes, node)
+	}
+	return nodes
+}
+
+// AllRows returns all row nodes (depth-first traversal, skipping root).
+func (t *TreeTable) AllRows() []*Node {
+	return t.dataNodesSlice()
+}
+
+// RowCount returns the number of rows.
+func (t *TreeTable) RowCount() int {
+	count := 0
+	for range t.dataNodes() {
+		count++
+	}
+	return count
+}
+
+// ColCount returns the number of columns.
+func (t *TreeTable) ColCount() int {
+	return len(t.Columns)
+}
+
+// ColIndex returns the index of a column by name.
+func (t *TreeTable) ColIndex(colName string) int {
+	for i, col := range t.Columns {
+		if col.Name == colName {
+			return i
+		}
+	}
+	return -1
+}
+
+// ColName returns the name of a column by index.
+func (t *TreeTable) ColName(colIndex int) string {
+	if colIndex < 0 || colIndex >= len(t.Columns) {
+		return ""
+	}
+	return t.Columns[colIndex].Name
+}
+
+// getDefaultValue returns the default value for a field type.
+func getDefaultValue(ft FieldType) any {
+	switch ft {
+	case FieldTypeNumber, FieldTypeCurrency, FieldTypePercent:
+		return 0.0
+	case FieldTypeCheckbox:
+		return false
+	case FieldTypeDateTime:
+		return time.Now()
+	case FieldTypeSingleSelect, FieldTypeMultipleSelect:
+		return ""
+	case FieldTypeURL:
+		return "https://"
+	case FieldTypeEmail:
+		return "example@domain.com"
+	case FieldTypePhone:
+		return "+1234567890"
+	default:
+		return ""
+	}
+}
+
+// AddColumn adds a new column.
+func (t *TreeTable) AddColumn(col ColumnDefinition, index int) {
+	if index < 0 || index > len(t.Columns) {
+		index = len(t.Columns)
+	}
+
+	// Check if column with same name already exists
+	if _, exists := t.columnMap[col.Name]; exists {
+		return
+	}
+
+	// Insert new column
+	t.Columns = append(t.Columns[:index], append([]ColumnDefinition{col}, t.Columns[index:]...)...)
+	t.initColumnMap()
+
+	// Add new cell to all rows
+	for node := range t.dataNodes() {
+		node.SetCellValue(col.Name, getDefaultValue(col.Type), t)
+	}
+}
+
+// DeleteColumn deletes a column.
+func (t *TreeTable) DeleteColumn(colName string) bool {
+	idx := -1
+	for i, col := range t.Columns {
+		if col.Name == colName {
+			idx = i
+			break
+		}
+	}
+	if idx == -1 {
+		return false
+	}
+
+	// Remove from column definitions
+	t.Columns = append(t.Columns[:idx], t.Columns[idx+1:]...)
+	t.initColumnMap()
+
+	// Remove cell from all rows
+	for node := range t.dataNodes() {
+		for i := len(node.RowCells) - 1; i >= 0; i-- {
+			if node.RowCells[i].ColumnName == colName {
+				node.RowCells = append(node.RowCells[:i], node.RowCells[i+1:]...)
+			}
+		}
+	}
+	return true
+}
+
+// RenameColumn renames a column.
+func (t *TreeTable) RenameColumn(oldName, newName string) bool {
+	idx := -1
+	for i, col := range t.Columns {
+		if col.Name == oldName {
+			idx = i
+			break
+		}
+	}
+	if idx == -1 {
+		return false
+	}
+
+	// Update column definition
+	t.Columns[idx].Name = newName
+
+	// Update column mapping
+	delete(t.columnMap, oldName)
+	t.columnMap[newName] = &t.Columns[idx]
+
+	// Update cell names in all rows
+	for node := range t.dataNodes() {
+		for i, cell := range node.RowCells {
+			if cell.ColumnName == oldName {
+				node.RowCells[i].ColumnName = newName
+				break
+			}
+		}
+	}
+	return true
+}
+
+// UpdateColumn updates a column's attributes.
+func (t *TreeTable) UpdateColumn(colName string, updateFunc func(*ColumnDefinition)) bool {
+	colDef := t.GetColumnDefinition(colName)
+	if colDef == nil {
+		return false
+	}
+
+	// Apply update function
+	updateFunc(colDef)
+
+	// Update cells in all rows
+	for node := range t.dataNodes() {
+		for i := range node.RowCells {
+			if node.RowCells[i].ColumnName == colName {
+				// Update cell type if needed
+				if node.RowCells[i].Type == "" {
+					node.RowCells[i].Type = colDef.Type
+				}
+				break
+			}
+		}
+	}
+	return true
+}
+
+// SetRootRows sets the root rows using column definitions.
+func (t *TreeTable) SetRootRows(columns []ColumnDefinition) {
+	// Create new root container node
+	t.Root = NewContainerNode("root", nil)
+	t.OriginalRoot = t.Root.Clone()
+
+	// Set column definitions
+	t.Columns = make([]ColumnDefinition, len(columns))
+	copy(t.Columns, columns)
+	t.initColumnMap()
+
+	// Determine row count (longest column)
+	rowCount := 0
+	for _, col := range columns {
+		if len(col.Values) > rowCount {
+			rowCount = len(col.Values)
+		}
+	}
+
+	// Add rows
+	for rowIdx := 0; rowIdx < rowCount; rowIdx++ {
+		var cells []CellData
+		for _, col := range columns {
+			value := nilAny
+			if rowIdx < len(col.Values) {
+				value = col.Values[rowIdx]
+			} else {
+				value = col.DefaultValue
+			}
+
+			cells = append(cells, CellData{
+				ColumnName: col.Name,
+				Value:      value,
+				Type:       col.Type,
+			})
+		}
+		t.Root.AddChild(NewNode(cells))
+	}
+}
+
+// LoadTableData 一键加载表格数据（超直观！）
+func (t *TreeTable) LoadTableData(data TableData) {
+	// 清空现有数据
+	t.Root = NewContainerNode("root", nil)
+	t.Columns = make([]ColumnDefinition, len(data.Columns))
+	t.columnMap = make(map[string]*ColumnDefinition)
+
+	// 设置列定义
+	for i, colCfg := range data.Columns {
+		t.Columns[i] = ColumnDefinition{
+			Name:         colCfg.Name,
+			Type:         colCfg.Type,
+			Formula:      colCfg.Formula,
+			Options:      colCfg.Options,
+			Width:        colCfg.Width,
+			IsDisabled:   colCfg.Disabled,
+			DefaultValue: getDefaultValue(colCfg.Type),
+			Values:       nil,
+		}
+		t.columnMap[colCfg.Name] = &t.Columns[i]
+	}
+
+	// 添加行数据
+	for _, rowData := range data.Rows {
+		var cells []CellData
+		for colIdx, cellValue := range rowData {
+			if colIdx < len(data.Columns) {
+				colName := data.Columns[colIdx].Name
+				cells = append(cells, CellData{
+					ColumnName: colName,
+					Value:      cellValue,
+					Type:       data.Columns[colIdx].Type,
+				})
+			}
+		}
+		t.Root.AddChild(NewNode(cells))
+	}
+	stream.WriteTruncate("tmp/1.md", t.ToMarkdown())
+
+}
+
+// SortByColumn sorts all rows by the specified column.
+func (t *TreeTable) SortByColumn(colName string, ascending bool) {
+	rows := t.AllRows()
+
+	// Sort rows based on column values
+	sort.Slice(rows, func(i, j int) bool {
+		cellI := rows[i].GetCell(colName, t)
+		cellJ := rows[j].GetCell(colName, t)
+
+		if cellI == nil && cellJ == nil {
+			return false
+		}
+		if cellI == nil {
+			return !ascending
+		}
+		if cellJ == nil {
+			return ascending
+		}
+
+		// Compare values based on type
+		switch cellI.Type {
+		case FieldTypeNumber, FieldTypeCurrency, FieldTypePercent:
+			valI, _ := cellI.AsFloat()
+			valJ, _ := cellJ.AsFloat()
+			if ascending {
+				return valI < valJ
+			}
+			return valI > valJ
+
+		case FieldTypeDateTime:
+			valI, okI := cellI.AsTime()
+			valJ, okJ := cellJ.AsTime()
+			if okI && okJ {
+				if ascending {
+					return valI.Before(valJ)
+				}
+				return valI.After(valJ)
+			}
+			// Fallback to string comparison
+			strI := fmt.Sprintf("%v", cellI.Value)
+			strJ := fmt.Sprintf("%v", cellJ.Value)
+			if ascending {
+				return strI < strJ
+			}
+			return strI > strJ
+
+		case FieldTypeCheckbox:
+			valI, _ := cellI.AsBool()
+			valJ, _ := cellJ.AsBool()
+			if ascending {
+				return !valI && valJ
+			}
+			return valI && !valJ
+
+		default: // Text types
+			strI := fmt.Sprintf("%v", cellI.Value)
+			strJ := fmt.Sprintf("%v", cellJ.Value)
+			if ascending {
+				return strI < strJ
+			}
+			return strI > strJ
+		}
+	})
+
+	// Rebuild the tree with sorted rows
+	t.Root.Children = make([]*Node, 0, len(rows))
+	for _, row := range rows {
+		row.parent = nil
+		t.Root.AddChild(row)
+	}
+
+	// Update row numbers
+	t.updateRowNumbers()
+}
+
+// updateRowNumbers updates the RowNumber field for all nodes.
+func (t *TreeTable) updateRowNumbers() {
+	rowNum := 0
+	for node := range t.dataNodes() {
+		node.RowNumber = rowNum
+		rowNum++
+	}
+}
+
+// SumIf sums values in a column where another column matches a value.
+func (t *TreeTable) SumIf(filterColumn, filterValue, sumColumn string) float64 {
+	total := 0.0
+	for node := range t.dataNodes() {
+		filterCell := node.GetCell(filterColumn, t)
+		sumCell := node.GetCell(sumColumn, t)
+
+		if filterCell != nil && sumCell != nil {
+			if fmt.Sprint(filterCell.Value) == filterValue {
+				if val, ok := ToFloat(sumCell.Value); ok {
+					total += val
+				}
+			}
+		}
+	}
+	return total
+}
+
+// ToFloat converts a value to float64.
+func ToFloat(val any) (float64, bool) {
+	switch v := val.(type) {
+	case float64:
+		return v, true
+	case int:
+		return float64(v), true
+	case int64:
+		return float64(v), true
+	default:
+		if f, err := strconv.ParseFloat(fmt.Sprintf("%v", val), 64); err == nil {
+			return f, true
+		}
+		return 0, false
+	}
+}
+
+// GroupBy 按指定列分组
+func (t *TreeTable) GroupBy(columnName string) error {
+	// 获取所有行
+	allRows := t.AllRows()
+	if len(allRows) == 0 {
+		return nil
+	}
+
+	// 按分组列的值排序，便于分组
+	sort.Slice(allRows, func(i, j int) bool {
+		cellI := allRows[i].GetCell(columnName, t)
+		cellJ := allRows[j].GetCell(columnName, t)
+
+		if cellI == nil && cellJ == nil {
+			return false
+		}
+		if cellI == nil {
+			return true
+		}
+		if cellJ == nil {
+			return false
+		}
+
+		return fmt.Sprintf("%v", cellI.Value) < fmt.Sprintf("%v", cellJ.Value)
+	})
+
+	// 创建新的根容器
+	newRoot := NewContainerNode("root", nil)
+	newRoot.isOpen = true
+
+	// 分组处理
+	currentGroup := ""
+	var currentGroupContainer *Node
+
+	for _, row := range allRows {
+		cell := row.GetCell(columnName, t)
+		groupValue := "未分组"
+		if cell != nil {
+			groupValue = fmt.Sprintf("%v", cell.Value)
+		}
+
+		// 如果分组值改变，创建新的分组容器
+		if groupValue != currentGroup {
+			currentGroup = groupValue
+			currentGroupContainer = NewContainerNode("group", []CellData{
+				{ColumnName: columnName, Value: groupValue, Type: FieldTypeSingleLineText},
+			})
+			currentGroupContainer.GroupKey = groupValue
+			currentGroupContainer.isOpen = true
+			newRoot.AddChild(currentGroupContainer)
+		}
+
+		// 将行添加到当前分组
+		row.parent = nil
+		currentGroupContainer.AddChild(row)
+	}
+
+	// 更新根节点
+	t.Root = newRoot
+	t.OriginalRoot = newRoot.Clone()
+
+	return nil
+}
+
+// Aggregate 对分组进行聚合计算
+func (t *TreeTable) Aggregate(groupColumn, targetColumn, aggType string) map[string]float64 {
+	result := make(map[string]float64)
+
+	// 遍历所有分组容器
+	for _, node := range t.Root.Children {
+		if node.IsContainer() && strings.HasPrefix(node.Type, "group") {
+			groupKey := node.GroupKey
+			if groupKey == "" {
+				if cell := node.GetCell(groupColumn, t); cell != nil {
+					groupKey = fmt.Sprintf("%v", cell.Value)
+				} else {
+					groupKey = "未分组"
+				}
+			}
+
+			var aggregateValue float64
+			count := 0
+
+			// 遍历分组内的所有行
+			for row := range node.Walk() {
+				if row.IsContainer() {
+					continue
+				}
+
+				if cell := row.GetCell(targetColumn, t); cell != nil {
+					if val, ok := ToFloat(cell.Value); ok {
+						switch aggType {
+						case "sum":
+							aggregateValue += val
+						case "avg":
+							aggregateValue += val
+							count++
+						case "max":
+							if count == 0 || val > aggregateValue {
+								aggregateValue = val
+							}
+							count = 1
+						case "min":
+							if count == 0 || val < aggregateValue {
+								aggregateValue = val
+							}
+							count = 1
+						}
+					}
+				}
+			}
+
+			// 处理平均值
+			if aggType == "avg" && count > 0 {
+				aggregateValue /= float64(count)
+			}
+
+			if aggType == "count" {
+				rowCount := 0
+				for range node.Walk() {
+					if !node.IsContainer() {
+						rowCount++
+					}
+				}
+				result[groupKey] = float64(rowCount)
+			} else {
+				result[groupKey] = aggregateValue
+			}
+		}
+	}
+
+	return result
+}
+
+// GetGroups 获取所有分组
+func (t *TreeTable) GetGroups() []*Node {
+	var groups []*Node
+	for _, child := range t.Root.Children {
+		if child.IsContainer() && strings.HasPrefix(child.Type, "group") {
+			groups = append(groups, child)
+		}
+	}
+	return groups
+}
+
+// ExpandAllGroups 展开所有分组
+func (t *TreeTable) ExpandAllGroups() {
+	for node := range t.Root.Walk() {
+		if node.IsContainer() {
+			node.isOpen = true
+		}
+	}
+}
+
+// CollapseAllGroups 折叠所有分组
+func (t *TreeTable) CollapseAllGroups() {
+	for node := range t.Root.Walk() {
+		if node.IsContainer() && !strings.HasPrefix(node.Type, "root") {
+			node.isOpen = false
+		}
+	}
+}
+
+// Ungroup 取消分组，回到平面结构
+func (t *TreeTable) Ungroup() {
+	newRoot := NewContainerNode("root", nil)
+	newRoot.isOpen = true
+
+	// 将所有行提取到根节点
+	for _, node := range t.Root.Children {
+		for row := range node.Walk() {
+			if !row.IsContainer() {
+				row.parent = nil
+				newRoot.AddChild(row)
+			}
+		}
+	}
+
+	t.Root = newRoot
+	t.OriginalRoot = newRoot.Clone()
+}
+
+// ToMarkdown exports the table to Markdown format.
+func (t *TreeTable) ToMarkdown() string {
+	var sb strings.Builder
+	sb.WriteString("# Tree Table Structure\n\n")
+	sb.WriteString("| Level | Type |")
+	for _, col := range t.Columns {
+		sb.WriteString(fmt.Sprintf(" %s |", col.Name))
+	}
+	sb.WriteString("\n|-------|------|")
+	for range t.Columns {
+		sb.WriteString("-------|")
+	}
+	sb.WriteString("\n")
+
+	for node := range t.dataNodes() {
+		relativeDepth := node.Depth() - 1
+		indent := strings.Repeat("&nbsp;&nbsp;&nbsp;", relativeDepth)
+
+		icon := "📄"
+		if node.IsContainer() {
+			if node.isOpen {
+				icon = "📂"
+			} else {
+				icon = "📁"
+			}
+		}
+
+		sb.WriteString(fmt.Sprintf("| %s%s | %s |", indent, icon, node.Type))
+
+		for _, col := range t.Columns {
+			cell := node.GetCell(col.Name, t)
+			value := "-"
+			if cell != nil {
+				value = fmt.Sprintf("%v", cell.Value)
+			}
+			sb.WriteString(fmt.Sprintf(" %s |", value))
+		}
+		sb.WriteString("\n")
+	}
+	return sb.String()
+}
+
+// ToJSON exports the table to JSON.
+func (t *TreeTable) ToJSON() ([]byte, error) {
+	type exportData struct {
+		Columns []ColumnDefinition `json:"columns"`
+		Root    *Node              `json:"root"`
+	}
+	return json.MarshalIndent(exportData{t.Columns, t.Root}, "", "  ")
+}
+
+// FromJSON imports the table from JSON.
+func FromJSON(data []byte) (*TreeTable, error) {
+	var d struct {
+		Columns []ColumnDefinition `json:"columns"`
+		Root    *Node              `json:"root"`
+	}
+	if err := json.Unmarshal(data, &d); err != nil {
+		return nil, err
+	}
+
+	table := &TreeTable{
+		Root:         d.Root,
+		OriginalRoot: d.Root.Clone(),
+		Columns:      d.Columns,
+	}
+	table.initColumnMap()
+
+	return table, nil
+}
+
 // 从字符串值探测数据类型
-func DetectTypeFromString(s string) FieldType {
+func detectTypeFromString(s string) FieldType {
 	// 尝试解析为布尔值
 	if strings.EqualFold(s, "true") || strings.EqualFold(s, "false") ||
 		s == "1" || s == "0" || s == "是" || s == "否" {
@@ -336,11 +1151,14 @@ func DetectTypeFromString(s string) FieldType {
 	return FieldTypeSingleLineText
 }
 
-// 推断值类型（使用FieldType）
 func inferType(v any) FieldType {
+	if v == nil {
+		return FieldTypeSingleLineText
+	}
+
 	switch val := v.(type) {
 	case string:
-		return DetectTypeFromString(val)
+		return detectTypeFromString(val)
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
 		return FieldTypeNumber
 	case float32, float64:
@@ -350,807 +1168,8 @@ func inferType(v any) FieldType {
 	case time.Time:
 		return FieldTypeDateTime
 	default:
-		// 尝试将其他类型转换为字符串再检测
-		return DetectTypeFromString(fmt.Sprintf("%v", v))
+		return detectTypeFromString(fmt.Sprintf("%v", v))
 	}
 }
 
-// 检测单元格值的类型
-func (c *CellData) DetectValueType() FieldType {
-	return inferType(c.Value)
-}
-
-// 在节点级别检测列类型
-func (n *Node) DetectCellType(colName string) FieldType {
-	cell := n.GetCell(colName, nil)
-	if cell == nil {
-		return FieldTypeSingleLineText
-	}
-	return cell.DetectValueType()
-}
-
-// ------------------------------ 行列增删改查方法 ------------------------------
-func (n *Node) Walk2() iter.Seq2[int, *Node] {
-	return func(yield func(int, *Node) bool) {
-		if !yield(0, n) {
-			return
-		}
-		for i, child := range n.Children {
-			for node := range child.Walk() {
-				if !yield(i, node) {
-					return
-				}
-			}
-		}
-	}
-}
-
-// 获取所有数据节点（直接从根节点的子节点开始遍历）
-func (t *TreeTable) dataNodes() iter.Seq[*Node] {
-	return func(yield func(*Node) bool) {
-		// 遍历根节点的所有直接子节点
-		for _, child := range t.Root.Children {
-			// 使用栈实现深度优先遍历
-			stack := []*Node{child}
-			for len(stack) > 0 {
-				// 弹出栈顶节点
-				n := stack[len(stack)-1]
-				stack = stack[:len(stack)-1]
-
-				// 处理当前节点
-				if !yield(n) {
-					return
-				}
-
-				// 将子节点逆序入栈（保证从左到右的顺序）
-				for i := len(n.Children) - 1; i >= 0; i-- {
-					stack = append(stack, n.Children[i])
-				}
-			}
-		}
-	}
-}
-
-// 获取所有数据节点的索引迭代器
-func (t *TreeTable) dataNodesIndexed() iter.Seq2[int, *Node] {
-	return func(yield func(int, *Node) bool) {
-		idx := 0
-		for node := range t.dataNodes() {
-			if !yield(idx, node) {
-				return
-			}
-			idx++
-		}
-	}
-}
-
-// 获取所有数据节点的切片
-func (t *TreeTable) dataNodesSlice() []*Node {
-	var nodes []*Node
-	for node := range t.dataNodes() {
-		nodes = append(nodes, node)
-	}
-	return nodes
-}
-
-// 获取所有行节点（深度优先遍历，跳过根节点）
-func (t *TreeTable) AllRows() []*Node {
-	return t.dataNodesSlice()
-}
-
-// 获取所有行节点（迭代器版本，跳过根节点）
-func (t *TreeTable) AllRows2() iter.Seq2[int, *Node] {
-	return t.dataNodesIndexed()
-}
-
-// 获取行数
-func (t *TreeTable) RowCount() int {
-	count := 0
-	for range t.dataNodes() {
-		count++
-	}
-	return count
-}
-
-// 获取列数
-func (t *TreeTable) ColCount() int {
-	return len(t.Columns)
-}
-
-// 获取列索引
-func (t *TreeTable) ColIndex(colName string) int {
-	if idx, ok := t.columnMap[colName]; ok {
-		return idx
-	}
-	return -1
-}
-
-// 获取列名
-func (t *TreeTable) ColName(colIndex int) string {
-	if colIndex < 0 || colIndex >= len(t.Columns) {
-		return ""
-	}
-	return t.Columns[colIndex].Name
-}
-
-// 初始化列映射
-func (t *TreeTable) initColumnMap() {
-	t.columnMap = make(map[string]int)
-	for i, col := range t.Columns {
-		t.columnMap[col.Name] = i
-	}
-}
-
-// 获取默认值
-func getDefaultValue(ft FieldType) any {
-	switch ft {
-	case FieldTypeNumber:
-		return 0
-	case FieldTypeCheckbox:
-		return false
-	case FieldTypeDateTime:
-		return time.Now().Format(time.RFC3339)
-	case FieldTypeSingleSelect, FieldTypeMultipleSelect:
-		return ""
-	default:
-		return ""
-	}
-}
-
-// 添加新列（增强版）
-func (t *TreeTable) AddColumn(col CellData, index int) {
-	if index < 0 || index > len(t.Columns) {
-		index = len(t.Columns)
-	}
-
-	// 检查是否已存在同名列
-	if _, exists := t.columnMap[col.Name]; exists {
-		return // 或更新现有列
-	}
-
-	// 插入新列
-	t.Columns = append(t.Columns[:index], append([]CellData{col}, t.Columns[index:]...)...)
-	t.initColumnMap()
-
-	// 为所有行添加新列的单元格
-	for node := range t.dataNodes() {
-		node.SetCellValue(col.Name, getDefaultValue(col.Type), t)
-	}
-}
-
-// 删除列（增强版）
-func (t *TreeTable) DeleteColumn(colName string) bool {
-	idx := t.ColIndex(colName)
-	if idx == -1 {
-		return false
-	}
-
-	// 从列定义中删除
-	t.Columns = append(t.Columns[:idx], t.Columns[idx+1:]...)
-	t.initColumnMap()
-
-	// 从所有行中删除该列的单元格
-	for node := range t.dataNodes() {
-		for i := len(node.RowCells) - 1; i >= 0; i-- {
-			if node.RowCells[i].Name == colName {
-				node.RowCells = append(node.RowCells[:i], node.RowCells[i+1:]...)
-			}
-		}
-	}
-	return true
-}
-
-// 重命名列
-func (t *TreeTable) RenameColumn(oldName, newName string) bool {
-	idx := t.ColIndex(oldName)
-	if idx == -1 {
-		return false
-	}
-
-	// 更新列定义
-	t.Columns[idx].Name = newName
-
-	// 更新列映射
-	delete(t.columnMap, oldName)
-	t.columnMap[newName] = idx
-
-	// 更新所有行中的单元格名称
-	for node := range t.dataNodes() {
-		for i, cell := range node.RowCells {
-			if cell.Name == oldName {
-				node.RowCells[i].Name = newName
-				break
-			}
-		}
-	}
-	return true
-}
-
-// 更新列属性（增强版）
-func (t *TreeTable) UpdateColumn(colName string, updateFunc func(*CellData)) bool {
-	idx := t.ColIndex(colName)
-	if idx == -1 {
-		return false
-	}
-
-	// 应用更新函数
-	updateFunc(&t.Columns[idx])
-
-	// 更新所有行中的单元格
-	for node := range t.dataNodes() {
-		for i := range node.RowCells {
-			if node.RowCells[i].Name == colName {
-				updateFunc(&node.RowCells[i])
-				break
-			}
-		}
-	}
-	return true
-}
-
-// 获取列定义
-func (t *TreeTable) GetColumn(colName string) *CellData {
-	idx := t.ColIndex(colName)
-	if idx == -1 {
-		return nil
-	}
-	return &t.Columns[idx]
-}
-
-// 批量检测列类型
-func (t *TreeTable) DetectColumnTypes() map[string]FieldType {
-	typeMap := make(map[string]FieldType)
-
-	for _, col := range t.Columns {
-		// 收集该列所有非空值
-		values := make([]any, 0)
-		for node := range t.dataNodes() {
-			if cell := node.GetCell(col.Name, t); cell != nil && cell.Value != nil {
-				values = append(values, cell.Value)
-			}
-		}
-
-		// 如果有值，检测最常见的类型
-		if len(values) > 0 {
-			typeCounts := make(map[FieldType]int)
-			for _, val := range values {
-				ft := inferType(val)
-				typeCounts[ft]++
-			}
-
-			// 找出出现频率最高的类型
-			maxCount := 0
-			dominantType := FieldTypeSingleLineText
-			for ft, count := range typeCounts {
-				if count > maxCount {
-					maxCount = count
-					dominantType = ft
-				}
-			}
-
-			typeMap[col.Name] = dominantType
-		} else {
-			// 没有数据时，使用列定义的类型或默认类型
-			if col.Type != "" {
-				typeMap[col.Name] = col.Type
-			} else {
-				typeMap[col.Name] = FieldTypeSingleLineText
-			}
-		}
-	}
-
-	return typeMap
-}
-
-// 自动检测并更新列类型
-func (t *TreeTable) AutoDetectAndUpdateTypes() {
-	typeMap := t.DetectColumnTypes()
-	for colName, detectedType := range typeMap {
-		if currentType := t.GetColumn(colName).Type; currentType != detectedType {
-			t.UpdateColumn(colName, func(c *CellData) {
-				c.Type = detectedType
-			})
-		}
-	}
-}
-
-// 添加新行（使用表头定义）
-func (t *TreeTable) AddRow(values map[string]any, parentID string, position int) *Node {
-	cells := make([]CellData, 0, len(t.Columns))
-
-	// 根据表头创建单元格
-	for _, col := range t.Columns {
-		value := values[col.Name]
-		if value == nil {
-			value = getDefaultValue(col.Type)
-		}
-
-		cells = append(cells, CellData{
-			Name:  col.Name,
-			Value: value,
-			Type:  col.Type,
-		})
-	}
-
-	return t.addRowWithCells(cells, parentID, position)
-}
-
-// 内部方法：使用预定义单元格添加行
-func (t *TreeTable) addRowWithCells(cells []CellData, parentID string, position int) *Node {
-	var parent *Node
-	if parentID == "" {
-		parent = t.Root
-	} else {
-		for node := range t.dataNodes() {
-			if node.ID == parentID {
-				parent = node
-				break
-			}
-		}
-		if parent == nil {
-			parent = t.Root
-		}
-	}
-
-	newNode := NewNode(cells)
-
-	if position < 0 || position > len(parent.Children) {
-		parent.AddChild(newNode)
-	} else {
-		parent.InsertChild(position, newNode)
-	}
-
-	return newNode
-}
-
-// 插入行
-func (t *TreeTable) InsertRow(index int, cells []CellData) bool {
-	rows := t.AllRows()
-	if index < 0 || index > len(rows) {
-		return false
-	}
-
-	// 找到插入位置对应的节点
-	var targetNode *Node
-	var parent *Node
-	var posInParent int
-
-	if index == len(rows) {
-		// 插入到最后
-		lastRow := rows[len(rows)-1]
-		parent = lastRow.parent
-		if parent == nil {
-			parent = t.Root
-		}
-		posInParent = len(parent.Children)
-	} else {
-		targetNode = rows[index]
-		parent = targetNode.parent
-		if parent == nil {
-			parent = t.Root
-		}
-
-		// 查找在父节点中的位置
-		for i, child := range parent.Children {
-			if child.ID == targetNode.ID {
-				posInParent = i
-				break
-			}
-		}
-	}
-
-	// 创建新节点并插入
-	newNode := NewNode(cells)
-	parent.InsertChild(posInParent, newNode)
-	return true
-}
-
-// 删除行
-func (t *TreeTable) DeleteRow(rowIndex int) bool {
-	rows := t.AllRows()
-	if rowIndex < 0 || rowIndex >= len(rows) {
-		return false
-	}
-
-	nodeToDelete := rows[rowIndex]
-	parent := nodeToDelete.parent
-	if parent == nil {
-		return false
-	}
-
-	parent.RemoveChild(nodeToDelete)
-	return true
-}
-
-// 删除行（按ID）
-func (t *TreeTable) DeleteRowByID(nodeID string) bool {
-	for node := range t.dataNodes() {
-		if node.ID == nodeID {
-			parent := node.parent
-			if parent == nil {
-				return false
-			}
-			parent.RemoveChild(node)
-			return true
-		}
-	}
-	return false
-}
-
-// 移动行
-func (t *TreeTable) MoveRow(fromIndex, toIndex int) bool {
-	rows := t.AllRows()
-	if fromIndex < 0 || fromIndex >= len(rows) || toIndex < 0 || toIndex >= len(rows) {
-		return false
-	}
-
-	fromNode := rows[fromIndex]
-	toNode := rows[toIndex]
-
-	// 不能移动到自己的子树中
-	if isDescendant(fromNode, toNode) {
-		return false
-	}
-
-	// 从原位置移除
-	fromParent := fromNode.parent
-	if fromParent == nil {
-		return false
-	}
-	fromParent.RemoveChild(fromNode)
-
-	// 插入到新位置
-	toParent := toNode.parent
-	if toParent == nil {
-		toParent = t.Root
-	}
-
-	// 查找在父节点中的位置
-	pos := 0
-	for i, child := range toParent.Children {
-		if child.ID == toNode.ID {
-			pos = i
-			break
-		}
-	}
-
-	if toIndex < fromIndex {
-		toParent.InsertChild(pos, fromNode)
-	} else {
-		toParent.InsertChild(pos+1, fromNode)
-	}
-
-	return true
-}
-
-// 检查是否是后代节点
-func isDescendant(ancestor, descendant *Node) bool {
-	for node := descendant.parent; node != nil; node = node.parent {
-		if node == ancestor {
-			return true
-		}
-	}
-	return false
-}
-
-// 复制行
-func (t *TreeTable) CopyRow(rowIndex int) *Node {
-	rows := t.AllRows()
-	if rowIndex < 0 || rowIndex >= len(rows) {
-		return nil
-	}
-
-	original := rows[rowIndex]
-	cloned := original.Clone()
-
-	// 添加到原位置之后
-	parent := original.parent
-	if parent == nil {
-		parent = t.Root
-	}
-
-	// 查找在父节点中的位置
-	pos := 0
-	for i, child := range parent.Children {
-		if child.ID == original.ID {
-			pos = i + 1
-			break
-		}
-	}
-
-	parent.InsertChild(pos, cloned)
-	return cloned
-}
-
-// 获取单元格值（通过行索引和列名）
-func (t *TreeTable) GetCellValue(rowIndex int, colName string) (any, bool) {
-	rows := t.AllRows()
-	if rowIndex < 0 || rowIndex >= len(rows) {
-		return nil, false
-	}
-
-	cell := rows[rowIndex].GetCell(colName, t)
-	if cell == nil {
-		return nil, false
-	}
-	return cell.Value, true
-}
-
-// 设置单元格值（通过行索引和列名）
-func (t *TreeTable) SetCellValue(rowIndex int, colName string, value any) bool {
-	rows := t.AllRows()
-	if rowIndex < 0 || rowIndex >= len(rows) {
-		return false
-	}
-
-	rows[rowIndex].SetCellValue(colName, value, t)
-	return true
-}
-
-// 获取整行数据
-func (t *TreeTable) GetRow(rowIndex int) []CellData {
-	rows := t.AllRows()
-	if rowIndex < 0 || rowIndex >= len(rows) {
-		return nil
-	}
-	return rows[rowIndex].RowCells
-}
-
-// 设置整行数据
-func (t *TreeTable) SetRow(rowIndex int, cells []CellData) bool {
-	rows := t.AllRows()
-	if rowIndex < 0 || rowIndex >= len(rows) {
-		return false
-	}
-
-	rows[rowIndex].RowCells = cells
-	return true
-}
-
-// 排序行
-func (t *TreeTable) SortRows(colName string, ascending bool) {
-	rows := t.AllRows()
-
-	sort.Slice(rows, func(i, j int) bool {
-		valI, okI := t.GetCellValue(i, colName)
-		valJ, okJ := t.GetCellValue(j, colName)
-
-		if !okI || !okJ {
-			return false
-		}
-
-		// 尝试数值比较
-		if numI, ok := ToFloat(valI); ok {
-			if numJ, ok := ToFloat(valJ); ok {
-				if ascending {
-					return numI < numJ
-				}
-				return numI > numJ
-			}
-		}
-
-		// 字符串比较
-		strI := fmt.Sprintf("%v", valI)
-		strJ := fmt.Sprintf("%v", valJ)
-
-		if ascending {
-			return strI < strJ
-		}
-		return strI > strJ
-	})
-
-	// 重建树结构（保持父子关系）
-	t.rebuildTreeFromSortedRows(rows)
-}
-
-// 辅助函数：转换为float64
-func ToFloat(val any) (float64, bool) {
-	switch v := val.(type) {
-	case float64:
-		return v, true
-	case int:
-		return float64(v), true
-	case int64:
-		return float64(v), true
-	default:
-		if f, err := strconv.ParseFloat(fmt.Sprintf("%v", val), 64); err == nil {
-			return f, true
-		}
-		return 0, false
-	}
-}
-
-// 从排序后的行重建树
-func (t *TreeTable) rebuildTreeFromSortedRows(sortedRows []*Node) {
-	// 创建ID到节点的映射
-	idMap := make(map[string]*Node)
-	for _, row := range sortedRows {
-		idMap[row.ID] = row
-	}
-
-	// 重建父子关系
-	for _, row := range sortedRows {
-		// 保存原始子节点
-		children := row.Children
-		row.Children = nil
-
-		// 重新添加子节点（按顺序）
-		for _, child := range children {
-			if childNode, ok := idMap[child.ID]; ok {
-				row.AddChild(childNode)
-			}
-		}
-	}
-}
-
-// ------------------------------ 树形表格核心方法（含公式列支持） ------------------------------
-func NewTreeTable() *TreeTable {
-	table := &TreeTable{}
-
-	// 默认表头（使用FieldType）
-	defaultColumns := []CellData{
-		{Name: "姓名", Type: FieldTypeSingleLineText, Width: 120},
-		{Name: "出生年份", Type: FieldTypeNumber, Width: 100},
-		{Name: "年龄", Type: FieldTypeFormula,
-			Formula: `return 2024 - ctx["出生年份"].(int)`, Width: 80},
-		{Name: "女工日结", Type: FieldTypeNumber, Width: 100},
-		{Name: "计算结果", Type: FieldTypeFormula,
-			Formula: `/* 公式逻辑 */`, Width: 120},
-		{Name: "入职日期", Type: FieldTypeDateTime, Width: 120},
-		{Name: "状态", Type: FieldTypeSingleSelect,
-			Options: []string{"在职", "离职"}, Width: 80},
-	}
-
-	table.Columns = defaultColumns
-	table.initColumnMap()
-
-	// 创建根节点（虚拟容器）
-	root := NewContainerNode("root", nil)
-	table.Root = root
-	table.OriginalRoot = root.Clone()
-
-	// 添加示例数据（直接作为根节点的子节点）
-	group1 := NewContainerNode("department", []CellData{
-		{Name: "姓名", Value: "技术部", Type: FieldTypeSingleLineText},
-	})
-	root.AddChild(group1)
-
-	emp1 := NewNode([]CellData{
-		{Name: "姓名", Value: "张三", Type: FieldTypeSingleLineText},
-		{Name: "出生年份", Value: 1990, Type: FieldTypeNumber},
-		{Name: "女工日结", Value: 200.0, Type: FieldTypeNumber},
-		{Name: "入职日期", Value: "2020-01-15", Type: FieldTypeDateTime},
-	})
-	group1.AddChild(emp1)
-
-	root.AddChild(group1)
-
-	// 设置回调
-	table.OnRowSelected = func(n *Node) {}
-	table.OnRowDoubleClick = func(n *Node) {}
-
-	return table
-}
-
-// SumIf 方法（优化版）
-func (t *TreeTable) SumIf(filterColumn, filterValue, sumColumn string) float64 {
-	total := 0.0
-	for node := range t.dataNodes() {
-		filterCell := node.GetCell(filterColumn, t)
-		sumCell := node.GetCell(sumColumn, t)
-
-		if filterCell != nil && sumCell != nil {
-			if fmt.Sprint(filterCell.Value) == filterValue {
-				if val, ok := ToFloat(sumCell.Value); ok {
-					total += val
-				}
-			}
-		}
-	}
-	return total
-}
-
-// ------------------------------ Markdown渲染（显示公式计算结果） ------------------------------
-func (t *TreeTable) ToMarkdown() string {
-	var sb strings.Builder
-	sb.WriteString("# 树形表格结构（含公式列）\n\n")
-	sb.WriteString("| 层级 | 类型 |")
-	for _, col := range t.Columns {
-		sb.WriteString(fmt.Sprintf(" %s |", col.Name))
-	}
-	sb.WriteString("\n|------|------|")
-	for range t.Columns {
-		sb.WriteString("------|")
-	}
-	sb.WriteString("\n")
-
-	// 使用新的遍历方法
-	//idx := 0
-	for node := range t.dataNodes() {
-		// 计算相对深度（相对于根节点）
-		relativeDepth := node.Depth() - 1
-		indent := strings.Repeat("&nbsp;&nbsp;&nbsp;", relativeDepth)
-
-		icon := "📄"
-		if node.IsContainer() {
-			if node.isOpen {
-				icon = "📂"
-			} else {
-				icon = "📁"
-			}
-		}
-
-		sb.WriteString(fmt.Sprintf("| %s%s | %s |", indent, icon, node.Type))
-
-		for _, col := range t.Columns {
-			cell := node.GetCell(col.Name, t)
-			value := "-"
-			if cell != nil {
-				value = fmt.Sprintf("%v", cell.Value)
-			}
-			sb.WriteString(fmt.Sprintf(" %s |", value))
-		}
-		sb.WriteString("\n")
-	}
-	return sb.String()
-}
-
-// ------------------------------ 数据导入/导出（支持公式列） ------------------------------
-// 导出为JSON（含公式定义）
-func (t *TreeTable) ToJSON() ([]byte, error) {
-	type exportData struct {
-		Columns []CellData `json:"columns"`
-		Root    *Node      `json:"root"`
-	}
-	return json.MarshalIndent(exportData{t.Columns, t.Root}, "", "  ")
-}
-
-// 从JSON导入（恢复公式列）
-func FromJSON(data []byte) (*TreeTable, error) {
-	var d struct {
-		Columns []CellData `json:"columns"`
-		Root    *Node      `json:"root"`
-	}
-	if err := json.Unmarshal(data, &d); err != nil {
-		return nil, err
-	}
-
-	table := &TreeTable{
-		Root:         d.Root,
-		OriginalRoot: d.Root.Clone(),
-		Columns:      d.Columns,
-	}
-	table.initColumnMap()
-
-	return table, nil
-}
-
-// 并行处理所有行
-func (t *TreeTable) ProcessRowsConcurrently(processFunc func(*Node)) {
-	var wg sync.WaitGroup
-	sem := make(chan struct{}, runtime.NumCPU()) // 限制并发数
-
-	for node := range t.dataNodes() {
-		wg.Add(1)
-		sem <- struct{}{} // 获取信号量
-
-		go func(n *Node) {
-			defer wg.Done()
-			defer func() { <-sem }() // 释放信号量
-			processFunc(n)
-		}(node)
-	}
-
-	wg.Wait()
-}
-
-// 查找符合条件的节点
-func (t *TreeTable) FindNodes(predicate func(*Node) bool) []*Node {
-	var results []*Node
-	for node := range t.dataNodes() {
-		if predicate(node) {
-			results = append(results, node)
-		}
-	}
-	return results
-}
+var nilAny any = nil
