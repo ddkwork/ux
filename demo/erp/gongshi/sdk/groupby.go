@@ -467,5 +467,5 @@ func (t *TreeTable) Ungroup() {
 	}
 
 	t.Root = root
-	t.OriginalRoot = root.Clone()
+	//t.OriginalRoot = root.Clone()
 }
