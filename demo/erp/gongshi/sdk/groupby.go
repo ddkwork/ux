@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/ddkwork/golibrary/std/safemap"
 	"github.com/ddkwork/golibrary/std/stream/deepcopy"
 	"github.com/ddkwork/ux/demo/erp/gongshi/sdk/field"
 )
@@ -28,11 +29,11 @@ func (t *TreeTable) SumIf(filterColumn, filterValue, sumColumn string) float64 {
 }
 
 // GroupBy 按指定列分组
-func (t *TreeTable) GroupBy(columnName string) error {
+func (t *TreeTable) GroupBy_(columnName string) {
 	// 获取所有行
 	allRows := t.AllRows()
 	if len(allRows) == 0 {
-		return nil
+		return
 	}
 
 	// 按分组列的值排序，便于分组
@@ -133,64 +134,93 @@ func (t *TreeTable) GroupBy(columnName string) error {
 
 	// 更新根节点
 	t.Root = root
-	t.OriginalRoot = root.Clone()
-
-	return nil
+	t.OriginalRoot = root.Clone() //todo remove
 }
 
 func (t *TreeTable) updateOriginalRoot() {
 	t.OriginalRoot = deepcopy.Clone(t.Root) //to-do 增删改查调用它
 }
 
-func (t *TreeTable) GroupBy2(field string) {
-	// 按照字段名称找到分组的列
-	//mylog.CheckNil(t.OriginalRoot)
-	//t.Root = t.OriginalRoot
-	//t.groupedRows = nil
-	//groupColumIndex := -1
-	//for i, cell := range t.header.columnCells {
-	//	if field == cell.Name {
-	//		groupColumIndex = i
-	//		mylog.Trace(i, "即将按"+strconv.Quote(cell.Name)+"列进行分组 ")
-	//		break
-	//	}
-	//}
-	//if groupColumIndex == -1 {
-	//	mylog.Check("未找到分组列,请检查输入的字段名称是否正确")
-	//	return
-	//}
-	//
-	//// 构建分组映射
-	//groupMap := make(map[string][]*Node)
-	//for _, n := range t.RootRows() {
-	//	cells := t.MarshalRowCells(n)
-	//	// 检查列索引是否有效
-	//	if groupColumIndex >= len(cells) {
-	//		continue
-	//	}
-	//	// 获取指定列的值
-	//	groupValue := cells[groupColumIndex].Value
-	//	// 将节点添加到对应的分组中
-	//	groupMap[groupValue] = append(groupMap[groupValue], n)
-	//}
-	//
-	//// 创建新的根节点
-	//var zero T
-	//root := newRoot(zero)
-	//for groupKey, groupNodes := range groupMap {
-	//	// 创建容器节点
-	//	containerNode := NewContainerNode(groupKey, zero)
-	//	for _, node := range groupNodes {
-	//		// 将节点添加到容器节点中
-	//		containerNode.AddChild(node)
-	//	}
-	//	// 将容器节点添加到新的根节点中
-	//	root.AddChild(containerNode)
-	//}
+// GroupBy 按指定列分组（带聚合信息的Map实现）
+func (t *TreeTable) GroupBy(columnName string) {
+	// 1. 获取所有行
+	allRows := t.AllRows()
+	if len(allRows) == 0 {
+		return
+	}
 
-	// 更新树形表格的根节点和根行
-	//t.groupedRows = root.Children
-	//t.Root = root
+	// 2. 构建分组映射 (分组值 → 行节点列表)
+	//groupMap := make(map[string][]*Node)
+	groupMap := new(safemap.M[string, []*Node])
+	for _, row := range allRows {
+		cell := row.GetCell(columnName)
+		groupValue := "未分组"
+		if cell != nil {
+			groupValue = fmt.Sprintf("%v", cell.Value)
+		}
+		groupMap[groupValue] = append(groupMap[groupValue], row)
+	}
+
+	// 3. 创建新的根容器
+	root := newRoot()
+
+	// 4. 为每个分组创建容器节点（带聚合信息）
+	for groupKey, groupRows := range groupMap {
+		// 创建容器节点的行数据（包含所有列）
+		cells := make([]CellData, len(t.Columns))
+		for colIdx, col := range t.Columns {
+			cellData := CellData{
+				ColumnName: col.Name,
+				Type:       col.Type,
+			}
+
+			if col.Name == columnName {
+				// 分组列：显示分组键 + 行数
+				cellData.Value = fmt.Sprintf("%s (%d)", groupKey, len(groupRows))
+			} else {
+				// 其他列：根据类型执行聚合
+				switch col.Type {
+				case field.NumberType:
+					// 数字列求和
+					sum := 0.0
+					for _, row := range groupRows {
+						if cell := row.GetCell(col.Name); cell != nil {
+							if v, ok := ToFloat(cell.Value); ok {
+								sum += v
+							}
+						}
+					}
+					cellData.Value = sum
+				case field.TextType:
+					// 文本列计数
+					cellData.Value = len(groupRows)
+				default:
+					// 其他类型留空
+					cellData.Value = ""
+				}
+			}
+			cells[colIdx] = cellData
+		}
+
+		// 创建容器节点（使用聚合信息作为显示名称）
+		displayName := fmt.Sprintf("%s (%d)", groupKey, len(groupRows))
+		containerNode := NewContainerNode(displayName, cells)
+		containerNode.GroupKey = groupKey
+		containerNode.isOpen = true
+
+		// 将行节点添加到容器
+		for _, row := range groupRows {
+			row.parent = nil // 解除原父子关系
+			containerNode.AddChild(row)
+		}
+
+		// 添加容器到根节点
+		root.AddChild(containerNode)
+	}
+
+	// 5. 更新表格结构
+	t.groupedRows = root.Children
+	t.Root = root
 	// 如果有分组结果，展开所有节点以便显示分组内容
 	if len(t.rootRows) > 0 {
 		t.OpenAll()
