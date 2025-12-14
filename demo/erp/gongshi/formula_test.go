@@ -1,10 +1,12 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"testing"
 
 	"github.com/alecthomas/assert/v2"
+	"github.com/ddkwork/golibrary/std/mylog"
 	"github.com/ddkwork/ux/demo/erp/gongshi/sdk"
 	"github.com/ddkwork/ux/demo/erp/gongshi/sdk/field"
 )
@@ -102,4 +104,11 @@ func TestGroupBy(t *testing.T) {
 
 	table.Ungroup()
 	table.ToMarkdown("取消分组")
+}
+
+func TestLoadXlsx(t *testing.T) {
+	file, err := sdk.LoadFile("(数据表)日结流水.xlsx")
+	mylog.Check(err)
+	mylog.Struct(file)
+	//repr.Indent()
 }

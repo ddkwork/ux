@@ -82,7 +82,7 @@ func parseXLS(filename string) ([][]string, error) {
 	return rows, nil
 }
 
-func loadFile(filename string) ([][]string, error) {
+func LoadFile(filename string) ([][]string, error) {
 	if strings.HasSuffix(filename, ".csv") {
 		return parseCSV(filename)
 	} else if strings.HasSuffix(filename, ".xls") || strings.HasSuffix(filename, ".xlsx") {
