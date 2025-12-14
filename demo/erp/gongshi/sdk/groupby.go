@@ -328,7 +328,7 @@ func (t *TreeTable) Aggregate(groupColumn, targetColumn, aggType string) map[str
 
 	// 遍历所有分组容器
 	for _, node := range t.Root.Children {
-		if node.IsContainer() && strings.HasPrefix(node.Type, "group") {
+		if node.IsContainer() { //&& strings.HasPrefix(node.Type, "group")
 			groupKey := node.GroupKey
 			if groupKey == "" {
 				if cell := node.GetCell(groupColumn); cell != nil {
@@ -396,7 +396,7 @@ func (t *TreeTable) Aggregate(groupColumn, targetColumn, aggType string) map[str
 func (t *TreeTable) GetGroups() []*Node {
 	var groups []*Node
 	for _, child := range t.Root.Children {
-		if child.IsContainer() && strings.HasPrefix(child.Type, "group") {
+		if child.IsContainer() { //&& strings.HasPrefix(child.Type, "group")
 			groups = append(groups, child)
 		}
 	}
