@@ -57,41 +57,6 @@ func (e *YaegiEngine) UpdateRowCell(rowIndex int) {
 }
 
 func main() {
-	table := sdk.TableDemo()
-	table.ToMarkdown("原始数据")
-
-	// 4. 显示数据
-	//fmt.Println("=== 基础数据展示 ===")
-	//fmt.Printf("%-8s %-12s %-12s %-16s\n", "姓名", "女工日结", "男工车结", "女工实发工资")
-	//fmt.Println("────────── ──────────── ──────────── ────────────────")
-
-	//for _, row := range table.AllRows() {
-	//	name := row.GetCell("姓名").Value
-	//	day := row.GetCell("女工日结").Value
-	//	car := row.GetCell("男工车结").Value
-	//	salary := row.GetCell("女工实发工资").Value
-	//	fmt.Printf("%-8v %-12v %-12v %-16v\n", name, day, car, salary)
-	//}
-
-	// 5. 排序演示
-	//fmt.Println("\n=== 按女工日结降序排序 ===")
-	//table.SortByColumn("女工日结", false)
-	//for i, row := range table.AllRows() {
-	//	name := row.GetCell("姓名").Value
-	//	day := row.GetCell("女工日结").Value
-	//	fmt.Printf("%d. %v: %v\n", i+1, name, day)
-	//}
-	//table.ToMarkdown("按女工日结排序")
-
-	engine := NewYaegiEngine(table)
-	for i := 0; i < table.RowCount(); i++ {
-		engine.UpdateRowCell(i)
-	}
-	table.ToMarkdown("按公式列更新单元格数")
-	//main2()//todo bug,need make uint test
-}
-
-func main2() {
 	// 1. 创建表格
 	table := sdk.NewTreeTable()
 

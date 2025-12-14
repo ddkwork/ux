@@ -6,10 +6,11 @@ require (
 	gioui.org v0.9.0
 	gioui.org/x v0.9.0
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0
+	github.com/alecthomas/assert/v2 v2.11.0
 	github.com/alecthomas/chroma/v2 v2.20.0
 	github.com/ddkwork/golibrary v0.1.5-0.20250816073422-ec5c841d4409
 	github.com/google/go-cmp v0.7.0
-	github.com/oligo/gvcode v0.4.3
+	github.com/oligo/gvcode v0.4.4
 	github.com/traefik/yaegi v0.16.1
 	github.com/xuri/excelize/v2 v2.10.0
 	github.com/yuin/goldmark v1.7.13
@@ -27,11 +28,13 @@ replace gioui.org => github.com/ddkwork/gio v0.0.0-20251210014241-7f194927afbc
 
 require (
 	gioui.org/shader v1.0.8 // indirect
+	github.com/alecthomas/repr v0.5.2 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/go-text/typesetting v0.3.1 // indirect
 	github.com/godbus/dbus/v5 v5.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/hexops/gotextdiff v1.0.3 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/ncruces/go-strftime v1.0.0 // indirect
 	github.com/rdleal/intervalst v1.5.0 // indirect
