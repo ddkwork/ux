@@ -84,7 +84,7 @@ func (t *TreeTable) AddColumn(col ColumnDefinition, index int) {
 	t.initColumnMap()
 
 	// Add new cell to all rows
-	for node := range t.dataNodes() {
+	for node := range t.DataNodes() {
 		node.SetCellValue(col.Name, getDefaultValue(col.Type), t)
 	}
 }
@@ -107,7 +107,7 @@ func (t *TreeTable) DeleteColumn(colName string) bool {
 	t.initColumnMap()
 
 	// Remove cell from all rows
-	for node := range t.dataNodes() {
+	for node := range t.DataNodes() {
 		for i := len(node.RowCells) - 1; i >= 0; i-- {
 			if node.RowCells[i].ColumnName == colName {
 				node.RowCells = append(node.RowCells[:i], node.RowCells[i+1:]...)
@@ -138,7 +138,7 @@ func (t *TreeTable) RenameColumn(oldName, newName string) bool {
 	t.columnMap[newName] = &t.Columns[idx]
 
 	// Update cell names in all rows
-	for node := range t.dataNodes() {
+	for node := range t.DataNodes() {
 		for i, cell := range node.RowCells {
 			if cell.ColumnName == oldName {
 				node.RowCells[i].ColumnName = newName
@@ -160,7 +160,7 @@ func (t *TreeTable) UpdateColumn(colName string, updateFunc func(*ColumnDefiniti
 	updateFunc(colDef)
 
 	// Update cells in all rows
-	for node := range t.dataNodes() {
+	for node := range t.DataNodes() {
 		for i := range node.RowCells {
 			if node.RowCells[i].ColumnName == colName {
 				// Update cell type if needed

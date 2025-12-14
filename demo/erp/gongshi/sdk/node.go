@@ -86,36 +86,6 @@ func (n *Node) Clone() (to *Node) {
 	return
 }
 
-// dataNodes returns a sequence of all data nodes (children of the root).
-func (t *TreeTable) dataNodes() iter.Seq[*Node] {
-	return func(yield func(*Node) bool) {
-		for _, child := range t.Root.Children {
-			stack := []*Node{child}
-			for len(stack) > 0 {
-				n := stack[len(stack)-1]
-				stack = stack[:len(stack)-1]
-
-				if !yield(n) {
-					return
-				}
-
-				for i := len(n.Children) - 1; i >= 0; i-- {
-					stack = append(stack, n.Children[i])
-				}
-			}
-		}
-	}
-}
-
-// dataNodesSlice returns a slice of all data nodes.
-func (t *TreeTable) dataNodesSlice() []*Node {
-	var nodes []*Node
-	for node := range t.dataNodes() {
-		nodes = append(nodes, node)
-	}
-	return nodes
-}
-
 // AddChildren adds multiple child nodes.
 func (n *Node) AddChildren(children []*Node) {
 	for _, child := range children {
@@ -143,11 +113,43 @@ func (n *Node) SetChildren(children []*Node) {
 	n.Children = children
 }
 
+// DataNodes returns a sequence of all data nodes (children of the root).
+func (t *TreeTable) DataNodes() iter.Seq[*Node] {
+	return func(yield func(*Node) bool) {
+		for _, child := range t.Root.Children {
+			stack := []*Node{child}
+			for len(stack) > 0 {
+				n := stack[len(stack)-1]
+				stack = stack[:len(stack)-1]
+
+				if !yield(n) {
+					return
+				}
+
+				for i := len(n.Children) - 1; i >= 0; i-- {
+					stack = append(stack, n.Children[i])
+				}
+			}
+		}
+	}
+}
+
+// DataNodesSlice returns a slice of all data nodes.
+func (t *TreeTable) DataNodesSlice() []*Node {
+	var nodes []*Node
+	for node := range t.DataNodes() {
+		nodes = append(nodes, node)
+	}
+	return nodes
+}
+
 func (n *Node) Walk() iter.Seq[*Node] {
 	return func(yield func(*Node) bool) {
 		n.walkIndex = 0
-		if !yield(n) {
-			return
+		if !n.IsRoot() { //todo skip root?应该调用dateNode数据节点方法
+			if !yield(n) {
+				return
+			}
 		}
 		for i, child := range n.Children {
 			child.walkIndex = i
@@ -157,50 +159,6 @@ func (n *Node) Walk() iter.Seq[*Node] {
 			if child.CanHaveChildren() {
 				// 函数式编程,Walk 方法返回的是一个函数。这个返回的函数接受一个参数（也是一个函数），这个参数就是 yield
 				child.Walk()(yield) // 迭代子节点的子节点
-			}
-		}
-	}
-}
-
-// Walk iterates over the node and its descendants.
-//func (n *Node) Walk() iter.Seq[*Node] {
-//	return func(yield func(*Node) bool) {
-//		if !yield(n) {
-//			return
-//		}
-//		for _, child := range n.Children {
-//			for node := range child.Walk() {
-//				if !yield(node) {
-//					return
-//				}
-//			}
-//		}
-//	}
-//}
-
-// Walk2 iterates over the node and its descendants with indices.
-//func (n *Node) Walk2() iter.Seq2[int, *Node] {
-//	return func(yield func(int, *Node) bool) {
-//		if !yield(0, n) {
-//			return
-//		}
-//		for i, child := range n.Children {
-//			for node := range child.Walk2() {
-//				if !yield(i, node) {
-//					return
-//				}
-//			}
-//		}
-//	}
-//}
-
-func (n *Node) Containers() iter.Seq2[int, *Node] {
-	return func(yield func(int, *Node) bool) {
-		for i, child := range n.Children {
-			if child.Container() { // 迭代当前节点下的所有容器节点
-				if !yield(i, child) {
-					break
-				}
 			}
 		}
 	}
@@ -220,6 +178,18 @@ func (n *Node) WalkContainer() iter.Seq2[int, *Node] {
 			for _, child := range container.Children {
 				if child.CanHaveChildren() {
 					child.WalkContainer()(yield)
+				}
+			}
+		}
+	}
+}
+
+func (n *Node) Containers() iter.Seq2[int, *Node] { //适用于分组后的容器节点
+	return func(yield func(int, *Node) bool) {
+		for i, child := range n.Children {
+			if child.Container() { // 迭代当前节点下的所有容器节点
+				if !yield(i, child) {
+					break
 				}
 			}
 		}
@@ -248,7 +218,7 @@ func (n *Node) WalkContainer() iter.Seq2[int, *Node] {
 // }
 
 func (n *Node) Depth() int {
-	count := 0
+	count := 0 // root node is 0
 	p := n.parent
 	for p != nil {
 		count++
@@ -266,7 +236,7 @@ func (t *TreeTable) MaxDepth() int {
 	}
 	return maxDepth
 }
-func (n *Node) Find() (found *Node) {
+func (n *Node) Find() (found *Node) { //todo test
 	for child := range n.parent.Walk() {
 		if child.ID == n.ID {
 			found = child

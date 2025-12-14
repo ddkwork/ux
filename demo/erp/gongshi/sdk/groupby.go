@@ -12,7 +12,7 @@ import (
 // SumIf sums values in a column where another column matches a value.
 func (t *TreeTable) SumIf(filterColumn, filterValue, sumColumn string) float64 {
 	total := 0.0
-	for node := range t.dataNodes() {
+	for node := range t.DataNodes() {
 		filterCell := node.GetCell(filterColumn)
 		sumCell := node.GetCell(sumColumn)
 
@@ -54,8 +54,7 @@ func (t *TreeTable) GroupBy(columnName string) error {
 	})
 
 	// 创建新的根容器
-	newRoot := NewContainerNode("root", nil)
-	newRoot.isOpen = true
+	root := newRoot()
 
 	// 分组处理
 	currentGroup := ""
@@ -76,7 +75,7 @@ func (t *TreeTable) GroupBy(columnName string) error {
 			})
 			currentGroupContainer.GroupKey = groupValue
 			currentGroupContainer.isOpen = true
-			newRoot.AddChild(currentGroupContainer)
+			root.AddChild(currentGroupContainer)
 		}
 
 		// 将行添加到当前分组
@@ -85,14 +84,16 @@ func (t *TreeTable) GroupBy(columnName string) error {
 	}
 
 	// 更新根节点
-	t.Root = newRoot
-	t.OriginalRoot = newRoot.Clone()
+	t.Root = root
+	t.OriginalRoot = root.Clone()
 
 	return nil
 }
+
 func (t *TreeTable) updateOriginalRoot() {
 	t.OriginalRoot = deepcopy.Clone(t.Root) //to-do 增删改查调用它
 }
+
 func (t *TreeTable) GroupBy2(field string) {
 	// 按照字段名称找到分组的列
 	//mylog.CheckNil(t.OriginalRoot)

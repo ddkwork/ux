@@ -25,7 +25,7 @@ func (t *TreeTable) ToMarkdown(name string) string {
 	sb.WriteString("\n")
 
 	// Write data rows
-	for node := range t.dataNodes() {
+	for node := range t.DataNodes() {
 		// Calculate relative depth (root is depth 0)
 		depth := max(node.Depth()-1, 0)
 
@@ -56,6 +56,7 @@ func (t *TreeTable) ToMarkdown(name string) string {
 			// Add remaining columns
 			for i := 1; i < len(t.Columns); i++ {
 				col := t.Columns[i]
+				//println(col.Name)
 				cell := node.GetCell(col.Name)
 				value := "-"
 				if cell != nil {

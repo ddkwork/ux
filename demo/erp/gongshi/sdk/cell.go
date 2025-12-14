@@ -29,7 +29,7 @@ func (n *Node) GetCell(colName string) *CellData {
 			return &n.RowCells[i]
 		}
 	}
-	panic("GetCell fail")
+	panic("GetCell fail in column : " + colName)
 }
 
 // SetCellValue sets the value of a cell by column name.

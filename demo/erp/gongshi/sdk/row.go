@@ -15,13 +15,13 @@ func (t *TreeTable) IsRowSelected() bool { return t.SelectedNode != nil }
 
 // AllRows returns all row nodes (depth-first traversal, skipping root).
 func (t *TreeTable) AllRows() []*Node {
-	return t.dataNodesSlice()
+	return t.DataNodesSlice()
 }
 
 // updateRowNumbers updates the RowNumber field for all nodes.
 func (t *TreeTable) updateRowNumbers() {
 	rowNum := 0
-	for node := range t.dataNodes() {
+	for node := range t.DataNodes() {
 		node.RowNumber = rowNum
 		rowNum++
 	}
@@ -49,7 +49,7 @@ func (t *TreeTable) GetRow(rowIndex int) *Node {
 // RowCount returns the number of rows.
 func (t *TreeTable) RowCount() int {
 	count := 0
-	for range t.dataNodes() {
+	for range t.DataNodes() {
 		count++
 	}
 	return count

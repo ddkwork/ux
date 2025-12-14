@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/ddkwork/golibrary/std/mylog"
 	"github.com/ddkwork/ux/demo/erp/gongshi/sdk"
@@ -80,17 +79,11 @@ func main() {
 	}
 
 	table.LoadTableData(data)
+	table.ToMarkdown("原始数据")
 
-	// 3. 显示原始数据
-	fmt.Println("=== 原始数据 ===")
-	printFlatTable(table)
-
-	// 4. 按姓名分组
-	fmt.Println("\n=== 按姓名分组后 ===")
 	table.GroupBy("姓名")
 	table.ToMarkdown("按姓名分组")
-
-	printGroupedTable(table)
+	return
 
 	// 5. 聚合计算
 	fmt.Println("\n=== 分组聚合结果 ===")
@@ -118,39 +111,6 @@ func main() {
 	}
 	table.ToMarkdown("按姓名分组集合")
 
-	// 7. 取消分组
-	fmt.Println("\n=== 取消分组 ===")
 	table.Ungroup()
-	printFlatTable(table)
 	table.ToMarkdown("取消分组")
-}
-
-func printFlatTable(table *sdk.TreeTable) {
-	fmt.Printf("%-8s %-12s %-12s %-16s\n", "姓名", "女工日结", "男工车结", "女工实发工资")
-	fmt.Println("────────── ──────────── ──────────── ────────────────")
-	for _, row := range table.AllRows() {
-		name := row.GetCell("姓名").Value
-		day := row.GetCell("女工日结").Value
-		car := row.GetCell("男工车结").Value
-		salary := row.GetCell("女工实发工资").Value
-		fmt.Printf("%-8v %-12v %-12v %-16v\n", name, day, car, salary)
-	}
-}
-
-func printGroupedTable(table *sdk.TreeTable) {
-	fmt.Println("树形结构:")
-	for node := range table.Root.Walk() {
-		indent := strings.Repeat("  ", node.Depth()-1)
-		if node.IsContainer() {
-			groupName := node.GroupKey
-			if cell := node.GetCell("姓名"); cell != nil {
-				groupName = fmt.Sprintf("%v", cell.Value)
-			}
-			fmt.Printf("%s📁 分组: %s (%d人)\n", indent, groupName, len(node.Children))
-		} else {
-			name := node.GetCell("姓名").Value
-			day := node.GetCell("女工日结").Value
-			fmt.Printf("%s👤 %v: %v\n", indent, name, day)
-		}
-	}
 }
