@@ -29,7 +29,7 @@ func (n *Node) GetCell(colName string) *CellData {
 			return &n.RowCells[i]
 		}
 	}
-	panic("GetCell fail in column : " + colName)
+	panic("GetCell fail in column : " + colName) //分组后的容器节点没有和表头单元格具有同样配置的列导致
 }
 
 // SetCellValue sets the value of a cell by column name.
