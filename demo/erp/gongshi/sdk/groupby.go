@@ -60,6 +60,12 @@ func (t *TreeTable) GroupBy(columnName string) error {
 	currentGroup := ""
 	var currentGroupContainer *Node
 
+	// 获取所有列配置
+	columnConfigs := make(map[string]field.FieldType)
+	for _, col := range t.Columns {
+		columnConfigs[col.Name] = col.Type
+	}
+
 	for _, row := range allRows {
 		cell := row.GetCell(columnName)
 		groupValue := "未分组"
@@ -70,9 +76,51 @@ func (t *TreeTable) GroupBy(columnName string) error {
 		// 如果分组值改变，创建新的分组容器
 		if groupValue != currentGroup {
 			currentGroup = groupValue
-			currentGroupContainer = NewContainerNode("group", []CellData{
-				{ColumnName: columnName, Value: groupValue, Type: field.TextType},
-			})
+
+			// 创建包含所有列的单元格数据
+			cells := make([]CellData, len(t.Columns))
+			for i, col := range t.Columns {
+				cellData := CellData{
+					ColumnName: col.Name,
+					Type:       col.Type,
+				}
+
+				if col.Name == columnName {
+					// 分组列显示分组值
+					cellData.Value = groupValue
+				} else {
+					// 其他列根据类型执行聚合
+					switch col.Type {
+					case field.NumberType:
+						// 数字列求和
+						sum := 0.0
+						for _, r := range allRows {
+							if fmt.Sprint(r.GetCell(columnName).Value) == groupValue {
+								if v, ok := ToFloat(r.GetCell(col.Name).Value); ok {
+									sum += v
+								}
+							}
+						}
+						cellData.Value = sum
+					case field.TextType:
+						// 文本列计数
+						count := 0
+						for _, r := range allRows {
+							if fmt.Sprint(r.GetCell(columnName).Value) == groupValue {
+								count++
+							}
+						}
+						cellData.Value = count
+					default:
+						// 其他类型留空
+						cellData.Value = ""
+					}
+				}
+
+				cells[i] = cellData
+			}
+
+			currentGroupContainer = NewContainerNode("group", cells)
 			currentGroupContainer.GroupKey = groupValue
 			currentGroupContainer.isOpen = true
 			root.AddChild(currentGroupContainer)
