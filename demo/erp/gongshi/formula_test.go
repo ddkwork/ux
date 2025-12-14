@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/alecthomas/assert/v2"
@@ -37,12 +36,16 @@ func TestFormula(t *testing.T) {
 
 func TestSort(t *testing.T) {
 	table := sdk.TableDemo()
-	fmt.Println("\n=== 按女工日结降序排序 ===")
 	table.SortByColumn("女工日结", false)
-	for i, row := range table.AllRows() {
-		name := row.GetCell("姓名").Value
-		day := row.GetCell("女工日结").Value
-		fmt.Printf("%d. %v: %v\n", i+1, name, day)
-	}
-	table.ToMarkdown("按女工日结排序")
+	md := `# Tree Table Structure
+
+| 姓名 | 女工日结 | 男工车结 | 女工实发工资 | 
+|--------|--------|--------|--------|
+| 📄 二人组 | 5913.6 | 2248.6 | 0 |
+| 📄 杨萍 | 3744.9 | 1465.2 | 0 |
+| 📄 三人组 | 2966.3 | 1104.2 | 0 |
+| 📄 房东 | 442.4 | 196.8 | 0 |
+| 📄 拼车 | 406.9 | 175 | 0 |
+`
+	assert.Equal(t, md, table.ToMarkdown("按女工日结排序"))
 }
