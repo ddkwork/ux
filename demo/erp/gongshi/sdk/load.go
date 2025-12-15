@@ -1,14 +1,9 @@
 package sdk
 
 import (
-	"encoding/csv"
-	"fmt"
-	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/ddkwork/golibrary/std/stream"
-	"github.com/xuri/excelize/v2"
 )
 
 // TableData 表格数据（核心！）
@@ -57,36 +52,4 @@ func (t *TreeTable) LoadTableData(data TableData) {
 		}
 		t.Root.AddChild(NewNode(cells))
 	}
-}
-
-func parseCSV(filename string) ([][]string, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	csvReader := csv.NewReader(file)
-	return csvReader.ReadAll()
-}
-
-func parseXLS(filename string) ([][]string, error) {
-	f, err := excelize.OpenFile(filename)
-	if err != nil {
-		return nil, err
-	}
-	rows, err := f.GetRows(f.GetSheetName(0))
-	if err != nil {
-		return nil, err
-	}
-	return rows, nil
-}
-
-func LoadFile(filename string) ([][]string, error) {
-	if strings.HasSuffix(filename, ".csv") {
-		return parseCSV(filename)
-	} else if strings.HasSuffix(filename, ".xls") || strings.HasSuffix(filename, ".xlsx") {
-		return parseXLS(filename)
-	}
-	return nil, fmt.Errorf("unsupported file type")
 }

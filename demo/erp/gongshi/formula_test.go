@@ -107,8 +107,7 @@ func TestGroupBy(t *testing.T) {
 }
 
 func TestLoadXlsx(t *testing.T) {
-	file, err := sdk.LoadFile("(数据表)日结流水.xlsx")
-	mylog.Check(err)
-	mylog.Struct(file)
-	//repr.Indent()
+	table := sdk.NewTreeTable()
+	mylog.Check(table.LoadXlsx("(数据表)日结流水.xlsx"))
+	table.ToMarkdown("TestLoadXlsx")
 }
