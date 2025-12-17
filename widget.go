@@ -83,7 +83,7 @@ func NewLogView() *LogView {
 				return
 			}
 			go func() {
-				f := mylog.Check2(explore.CreateFile("sata.json"))
+				f := mylog.Check2(Explore.CreateFile("sata.json"))
 				mylog.Check2(f.Write([]byte(l.CodeEditor.editor.Text())))
 				mylog.Check(f.Close())
 			}()

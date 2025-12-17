@@ -56,7 +56,7 @@ type IconButtonStyle struct {
 	Description string
 }
 
-func iconButtonSmall(button *widget.Clickable, icon []byte, txt string) ButtonStyle {
+func IconButtonSmall(button *widget.Clickable, icon []byte, txt string) ButtonStyle {
 	style := Button(button, icon, txt)
 	style.Inset = layout.Inset{}
 	style.IconSize = defaultHierarchyIconSize

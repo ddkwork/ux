@@ -32,7 +32,7 @@ func NewTheme() *material.Theme {
 
 var (
 	th      = material.NewTheme()
-	explore *explorer.Explorer
+	Explore *explorer.Explorer
 )
 
 func Run(title string, widget Widget) {
@@ -43,7 +43,7 @@ func Run(title string, widget Widget) {
 			app.Size(1400, 800),
 		)
 		w.Perform(system.ActionCenter)
-		explore = explorer.NewExplorer(w)
+		Explore = explorer.NewExplorer(w)
 		// mylog.Check(android_background_service.Start()) // todo fix xml
 
 		var ops op.Ops
@@ -51,7 +51,7 @@ func Run(title string, widget Widget) {
 		go func() {
 			for {
 				e := w.Event()
-				explore.ListenEvents(e)
+				Explore.ListenEvents(e)
 				switch e := e.(type) {
 				case app.DestroyEvent:
 					mylog.Check(e.Err)

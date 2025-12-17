@@ -416,7 +416,7 @@ func (t *TreeTable[T]) RowFrame(gtx layout.Context, n *Node[T], rowIndex int) la
 					if n.isOpen {
 						svg = images.SvgIconCircledChevronDown
 					}
-					return iconButtonSmall(new(widget.Clickable), svg, "").Layout(gtx)
+					return IconButtonSmall(new(widget.Clickable), svg, "").Layout(gtx)
 					// return NewButton("", nil).SetRectIcon(true).SetIcon(svg).Layout(gtx)
 				})
 			})
@@ -782,7 +782,7 @@ func (t *TreeTable[T]) SaveDate() {
 		t.JsonName += ".json"
 		if stream.IsAndroid() {
 			go func() {
-				f := mylog.Check2(explore.CreateFile(t.JsonName))
+				f := mylog.Check2(Explore.CreateFile(t.JsonName))
 				mylog.Check2(f.Write([]byte(t.String())))
 				mylog.Check(f.Close())
 			}()
@@ -1130,7 +1130,7 @@ func (t *TreeTable[T]) GroupBy(field string) {
 }
 
 func (t *TreeTable[T]) ScrollRowIntoView(row int) {
-	t.contextMenu.list.ScrollTo(row)
+	t.contextMenu.List.ScrollTo(row)
 }
 
 func newID() uuid.ID { return uuid.New('n') }

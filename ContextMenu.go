@@ -27,7 +27,7 @@ type ContextMenu struct {
 	Items []*ContextMenuItem
 	area  *component.ContextArea
 	state component.MenuState
-	list  *widget.List
+	List  *widget.List
 	sync.Once
 }
 
@@ -40,7 +40,7 @@ func NewContextMenu() *ContextMenu {
 			PositionHint:     0,
 		},
 		state: component.MenuState{},
-		list: &widget.List{
+		List: &widget.List{
 			Scrollbar: widget.Scrollbar{},
 			List: layout.List{
 				Axis:        layout.Vertical,
@@ -98,7 +98,7 @@ func (m *ContextMenu) Layout(gtx layout.Context, rootRows []layout.Widget) layou
 			return component.Menu(th, &m.state).Layout(gtx) // 所有行的item共用一个popup菜单而不是每行popup一个
 		})
 	})
-	return material.List(th, m.list).Layout(gtx, len(rootRows), func(gtx layout.Context, index int) layout.Dimensions {
+	return material.List(th, m.List).Layout(gtx, len(rootRows), func(gtx layout.Context, index int) layout.Dimensions {
 		gtx.Constraints.Min.X = gtx.Constraints.Max.X
 		return rootRows[index](gtx)
 	})
