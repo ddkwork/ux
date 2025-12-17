@@ -2,7 +2,6 @@ package ux
 
 import (
 	_ "embed"
-	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"image"
@@ -11,13 +10,11 @@ import (
 	"iter"
 	"os"
 	"path/filepath"
-	"reflect"
 	"slices"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	"gioui.org/io/clipboard"
 	"gioui.org/io/pointer"
@@ -36,7 +33,6 @@ import (
 	"github.com/ddkwork/ux/resources/images"
 	"github.com/ddkwork/ux/widget/material"
 	"github.com/google/go-cmp/cmp"
-	"github.com/xuri/excelize/v2"
 )
 
 type (
@@ -93,7 +89,6 @@ type (
 	CellData struct {
 		Name             string      // 表头单元格文本或者节点编辑器每一行的对应的列名，airtable中的字段名称
 		Value            string      // 单元格文本或者节点编辑器每一行的value
-		Type             FieldType   // 单元格类型,airtable中有多种字段类型
 		Tooltip          string      // 单元格提示信息
 		Options          []string    `json:"options,omitempty"`      // 用于选择型字段
 		FormulaExpr      string      `json:"formula_expr,omitempty"` //用于公式列
@@ -116,243 +111,6 @@ type (
 	// 	shrinkNeighbor bool
 	// }
 )
-
-// 实现airtable的零代码引擎
-func parseCSV(filename string) ([][]string, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	csvReader := csv.NewReader(file)
-	return csvReader.ReadAll()
-}
-
-func parseXLS(filename string) ([][]string, error) {
-	f, err := excelize.OpenFile(filename)
-	if err != nil {
-		return nil, err
-	}
-	rows, err := f.GetRows(f.GetSheetName(0))
-	if err != nil {
-		return nil, err
-	}
-	return rows, nil
-}
-
-func loadFile(filename string) ([][]string, error) {
-	if strings.HasSuffix(filename, ".csv") {
-		return parseCSV(filename)
-	} else if strings.HasSuffix(filename, ".xls") || strings.HasSuffix(filename, ".xlsx") {
-		return parseXLS(filename)
-	}
-	return nil, fmt.Errorf("unsupported file type")
-}
-
-type FieldType string //CellType
-
-const (
-	FieldTypeSingleLineText FieldType = "text"
-	FieldTypeNumber         FieldType = "number"
-	FieldTypeSingleSelect   FieldType = "singleSelect"
-	FieldTypeMultipleSelect FieldType = "multipleSelect"
-	FieldTypeDateTime       FieldType = "dateTime"
-	FieldTypeFormula        FieldType = "formula"
-	FieldTypeAttachment     FieldType = "attachment"
-	FieldTypeLink           FieldType = "link"
-	FieldTypeUser           FieldType = "user"
-	FieldTypePhone          FieldType = "phone"
-	FieldTypeEmail          FieldType = "email"
-	FieldTypeCheckbox       FieldType = "checkbox"
-	FieldTypeURL            FieldType = "url"
-	FieldTypeMultiLineText  FieldType = "multiLineText"
-)
-
-func detectFieldType(column []string) FieldType {
-	// 这里是一个简单的判断逻辑，可以根据需要扩展
-	for _, value := range column[1:] {
-		if _, err := strconv.Atoi(value); err == nil {
-			return FieldTypeNumber
-		}
-		if _, err := time.Parse(time.RFC3339, value); err == nil {
-			return FieldTypeDateTime
-		}
-		if strings.Contains(value, "@") && strings.Contains(value, ".") {
-			return FieldTypeEmail
-		}
-		if strings.HasPrefix(value, "http://") || strings.HasPrefix(value, "https://") {
-			return FieldTypeURL
-		}
-	}
-	return FieldTypeSingleLineText
-}
-
-func generateStruct(rows [][]string) reflect.Type {
-	// 获取表头
-	header := rows[0]
-	// 创建结构体字段
-	fields := make([]reflect.StructField, len(header))
-
-	for i, columnName := range header {
-		fieldType := detectFieldType(rows[i])
-		switch fieldType {
-		case FieldTypeNumber:
-			fields[i] = reflect.StructField{
-				Name: columnName,
-				Type: reflect.TypeFor[float64](),
-				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
-			}
-		case FieldTypeDateTime:
-			fields[i] = reflect.StructField{
-				Name: columnName,
-				Type: reflect.TypeFor[time.Time](),
-				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
-			}
-		case FieldTypeEmail:
-			fields[i] = reflect.StructField{
-				Name: columnName,
-				Type: reflect.TypeFor[string](),
-				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
-			}
-		case FieldTypeURL:
-			fields[i] = reflect.StructField{
-				Name: columnName,
-				Type: reflect.TypeFor[string](),
-				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
-			}
-		case FieldTypeSingleLineText, FieldTypeMultiLineText:
-			fields[i] = reflect.StructField{
-				Name: columnName,
-				Type: reflect.TypeFor[string](),
-				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
-			}
-		case FieldTypeSingleSelect, FieldTypeMultipleSelect:
-			fields[i] = reflect.StructField{
-				Name: columnName,
-				Type: reflect.TypeFor[string](),
-				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
-			}
-		case FieldTypeCheckbox:
-			fields[i] = reflect.StructField{
-				Name: columnName,
-				Type: reflect.TypeFor[bool](),
-				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
-			}
-		case FieldTypeAttachment, FieldTypeLink, FieldTypeUser, FieldTypePhone, FieldTypeFormula:
-			fields[i] = reflect.StructField{
-				Name: columnName,
-				Type: reflect.TypeFor[string](),
-				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
-			}
-		default:
-			fields[i] = reflect.StructField{
-				Name: columnName,
-				Type: reflect.TypeFor[string](),
-				Tag:  reflect.StructTag(fmt.Sprintf(`table:"%s"`, columnName)),
-			}
-		}
-	}
-
-	// 创建结构体
-	structType := reflect.StructOf(fields)
-	return structType
-}
-
-func createInstances(structType reflect.Type, rows [][]string) []reflect.Value {
-	instances := make([]reflect.Value, 0)
-
-	for _, row := range rows[1:] {
-		instance := reflect.New(structType).Elem()
-		for i, value := range row {
-			field := instance.Field(i)
-			switch field.Type().Kind() {
-			case reflect.Float64:
-				num, _ := strconv.ParseFloat(value, 64)
-				field.SetFloat(num)
-			case reflect.Bool:
-				boolValue := strings.EqualFold(value, "true")
-				field.SetBool(boolValue)
-			case reflect.String:
-				field.SetString(value)
-			case reflect.Struct:
-				if field.Type() == reflect.TypeFor[time.Time]() {
-					t, _ := time.Parse(time.RFC3339, value)
-					field.Set(reflect.ValueOf(t))
-				}
-			}
-		}
-		instances = append(instances, instance)
-	}
-
-	return instances
-}
-
-func LoadDynamicTreeTable(filename string) (*TreeTable[reflect.Value], error) {
-	rows, err := loadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	structType := generateStruct(rows)
-	instances := createInstances(structType, rows)
-
-	t := NewTreeTable[reflect.Value](reflect.New(structType).Elem())
-	for _, instance := range instances {
-		n := NewNode[reflect.Value](instance)
-		t.InsertAfter(n)
-	}
-
-	// 设置必要的回调函数和属性
-	t.SetRootRowsCallBack = func() {
-		// 根据需要设置回调函数
-	}
-
-	t.MarshalRowCells = func(n *Node[reflect.Value]) (cells []CellData) {
-		// 根据需要实现序列化函数
-		return MarshalRow(n.Data, func(key string, field any) (value string) {
-			return ""
-		})
-	}
-
-	t.UnmarshalRowCells = func(n *Node[reflect.Value], rows []CellData) reflect.Value {
-		// 根据需要实现反序列化函数
-		return UnmarshalRow[reflect.Value](rows, func(key, value string) (field any) {
-			return nil
-		})
-	}
-
-	t.RowSelectedCallback = func() {
-		// 根据需要设置回调函数
-	}
-
-	t.RowDoubleClickCallback = func() {
-		// 根据需要设置回调函数
-	}
-
-	t.JsonName = strings.TrimSuffix(filename, filepath.Ext(filename)) + ".json"
-
-	return t, nil
-}
-
-//type CellType int //实现airtable中字段类型枚举
-//
-//const (
-//	FieldTypeSingleLineText CellType = iota //单行文本
-//	FieldTypeNumber                         //数字
-//	FieldTypeSingleSelect                   //单选
-//	FieldTypeMultipleSelect                 //多选
-//	FieldTypeDateTime                       //日期
-//	FieldTypeFormula                        //公式
-//	FieldTypeAttachment                     //附件
-//	FieldTypeLink                           //链接
-//	FieldTypeUser                           //用户
-//	FieldTypePhone                          //电话
-//	FieldTypeEmail                          //邮箱
-//	FieldTypeCheckbox                       //勾选框
-//	FieldTypeURL                            //链接
-//	FieldTypeMultiLineText                  //多行文本
-//)
 
 func NewTreeTable[T any](data T) *TreeTable[T] {
 	columnCells := InitHeader(data)
@@ -924,18 +682,6 @@ func (t *TreeTable[T]) SizeColumnsToFit(gtx layout.Context) { // 增删改查中
 		}
 	}
 	gtx.Constraints = originalConstraints
-}
-
-// 增删改查列，字段，重建元数据结构体，重建rootrows
-func (t *TreeTable[T]) Rebuild(data any) { //todo 这里应该处理反射生成的结构体，需要足够的单元测试和压力测试，以及性能测试
-	t.header = &tableHeader[T]{ //这里似乎不适合类型约束
-		columnCells: InitHeader(data),
-		//node:        &Node[T]{Data: data},//todo bug
-	}
-	t.columnCount = len(t.header.columnCells)
-	t.maxColumnCellWidths = make([]unit.Dp, t.columnCount)
-	t.maxColumnTextWidths = make([]unit.Dp, t.columnCount)
-	t.rootRows = t.Root.Children
 }
 
 // 默认字段，日期，姓名，分组后实现日结和个人工资总账，增加一个备注列
@@ -1801,7 +1547,7 @@ func (n *Node[T]) LastChild() (lastChild *Node[T]) {
 	return n.parent.Children[n.parent.LenChildren()-1]
 }
 func (n *Node[T]) IsLastChild() bool { return n.LastChild() == n }
-func (n *Node[T]) CopyFrom(from *Node[T]) *Node[T] {
+func (n *Node[T]) CopyFrom(from *Node[T]) *Node[T] { //应用场景 复制粘贴节点
 	*n = *from
 	return n
 }
