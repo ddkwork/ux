@@ -12,27 +12,7 @@ import (
 	"gioui.org/app"
 	"gioui.org/op"
 	"github.com/ddkwork/golibrary/std/mylog"
-
-	"github.com/ddkwork/golibrary/std/safemap"
-	"github.com/ddkwork/golibrary/std/stream"
 )
-
-func TestTreeTable_ContextMenuItem(t1 *testing.T) {
-	m := safemap.NewOrdered[string, string](func(yield func(string, string) bool) {
-		yield("CopyRow", "CopyRow")
-		yield("ConvertToContainer", "ConvertToContainer")
-		yield("ConvertToNonContainer", "ConvertToNonContainer")
-		yield("New", "New")
-		yield("NewContainer", "NewContainer")
-		yield("Delete", "Delete")
-		yield("Duplicate", "Duplicate")
-		yield("Edit", "Edit")
-		yield("OpenAll", "OpenAll")
-		yield("CloseAll", "CloseAll")
-		yield("SaveData", "SaveData")
-	})
-	stream.NewGeneratedFile().EnumTypes("ContextMenuItem", m)
-}
 
 func TestNewPopupMenu(t *testing.T) {
 	t.Skip("finished")

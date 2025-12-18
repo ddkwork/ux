@@ -29,6 +29,7 @@ import (
 	"github.com/ddkwork/golibrary/std/stream/align"
 	"github.com/ddkwork/golibrary/std/stream/deepcopy"
 	"github.com/ddkwork/golibrary/std/stream/uuid"
+	"github.com/ddkwork/ux/menu"
 	"github.com/ddkwork/ux/resources/colors"
 	"github.com/ddkwork/ux/resources/images"
 	"github.com/ddkwork/ux/widget/material"
@@ -229,9 +230,9 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 	for _, n := range t.rootRows {
 		t.contextMenu.Once.Do(func() {
 			item := ContextMenuItem{}
-			for _, kind := range CopyRowType.EnumTypes() {
+			for _, kind := range menu.CopyRowType.EnumTypes() {
 				switch kind {
-				case CopyRowType:
+				case menu.CopyRowType:
 					item = ContextMenuItem{
 						Title:     "",
 						Icon:      images.SvgIconCopy,
@@ -239,7 +240,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 						Do:        func() { t.SelectedNode.CopyRow(gtx, t.maxColumnTextWidths) },
 						Clickable: widget.Clickable{},
 					}
-				case ConvertToContainerType:
+				case menu.ConvertToContainerType:
 					item = ContextMenuItem{
 						Title: "",
 						Icon:  images.SvgIconConvertToContainer,
@@ -252,7 +253,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 						},
 						Clickable: widget.Clickable{},
 					}
-				case ConvertToNonContainerType:
+				case menu.ConvertToNonContainerType:
 					item = ContextMenuItem{
 						Title: "",
 						Icon:  images.SvgIconConvertToNonContainer,
@@ -269,7 +270,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 						AppendDivider: true,
 						Clickable:     widget.Clickable{},
 					}
-				case NewType:
+				case menu.NewType:
 					item = ContextMenuItem{
 						Title: "",
 						Icon:  images.SvgIconCircledAdd,
@@ -280,7 +281,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 						},
 						Clickable: widget.Clickable{},
 					}
-				case NewContainerType:
+				case menu.NewContainerType:
 					item = ContextMenuItem{
 						Title: "",
 						Icon:  images.SvgIconCircledVerticalEllipsis,
@@ -291,7 +292,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 						},
 						Clickable: widget.Clickable{},
 					}
-				case DeleteType:
+				case menu.DeleteType:
 					item = ContextMenuItem{
 						Title:     "",
 						Icon:      images.SvgIconTrash,
@@ -299,7 +300,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 						Do:        func() { t.Remove() },
 						Clickable: widget.Clickable{},
 					}
-				case DuplicateType:
+				case menu.DuplicateType:
 					item = ContextMenuItem{
 						Title: "",
 						Icon:  images.SvgIconDuplicate,
@@ -309,7 +310,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 						},
 						Clickable: widget.Clickable{},
 					}
-				case EditType:
+				case menu.EditType:
 					item = ContextMenuItem{
 						Title:         "",
 						Icon:          images.SvgIconEdit,
@@ -318,7 +319,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 						AppendDivider: true,
 						Clickable:     widget.Clickable{},
 					}
-				case OpenAllType:
+				case menu.OpenAllType:
 					item = ContextMenuItem{
 						Title:     "",
 						Icon:      images.SvgIconHierarchy,
@@ -326,7 +327,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 						Do:        func() { t.OpenAll() },
 						Clickable: widget.Clickable{},
 					}
-				case CloseAllType:
+				case menu.CloseAllType:
 					item = ContextMenuItem{
 						Title:     "",
 						Icon:      images.SvgIconCircledVerticalEllipsis,
@@ -334,7 +335,7 @@ func (t *TreeTable[T]) Layout(gtx layout.Context) layout.Dimensions {
 						Do:        func() { t.Root.CloseAll() },
 						Clickable: widget.Clickable{},
 					}
-				case SaveDataType:
+				case menu.SaveDataType:
 					item = ContextMenuItem{
 						Title:     "",
 						Icon:      images.SvgIconSaveContent,
