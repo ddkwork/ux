@@ -6,7 +6,7 @@ require (
 	gioui.org v0.9.0
 	gioui.org/x v0.9.0
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0
-	github.com/alecthomas/chroma/v2 v2.21.0
+	github.com/alecthomas/chroma/v2 v2.21.1
 	github.com/ddkwork/golibrary v0.1.5-0.20250816073422-ec5c841d4409
 	github.com/google/go-cmp v0.7.0
 	github.com/oligo/gvcode v0.4.4
@@ -25,7 +25,7 @@ replace gioui.org => github.com/ddkwork/gio v0.0.0-20251215014628-efadd9a2ff89
 require (
 	gioui.org/shader v1.0.8 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
-	github.com/go-text/typesetting v0.3.1 // indirect
+	github.com/go-text/typesetting v0.3.2 // indirect
 	github.com/godbus/dbus/v5 v5.2.0 // indirect
 	github.com/rdleal/intervalst v1.5.0 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
