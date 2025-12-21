@@ -6,7 +6,6 @@ import (
 	"iter"
 	"net/http"
 	"os"
-	"reflect"
 	"slices"
 	"strings"
 	"testing"
@@ -362,4 +361,3 @@ func TestTreeTable_updateRowNumber(t1 *testing.T) {
 	// mylog.Struct(demo.Root.LastChild())
 	assert.Equal(t1, demo.Root.LastChild().RowNumber, ux.CountTableRows(demo.RootRows()))
 }
-
