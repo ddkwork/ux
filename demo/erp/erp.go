@@ -13,46 +13,44 @@ import (
 )
 
 type (
-	Info struct { //todo加入公告，写入男女工计件价格，工具栏加入 日结和结账按钮，按下面的两个东西分组rows
-		Data time.Time `table:"日期"` //结合每日余货核查记账准确性，日产量是否达标等等
-		Name string    `table:"姓名"` //结账按姓名分组，减去伙食费就是每个女工的工资条，吃饭打卡设计？
+	Info struct { // todo加入公告，写入男女工计件价格，工具栏加入 日结和结账按钮，按下面的两个东西分组rows
+		Data time.Time `table:"日期"` // 结合每日余货核查记账准确性，日产量是否达标等等
+		Name string    `table:"姓名"` // 结账按姓名分组，减去伙食费就是每个女工的工资条，吃饭打卡设计？
 
-		//todi 添加更多的分类，如果价格不同的话，需要解决这里占据太宽的问题，子节点？
-		Lazhi        int `table:"蜡纸"`  //加入大果做成celltype，然后form录入明细？这样看不到分类汇总和小计
-		Zhongxiaoguo int `table:"中小果"` //为了日结公式的使用，价格不同的必须有独立的列？
+		// todi 添加更多的分类，如果价格不同的话，需要解决这里占据太宽的问题，子节点？
+		Lazhi        int `table:"蜡纸"`  // 加入大果做成celltype，然后form录入明细？这样看不到分类汇总和小计
+		Zhongxiaoguo int `table:"中小果"` // 为了日结公式的使用，价格不同的必须有独立的列？
 		JianShu      int `table:"件数"`
 
-		//胶框小标
-		//胶框无标
-		//胶框小框
-		//串果
-		//泡沫箱
-		//周转框
-		//这么多列需要三折叠屏才合适，或者横屏编辑，需要支持动态删除列，近年来的场景不需要这么多分类，都是统价
+		// 胶框小标
+		// 胶框无标
+		// 胶框小框
+		// 串果
+		// 泡沫箱
+		// 周转框
+		// 这么多列需要三折叠屏才合适，或者横屏编辑，需要支持动态删除列，近年来的场景不需要这么多分类，都是统价
 
-		IndexCard string `table:"第几车"` //实现celltype？自动自增
-		SendCard  int    `table:"发车"`  //todo 把分类件数明细，驾驶员姓名，电话，车牌，接货人和电话，接货点等布局一个from作为celltype
-		YuHuo     int    `table:"余货"`  //todo 核查计数准确性，自动校验后写入图标或者相差的件数
+		IndexCard string `table:"第几车"` // 实现celltype？自动自增
+		SendCard  int    `table:"发车"`  // todo 把分类件数明细，驾驶员姓名，电话，车牌，接货人和电话，接货点等布局一个from作为celltype
+		YuHuo     int    `table:"余货"`  // todo 核查计数准确性，自动校验后写入图标或者相差的件数
 
-		Women int `table:"女工日结"` //todo 公式引入
-		Man   int `table:"男工车结"` //todo 结账form加入来去路费，平常用车耗油，小费等用于汇总结账需要
+		Women int `table:"女工日结"` // todo 公式引入
+		Man   int `table:"男工车结"` // todo 结账form加入来去路费，平常用车耗油，小费等用于汇总结账需要
 
 		Note string `table:"备注"`
-		//todo 底部布局一个每列汇总
+		// todo 底部布局一个每列汇总
 		// 垂直布局一个结账form
 	}
 )
 
-//todo加入截图功能，截屏整个画布，截屏所有女工的日结，截屏结账分类汇总
-
+// todo加入截图功能，截屏整个画布，截屏所有女工的日结，截屏结账分类汇总
 func main() {
-	//stream.GitProxy(true)
-	//return
+	// stream.GitProxy(true)
+	// return
 	t := ux.NewTreeTable(Info{})
 	t.TableContext = ux.TableContext[Info]{
 		CustomContextMenuItems: func(gtx layout.Context, n *ux.Node[Info]) iter.Seq[ux.ContextMenuItem] {
 			return func(yield func(ux.ContextMenuItem) bool) {
-
 			}
 		},
 		MarshalRowCells: func(n *ux.Node[Info]) (cells []ux.CellData) {
@@ -91,10 +89,8 @@ func main() {
 			})
 		},
 		RowSelectedCallback: func() {
-
 		},
 		RowDoubleClickCallback: func() {
-
 		},
 		SetRootRowsCallBack: func() {
 			//index1 := ux.NewContainerNode(FormatTime(time.Now()), Info{
@@ -831,7 +827,6 @@ func main() {
 				YuHuo:     0,
 				Note:      "金宝67件装车费已付",
 			})
-
 		},
 		JsonName:      "treegrid",
 		CreatMarkdown: false,
@@ -841,25 +836,25 @@ func main() {
 	panel.AddChild(hPanel)
 
 	type toolbarButtons struct {
-		redo      *widget.Clickable //撤销
-		next      *widget.Clickable //前进
-		add       *widget.Clickable //添加记录
-		field     *widget.Clickable //字段管理
-		child     *widget.Clickable //子记录
-		filter    *widget.Clickable //筛选
-		sort      *widget.Clickable //排序
-		group     *widget.Clickable //分组
-		check     *widget.Clickable //按日期分组，核对每日所有发车总件数+余货=女工计数总件数
-		bill      *widget.Clickable //结账,按姓名分组
-		rowHeight *widget.Clickable //行高
-		notice    *widget.Clickable //公告
-		find      *widget.Clickable //查找
-		ai        *widget.Clickable //ai分析数据
-		remind    *widget.Clickable //自动提醒
-		export    *widget.Clickable //导出数据
-		form      *widget.Clickable //生成表单
-		share     *widget.Clickable //分享视图
-		screen    *widget.Clickable //截屏
+		redo      *widget.Clickable // 撤销
+		next      *widget.Clickable // 前进
+		add       *widget.Clickable // 添加记录
+		field     *widget.Clickable // 字段管理
+		child     *widget.Clickable // 子记录
+		filter    *widget.Clickable // 筛选
+		sort      *widget.Clickable // 排序
+		group     *widget.Clickable // 分组
+		check     *widget.Clickable // 按日期分组，核对每日所有发车总件数+余货=女工计数总件数
+		bill      *widget.Clickable // 结账,按姓名分组
+		rowHeight *widget.Clickable // 行高
+		notice    *widget.Clickable // 公告
+		find      *widget.Clickable // 查找
+		ai        *widget.Clickable // ai分析数据
+		remind    *widget.Clickable // 自动提醒
+		export    *widget.Clickable // 导出数据
+		form      *widget.Clickable // 生成表单
+		share     *widget.Clickable // 分享视图
+		screen    *widget.Clickable // 截屏
 
 	}
 	bar := toolbarButtons{
@@ -884,10 +879,9 @@ func main() {
 		screen:    &widget.Clickable{},
 	}
 	t.TableContext.GroupCallback = func(gtx layout.Context) {
-		if bar.group.Clicked(gtx) { //todo pop window
+		if bar.group.Clicked(gtx) { // todo pop window
 			t.GroupBy("姓名")
 		}
-
 	}
 
 	InitAppBar(hPanel, func(yield func(style ux.ButtonStyle) bool) {
@@ -930,7 +924,7 @@ func InitAppBar(hPanel *ux.Panel, toolBars iter.Seq[ux.ButtonStyle]) *AppBar {
 	}
 	return &AppBar{
 		Search: search,
-		//About:  about,
+		// About:  about,
 	}
 }
 

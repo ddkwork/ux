@@ -14,7 +14,7 @@ func main() {
 	p := ux.NewPanel()
 	p.AddChild(
 		ux.NewInput("", "Input", "Hello, world!"),
-		//ux.NewLogView(),
+		// ux.NewLogView(),
 	)
 	ux.Run("demo", p)
 }

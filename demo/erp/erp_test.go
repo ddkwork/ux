@@ -20,7 +20,6 @@ func TestGroupBy(*testing.T) {
 	t.TableContext = ux.TableContext[Info]{
 		CustomContextMenuItems: func(gtx layout.Context, n *ux.Node[Info]) iter.Seq[ux.ContextMenuItem] {
 			return func(yield func(ux.ContextMenuItem) bool) {
-
 			}
 		},
 		MarshalRowCells: func(n *ux.Node[Info]) (cells []ux.CellData) {
@@ -59,10 +58,8 @@ func TestGroupBy(*testing.T) {
 			})
 		},
 		RowSelectedCallback: func() {
-
 		},
 		RowDoubleClickCallback: func() {
-
 		},
 		SetRootRowsCallBack: func() {
 			//index1 := ux.NewContainerNode(FormatTime(time.Now()), Info{
@@ -799,13 +796,12 @@ func TestGroupBy(*testing.T) {
 				YuHuo:     0,
 				Note:      "金宝67件装车费已付",
 			})
-
 		},
 		JsonName:      "treegrid",
 		CreatMarkdown: false,
 	}
 	t.SetRootRowsCallBack()
-	t.OriginalRoot = deepcopy.Clone(t.Root) //todo
+	t.OriginalRoot = deepcopy.Clone(t.Root) // todo
 	t.SizeColumnsToFit(layout.Context{})
 	mylog.Call(func() {
 		t.GroupBy("日期")
@@ -856,8 +852,8 @@ func TestFromXls(t *testing.T) {
 			strconv.Quote(row[0])+
 			")", ",")
 		g.P("Name:         ", strconv.Quote(row[1]), ",")
-		//g.P("Lazhi:        ", row[2], ",")
-		//g.P("Zhongxiaoguo: ", row[3], ",")
+		// g.P("Lazhi:        ", row[2], ",")
+		// g.P("Zhongxiaoguo: ", row[3], ",")
 		if row[2] == "" {
 			g.P("JianShu:    ", 0, ",")
 		} else {
@@ -876,8 +872,8 @@ func TestFromXls(t *testing.T) {
 		} else {
 			g.P("YuHuo:        ", row[5], ",")
 		}
-		//g.P("Women:        ", row[6], ",")
-		//g.P("Man:          ", row[7], ",")
+		// g.P("Women:        ", row[6], ",")
+		// g.P("Man:          ", row[7], ",")
 		if len(row) > 8 {
 			g.P("Note:         ", strconv.Quote(row[8]), ",")
 		}
@@ -886,7 +882,7 @@ func TestFromXls(t *testing.T) {
 	stream.WriteTruncate("tmp/erp_test.go", g.String())
 	for _, row := range rows {
 		for _, colCell := range row {
-			//print(stream.AlignString(colCell+"|", 15))
+			// print(stream.AlignString(colCell+"|", 15))
 			fmt.Printf("%-15s\t|", colCell)
 		}
 		fmt.Println()
