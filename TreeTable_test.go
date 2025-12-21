@@ -363,28 +363,3 @@ func TestTreeTable_updateRowNumber(t1 *testing.T) {
 	assert.Equal(t1, demo.Root.LastChild().RowNumber, ux.CountTableRows(demo.RootRows()))
 }
 
-func TestLoadDynamicTreeTable(t *testing.T) {
-	type args struct {
-		filename string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    *ux.TreeTable[reflect.Value]
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := ux.LoadDynamicTreeTable(tt.args.filename)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("LoadDynamicTreeTable() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("LoadDynamicTreeTable() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}

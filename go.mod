@@ -1,19 +1,19 @@
 module github.com/ddkwork/ux
 
-go 1.25
+go 1.26rc1
 
 require (
 	gioui.org v0.9.0
 	gioui.org/x v0.9.0
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0
 	github.com/alecthomas/chroma/v2 v2.21.1
-	github.com/ddkwork/golibrary v0.1.5-0.20250816073422-ec5c841d4409
+	github.com/ddkwork/golibrary v0.1.5-0.20251221063703-dabff5748a4d
 	github.com/google/go-cmp v0.7.0
 	github.com/oligo/gvcode v0.4.4
 	github.com/xuri/excelize/v2 v2.10.0
 	github.com/yuin/goldmark v1.7.13
-	golang.org/x/exp v0.0.0-20251209150349-8475f28825e9
-	golang.org/x/exp/shiny v0.0.0-20251209150349-8475f28825e9
+	golang.org/x/exp v0.0.0-20251219203646-944ab1f22d93
+	golang.org/x/exp/shiny v0.0.0-20251219203646-944ab1f22d93
 	golang.org/x/image v0.34.0
 	golang.org/x/net v0.48.0
 	golang.org/x/sys v0.39.0
@@ -26,7 +26,7 @@ require (
 	gioui.org/shader v1.0.8 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/go-text/typesetting v0.3.2 // indirect
-	github.com/godbus/dbus/v5 v5.2.0 // indirect
+	github.com/godbus/dbus/v5 v5.2.1 // indirect
 	github.com/rdleal/intervalst v1.5.0 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.4 // indirect
