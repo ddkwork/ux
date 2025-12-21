@@ -855,7 +855,6 @@ func main() {
 		form      *widget.Clickable // 生成表单
 		share     *widget.Clickable // 分享视图
 		screen    *widget.Clickable // 截屏
-
 	}
 	bar := toolbarButtons{
 		redo:      &widget.Clickable{},
