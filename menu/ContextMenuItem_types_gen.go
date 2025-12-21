@@ -1,7 +1,7 @@
 package menu
 
 import (
-	"github.com/ddkwork/golibrary/std/stream"
+	"github.com/ddkwork/golibrary/types"
 	"strings"
 )
 
@@ -27,7 +27,7 @@ func (t ContextMenuItemType) Valid() bool {
 	return t >= CopyRowType && t <= SaveDataType
 }
 
-func ContextMenuItemTypeBy[T stream.Integer](v T) ContextMenuItemType {
+func ContextMenuItemTypeBy[T types.Integer](v T) ContextMenuItemType {
 	return ContextMenuItemType(v)
 }
 

@@ -1,6 +1,8 @@
 package languages
 
-import "github.com/ddkwork/golibrary/std/stream"
+import (
+	"github.com/ddkwork/golibrary/types"
+)
 
 type LanguagesKind byte
 
@@ -262,7 +264,7 @@ const (
 	InvalidLanguagesKind
 )
 
-func ConvertInteger2LanguagesKind[T stream.Integer](v T) LanguagesKind {
+func ConvertInteger2LanguagesKind[T types.Integer](v T) LanguagesKind {
 	return LanguagesKind(v)
 }
 
